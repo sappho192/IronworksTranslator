@@ -15,6 +15,7 @@
         <TextBox Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                  Margin="8" TextWrapping="Wrap" Text="" 
                  x:Name="TranslatedChatBox" x:FieldModifier="public"
+                 IsReadOnly="True"
                  />
         <!--<Button Content="Update" HorizontalAlignment="Center" VerticalAlignment="Top"
                 Margin="15" Width="75"
