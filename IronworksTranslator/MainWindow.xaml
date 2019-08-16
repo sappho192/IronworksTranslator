@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:IronworksTranslator"
         mc:Ignorable="d"
+        Name="mainWindow"
         Title="IronworksTranslator" Height="200" Width="400"
         MinHeight="200" MinWidth="400"
         PreviewLostKeyboardFocus="Window_PreviewLostKeyboardFocus">

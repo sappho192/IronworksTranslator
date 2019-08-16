@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Windows;
@@ -22,6 +23,8 @@ namespace IronworksTranslator
         {
             Topmost = true;
             InitializeComponent();
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            mainWindow.Title += $" v{version.ToString()}";
             ironworksContext = IronworksContext.Instance();
             chatboxUpdater = new BackgroundWorker
             {
