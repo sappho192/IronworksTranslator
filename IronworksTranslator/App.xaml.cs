@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IronworksTranslator.Core;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -13,5 +14,11 @@ namespace IronworksTranslator
     /// </summary>
     public partial class App : Application
     {
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+            IronworksContext.driver.Dispose();
+            IronworksContext.chatFinder.CancelAsync();
+            IronworksContext.chatFinder.Dispose();
+        }
     }
 }

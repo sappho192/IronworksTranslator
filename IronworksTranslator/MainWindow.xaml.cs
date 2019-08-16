@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using IronworksTranslator.Core;
+using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace IronworksTranslator
 {
@@ -20,16 +14,98 @@ namespace IronworksTranslator
     /// </summary>
     public partial class MainWindow : Window
     {
+        private IronworksContext ironworksContext;
+        private StringBuilder stringBuilder = new StringBuilder();
+        private BackgroundWorker chatboxUpdater;
+
         public MainWindow()
         {
             Topmost = true;
             InitializeComponent();
+            ironworksContext = IronworksContext.Instance();
+            chatboxUpdater = new BackgroundWorker {
+                WorkerReportsProgress = true,
+                WorkerSupportsCancellation = true
+            };
+            chatboxUpdater.DoWork += ChatboxUpdater_DoWork;
+            chatboxUpdater.ProgressChanged += ChatboxUpdater_ProgressChanged;
+            chatboxUpdater.RunWorkerAsync();
+        }
+
+        private void ChatboxUpdater_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            
+        }
+
+        private void ChatboxUpdater_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var updater = sender as BackgroundWorker;
+            while (!updater.CancellationPending)
+            {
+                Thread.Sleep(1000);
+                UpdateChatbox();
+                updater.ReportProgress(0);
+            }
         }
 
         private void Window_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             Window window = (Window)sender;
             window.Topmost = true;
+        }
+
+        private void UpdateChatButton_Click(object sender, RoutedEventArgs e)
+        {
+            Update();
+        }
+
+        private void Update()
+        {
+            ironworksContext.UpdateChat();
+            //Task<ChatLogItem> update = Task.Factory.StartNew(() => {
+            //    ChatLogItem chatItem;
+            //    if (!ChatQueue.chatQueue.IsEmpty)
+            //    {
+            //        ChatQueue.chatQueue.TryDequeue(out chatItem);
+            //    } else
+            //    {
+            //        chatItem = null;
+            //    }
+            //    return chatItem;
+            //});
+            //var chat = update.Result;
+
+            UpdateChatbox();
+        }
+
+        private void UpdateChatbox()
+        {
+            int code = 0xA;
+            while (ChatQueue.q.Any())
+            {
+                var chat = ChatQueue.q.Dequeue();
+                int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out code);
+                if (code <= 0x30)
+                {
+                    var author = chat.Line.RemoveAfter(":");
+                    var sentence = chat.Line.RemoveBefore(":");
+                    var translated = ironworksContext.TranslateChat(sentence);
+                    stringBuilder.Append(chat.Code).Append(author).Append(":").Append(translated).Append(Environment.NewLine);
+                    Application.Current.Dispatcher.Invoke(new Action(() => {
+                        TranslatedChatBox.Text += stringBuilder.ToString();
+                    }));
+                    
+                    stringBuilder.Clear();
+                }
+                else
+                {
+                    stringBuilder.Append(chat.Line).Append(Environment.NewLine);
+                    Application.Current.Dispatcher.Invoke(new Action(() => {
+                        TranslatedChatBox.Text += stringBuilder.ToString();
+                    }));
+                    stringBuilder.Clear();
+                }
+            }
         }
     }
 }

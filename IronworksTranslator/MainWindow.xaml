@@ -5,9 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:IronworksTranslator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
+        Title="IronworksTranslator" Height="400" Width="400"
+        MaxHeight="400" MaxWidth="400"
+        MinHeight="400" MinWidth="400"
         PreviewLostKeyboardFocus="Window_PreviewLostKeyboardFocus">
     <Grid>
-        
+        <TextBox HorizontalAlignment="Center" VerticalAlignment="Bottom" 
+                 Height="300" Margin="0" TextWrapping="Wrap" Text="" Width="385"
+                 x:Name="TranslatedChatBox" x:FieldModifier="public"/>
+        <Button Content="Update" HorizontalAlignment="Center" VerticalAlignment="Top"
+                Margin="15" Width="75"
+                Name="UpdateChatButton" Click="UpdateChatButton_Click"/>
     </Grid>
 </Window>
