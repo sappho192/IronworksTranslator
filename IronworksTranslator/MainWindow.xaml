@@ -5,16 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:IronworksTranslator"
         mc:Ignorable="d"
-        Title="IronworksTranslator" Height="400" Width="400"
-        MaxHeight="400" MaxWidth="400"
-        MinHeight="400" MinWidth="400"
+        Title="IronworksTranslator" Height="200" Width="400"
+        MinHeight="200" MinWidth="400"
         PreviewLostKeyboardFocus="Window_PreviewLostKeyboardFocus">
     <Grid>
-        <TextBox HorizontalAlignment="Center" VerticalAlignment="Bottom" 
-                 Height="300" Margin="0" TextWrapping="Wrap" Text="" Width="385"
-                 x:Name="TranslatedChatBox" x:FieldModifier="public"/>
-        <Button Content="Update" HorizontalAlignment="Center" VerticalAlignment="Top"
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                 Margin="8" TextWrapping="Wrap" Text="" 
+                 x:Name="TranslatedChatBox" x:FieldModifier="public"
+                 />
+        <!--<Button Content="Update" HorizontalAlignment="Center" VerticalAlignment="Top"
                 Margin="15" Width="75"
-                Name="UpdateChatButton" Click="UpdateChatButton_Click"/>
+                Name="UpdateChatButton" Click="UpdateChatButton_Click"/>-->
     </Grid>
 </Window>
