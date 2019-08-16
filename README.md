@@ -21,3 +21,10 @@ Windows 10 64bit
 * 강제종료했으면 작업관리자(Ctrl+Shift+Esc)가서 세부정보->PhantomJS.exe 까지 강제종료해주세여. 추후에 해결하겠음  
 
 오류 제보, 기능 추가 문의는 https://github.com/sappho192/IronworksTranslator/issues 혹은 sappho192@지메일로 주세요.
+
+## Dependencies (with NuGet) 
+These dependency list is just for specification and will be already embedded.  
+You don't have to install them to use this program.
+ * Selenium, PhantomJS
+ * Sharlayan
+
