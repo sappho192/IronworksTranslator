@@ -3,11 +3,11 @@ using Sharlayan;
 using Sharlayan.Models;
 using Sharlayan.Models.ReadResults;
 using System;
-using System.Diagnostics;
-using System.Windows;
-using System.Web;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Threading;
+using System.Web;
+using System.Windows;
 
 namespace IronworksTranslator.Core
 {

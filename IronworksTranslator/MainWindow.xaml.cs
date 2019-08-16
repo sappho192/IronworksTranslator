@@ -23,7 +23,8 @@ namespace IronworksTranslator
             Topmost = true;
             InitializeComponent();
             ironworksContext = IronworksContext.Instance();
-            chatboxUpdater = new BackgroundWorker {
+            chatboxUpdater = new BackgroundWorker
+            {
                 WorkerReportsProgress = true,
                 WorkerSupportsCancellation = true
             };
@@ -34,7 +35,7 @@ namespace IronworksTranslator
 
         private void ChatboxUpdater_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            
+
         }
 
         private void ChatboxUpdater_DoWork(object sender, DoWorkEventArgs e)
@@ -62,19 +63,6 @@ namespace IronworksTranslator
         private void Update()
         {
             ironworksContext.UpdateChat();
-            //Task<ChatLogItem> update = Task.Factory.StartNew(() => {
-            //    ChatLogItem chatItem;
-            //    if (!ChatQueue.chatQueue.IsEmpty)
-            //    {
-            //        ChatQueue.chatQueue.TryDequeue(out chatItem);
-            //    } else
-            //    {
-            //        chatItem = null;
-            //    }
-            //    return chatItem;
-            //});
-            //var chat = update.Result;
-
             UpdateChatbox();
         }
 
@@ -91,17 +79,21 @@ namespace IronworksTranslator
                     var sentence = chat.Line.RemoveBefore(":");
                     var translated = ironworksContext.TranslateChat(sentence);
                     stringBuilder.Append(chat.Code).Append(author).Append(":").Append(translated).Append(Environment.NewLine);
-                    Application.Current.Dispatcher.Invoke(new Action(() => {
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
                         TranslatedChatBox.Text += stringBuilder.ToString();
+                        TranslatedChatBox.ScrollToEnd();
                     }));
-                    
+
                     stringBuilder.Clear();
                 }
                 else
                 {
                     stringBuilder.Append(chat.Line).Append(Environment.NewLine);
-                    Application.Current.Dispatcher.Invoke(new Action(() => {
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
                         TranslatedChatBox.Text += stringBuilder.ToString();
+                        TranslatedChatBox.ScrollToEnd();
                     }));
                     stringBuilder.Clear();
                 }
