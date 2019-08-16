@@ -10,9 +10,12 @@ namespace IronworksTranslator
     {
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            IronworksContext.driver.Dispose();
-            IronworksContext.chatFinder.CancelAsync();
-            IronworksContext.chatFinder.Dispose();
+            if(IronworksContext.Instance().Attached == true)
+            {
+                IronworksContext.driver.Dispose();
+                IronworksContext.chatFinder.CancelAsync();
+                IronworksContext.chatFinder.Dispose();
+            }
         }
     }
 }
