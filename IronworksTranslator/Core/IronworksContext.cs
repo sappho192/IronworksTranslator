@@ -41,13 +41,18 @@ namespace IronworksTranslator.Core
                 driverService.HideCommandPromptWindow = true;
                 driver = new PhantomJSDriver(driverService);
 
-                chatFinder = new BackgroundWorker {
+                chatFinder = new BackgroundWorker
+                {
                     WorkerReportsProgress = true,
                     WorkerSupportsCancellation = true
                 };
                 chatFinder.DoWork += ChatFinder_DoWork;
                 chatFinder.ProgressChanged += ChatFinder_ProgressChanged;
                 chatFinder.RunWorkerAsync();
+            }
+            else
+            {
+                Application.Current.Shutdown();
             }
         }
 
@@ -84,15 +89,15 @@ namespace IronworksTranslator.Core
                     IsWin64 = true
                 };
 
-                Console.WriteLine("Attaching ffxiv_dx11.exe");
+                //Console.WriteLine("Attaching ffxiv_dx11.exe");
                 MemoryHandler.Instance.SetProcess(processModel, gameLanguage, patchVersion, useLocalCache);
-                MessageBox.Show("Attached");
+                MessageBox.Show("Attached ffxiv_dx11.exe");
 
                 return true;
             }
             else
             {
-                Console.WriteLine("Can't find ffxiv_dx11.exe");
+                MessageBox.Show("Can't find ffxiv_dx11.exe");
                 return false;
             }
         }
