@@ -10,9 +10,11 @@
         PreviewLostKeyboardFocus="Window_PreviewLostKeyboardFocus">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="8*"/>
         </Grid.RowDefinitions>
-        <TextBox Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+        <Label Grid.Row="0" Content="강제종료 시 작업관리자에서 PhantomJS.exe 종료바람" HorizontalContentAlignment="Center"/>
+        <TextBox Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                  Margin="8" TextWrapping="Wrap" Text="" 
                  x:Name="TranslatedChatBox" x:FieldModifier="public"
                  IsReadOnly="True"
