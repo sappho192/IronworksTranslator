@@ -3,7 +3,6 @@ using Sharlayan;
 using Sharlayan.Models;
 using Sharlayan.Models.ReadResults;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
 using System.Web;
@@ -109,26 +108,25 @@ namespace IronworksTranslator.Core
             string testUrl = "https://papago.naver.com/?sk=ja&tk=ko&st=" + HttpUtility.UrlEncode(sentence);
             driver.Url = testUrl;
             driver.Navigate();
+            driver.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(10));
             //the driver can now provide you with what you need (it will execute the script)
             //get the source of the page
             var source = driver.PageSource;
-            string translated = String.Copy(sentence);
+            string translated = string.Copy(sentence);
             //fully navigate the dom
             try
             {
                 OpenQA.Selenium.IWebElement pathElement;
                 do
                 {
-                    //Console.Write("!");
                     pathElement = driver.FindElementById("txtTarget");
                 } while (pathElement.Text.Equals(""));
                 translated = pathElement.Text;
-                //Console.WriteLine($"Result: {pathElement.Text}");
             }
             catch (Exception e)
             {
                 //MessageBox.Show(e.Message);
-                translated = TranslateChat(sentence);
+                translated = translated.Insert(0, "[원문]");
             }
             return translated;
         }
