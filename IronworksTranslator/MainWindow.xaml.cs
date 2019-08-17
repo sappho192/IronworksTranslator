@@ -68,11 +68,12 @@ namespace IronworksTranslator
                     var sentence = chat.Line.RemoveBefore(":");
                     var translated = ironworksContext.TranslateChat(sentence);
 
-                    /* ONLY FOR DEBUG */
+#if DEBUG
                     stringBuilder.Append(chat.Code).Append(author).Append(":").Append(translated).Append(Environment.NewLine);
+#else
+                    stringBuilder.Append(author).Append(":").Append(translated).Append(Environment.NewLine);
+#endif
 
-                    /* PRODUCTION */
-                    //stringBuilder.Append(author).Append(":").Append(translated).Append(Environment.NewLine);
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
                         TranslatedChatBox.Text += stringBuilder.ToString();
@@ -82,12 +83,11 @@ namespace IronworksTranslator
                 }
                 else
                 {
-                    /* ONLY FOR DEBUG */
+#if DEBUG
                     stringBuilder.Append(chat.Code).Append(chat.Line).Append(Environment.NewLine);
-
-                    /* PRODUCTION */
-                    //stringBuilder.Append(chat.Line).Append(Environment.NewLine);
-
+#else
+                    stringBuilder.Append(chat.Line).Append(Environment.NewLine);
+#endif
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
                         TranslatedChatBox.Text += stringBuilder.ToString();
