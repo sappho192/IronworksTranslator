@@ -55,47 +55,51 @@ namespace IronworksTranslator
         private void UpdateChatbox()
         {
             int code = 0xA;
-            while (ChatQueue.q.Any())
+            if(ChatQueue.q.Any())
             {
-                var chat = ChatQueue.q.Dequeue();
-                int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out code);
-                if (code <= 0x30)
+                while (ChatQueue.q.Any())
                 {
-                    var author = chat.Line.RemoveAfter(":");
-                    var sentence = chat.Line.RemoveBefore(":");
-                    var translated = ironworksContext.TranslateChat(sentence);
-
-                    /* ONLY FOR DEBUG */
-                    stringBuilder.Append(chat.Code).Append(author).Append(":").Append(translated).Append(Environment.NewLine);
-                    
-                    /* PRODUCTION */
-                    //stringBuilder.Append(author).Append(":").Append(translated).Append(Environment.NewLine);
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    var chat = ChatQueue.q.Dequeue();
+                    int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out code);
+                    if (code <= 0x30)
                     {
-                        TranslatedChatBox.Text += stringBuilder.ToString();
-                    }));
+                        var author = chat.Line.RemoveAfter(":");
+                        var sentence = chat.Line.RemoveBefore(":");
+                        var translated = ironworksContext.TranslateChat(sentence);
 
-                    stringBuilder.Clear();
+                        /* ONLY FOR DEBUG */
+                        stringBuilder.Append(chat.Code).Append(author).Append(":").Append(translated).Append(Environment.NewLine);
+
+                        /* PRODUCTION */
+                        //stringBuilder.Append(author).Append(":").Append(translated).Append(Environment.NewLine);
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            TranslatedChatBox.Text += stringBuilder.ToString();
+                        }));
+
+                        stringBuilder.Clear();
+                    }
+                    else
+                    {
+                        /* ONLY FOR DEBUG */
+                        stringBuilder.Append(chat.Code).Append(chat.Line).Append(Environment.NewLine);
+
+                        /* PRODUCTION */
+                        //stringBuilder.Append(chat.Line).Append(Environment.NewLine);
+
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            TranslatedChatBox.Text += stringBuilder.ToString();
+                        }));
+                        stringBuilder.Clear();
+                    }
                 }
-                else
+                Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
-                    /* ONLY FOR DEBUG */
-                    stringBuilder.Append(chat.Code).Append(chat.Line).Append(Environment.NewLine);
-
-                    /* PRODUCTION */
-                    //stringBuilder.Append(chat.Line).Append(Environment.NewLine);
-
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
-                    {
-                        TranslatedChatBox.Text += stringBuilder.ToString();
-                    }));
-                    stringBuilder.Clear();
-                }
+                    //TranslatedChatBox.ScrollToEnd();
+                    TranslatedChatBox.ScrollToVerticalOffset(double.MaxValue);
+                }));
             }
-            Application.Current.Dispatcher.Invoke(new Action(() =>
-            {
-                TranslatedChatBox.ScrollToEnd();
-            }));
         }
     }
 }
