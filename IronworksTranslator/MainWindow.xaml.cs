@@ -86,7 +86,6 @@ namespace IronworksTranslator
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
                         TranslatedChatBox.Text += stringBuilder.ToString();
-                        TranslatedChatBox.ScrollToEnd();
                     }));
 
                     stringBuilder.Clear();
@@ -97,11 +96,14 @@ namespace IronworksTranslator
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
                         TranslatedChatBox.Text += stringBuilder.ToString();
-                        TranslatedChatBox.ScrollToEnd();
                     }));
                     stringBuilder.Clear();
                 }
             }
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                TranslatedChatBox.ScrollToEnd();
+            }));
         }
     }
 }
