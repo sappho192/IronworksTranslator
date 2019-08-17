@@ -17,7 +17,7 @@ namespace IronworksTranslator
     public partial class MainWindow : Window
     {
         private IronworksContext ironworksContext;
-        private StringBuilder stringBuilder = new StringBuilder();
+        //private 
         private readonly Timer chatboxTimer;
 
         public MainWindow()
@@ -56,45 +56,43 @@ namespace IronworksTranslator
         private void UpdateChatbox()
         {
             int code = 0xA;
-            if(ChatQueue.q.Any())
+            if (ChatQueue.q.Any())
             {
-                while (ChatQueue.q.Any())
+                ChatLogItem chat = ChatQueue.q.Take();
+                //ChatQueue.q.TryDequeue(out chat);
+                int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out code);
+                StringBuilder stringBuilder = new StringBuilder();
+                if (code <= 0x30)
                 {
-                    ChatLogItem chat = ChatQueue.q.Take();
-                    //ChatQueue.q.TryDequeue(out chat);
-                    int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out code);
-                    if (code <= 0x30)
+                    var author = chat.Line.RemoveAfter(":");
+                    var sentence = chat.Line.RemoveBefore(":");
+                    var translated = ironworksContext.TranslateChat(sentence);
+
+                    /* ONLY FOR DEBUG */
+                    stringBuilder.Append(chat.Code).Append(author).Append(":").Append(translated).Append(Environment.NewLine);
+
+                    /* PRODUCTION */
+                    //stringBuilder.Append(author).Append(":").Append(translated).Append(Environment.NewLine);
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
-                        var author = chat.Line.RemoveAfter(":");
-                        var sentence = chat.Line.RemoveBefore(":");
-                        var translated = ironworksContext.TranslateChat(sentence);
+                        TranslatedChatBox.Text += stringBuilder.ToString();
+                    }));
 
-                        /* ONLY FOR DEBUG */
-                        stringBuilder.Append(chat.Code).Append(author).Append(":").Append(translated).Append(Environment.NewLine);
+                    stringBuilder.Clear();
+                }
+                else
+                {
+                    /* ONLY FOR DEBUG */
+                    stringBuilder.Append(chat.Code).Append(chat.Line).Append(Environment.NewLine);
 
-                        /* PRODUCTION */
-                        //stringBuilder.Append(author).Append(":").Append(translated).Append(Environment.NewLine);
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            TranslatedChatBox.Text += stringBuilder.ToString();
-                        }));
+                    /* PRODUCTION */
+                    //stringBuilder.Append(chat.Line).Append(Environment.NewLine);
 
-                        stringBuilder.Clear();
-                    }
-                    else
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
-                        /* ONLY FOR DEBUG */
-                        stringBuilder.Append(chat.Code).Append(chat.Line).Append(Environment.NewLine);
-
-                        /* PRODUCTION */
-                        //stringBuilder.Append(chat.Line).Append(Environment.NewLine);
-
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            TranslatedChatBox.Text += stringBuilder.ToString();
-                        }));
-                        stringBuilder.Clear();
-                    }
+                        TranslatedChatBox.Text += stringBuilder.ToString();
+                    }));
+                    stringBuilder.Clear();
                 }
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
