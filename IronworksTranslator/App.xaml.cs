@@ -13,8 +13,6 @@ namespace IronworksTranslator
             if(IronworksContext.Instance().Attached == true)
             {
                 IronworksContext.driver.Dispose();
-                IronworksContext.chatFinder.CancelAsync();
-                IronworksContext.chatFinder.Dispose();
             }
         }
     }

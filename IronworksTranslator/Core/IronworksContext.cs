@@ -19,7 +19,7 @@ namespace IronworksTranslator.Core
         /* FFXIV stuff */
         public bool Attached { get; }
         private static Process[] processes;
-        public static BackgroundWorker chatFinder;
+        private readonly Timer chatTimer;
 
         // For chatlog you must locally store previous array offsets and indexes in order to pull the correct log from the last time you read it.
         private static int _previousArrayIndex = 0;
@@ -41,14 +41,7 @@ namespace IronworksTranslator.Core
                 driverService.HideCommandPromptWindow = true;
                 driver = new PhantomJSDriver(driverService);
 
-                chatFinder = new BackgroundWorker
-                {
-                    WorkerReportsProgress = true,
-                    WorkerSupportsCancellation = true
-                };
-                chatFinder.DoWork += ChatFinder_DoWork;
-                chatFinder.ProgressChanged += ChatFinder_ProgressChanged;
-                chatFinder.RunWorkerAsync();
+                chatTimer = new Timer(RefreshChat, null, 0, 1000);
             }
             else
             {
@@ -56,21 +49,10 @@ namespace IronworksTranslator.Core
             }
         }
 
-        private void ChatFinder_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void RefreshChat(object state)
         {
+            UpdateChat();
         }
-
-        private void ChatFinder_DoWork(object sender, DoWorkEventArgs e)
-        {
-            var finder = sender as BackgroundWorker;
-            while (!finder.CancellationPending)
-            {
-                Thread.Sleep(1000);
-                UpdateChat();
-                finder.ReportProgress(0);
-            }
-        }
-
         private static bool AttachGame()
         {
             processes = Process.GetProcessesByName("ffxiv_dx11");
@@ -112,7 +94,10 @@ namespace IronworksTranslator.Core
                 foreach (var item in readResult.ChatLogItems)
                 {
                     //ProcessChatMsg(readResult.ChatLogItems[i]);
-                    ChatQueue.q.Enqueue(item);
+                    if (int.Parse(item.Code, System.Globalization.NumberStyles.HexNumber) < 2000) // Skips battle log
+                    {
+                        ChatQueue.q.Enqueue(item);
+                    }
                 }
                 return true;
             }

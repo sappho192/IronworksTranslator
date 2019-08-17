@@ -17,7 +17,7 @@ namespace IronworksTranslator
     {
         private IronworksContext ironworksContext;
         private StringBuilder stringBuilder = new StringBuilder();
-        private BackgroundWorker chatboxUpdater;
+        private readonly Timer chatboxTimer;
 
         public MainWindow()
         {
@@ -26,30 +26,13 @@ namespace IronworksTranslator
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             mainWindow.Title += $" v{version.ToString()}";
             ironworksContext = IronworksContext.Instance();
-            chatboxUpdater = new BackgroundWorker
-            {
-                WorkerReportsProgress = true,
-                WorkerSupportsCancellation = true
-            };
-            chatboxUpdater.DoWork += ChatboxUpdater_DoWork;
-            chatboxUpdater.ProgressChanged += ChatboxUpdater_ProgressChanged;
-            chatboxUpdater.RunWorkerAsync();
+
+            chatboxTimer = new Timer(RefreshChatbox, null, 0, 1000);
         }
 
-        private void ChatboxUpdater_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void RefreshChatbox(object state)
         {
-
-        }
-
-        private void ChatboxUpdater_DoWork(object sender, DoWorkEventArgs e)
-        {
-            var updater = sender as BackgroundWorker;
-            while (!updater.CancellationPending)
-            {
-                Thread.Sleep(1000);
-                UpdateChatbox();
-                updater.ReportProgress(0);
-            }
+            UpdateChatbox();
         }
 
         private void Window_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
