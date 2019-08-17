@@ -1,4 +1,5 @@
 ﻿using IronworksTranslator.Core;
+using Sharlayan.Core;
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -59,7 +60,8 @@ namespace IronworksTranslator
             {
                 while (ChatQueue.q.Any())
                 {
-                    var chat = ChatQueue.q.Dequeue();
+                    ChatLogItem chat = ChatQueue.q.Take();
+                    //ChatQueue.q.TryDequeue(out chat);
                     int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out code);
                     if (code <= 0x30)
                     {

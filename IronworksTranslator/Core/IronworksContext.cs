@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium.PhantomJS;
+﻿using OpenQA.Selenium;
+using OpenQA.Selenium.PhantomJS;
 using Sharlayan;
 using Sharlayan.Models;
 using Sharlayan.Models.ReadResults;
@@ -95,7 +96,7 @@ namespace IronworksTranslator.Core
                     //ProcessChatMsg(readResult.ChatLogItems[i]);
                     if (int.Parse(item.Code, System.Globalization.NumberStyles.HexNumber) < 2000) // Skips battle log
                     {
-                        ChatQueue.q.Enqueue(item);
+                        ChatQueue.q.Add(item);
                     }
                 }
                 return true;
@@ -108,7 +109,7 @@ namespace IronworksTranslator.Core
             string testUrl = "https://papago.naver.com/?sk=ja&tk=ko&st=" + HttpUtility.UrlEncode(sentence);
             driver.Url = testUrl;
             driver.Navigate();
-            driver.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(10));
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             //the driver can now provide you with what you need (it will execute the script)
             //get the source of the page
             var source = driver.PageSource;
