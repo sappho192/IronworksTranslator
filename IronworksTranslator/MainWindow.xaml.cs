@@ -25,7 +25,7 @@ namespace IronworksTranslator
             Topmost = true;
             InitializeComponent();
             var version = Assembly.GetExecutingAssembly().GetName().Version;
-            mainWindow.Title += $" v{version.ToString()}";
+            mainWindow.Title += $" v{version}";
             ironworksContext = IronworksContext.Instance();
 
             chatboxTimer = new Timer(RefreshChatbox, null, 0, 1000);
@@ -42,25 +42,13 @@ namespace IronworksTranslator
             window.Topmost = true;
         }
 
-        private void UpdateChatButton_Click(object sender, RoutedEventArgs e)
-        {
-            Update();
-        }
-
-        private void Update()
-        {
-            ironworksContext.UpdateChat();
-            UpdateChatbox();
-        }
-
         private void UpdateChatbox()
         {
-            int code = 0xA;
             if (ChatQueue.q.Any())
             {
                 ChatLogItem chat = ChatQueue.q.Take();
                 //ChatQueue.q.TryDequeue(out chat);
-                int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out code);
+                int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var code);
                 StringBuilder stringBuilder = new StringBuilder();
                 if (code <= 0x30)
                 {
@@ -74,10 +62,10 @@ namespace IronworksTranslator
                     stringBuilder.Append(author).Append(":").Append(translated).Append(Environment.NewLine);
 #endif
 
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    Application.Current.Dispatcher.Invoke(() =>
                     {
                         TranslatedChatBox.Text += stringBuilder.ToString();
-                    }));
+                    });
 
                     stringBuilder.Clear();
                 }
@@ -88,17 +76,17 @@ namespace IronworksTranslator
 #else
                     stringBuilder.Append(chat.Line).Append(Environment.NewLine);
 #endif
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    Application.Current.Dispatcher.Invoke(() =>
                     {
                         TranslatedChatBox.Text += stringBuilder.ToString();
-                    }));
+                    });
                     stringBuilder.Clear();
                 }
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                Application.Current.Dispatcher.Invoke(() =>
                 {
                     //TranslatedChatBox.ScrollToEnd();
                     TranslatedChatBox.ScrollToVerticalOffset(double.MaxValue);
-                }));
+                });
             }
         }
     }
