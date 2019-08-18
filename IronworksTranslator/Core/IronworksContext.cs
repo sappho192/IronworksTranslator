@@ -119,30 +119,34 @@ namespace IronworksTranslator.Core
         public string TranslateChat(string sentence)
         {
             string testUrl = "https://papago.naver.com/?sk=ja&tk=ko&st=" + HttpUtility.UrlEncode(sentence);
-            //Log.Debug($"Translate URL: {testUrl}");
-            driver.Url = testUrl;
-            driver.Navigate();
-            //the driver can now provide you with what you need (it will execute the script)
-            //get the source of the page
-            //var source = driver.PageSource;
-            string translated = string.Copy(sentence);
-            //fully navigate the dom
-            try
+            lock (driver)
             {
-                OpenQA.Selenium.IWebElement pathElement;
-                do
+                //Log.Debug($"Translate URL: {testUrl}");
+                Log.Debug($"Locked web browser for {sentence}");
+                driver.Url = testUrl;
+                driver.Navigate();
+                //the driver can now provide you with what you need (it will execute the script)
+                //get the source of the page
+                //var source = driver.PageSource;
+                string translated = string.Copy(sentence);
+                //fully navigate the dom
+                try
                 {
-                    pathElement = driver.FindElementById("txtTarget");
-                } while (pathElement.Text.Equals(""));
-                translated = pathElement.Text;
-                Log.Debug($"Successfully translated {sentence} -> {translated}");
+                    OpenQA.Selenium.IWebElement pathElement;
+                    do
+                    {
+                        pathElement = driver.FindElementById("txtTarget");
+                    } while (pathElement.Text.Equals(""));
+                    translated = pathElement.Text;
+                    Log.Debug($"Successfully translated {sentence} -> {translated}");
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Exception {e.Message} when translating {sentence}");
+                    translated = translated.Insert(0, "[원문]");
+                }
+                return translated;
             }
-            catch (Exception e)
-            {
-                Log.Error($"Exception {e.Message} when translating {sentence}");
-                translated = translated.Insert(0, "[원문]");
-            }
-            return translated;
         }
     }
 }
