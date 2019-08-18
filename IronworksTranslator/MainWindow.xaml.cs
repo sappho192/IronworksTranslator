@@ -1,5 +1,6 @@
 ﻿using IronworksTranslator.Core;
 using Sharlayan.Core;
+using Serilog;
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -8,6 +9,8 @@ using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using Serilog.Events;
+using Serilog.Formatting.Compact;
 
 namespace IronworksTranslator
 {
@@ -24,11 +27,16 @@ namespace IronworksTranslator
         {
             Topmost = true;
             InitializeComponent();
+
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             mainWindow.Title += $" v{version}";
+            Log.Information($"Current version: {version}");
+
             ironworksContext = IronworksContext.Instance();
 
-            chatboxTimer = new Timer(RefreshChatbox, null, 0, 1000);
+            const int period = 500;
+            chatboxTimer = new Timer(RefreshChatbox, null, 0, period);
+            Log.Debug($"New RefreshChatbox timer with period {period}ms");
         }
 
         private void RefreshChatbox(object state)
@@ -46,41 +54,38 @@ namespace IronworksTranslator
         {
             if (ChatQueue.q.Any())
             {
-                ChatLogItem chat = ChatQueue.q.Take();
+                var chat = ChatQueue.q.Take();
                 //ChatQueue.q.TryDequeue(out chat);
                 int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var code);
-                StringBuilder stringBuilder = new StringBuilder();
                 if (code <= 0x30)
                 {
+                    Log.Debug("Chat: {@Chat}",chat);
                     var author = chat.Line.RemoveAfter(":");
                     var sentence = chat.Line.RemoveBefore(":");
                     var translated = ironworksContext.TranslateChat(sentence);
 
-#if DEBUG
-                    stringBuilder.Append(chat.Code).Append(author).Append(":").Append(translated).Append(Environment.NewLine);
-#else
-                    stringBuilder.Append(author).Append(":").Append(translated).Append(Environment.NewLine);
-#endif
-
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        TranslatedChatBox.Text += stringBuilder.ToString();
-                    });
 
-                    stringBuilder.Clear();
+                        TranslatedChatBox.Text +=
+#if DEBUG
+                        $"[{chat.Code}]{author}:{translated}{Environment.NewLine}";
+#else
+                        $"{author}:{translated}{Environment.NewLine}";
+#endif
+                    });
                 }
                 else
                 {
-#if DEBUG
-                    stringBuilder.Append(chat.Code).Append(chat.Line).Append(Environment.NewLine);
-#else
-                    stringBuilder.Append(chat.Line).Append(Environment.NewLine);
-#endif
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        TranslatedChatBox.Text += stringBuilder.ToString();
+                        TranslatedChatBox.Text +=
+#if DEBUG
+                            $"[{chat.Code}]{chat.Line}{Environment.NewLine}";
+#else
+                            $"{chat.Line}{Environment.NewLine}";
+#endif
                     });
-                    stringBuilder.Clear();
                 }
                 Application.Current.Dispatcher.Invoke(() =>
                 {

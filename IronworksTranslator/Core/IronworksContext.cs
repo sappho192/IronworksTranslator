@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Web;
 using System.Windows;
+using Serilog;
 
 namespace IronworksTranslator.Core
 {
@@ -37,11 +38,19 @@ namespace IronworksTranslator.Core
             Attached = AttachGame();
             if (Attached)
             {
+                Log.Information("Creating PhantomJS");
                 var driverService = PhantomJSDriverService.CreateDefaultService();
                 driverService.HideCommandPromptWindow = true;
                 driver = new PhantomJSDriver(driverService);
+                const int waitFor = 10;
+                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(waitFor);
+                driver.Manage().Timeouts().AsynchronousJavaScript = TimeSpan.FromSeconds(10);
+                driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(10);
+                Log.Debug($"PhantomJS created, page load wait time: {waitFor}s");
 
-                chatTimer = new Timer(RefreshChat, null, 0, 1000);
+                const int period = 500;
+                chatTimer = new Timer(RefreshChat, null, 0, 500);
+                Log.Debug($"New RefreshChat timer with period {period}ms");
             }
             else
             {
@@ -55,7 +64,9 @@ namespace IronworksTranslator.Core
         }
         private static bool AttachGame()
         {
-            processes = Process.GetProcessesByName("ffxiv_dx11");
+            string processName = "ffxiv_dx11";
+            Log.Debug($"Finding process {processName}");
+            processes = Process.GetProcessesByName(processName);
             if (processes.Length > 0)
             {
                 // supported: English, Chinese, Japanese, French, German, Korean
@@ -71,15 +82,16 @@ namespace IronworksTranslator.Core
                     IsWin64 = true
                 };
 
-                //Console.WriteLine("Attaching ffxiv_dx11.exe");
                 MemoryHandler.Instance.SetProcess(processModel, gameLanguage, patchVersion, useLocalCache);
-                MessageBox.Show("Attached ffxiv_dx11.exe");
+                Log.Debug($"Attached {processName}.exe ({gameLanguage})");
+                MessageBox.Show($"Attached {processName}.exe");
 
                 return true;
             }
             else
             {
-                MessageBox.Show("Can't find ffxiv_dx11.exe");
+                Log.Fatal($"Can't find {processName}.exe");
+                MessageBox.Show($"Can't find {processName}.exe");
                 return false;
             }
         }
@@ -107,9 +119,9 @@ namespace IronworksTranslator.Core
         public string TranslateChat(string sentence)
         {
             string testUrl = "https://papago.naver.com/?sk=ja&tk=ko&st=" + HttpUtility.UrlEncode(sentence);
+            //Log.Debug($"Translate URL: {testUrl}");
             driver.Url = testUrl;
             driver.Navigate();
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             //the driver can now provide you with what you need (it will execute the script)
             //get the source of the page
             //var source = driver.PageSource;
@@ -123,10 +135,11 @@ namespace IronworksTranslator.Core
                     pathElement = driver.FindElementById("txtTarget");
                 } while (pathElement.Text.Equals(""));
                 translated = pathElement.Text;
+                Log.Debug($"Successfully translated {sentence} -> {translated}");
             }
             catch (Exception e)
             {
-                //MessageBox.Show(e.Message);
+                Log.Error($"Exception {e.Message} when translating {sentence}");
                 translated = translated.Insert(0, "[원문]");
             }
             return translated;
