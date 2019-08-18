@@ -112,7 +112,7 @@ namespace IronworksTranslator.Core
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             //the driver can now provide you with what you need (it will execute the script)
             //get the source of the page
-            var source = driver.PageSource;
+            //var source = driver.PageSource;
             string translated = string.Copy(sentence);
             //fully navigate the dom
             try

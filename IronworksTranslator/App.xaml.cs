@@ -10,7 +10,7 @@ namespace IronworksTranslator
     {
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            if(IronworksContext.Instance().Attached == true)
+            if(IronworksContext.Instance().Attached)
             {
                 IronworksContext.driver.Dispose();
             }
