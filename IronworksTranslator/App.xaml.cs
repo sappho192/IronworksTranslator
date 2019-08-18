@@ -1,5 +1,9 @@
-﻿using IronworksTranslator.Core;
+﻿using System;
+using IronworksTranslator.Core;
 using System.Windows;
+using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Compact;
 
 namespace IronworksTranslator
 {
@@ -14,6 +18,21 @@ namespace IronworksTranslator
             {
                 IronworksContext.driver.Dispose();
             }
+            Log.Debug("Closing program");
+        }
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+            string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File(formatter: new CompactJsonFormatter(),
+                    path: $"log-{timestamp}.txt",
+                    retainedFileCountLimit: null)
+                .MinimumLevel.Debug()
+                .CreateLogger();
+
+            Log.Debug("Program started");
         }
     }
 }
