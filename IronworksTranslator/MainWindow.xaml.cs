@@ -1,16 +1,11 @@
 ﻿using IronworksTranslator.Core;
-using Sharlayan.Core;
 using Serilog;
 using System;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
-using Serilog.Events;
-using Serilog.Formatting.Compact;
 
 namespace IronworksTranslator
 {

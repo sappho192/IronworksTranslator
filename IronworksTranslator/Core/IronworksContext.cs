@@ -1,5 +1,4 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.PhantomJS;
+﻿using OpenQA.Selenium.PhantomJS;
 using Sharlayan;
 using Sharlayan.Models;
 using Sharlayan.Models.ReadResults;
