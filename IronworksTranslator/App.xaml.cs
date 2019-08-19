@@ -72,7 +72,19 @@ namespace IronworksTranslator
             }
             else
             {
-                Log.Fatal("TERMINATED BY UNHANDLED EXCEPTION: {@Exception}, {@InnerException}", exception, exception.InnerException);
+                if (exception.InnerException != null)
+                {
+                    Log.Fatal("TERMINATED BY UNHANDLED EXCEPTION: {@Exception}, {@InnerException}, {@GroundZero}",
+                        exception,
+                        exception.InnerException,
+                        exception.InnerException.StackTrace);
+                }
+                else
+                {
+                    Log.Fatal("TERMINATED BY UNHANDLED EXCEPTION: {@Exception}, {@GroundZero}",
+                        exception,
+                        exception.StackTrace);
+                }
             }
         }
     }
