@@ -3,23 +3,42 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:local="clr-namespace:IronworksTranslator"
+        xmlns:ui="clr-namespace:IronworksTranslator.UI"
         mc:Ignorable="d"
         Name="mainWindow"
         Title="IronworksTranslator" Height="200" Width="400"
         MinHeight="200" MinWidth="400"
+        AllowsTransparency="True" WindowStyle="None"
         PreviewLostKeyboardFocus="Window_PreviewLostKeyboardFocus">
-    <Grid>
+    <Window.Background>
+        <SolidColorBrush Opacity="0.1" Color="White"></SolidColorBrush>
+    </Window.Background>
+    <i:Interaction.Behaviors>
+        <ui:DragMoveBehavior/>
+    </i:Interaction.Behaviors>
+    <Grid Background="White">
         <Grid.RowDefinitions>
             <RowDefinition Height="2*"/>
             <RowDefinition Height="8*"/>
         </Grid.RowDefinitions>
-        <Label Grid.Row="0" Content="강제종료 시 작업관리자에서 PhantomJS.exe 종료바람" HorizontalContentAlignment="Center"/>
-        <TextBox Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
-                 Margin="8" TextWrapping="Wrap" Text="" 
-                 x:Name="TranslatedChatBox" x:FieldModifier="public"
-                 IsReadOnly="True"
-                 />
+        <Grid Grid.Row="0">
+            <Label Content="강제종료 시 작업관리자에서 PhantomJS.exe 종료바람" HorizontalContentAlignment="Center"
+                   MouseDoubleClick="Control_OnMouseDoubleClick"/>
+        </Grid>
+        <Grid Grid.Row="1"
+              Margin="0"
+              Opacity="0.75"
+              Background="Black">
+            <TextBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                     TextWrapping="Wrap" Text="" 
+                     x:Name="TranslatedChatBox" x:FieldModifier="public"
+                     IsReadOnly="True"
+                     Foreground="White"
+                     Background="Transparent"
+            />
+        </Grid>
         <!--<Button Content="Update" HorizontalAlignment="Center" VerticalAlignment="Top"
                 Margin="15" Width="75"
                 Name="UpdateChatButton" Click="UpdateChatButton_Click"/>-->

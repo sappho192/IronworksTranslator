@@ -89,5 +89,10 @@ namespace IronworksTranslator
                 });
             }
         }
+
+        private void Control_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
     }
 }
