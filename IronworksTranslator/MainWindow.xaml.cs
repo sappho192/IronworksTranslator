@@ -84,8 +84,8 @@ namespace IronworksTranslator
                 }
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    //TranslatedChatBox.ScrollToEnd();
-                    TranslatedChatBox.ScrollToVerticalOffset(double.MaxValue);
+                    TranslatedChatBox.ScrollToEnd();
+                    //TranslatedChatBox.ScrollToVerticalOffset(double.MaxValue);
                 });
             }
         }
