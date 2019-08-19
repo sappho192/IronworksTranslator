@@ -11,6 +11,7 @@
         Title="IronworksTranslator" Height="200" Width="400"
         MinHeight="200" MinWidth="400"
         AllowsTransparency="True" WindowStyle="None"
+        ResizeMode="CanResizeWithGrip"
         PreviewLostKeyboardFocus="Window_PreviewLostKeyboardFocus">
     <Window.Background>
         <SolidColorBrush Opacity="0.1" Color="White"></SolidColorBrush>
