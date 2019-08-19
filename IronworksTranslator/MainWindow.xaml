@@ -18,12 +18,13 @@
     <i:Interaction.Behaviors>
         <ui:DragMoveBehavior/>
     </i:Interaction.Behaviors>
-    <Grid Background="White">
+    <Grid Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="2*"/>
             <RowDefinition Height="8*"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0">
+        <Grid Grid.Row="0"
+              Background="White">
             <Label Content="강제종료 시 작업관리자에서 PhantomJS.exe 종료바람" HorizontalContentAlignment="Center"
                    MouseDoubleClick="Control_OnMouseDoubleClick"/>
         </Grid>
@@ -31,14 +32,16 @@
               Margin="0"
               Opacity="0.75"
               Background="Black">
-            <TextBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
-                     TextWrapping="Wrap" Text="" 
-                     x:Name="TranslatedChatBox" x:FieldModifier="public"
-                     IsReadOnly="True"
-                     Foreground="White"
-                     Background="Transparent"
-            />
         </Grid>
+        <TextBox Grid.Row="1"
+            HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                 TextWrapping="Wrap" Text="" 
+                 x:Name="TranslatedChatBox" x:FieldModifier="public"
+                 IsReadOnly="True"
+                 Foreground="White"
+                 Background="Transparent"
+        />
+
         <!--<Button Content="Update" HorizontalAlignment="Center" VerticalAlignment="Top"
                 Margin="15" Width="75"
                 Name="UpdateChatButton" Click="UpdateChatButton_Click"/>-->
