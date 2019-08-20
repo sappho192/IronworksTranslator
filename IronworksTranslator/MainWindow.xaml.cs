@@ -1,10 +1,12 @@
-﻿using IronworksTranslator.Core;
+﻿using FontAwesome.WPF;
+using IronworksTranslator.Core;
 using Serilog;
 using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace IronworksTranslator
@@ -92,7 +94,27 @@ namespace IronworksTranslator
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
-            Application.Current.Shutdown();
+            if(MessageBox.Show("정말 종료할까요?", "프로그램 종료", MessageBoxButton.YesNo).Equals(MessageBoxResult.Yes))
+            {
+                Application.Current.Shutdown();
+            }
+        }
+
+        private void CollapseButton_Click(object sender, RoutedEventArgs e)
+        {
+            var icon = (sender as Button).Content as ImageAwesome;
+            icon.Icon =
+                icon.Icon.Equals(FontAwesomeIcon.Bars) ?
+                FontAwesomeIcon.AngleDoubleUp
+                : FontAwesomeIcon.Bars;
+            ToolbarGrid.Visibility =
+                ToolbarGrid.Visibility.Equals(Visibility.Collapsed) ?
+                 Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.MainWindow.WindowState = WindowState.Minimized;
         }
     }
 }

@@ -9,52 +9,81 @@
         xmlns:ui="clr-namespace:IronworksTranslator.UI"
         mc:Ignorable="d"
         Name="mainWindow"
-        Title="IronworksTranslator" Height="200" Width="400"
-        MinHeight="200" MinWidth="400"
+        Title="IronworksTranslator" Height="200" Width="420"
+        MinHeight="200" MinWidth="420"
         AllowsTransparency="True" WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
         PreviewLostKeyboardFocus="Window_PreviewLostKeyboardFocus">
     <Window.Background>
-        <SolidColorBrush Opacity="0.1" Color="White"></SolidColorBrush>
+        <SolidColorBrush Opacity="0" Color="White"></SolidColorBrush>
     </Window.Background>
     <i:Interaction.Behaviors>
         <ui:DragMoveBehavior/>
     </i:Interaction.Behaviors>
     <Grid Background="Transparent">
         <DockPanel>
+            <!-- System command toolbar -->
             <Grid DockPanel.Dock="Top">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <!--Background="White"-->
-                <!--<Label Content="강제종료 시 작업관리자에서 PhantomJS.exe 종료바람" HorizontalContentAlignment="Center"
-                   MouseDoubleClick="Control_OnMouseDoubleClick"/>-->
                 <Grid Grid.Row="0"
                       Margin="0"
-                      Opacity="1"
                       Background="White">
                 </Grid>
-                <DockPanel Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <StackPanel Grid.Row="0" HorizontalAlignment="Left">
+                    <Button Grid.Row="0"
+                        Name="ToggleToolboxButton"
+                        Width="25" Height="25" 
+                        Click="CollapseButton_Click">
+                        <fa:ImageAwesome Icon="Bars" Margin="2"/>
+                    </Button>
+                </StackPanel>
+                <StackPanel Grid.Row="0" HorizontalAlignment="Center">
+                    <Label Content="강제종료 시 작업관리자에서 PhantomJS.exe 종료바람" HorizontalContentAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Grid.Row="0" HorizontalAlignment="Right"
+                                Orientation="Horizontal">
+                    <Button Width="25" Height="25" Margin="3,0,0,0"
+                                Click="MinimizeButton_Click">
+                        <fa:ImageAwesome Icon="WindowMinimize" Margin="2,10,2,0"/>
+                    </Button>
+                    <Button Width="25" Height="25" Click="ExitButton_Click">
+                        <fa:ImageAwesome Icon="PowerOff" Margin="2"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+            
+            <!-- General toolbar -->
+            <Grid Name="ToolbarGrid" Visibility="Collapsed" DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0"
+                      Margin="0"
+                      Opacity="0.95"
+                      Background="White">
+                </Grid>
+                <DockPanel Grid.Column="0">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Margin="16 0 0 0 ">Toolbar here</TextBlock>
-                    </StackPanel>
-                    <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right">
-                        <Button Click="ExitButton_Click" Margin="2">
-                            <fa:ImageAwesome Icon="Close" Width="15" Margin="3"/>
+                        <Button Width="25" Height="25">
+                            <fa:ImageAwesome Icon="Wrench" Margin="2"/>
                         </Button>
                     </StackPanel>
                 </DockPanel>
             </Grid>
+            
+            <!-- Chatlog textbox -->
             <Grid DockPanel.Dock="Top">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <Grid Grid.Row="0"
+                <Grid Grid.Row="0" Panel.ZIndex="0"
                       Margin="0"
                       Opacity="0.75"
                       Background="Black">
                 </Grid>
-                <TextBox Grid.Row="0"
+                <TextBox Grid.Row="0" Panel.ZIndex="1"
                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                          TextWrapping="Wrap" Text="" 
                          x:Name="TranslatedChatBox" x:FieldModifier="public"
