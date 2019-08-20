@@ -50,9 +50,8 @@ namespace IronworksTranslator
         private void UpdateChatbox()
         {
             if (ChatQueue.q.Any())
-            {
+            {// Should q be locked?
                 var chat = ChatQueue.q.Take();
-                //ChatQueue.q.TryDequeue(out chat);
                 int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var code);
                 if (code <= 0x30)
                 {
