@@ -90,7 +90,7 @@ namespace IronworksTranslator
             }
         }
 
-        private void Control_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
         }
