@@ -38,7 +38,7 @@ namespace IronworksTranslator
             /* Logger initialization */
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.File(formatter: new CompactJsonFormatter(),
-                    path: $"log-{Birthdate}.txt",
+                    path: $"./logs/log-{Birthdate}.txt",
                     retainedFileCountLimit: null)
                 .MinimumLevel.Debug()
                 .CreateLogger();
@@ -65,7 +65,7 @@ namespace IronworksTranslator
         {
             if (makeMiniDump)
             {
-                using (FileStream fs = new FileStream($"log-{Birthdate}.mdmp", FileMode.Create, FileAccess.ReadWrite, FileShare.Write))
+                using (FileStream fs = new FileStream($"./logs/log-{Birthdate}.mdmp", FileMode.Create, FileAccess.ReadWrite, FileShare.Write))
                 {
                     MiniDump.Write(fs.SafeFileHandle, MiniDump.Option.WithFullMemory, MiniDump.ExceptionInfo.Present);
                 }
