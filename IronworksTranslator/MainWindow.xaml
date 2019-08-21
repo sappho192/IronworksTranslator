@@ -121,7 +121,7 @@
                     Background="White" Visibility="Hidden">
                     <Label Content="Language settings"/>
                 </Grid>
-                <!-- Language settings grid -->
+                <!-- Chat settings grid -->
                 <Grid x:Name="ChatSettingsGrid"
                     Grid.Row="0" Panel.ZIndex="2"
                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
