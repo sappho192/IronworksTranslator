@@ -47,6 +47,11 @@ namespace IronworksTranslator
             window.Topmost = true;
         }
 
+        private void Window_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            CaptureTouch(e.TouchDevice);
+        }
+
         private void UpdateChatbox()
         {
             if (ChatQueue.q.Any())
