@@ -1,5 +1,6 @@
 ﻿using FontAwesome.WPF;
 using IronworksTranslator.Core;
+using IronworksTranslator.UI;
 using Serilog;
 using System;
 using System.Linq;
@@ -114,11 +115,65 @@ namespace IronworksTranslator
             ToolbarGrid.Visibility =
                 ToolbarGrid.Visibility.Equals(Visibility.Collapsed) ?
                  Visibility.Visible : Visibility.Collapsed;
+            ShowOnly(Settings.None); // Hide all settings grid
         }
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.MainWindow.WindowState = WindowState.Minimized;
+        }
+
+        private void GeneralSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleSettingsGrid(GeneralSettingsGrid, Settings.General);
+        }
+
+        private void LanguageSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleSettingsGrid(LanguageSettingsGrid, Settings.Language);
+        }
+
+        private void ChatSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleSettingsGrid(ChatSettingsGrid, Settings.Chat);
+        }
+
+        private void ToggleSettingsGrid(Grid settingsGrid, Settings setting)
+        {
+            if(settingsGrid.Visibility.Equals(Visibility.Hidden))
+            {
+                ShowOnly(setting);
+            } else
+            {
+                settingsGrid.Visibility = Visibility.Hidden;
+            }
+        }
+
+        private void ShowOnly(Settings active)
+        {
+            switch (active)
+            {
+                case Settings.General:
+                    GeneralSettingsGrid.Visibility = Visibility.Visible;
+                    LanguageSettingsGrid.Visibility = Visibility.Hidden;
+                    ChatSettingsGrid.Visibility = Visibility.Hidden;
+                    break;
+                case Settings.Language:
+                    GeneralSettingsGrid.Visibility = Visibility.Hidden;
+                    LanguageSettingsGrid.Visibility = Visibility.Visible;
+                    ChatSettingsGrid.Visibility = Visibility.Hidden;
+                    break;
+                case Settings.Chat:
+                    GeneralSettingsGrid.Visibility = Visibility.Hidden;
+                    LanguageSettingsGrid.Visibility = Visibility.Hidden;
+                    ChatSettingsGrid.Visibility = Visibility.Visible;
+                    break;
+                case Settings.None:
+                    GeneralSettingsGrid.Visibility = Visibility.Hidden;
+                    LanguageSettingsGrid.Visibility = Visibility.Hidden;
+                    ChatSettingsGrid.Visibility = Visibility.Hidden;
+                    break;
+            }
         }
     }
 }
