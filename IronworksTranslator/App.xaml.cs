@@ -32,20 +32,24 @@ namespace IronworksTranslator
             base.OnStartup(e);
 
             /* Crash reporter initialization */
+            InitWatchDog();
+
+            /* Logger initialization */
+            InitLogger();
+
+            /* Find or create settings file */
+            InitSettings();
+        }
+
+        private void InitWatchDog()
+        {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             Application.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+        }
 
-            /* Logger initialization */
-            Log.Logger = new LoggerConfiguration()
-                .WriteTo.File(formatter: new CompactJsonFormatter(),
-                    path: $"./logs/log-{Birthdate}.txt",
-                    retainedFileCountLimit: null)
-                .MinimumLevel.Debug()
-                .CreateLogger();
-            Log.Debug("Logger initialized");
-
-            /* Find or create settings file */
+        private static void InitSettings()
+        {
             Directory.CreateDirectory("settings");
             string settingsFilePath = "./settings/settings.json";
             if (File.Exists(settingsFilePath))
@@ -66,6 +70,17 @@ namespace IronworksTranslator
                 File.WriteAllText(settingsFilePath, settings);
                 Log.Debug("settings.json created");
             }
+        }
+
+        private static void InitLogger()
+        {
+            Log.Logger = new LoggerConfiguration()
+                            .WriteTo.File(formatter: new CompactJsonFormatter(),
+                                path: $"./logs/log-{Birthdate}.txt",
+                                retainedFileCountLimit: null)
+                            .MinimumLevel.Debug()
+                            .CreateLogger();
+            Log.Debug("Logger initialized");
         }
 
         private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
