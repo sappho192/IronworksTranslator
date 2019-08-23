@@ -6,6 +6,8 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         xmlns:local="clr-namespace:IronworksTranslator"
+        xmlns:core="clr-namespace:IronworksTranslator.Core"
+        xmlns:util="clr-namespace:IronworksTranslator.Util"
         xmlns:ui="clr-namespace:IronworksTranslator.UI"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
@@ -131,7 +133,24 @@
                     Grid.Row="0" Panel.ZIndex="2"
                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Background="White" Visibility="Hidden">
-                    <Label Content="Language settings"/>
+                    <ScrollViewer>
+                        <Grid>
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="모국어"/>
+                                    <ComboBox Name="ClientLanguageComboBox" SelectedIndex="0"
+                                        ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
+                                        SelectionChanged="ClientLanguageComboBox_SelectionChanged"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="번역 엔진"/>
+                                    <ComboBox Name="TranslatorEngineComboBox" SelectedIndex="0"
+                                        ItemsSource="{util:EnumToCollection EnumType={x:Type core:TranslatorEngine}}"
+                                        SelectionChanged="TranslatorEngineComboBox_SelectionChanged"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
                 </Grid>
                 <!-- Chat settings grid -->
                 <Grid x:Name="ChatSettingsGrid"

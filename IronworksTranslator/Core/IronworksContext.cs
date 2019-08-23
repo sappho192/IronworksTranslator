@@ -25,6 +25,7 @@ namespace IronworksTranslator.Core
         private static int _previousArrayIndex = 0;
         private static int _previousOffset = 0;
 
+
         /* Singleton context */
         private static IronworksContext _instance;
 
@@ -117,7 +118,19 @@ namespace IronworksTranslator.Core
 
         public string TranslateChat(string sentence)
         {
-            string testUrl = "https://papago.naver.com/?sk=ja&tk=ko&st=" + HttpUtility.UrlEncode(sentence);
+            if(IronworksSettings.Instance == null)
+            {
+                throw new Exception("IronworksSettings is null");
+            }
+            string tk = "ko";
+            foreach (var item in LanguageCodeList.papago)
+            {
+                if (IronworksSettings.Instance.Translator.NativeLanguage.ToString().Equals(item.NameEnglish))
+                {
+                    tk = item.Code;
+                }
+            }
+            string testUrl = $"https://papago.naver.com/?sk=ja&tk={tk}&st={HttpUtility.UrlEncode(sentence)}";
             lock (driver)
             {
                 //Log.Debug($"Translate URL: {testUrl}");

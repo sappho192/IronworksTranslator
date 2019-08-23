@@ -4,7 +4,7 @@ namespace IronworksTranslator.Core
 {
     public static class LanguageCodeList
     {
-        public static readonly IReadOnlyCollection<LanguageCodeModel> papagoLanguageList = new List<LanguageCodeModel>
+        public static readonly IReadOnlyCollection<LanguageCodeModel> papago = new List<LanguageCodeModel>
         {
             new LanguageCodeModel("ko", "Korean", "한국어"),
             new LanguageCodeModel("ja", "Japanese", "日本語"),

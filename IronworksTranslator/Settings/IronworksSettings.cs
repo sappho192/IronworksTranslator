@@ -15,13 +15,26 @@ namespace IronworksTranslator.Core
             UI.OnSettingsChanged += UI_OnSettingsChanged;
 
             Translator = new TranslatorSettings();
+            Translator.OnSettingsChanged += Translator_OnSettingsChanged;
 
             Chat = new ChatSettings();
         }
 
+        private void Translator_OnSettingsChanged(object sender, string name, object value)
+        {
+            onSettingsChanged("Translator", sender, name, value);
+        }
+
         private void UI_OnSettingsChanged(object sender, string name, object value)
         {
-            Log.Debug("UI settings {@propertyName} changed to {@value}", name, value);
+            onSettingsChanged("UI", sender, name, value);
+        }
+
+        private void onSettingsChanged(string group, object sender, string name, object value)
+        {
+            string template = " settings {@propertyName} changed to {@value}";
+
+            Log.Debug($"{group}{template}", name, value);
             if (Instance != null)
             {
                 Instance.UpdateSettingsFile();

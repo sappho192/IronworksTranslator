@@ -45,6 +45,11 @@ namespace IronworksTranslator
             Log.Debug("Applying settings from file");
             chatFontSizeSpinner.Value = ironworksSettings.UI.ChatTextboxFontSize;
             TranslatedChatBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
+
+            ClientLanguageComboBox.SelectedIndex = (int)ironworksSettings.Translator.NativeLanguage;
+
+            TranslatorEngineComboBox.SelectedIndex = (int)ironworksSettings.Translator.DefaultTranslatorEngine;
+
             Log.Debug("Settings applied");
         }
 
@@ -195,6 +200,24 @@ namespace IronworksTranslator
             {
                 ironworksSettings.UI.ChatTextboxFontSize = spinner.Value ?? 6;
                 TranslatedChatBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
+            }
+        }
+
+        private void ClientLanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                ComboBox box = sender as ComboBox;
+                ironworksSettings.Translator.NativeLanguage = (ClientLanguage)box.SelectedIndex;
+            }
+        }
+
+        private void TranslatorEngineComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                ComboBox box = sender as ComboBox;
+                ironworksSettings.Translator.DefaultTranslatorEngine = (TranslatorEngine)box.SelectedIndex;
             }
         }
     }

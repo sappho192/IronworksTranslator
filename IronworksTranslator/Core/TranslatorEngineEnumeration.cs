@@ -1,7 +1,10 @@
-﻿namespace IronworksTranslator.Core
+﻿using System.ComponentModel;
+
+namespace IronworksTranslator.Core
 {
     public enum TranslatorEngine
     {
-        Papago
+        [Description("Papago")]
+        Papago = 0
     }
 }

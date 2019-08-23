@@ -1,11 +1,18 @@
-﻿namespace IronworksTranslator.Core
+﻿using System.ComponentModel;
+
+namespace IronworksTranslator.Core
 {
     public enum ClientLanguage
     {
-        Japanese,
+        [Description("日本語")]
+        Japanese = 0,
+        [Description("English")]
         English,
-        Deutche,
-        Frencais,
+        [Description("Deutsch")]
+        German,
+        [Description("Français")]
+        French,
+        [Description("한국어")]
         Korean
     }
 }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace IronworksTranslator.Settings
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public sealed class TranslatorSettings
+    public sealed class TranslatorSettings : SettingsChangedEvent
     {
         public TranslatorSettings()
         {
@@ -14,12 +14,42 @@ namespace IronworksTranslator.Settings
             {
                 TranslatorEngine.Papago
             };
+            NativeLanguage = ClientLanguage.Korean;
         }
 
-        
+
         [JsonProperty]
-        public TranslatorEngine DefaultTranslatorEngine { get; set; }
+        public TranslatorEngine DefaultTranslatorEngine
+        {
+            get => defaultTranslatorEngine;
+            set
+            {
+                if (value != defaultTranslatorEngine)
+                {
+                    defaultTranslatorEngine = value;
+                    OnSettingsChanged?.Invoke(this, nameof(defaultTranslatorEngine), defaultTranslatorEngine);
+                }
+            }
+        }
         [JsonProperty]
-        public HashSet<TranslatorEngine> ActiveTranslatorEngines { get; }
+        public HashSet<TranslatorEngine> ActiveTranslatorEngines { get; } // How to attach event?
+        [JsonProperty]
+        public ClientLanguage NativeLanguage
+        {
+            get => nativeLanguage;
+            set
+            {
+                if (value != nativeLanguage)
+                {
+                    nativeLanguage = value;
+                    OnSettingsChanged?.Invoke(this, nameof(nativeLanguage), nativeLanguage);
+                }
+            }
+        }
+
+        private TranslatorEngine defaultTranslatorEngine;
+        private ClientLanguage nativeLanguage;
+
+        public event SettingsChangedEventHandler OnSettingsChanged;
     }
 }
