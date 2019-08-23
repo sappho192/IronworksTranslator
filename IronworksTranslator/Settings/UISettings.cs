@@ -15,6 +15,6 @@ namespace IronworksTranslator.Settings
 
         /* Chat UI settings  */
         [JsonProperty]
-        int ChatTextboxFontSize { get; set; } //px
+        public int ChatTextboxFontSize { get; set; } //px
     }
 }

@@ -18,8 +18,8 @@ namespace IronworksTranslator.Settings
 
         
         [JsonProperty]
-        TranslatorEngine DefaultTranslatorEngine { get; set; }
+        public TranslatorEngine DefaultTranslatorEngine { get; set; }
         [JsonProperty]
-        HashSet<TranslatorEngine> ActiveTranslatorEngines { get; }
+        public HashSet<TranslatorEngine> ActiveTranslatorEngines { get; }
     }
 }
