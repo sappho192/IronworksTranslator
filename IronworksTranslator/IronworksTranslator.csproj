@@ -127,6 +127,12 @@
     <Compile Include="Core\ClientLanguageEnumeration.cs" />
     <Compile Include="Core\LanguageCodeList.cs" />
     <Compile Include="Core\LanguageCodeModel.cs" />
+    <Compile Include="Core\TranslatorEngineEnumeration.cs" />
+    <Compile Include="Settings\Channel.cs" />
+    <Compile Include="Settings\ChatSettings.cs" />
+    <Compile Include="Settings\IronworksSettings.cs" />
+    <Compile Include="Settings\TranslatorSettings.cs" />
+    <Compile Include="Settings\UISettings.cs" />
     <Compile Include="UI\DragMoveBehavior.cs" />
     <Compile Include="UI\SettingsEnumeration.cs" />
     <Compile Include="Util\MiniDump.cs" />
