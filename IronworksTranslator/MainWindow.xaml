@@ -7,6 +7,7 @@
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         xmlns:local="clr-namespace:IronworksTranslator"
         xmlns:ui="clr-namespace:IronworksTranslator.UI"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Name="mainWindow"
         Title="IronworksTranslator" Height="200" Width="420"
@@ -112,7 +113,18 @@
                     Grid.Row="0" Panel.ZIndex="2"
                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Background="White" Visibility="Hidden">
-                    <Label Content="General settings"/>
+                    <ScrollViewer>
+                        <Grid>
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="채팅 글자 크기"/>
+                                    <xctk:IntegerUpDown Name="chatFontSizeSpinner"
+                                        Increment="1" Maximum="30" Minimum="6" Value="6"
+                                        ValueChanged="ChatFontSizeSpinner_ValueChanged"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
                 </Grid>
                 <!-- Language settings grid -->
                 <Grid x:Name="LanguageSettingsGrid"

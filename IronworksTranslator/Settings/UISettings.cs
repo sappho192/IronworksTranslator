@@ -3,7 +3,7 @@
 namespace IronworksTranslator.Settings
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public sealed class UISettings
+    public sealed class UISettings : SettingsChangedEvent
     {
         public UISettings()
         {
@@ -15,6 +15,24 @@ namespace IronworksTranslator.Settings
 
         /* Chat UI settings  */
         [JsonProperty]
-        public int ChatTextboxFontSize { get; set; } //px
+        public int ChatTextboxFontSize
+        {
+            get => chatTextboxFontSize;
+            set
+            {
+                if (value != chatTextboxFontSize)
+                {
+                    chatTextboxFontSize = value;
+                    if (OnSettingsChanged != null)
+                    {
+                        OnSettingsChanged(this, ChatTextboxFontSize);
+                    }
+                    //NotifyPropertyChanged();
+                }
+            }
+        } //px
+        private int chatTextboxFontSize;
+
+        public event SettingsChangedEventHandler OnSettingsChanged;
     }
 }

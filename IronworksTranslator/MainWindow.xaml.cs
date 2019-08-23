@@ -1,6 +1,5 @@
 ﻿using FontAwesome.WPF;
 using IronworksTranslator.Core;
-using IronworksTranslator.UI;
 using Serilog;
 using System;
 using System.Linq;
@@ -9,6 +8,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Xceed.Wpf.Toolkit;
 
 namespace IronworksTranslator
 {
@@ -18,6 +18,7 @@ namespace IronworksTranslator
     public partial class MainWindow : Window
     {
         private IronworksContext ironworksContext;
+        private IronworksSettings ironworksSettings;
         //private 
         private readonly Timer chatboxTimer;
 
@@ -31,10 +32,18 @@ namespace IronworksTranslator
             Log.Information($"Current version: {version}");
 
             ironworksContext = IronworksContext.Instance();
+            ironworksSettings = IronworksSettings.Instance;
+            LoadSettings();
 
             const int period = 500;
             chatboxTimer = new Timer(RefreshChatbox, null, 0, period);
             Log.Debug($"New RefreshChatbox timer with period {period}ms");
+        }
+
+        private void LoadSettings()
+        {
+            chatFontSizeSpinner.Value = ironworksSettings.UI.ChatTextboxFontSize;
+            TranslatedChatBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
         }
 
         private void RefreshChatbox(object state)
@@ -61,7 +70,7 @@ namespace IronworksTranslator
                 int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var code);
                 if (code <= 0x30)
                 {
-                    Log.Debug("Chat: {@Chat}",chat);
+                    Log.Debug("Chat: {@Chat}", chat);
                     var author = chat.Line.RemoveAfter(":");
                     var sentence = chat.Line.RemoveBefore(":");
                     var translated = ironworksContext.TranslateChat(sentence);
@@ -99,7 +108,7 @@ namespace IronworksTranslator
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
-            if(MessageBox.Show("정말 종료할까요?", "프로그램 종료", MessageBoxButton.YesNo).Equals(MessageBoxResult.Yes))
+            if (System.Windows.MessageBox.Show("정말 종료할까요?", "프로그램 종료", MessageBoxButton.YesNo).Equals(MessageBoxResult.Yes))
             {
                 Application.Current.Shutdown();
             }
@@ -120,7 +129,7 @@ namespace IronworksTranslator
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
-            Application.Current.MainWindow.WindowState = WindowState.Minimized;
+            Application.Current.MainWindow.WindowState = System.Windows.WindowState.Minimized;
         }
 
         private void GeneralSettingsButton_Click(object sender, RoutedEventArgs e)
@@ -140,10 +149,11 @@ namespace IronworksTranslator
 
         private void ToggleSettingsGrid(Grid settingsGrid, UI.SettingsTab setting)
         {
-            if(settingsGrid.Visibility.Equals(Visibility.Hidden))
+            if (settingsGrid.Visibility.Equals(Visibility.Hidden))
             {
                 ShowOnly(setting);
-            } else
+            }
+            else
             {
                 settingsGrid.Visibility = Visibility.Hidden;
             }
@@ -173,6 +183,16 @@ namespace IronworksTranslator
                     LanguageSettingsGrid.Visibility = Visibility.Hidden;
                     ChatSettingsGrid.Visibility = Visibility.Hidden;
                     break;
+            }
+        }
+
+        private void ChatFontSizeSpinner_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            IntegerUpDown spinner = sender as IntegerUpDown;
+            if (ironworksSettings != null)
+            {
+                ironworksSettings.UI.ChatTextboxFontSize = spinner.Value ?? 6;
+                TranslatedChatBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
             }
         }
     }
