@@ -1,6 +1,6 @@
 ﻿namespace IronworksTranslator.UI
 {
-    public enum Settings
+    public enum SettingsTab
     {
         None,
         General,
