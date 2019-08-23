@@ -123,6 +123,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Core\ChatCodeEnumeration.cs" />
+    <Compile Include="Core\ClientLanguageEnumeration.cs" />
+    <Compile Include="Core\LanguageCodeList.cs" />
+    <Compile Include="Core\LanguageCodeModel.cs" />
     <Compile Include="UI\DragMoveBehavior.cs" />
     <Compile Include="UI\SettingsEnumeration.cs" />
     <Compile Include="Util\MiniDump.cs" />
