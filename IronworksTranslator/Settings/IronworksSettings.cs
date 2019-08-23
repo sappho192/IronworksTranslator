@@ -1,5 +1,6 @@
 ﻿using IronworksTranslator.Settings;
 using Newtonsoft.Json;
+using Serilog;
 using System.IO;
 
 namespace IronworksTranslator.Core
@@ -18,8 +19,9 @@ namespace IronworksTranslator.Core
             Chat = new ChatSettings();
         }
 
-        private void UI_OnSettingsChanged(object sender, object changedProperty)
+        private void UI_OnSettingsChanged(object sender, string name, object value)
         {
+            Log.Debug("UI settings {@propertyName} changed to {@value}", name, value);
             if (Instance != null)
             {
                 Instance.UpdateSettingsFile();

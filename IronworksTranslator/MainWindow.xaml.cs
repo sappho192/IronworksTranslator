@@ -42,8 +42,10 @@ namespace IronworksTranslator
 
         private void LoadSettings()
         {
+            Log.Debug("Applying settings from file");
             chatFontSizeSpinner.Value = ironworksSettings.UI.ChatTextboxFontSize;
             TranslatedChatBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
+            Log.Debug("Settings applied");
         }
 
         private void RefreshChatbox(object state)

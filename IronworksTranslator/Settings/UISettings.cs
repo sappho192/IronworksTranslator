@@ -23,11 +23,7 @@ namespace IronworksTranslator.Settings
                 if (value != chatTextboxFontSize)
                 {
                     chatTextboxFontSize = value;
-                    if (OnSettingsChanged != null)
-                    {
-                        OnSettingsChanged(this, ChatTextboxFontSize);
-                    }
-                    //NotifyPropertyChanged();
+                    OnSettingsChanged?.Invoke(this, nameof(ChatTextboxFontSize), ChatTextboxFontSize);
                 }
             }
         } //px
