@@ -5,6 +5,7 @@
         Japanese,
         English,
         Deutche,
-        Frencais
+        Frencais,
+        Korean
     }
 }
