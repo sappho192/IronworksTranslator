@@ -6,6 +6,7 @@ using System.Windows;
 using IronworksTranslator.Util;
 using Serilog;
 using Serilog.Formatting.Compact;
+using Newtonsoft.Json;
 
 namespace IronworksTranslator
 {
@@ -42,8 +43,29 @@ namespace IronworksTranslator
                     retainedFileCountLimit: null)
                 .MinimumLevel.Debug()
                 .CreateLogger();
+            Log.Debug("Logger initialized");
 
-            Log.Debug("Program started");
+            /* Find or create settings file */
+            Directory.CreateDirectory("settings");
+            string settingsFilePath = "./settings/settings.json";
+            if (File.Exists(settingsFilePath))
+            {// Read settings
+                using (StreamReader reader = File.OpenText(settingsFilePath))
+                {
+                    var settings = reader.ReadToEnd();
+                    var previousSettings = JsonConvert.DeserializeObject<IronworksSettings>(settings);
+                    IronworksSettings.Instance = previousSettings;
+                    Log.Debug("settings.json loaded");
+                }
+            }
+            else
+            {// Create new one
+                var ironworksSettings = new IronworksSettings();
+                IronworksSettings.Instance = ironworksSettings;
+                string settings = JsonConvert.SerializeObject(ironworksSettings, Formatting.Indented);
+                File.WriteAllText(settingsFilePath, settings);
+                Log.Debug("settings.json created");
+            }
         }
 
         private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)

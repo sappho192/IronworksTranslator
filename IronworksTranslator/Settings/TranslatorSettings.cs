@@ -1,8 +1,10 @@
 ﻿using IronworksTranslator.Core;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace IronworksTranslator.Settings
 {
+    [JsonObject(MemberSerialization.OptIn)]
     public sealed class TranslatorSettings
     {
         public TranslatorSettings()
@@ -15,7 +17,9 @@ namespace IronworksTranslator.Settings
         }
 
         
+        [JsonProperty]
         TranslatorEngine DefaultTranslatorEngine { get; set; }
+        [JsonProperty]
         HashSet<TranslatorEngine> ActiveTranslatorEngines { get; }
     }
 }
