@@ -27,6 +27,7 @@ namespace IronworksTranslator
         {
             Topmost = true;
             InitializeComponent();
+            exampleChatBox.Text = $"이프 저격하는 무작위 레벨링 가실 분~{Environment.NewLine}エキルレ行く方いますか？{Environment.NewLine}Mechanics are for Cars KUPO!";
 
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             mainWindow.Title += $" v{version}";
@@ -274,6 +275,7 @@ namespace IronworksTranslator
             {
                 ironworksSettings.UI.ChatTextboxFontSize = spinner.Value ?? 6;
                 TranslatedChatBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
+                exampleChatBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
             }
         }
 
