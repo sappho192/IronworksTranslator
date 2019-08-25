@@ -188,6 +188,5 @@ namespace IronworksTranslator.Settings
         public Channel NPCDialog;
         public Channel NPCAnnounce;
         public Channel Recruitment;
-        //public Channel // TODO: Crossworld Linkshell
     }
 }
