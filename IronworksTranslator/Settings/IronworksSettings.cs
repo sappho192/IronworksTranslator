@@ -40,8 +40,8 @@ namespace IronworksTranslator.Core
             Chat.CWLinkShell6.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("CWLinkShell6@Chat", sender, name, value); };
             Chat.CWLinkShell7.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("CWLinkShell7@Chat", sender, name, value); };
             Chat.CWLinkShell8.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("CWLinkShell8@Chat", sender, name, value); };
-            Chat.FreeCompany.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("LinkShell8@Chat", sender, name, value); };
-            Chat.Novice.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("LinkShell8@Chat", sender, name, value); };
+            Chat.FreeCompany.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("FreeCompany@Chat", sender, name, value); };
+            Chat.Novice.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("Novice@Chat", sender, name, value); };
             Chat.Echo.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("Echo@Chat", sender, name, value); };
             Chat.System.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("System@Chat", sender, name, value); };
             Chat.Error.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("Error@Chat", sender, name, value); };
