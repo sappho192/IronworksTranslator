@@ -76,36 +76,55 @@ namespace IronworksTranslator
             if (ChatQueue.q.Any())
             {// Should q be locked?
                 var chat = ChatQueue.q.Take();
-                int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var code);
-                if (code <= (int)ChatCode.Recruitment) // 0x48, 0d72
+                int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var intCode);
+                ChatCode code = (ChatCode)intCode;
+                if (code <= ChatCode.Recruitment) // 0x48, 0d72
                 {
-                    if (ironworksSettings.Chat.ChannelVisibility.TryGetValue((ChatCode)code, out bool value))
+                    if (ironworksSettings.Chat.ChannelVisibility.TryGetValue(code, out bool show))
                     {
-                        Log.Debug("Chat: {@Chat}", chat);
-                        var author = chat.Line.RemoveAfter(":");
-                        var sentence = chat.Line.RemoveBefore(":");
-                        var translated = ironworksContext.TranslateChat(sentence, ironworksSettings.Chat.ChannelLanguage[(ChatCode)code]);
-
-                        Application.Current.Dispatcher.Invoke(() =>
+                        if(show)
                         {
+                            Log.Debug("Chat: {@Chat}", chat);
+                            if (code == ChatCode.Recruitment || code == ChatCode.System || code == ChatCode.Error)
+                            {
+                                var translated = ironworksContext.TranslateChat(chat.Line, ironworksSettings.Chat.ChannelLanguage[code]);
 
-                            TranslatedChatBox.Text +=
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    TranslatedChatBox.Text +=
+#if DEBUG
+                            $"[{chat.Code}]{translated}{Environment.NewLine}";
+#else
+                            $"{translated}{Environment.NewLine}";
+#endif
+                                });
+                            }
+                            else
+                            {
+                                var author = chat.Line.RemoveAfter(":");
+                                var sentence = chat.Line.RemoveBefore(":");
+                                var translated = ironworksContext.TranslateChat(sentence, ironworksSettings.Chat.ChannelLanguage[code]);
+
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+
+                                    TranslatedChatBox.Text +=
 #if DEBUG
                         $"[{chat.Code}]{author}:{translated}{Environment.NewLine}";
 #else
                         $"{author}:{translated}{Environment.NewLine}";
 #endif
-                        });
+                                });
+                            }
+                        }
                     }
                     else
                     {
-                        Log.Error("UNEXPECTED CHATCODE {@Code} when translating {@Message}", code, chat.Line);
+                        Log.Error("UNEXPECTED CHATCODE {@Code} when translating {@Message}", intCode, chat.Line);
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            var author = chat.Line.RemoveAfter(":");
-                            var sentence = chat.Line.RemoveBefore(":");
                             TranslatedChatBox.Text +=
-                        $"[모르는 채널-제보요망][{chat.Code}]{author}:{sentence}{Environment.NewLine}";
+                        $"[모르는 채널-제보요망][{chat.Code}]{chat.Line}{Environment.NewLine}";
                         });
                     }
                 }
