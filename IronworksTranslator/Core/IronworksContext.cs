@@ -5,7 +5,6 @@ using Sharlayan.Models.ReadResults;
 using System;
 using System.Diagnostics;
 using System.Threading;
-using System.Web;
 using System.Windows;
 using Serilog;
 
@@ -116,7 +115,7 @@ namespace IronworksTranslator.Core
             return false;
         }
 
-        public string TranslateChat(string sentence)
+        public string TranslateChat(string sentence, ClientLanguage from)
         {
             if(IronworksSettings.Instance == null)
             {
@@ -130,7 +129,15 @@ namespace IronworksTranslator.Core
                     tk = item.Code;
                 }
             }
-            string testUrl = $"https://papago.naver.com/?sk=ja&tk={tk}&st={HttpUtility.UrlEncode(sentence)}";
+            string sk = "ja";
+            foreach (var item in LanguageCodeList.papago)
+            {
+                if (from.ToString().Equals(item.NameEnglish))
+                {
+                    sk = item.Code;
+                }
+            }
+            string testUrl = $"https://papago.naver.com/?sk={sk}&tk={tk}&st={Uri.EscapeDataString(sentence)}";
             lock (driver)
             {
                 //Log.Debug($"Translate URL: {testUrl}");

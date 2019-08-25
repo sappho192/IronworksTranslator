@@ -6,8 +6,9 @@ namespace IronworksTranslator.Settings
     [JsonObject(MemberSerialization.OptIn)]
     public class Channel : SettingsChangedEvent
     {
-        public Channel()
+        public Channel(ChatCode code)
         {
+            Code = code;
             Show = true;
             MajorLanguage = ClientLanguage.Japanese;
         }
@@ -41,6 +42,9 @@ namespace IronworksTranslator.Settings
             }
         }
         private ClientLanguage majorLanguage;
+
+        [JsonIgnore]
+        public readonly ChatCode Code;
 
         public event SettingsChangedEventHandler OnSettingsChanged;
     }
