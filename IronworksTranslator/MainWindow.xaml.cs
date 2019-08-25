@@ -127,9 +127,9 @@ namespace IronworksTranslator
             {// Should q be locked?
                 var chat = ChatQueue.q.Take();
                 int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var code);
-                if (code <= 0x30)
+                if (code <= (int)ChatCode.Recruitment) // 0x48, 0d72
                 {
-                    if (ironworksSettings.Chat.ChannelVisibility[(ChatCode)code])
+                    if (ironworksSettings.Chat.ChannelVisibility.TryGetValue((ChatCode)code, out bool value))
                     {
                         Log.Debug("Chat: {@Chat}", chat);
                         var author = chat.Line.RemoveAfter(":");
@@ -145,6 +145,17 @@ namespace IronworksTranslator
 #else
                         $"{author}:{translated}{Environment.NewLine}";
 #endif
+                        });
+                    }
+                    else
+                    {
+                        Log.Error("UNEXPECTED CHATCODE {@Code} when translating {@Message}", code, chat.Line);
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            var author = chat.Line.RemoveAfter(":");
+                            var sentence = chat.Line.RemoveBefore(":");
+                            TranslatedChatBox.Text +=
+                        $"[모르는 채널-제보요망][{chat.Code}]{author}:{sentence}{Environment.NewLine}";
                         });
                     }
                 }
