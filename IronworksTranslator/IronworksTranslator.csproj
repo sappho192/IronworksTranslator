@@ -143,6 +143,7 @@
     <Compile Include="Core\LanguageCodeList.cs" />
     <Compile Include="Core\LanguageCodeModel.cs" />
     <Compile Include="Core\TranslatorEngineEnumeration.cs" />
+    <Compile Include="MainWindow.ChatSettingsUI.cs" />
     <Compile Include="Settings\Channel.cs" />
     <Compile Include="Settings\ChatSettings.cs" />
     <Compile Include="Settings\IronworksSettings.cs" />
