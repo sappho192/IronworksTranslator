@@ -1,5 +1,6 @@
 ﻿using FontAwesome.WPF;
 using IronworksTranslator.Core;
+using IronworksTranslator.Util;
 using Serilog;
 using System;
 using System.Linq;
@@ -78,43 +79,50 @@ namespace IronworksTranslator
                 var chat = ChatQueue.q.Take();
                 int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var intCode);
                 ChatCode code = (ChatCode)intCode;
-                if (code <= ChatCode.Recruitment) // 0x48, 0d72
+                if (code <= ChatCode.Recruitment) // For now, Recruitment(0x48) is upper bound of chat related code.
                 {
                     if (ironworksSettings.Chat.ChannelVisibility.TryGetValue(code, out bool show))
                     {
-                        if(show)
+                        if (show)
                         {
                             Log.Debug("Chat: {@Chat}", chat);
+
                             if (code == ChatCode.Recruitment || code == ChatCode.System || code == ChatCode.Error)
                             {
-                                var translated = ironworksContext.TranslateChat(chat.Line, ironworksSettings.Chat.ChannelLanguage[code]);
-
-                                Application.Current.Dispatcher.Invoke(() =>
+                                if (!ContainsNativeLanguage(chat.Line))
                                 {
-                                    TranslatedChatBox.Text +=
+                                    var translated = ironworksContext.TranslateChat(chat.Line, ironworksSettings.Chat.ChannelLanguage[code]);
+
+                                    Application.Current.Dispatcher.Invoke(() =>
+                                    {
+                                        TranslatedChatBox.Text +=
 #if DEBUG
-                            $"[{chat.Code}]{translated}{Environment.NewLine}";
+                                        $"[{chat.Code}]{translated}{Environment.NewLine}";
 #else
-                            $"{translated}{Environment.NewLine}";
+                                        $"{translated}{Environment.NewLine}";
 #endif
-                                });
+                                    });
+                                }
                             }
                             else
                             {
                                 var author = chat.Line.RemoveAfter(":");
                                 var sentence = chat.Line.RemoveBefore(":");
-                                var translated = ironworksContext.TranslateChat(sentence, ironworksSettings.Chat.ChannelLanguage[code]);
-
-                                Application.Current.Dispatcher.Invoke(() =>
+                                if (!ContainsNativeLanguage(chat.Line))
                                 {
+                                    var translated = ironworksContext.TranslateChat(sentence, ironworksSettings.Chat.ChannelLanguage[code]);
 
-                                    TranslatedChatBox.Text +=
+                                    Application.Current.Dispatcher.Invoke(() =>
+                                    {
+
+                                        TranslatedChatBox.Text +=
 #if DEBUG
-                        $"[{chat.Code}]{author}:{translated}{Environment.NewLine}";
+                                        $"[{chat.Code}]{author}:{translated}{Environment.NewLine}";
 #else
-                        $"{author}:{translated}{Environment.NewLine}";
+                                        $"{author}:{translated}{Environment.NewLine}";
 #endif
-                                });
+                                    });
+                                }
                             }
                         }
                     }
@@ -134,9 +142,9 @@ namespace IronworksTranslator
                     {
                         TranslatedChatBox.Text +=
 #if DEBUG
-                            $"[{chat.Code}]{chat.Line}{Environment.NewLine}";
+                            $"[???][{chat.Code}]{chat.Line}{Environment.NewLine}";
 #else
-                            $"{chat.Line}{Environment.NewLine}";
+                            $"[???]{chat.Line}{Environment.NewLine}";
 #endif
                     });
                 }
@@ -145,6 +153,23 @@ namespace IronworksTranslator
                     TranslatedChatBox.ScrollToEnd();
                     //TranslatedChatBox.ScrollToVerticalOffset(double.MaxValue);
                 });
+            }
+        }
+
+        private bool ContainsNativeLanguage(string sentence)
+        {
+            switch (ironworksSettings.Translator.NativeLanguage)
+            {
+                case ClientLanguage.Japanese:
+                    return sentence.HasJapanese();
+                case ClientLanguage.English:
+                    return sentence.HasEnglish();
+                case ClientLanguage.Korean:
+                    return sentence.HasKorean();
+                case ClientLanguage.German:
+                case ClientLanguage.French:
+                default:
+                    return false;
             }
         }
 
