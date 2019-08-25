@@ -41,6 +41,12 @@ namespace IronworksTranslator
             LoadChannelState(CWLinkShell7Panel, ironworksSettings.Chat.CWLinkShell7);
             LoadChannelState(CWLinkShell8Panel, ironworksSettings.Chat.CWLinkShell8);
 
+            LoadChannelState(SystemPanel, ironworksSettings.Chat.System);
+            LoadChannelState(ErrorPanel, ironworksSettings.Chat.Error);
+            LoadChannelState(NPCDialogPanel, ironworksSettings.Chat.NPCDialog);
+            LoadChannelState(NPCAnnouncePanel, ironworksSettings.Chat.NPCAnnounce);
+            LoadChannelState(RecruitmentPanel, ironworksSettings.Chat.Recruitment);
+
             Log.Debug("Chat settings applied");
         }
 
@@ -581,6 +587,115 @@ namespace IronworksTranslator
         private void CWLinkShell8ShowButton_Click(object sender, RoutedEventArgs e)
         {
             ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.CWLinkShell8);
+        }
+
+        private void SystemGroupShowButton_Click(object sender, RoutedEventArgs e)
+        {
+            DisplaySystemGroup(true, FontAwesomeIcon.Eye);
+        }
+
+        private void SystemGroupHideButton_Click(object sender, RoutedEventArgs e)
+        {
+            DisplaySystemGroup(false, FontAwesomeIcon.EyeSlash);
+        }
+
+        private void DisplaySystemGroup(bool display, FontAwesomeIcon icon)
+        {
+            (SystemShowButton.Content as ImageAwesome).Icon = icon;
+            (ErrorShowButton.Content as ImageAwesome).Icon = icon;
+            (NPCDialogShowButton.Content as ImageAwesome).Icon = icon;
+            (NPCAnnounceShowButton.Content as ImageAwesome).Icon = icon;
+            (RecruitmentShowButton.Content as ImageAwesome).Icon = icon;
+
+            ironworksSettings.Chat.System.Show = display;
+            ironworksSettings.Chat.Error.Show = display;
+            ironworksSettings.Chat.NPCDialog.Show = display;
+            ironworksSettings.Chat.NPCAnnounce.Show = display;
+            ironworksSettings.Chat.Recruitment.Show = display;
+        }
+
+        private void SystemGroupComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                var languageIndex = ((ComboBox)sender).SelectedIndex;
+                ChangeMajorLanguage(ironworksSettings.Chat.System, (ClientLanguage)languageIndex);
+                ChangeMajorLanguage(ironworksSettings.Chat.Error, (ClientLanguage)languageIndex);
+                ChangeMajorLanguage(ironworksSettings.Chat.NPCDialog, (ClientLanguage)languageIndex);
+                ChangeMajorLanguage(ironworksSettings.Chat.NPCAnnounce, (ClientLanguage)languageIndex);
+                ChangeMajorLanguage(ironworksSettings.Chat.Recruitment, (ClientLanguage)languageIndex);
+
+                SystemComboBox.SelectedIndex = languageIndex;
+                ErrorComboBox.SelectedIndex = languageIndex;
+                NPCDialogComboBox.SelectedIndex = languageIndex;
+                NPCAnnounceComboBox.SelectedIndex = languageIndex;
+                RecruitmentComboBox.SelectedIndex = languageIndex;
+            }
+        }
+
+        private void SystemShowButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.System);
+        }
+
+        private void ErrorShowButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Error);
+        }
+
+        private void RecruitmentShowButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Recruitment);
+        }
+
+        private void NPCDialogShowButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.NPCDialog);
+        }
+
+        private void NPCAnnounceShowButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.NPCAnnounce);
+        }
+
+        private void SystemComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                ChangeMajorLanguage(ironworksSettings.Chat.System, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+            }
+        }
+
+        private void ErrorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                ChangeMajorLanguage(ironworksSettings.Chat.Error, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+            }
+        }
+
+        private void RecruitmentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                ChangeMajorLanguage(ironworksSettings.Chat.Recruitment, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+            }
+        }
+
+        private void NPCDialogComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                ChangeMajorLanguage(ironworksSettings.Chat.NPCDialog, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+            }
+        }
+
+        private void NPCAnnounceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                ChangeMajorLanguage(ironworksSettings.Chat.NPCAnnounce, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+            }
         }
     }
 }

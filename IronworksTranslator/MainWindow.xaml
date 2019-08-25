@@ -159,6 +159,7 @@
                     Background="White" Visibility="Hidden">
                     <ScrollViewer>
                         <StackPanel Orientation="Vertical">
+                            <!-- Party, Field -->
                             <Expander IsExpanded="False">
                                 <Expander.Header>
                                     <StackPanel Orientation="Horizontal">
@@ -247,6 +248,7 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Expander>
+                            <!-- Community Group -->
                             <Expander IsExpanded="False">
                                 <Expander.Header>
                                     <StackPanel Orientation="Horizontal">
@@ -510,6 +512,84 @@
                                         <ComboBox Name="CWLinkShell8ComboBox" SelectedIndex="0"
                                         ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
                                         SelectionChanged="CWLinkShell8ComboBox_SelectionChanged"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Expander>
+                            <!-- System Group -->
+                            <Expander IsExpanded="False">
+                                <Expander.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="시스템"/>
+                                        <!--<Label Content=""/>-->
+                                        <Button Name="SystemGroupShowButton" Width="24" Height="24"
+                                                Click="SystemGroupShowButton_Click">
+                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                        </Button>
+                                        <Button Name="SystemGroupHideButton" Width="24" Height="24"
+                                                Click="SystemGroupHideButton_Click">
+                                            <fa:ImageAwesome Icon="EyeSlash" Margin="2"/>
+                                        </Button>
+                                        <Label Content="상대방 언어"/>
+                                        <ComboBox Name="SystemGroupComboBox" SelectedIndex="0"
+                                        ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
+                                        SelectionChanged="SystemGroupComboBox_SelectionChanged"/>
+                                    </StackPanel>
+                                </Expander.Header>
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Name="SystemPanel" Orientation="Horizontal">
+                                        <Label Content="시스템"/>
+                                        <Button Name="SystemShowButton" Width="24" Height="24"
+                                                Click="SystemShowButton_Click">
+                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                        </Button>
+                                        <Label Content="상대방 언어"/>
+                                        <ComboBox Name="SystemComboBox" SelectedIndex="0"
+                                        ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
+                                        SelectionChanged="SystemComboBox_SelectionChanged"/>
+                                    </StackPanel>
+                                    <StackPanel Name="ErrorPanel" Orientation="Horizontal">
+                                        <Label Content="에러"/>
+                                        <Button Name="ErrorShowButton" Width="24" Height="24"
+                                                Click="ErrorShowButton_Click">
+                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                        </Button>
+                                        <Label Content="상대방 언어"/>
+                                        <ComboBox Name="ErrorComboBox" SelectedIndex="0"
+                                        ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
+                                        SelectionChanged="ErrorComboBox_SelectionChanged"/>
+                                    </StackPanel>
+                                    <StackPanel Name="RecruitmentPanel" Orientation="Horizontal">
+                                        <Label Content="임무 모집"/>
+                                        <Button Name="RecruitmentShowButton" Width="24" Height="24"
+                                                Click="RecruitmentShowButton_Click">
+                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                        </Button>
+                                        <Label Content="상대방 언어"/>
+                                        <ComboBox Name="RecruitmentComboBox" SelectedIndex="0"
+                                        ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
+                                        SelectionChanged="RecruitmentComboBox_SelectionChanged"/>
+                                    </StackPanel>
+                                    <StackPanel Name="NPCDialogPanel" Orientation="Horizontal">
+                                        <Label Content="NPC 대사"/>
+                                        <Button Name="NPCDialogShowButton" Width="24" Height="24"
+                                                Click="NPCDialogShowButton_Click">
+                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                        </Button>
+                                        <Label Content="상대방 언어"/>
+                                        <ComboBox Name="NPCDialogComboBox" SelectedIndex="0"
+                                        ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
+                                        SelectionChanged="NPCDialogComboBox_SelectionChanged"/>
+                                    </StackPanel>
+                                    <StackPanel Name="NPCAnnouncePanel" Orientation="Horizontal">
+                                        <Label Content="NPC 공지"/>
+                                        <Button Name="NPCAnnounceShowButton" Width="24" Height="24"
+                                                Click="NPCAnnounceShowButton_Click">
+                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                        </Button>
+                                        <Label Content="상대방 언어"/>
+                                        <ComboBox Name="NPCAnnounceComboBox" SelectedIndex="0"
+                                        ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
+                                        SelectionChanged="NPCAnnounceComboBox_SelectionChanged"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Expander>
