@@ -17,6 +17,7 @@ namespace IronworksTranslator
     {
         public static readonly string Birthdate = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         public static bool makeMiniDump = false;
+        public static bool newcomer = false;
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
@@ -64,6 +65,7 @@ namespace IronworksTranslator
             }
             else
             {// Create new one
+                newcomer = true;
                 var ironworksSettings = new IronworksSettings();
                 IronworksSettings.Instance = ironworksSettings;
                 string settings = JsonConvert.SerializeObject(ironworksSettings, Formatting.Indented);

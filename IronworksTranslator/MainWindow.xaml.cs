@@ -30,15 +30,29 @@ namespace IronworksTranslator
 
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             mainWindow.Title += $" v{version}";
+            AppHeaderLabel.Content += $" v{version}";
             Log.Information($"Current version: {version}");
 
             ironworksContext = IronworksContext.Instance();
             ironworksSettings = IronworksSettings.Instance;
             LoadSettings();
 
+            Welcome();
+
             const int period = 500;
             chatboxTimer = new Timer(RefreshChatbox, null, 0, period);
             Log.Debug($"New RefreshChatbox timer with period {period}ms");
+        }
+
+        private void Welcome()
+        {
+            TranslatedChatBox.Text += $"최근에 강제종료했다면 작업관리자에서 PhantomJS.exe도 종료해주세요.{Environment.NewLine}";
+            if (App.newcomer)
+            //if (true)
+            {
+                TranslatedChatBox.Text += $"프로그램을 처음 쓰시는군요.{Environment.NewLine}";
+                TranslatedChatBox.Text += $"메뉴 버튼을 눌러 채널별 언어 설정을 마무리해주세요.{Environment.NewLine}";
+            }
         }
 
         private void LoadSettings()

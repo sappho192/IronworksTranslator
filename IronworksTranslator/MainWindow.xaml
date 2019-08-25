@@ -43,7 +43,7 @@
                     </Button>
                 </StackPanel>
                 <StackPanel Grid.Row="0" HorizontalAlignment="Center">
-                    <Label Content="강제종료 시 작업관리자에서 PhantomJS.exe 종료바람" HorizontalContentAlignment="Center"/>
+                    <Label Name="AppHeaderLabel" Content="Ironworks Translator" HorizontalContentAlignment="Center" FontWeight="Bold"/>
                 </StackPanel>
                 <StackPanel Grid.Row="0" HorizontalAlignment="Right"
                                 Orientation="Horizontal">
