@@ -5,7 +5,6 @@ using Sharlayan.Models.ReadResults;
 using System;
 using System.Diagnostics;
 using System.Threading;
-using System.Web;
 using System.Windows;
 using Serilog;
 
@@ -24,6 +23,7 @@ namespace IronworksTranslator.Core
         // For chatlog you must locally store previous array offsets and indexes in order to pull the correct log from the last time you read it.
         private static int _previousArrayIndex = 0;
         private static int _previousOffset = 0;
+
 
         /* Singleton context */
         private static IronworksContext _instance;
@@ -115,9 +115,29 @@ namespace IronworksTranslator.Core
             return false;
         }
 
-        public string TranslateChat(string sentence)
+        public string TranslateChat(string sentence, ClientLanguage from)
         {
-            string testUrl = "https://papago.naver.com/?sk=ja&tk=ko&st=" + HttpUtility.UrlEncode(sentence);
+            if(IronworksSettings.Instance == null)
+            {
+                throw new Exception("IronworksSettings is null");
+            }
+            string tk = "ko";
+            foreach (var item in LanguageCodeList.papago)
+            {
+                if (IronworksSettings.Instance.Translator.NativeLanguage.ToString().Equals(item.NameEnglish))
+                {
+                    tk = item.Code;
+                }
+            }
+            string sk = "ja";
+            foreach (var item in LanguageCodeList.papago)
+            {
+                if (from.ToString().Equals(item.NameEnglish))
+                {
+                    sk = item.Code;
+                }
+            }
+            string testUrl = $"https://papago.naver.com/?sk={sk}&tk={tk}&st={Uri.EscapeDataString(sentence)}";
             lock (driver)
             {
                 //Log.Debug($"Translate URL: {testUrl}");
