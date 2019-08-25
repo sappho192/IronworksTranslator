@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 namespace IronworksTranslator.Settings
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public class Channel
+    public class Channel : SettingsChangedEvent
     {
         public Channel()
         {
@@ -13,8 +13,35 @@ namespace IronworksTranslator.Settings
         }
 
         [JsonProperty]
-        bool Show { get; set; }
+        public bool Show
+        {
+            get => show;
+            set
+            {
+                if (value != show)
+                {
+                    show = value;
+                    OnSettingsChanged?.Invoke(this, nameof(Show), Show);
+                }
+            }
+        }
+        private bool show;
+
         [JsonProperty]
-        ClientLanguage MajorLanguage { get; set; }
+        public ClientLanguage MajorLanguage
+        {
+            get => majorLanguage;
+            set
+            {
+                if (value != majorLanguage)
+                {
+                    majorLanguage = value;
+                    OnSettingsChanged?.Invoke(this, nameof(MajorLanguage), MajorLanguage);
+                }
+            }
+        }
+        private ClientLanguage majorLanguage;
+
+        public event SettingsChangedEventHandler OnSettingsChanged;
     }
 }
