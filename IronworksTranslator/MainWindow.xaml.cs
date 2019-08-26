@@ -133,6 +133,11 @@ namespace IronworksTranslator
                         if (show)
                         {
                             Log.Debug("Chat: {@Chat}", chat);
+                            var autoTranslates = chat.Bytes.ExtractAutoTranslate();
+                            if(autoTranslates.Count != 0)
+                            {
+                                throw new Exception("AutoTranslate found");
+                            }
 
                             if (code == ChatCode.Recruitment || code == ChatCode.System || code == ChatCode.Error
                                 || code == ChatCode.Notice || code == ChatCode.Emote || code == ChatCode.MarketSold)

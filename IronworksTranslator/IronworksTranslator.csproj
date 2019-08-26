@@ -152,6 +152,7 @@
     <Compile Include="Settings\UISettings.cs" />
     <Compile Include="UI\DragMoveBehavior.cs" />
     <Compile Include="UI\SettingsEnumeration.cs" />
+    <Compile Include="Util\ByteArrayExtension.cs" />
     <Compile Include="Util\EnumToCollectionExtension.cs" />
     <Compile Include="Util\StringExtension.cs" />
     <Compile Include="Util\MiniDump.cs" />
