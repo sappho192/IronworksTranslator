@@ -126,8 +126,8 @@ namespace IronworksTranslator
                 var chat = ChatQueue.q.Take();
                 int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var intCode);
                 ChatCode code = (ChatCode)intCode;
-                if (code <= ChatCode.CWLinkShell8 && code != ChatCode.GilReceive)
-                {// For now, CWLinkShell8(0x6B) is upper bound of chat related code. Gil received message will be ignored.
+                if (code <= ChatCode.CWLinkShell8 && code != ChatCode.GilReceive && code != ChatCode.Gather)
+                {// For now, CWLinkShell8(0x6B) is upper bound of chat related code. Gil received & Gather message will be ignored.
                     if (ironworksSettings.Chat.ChannelVisibility.TryGetValue(code, out bool show))
                     {
                         if (show)

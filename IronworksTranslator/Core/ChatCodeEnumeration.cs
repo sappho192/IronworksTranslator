@@ -25,6 +25,7 @@ namespace IronworksTranslator.Core
         CWLinkShell1 = 0x25,
         System = 0x39,
         Echo = 0x38,
+        Gather = 0x3B,
         Error = 0x3C,
         NPCDialog = 0x3D,
         GilReceive = 0x3E,
