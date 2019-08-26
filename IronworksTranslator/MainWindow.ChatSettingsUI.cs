@@ -721,7 +721,10 @@ namespace IronworksTranslator
 
         private void MarketSoldComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ChangeMajorLanguage(ironworksSettings.Chat.MarketSold, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+            if (ironworksSettings != null)
+            {
+                ChangeMajorLanguage(ironworksSettings.Chat.MarketSold, (ClientLanguage)((ComboBox)sender).SelectedIndex); 
+            }
         }
 
         private void RecruitmentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
