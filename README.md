@@ -22,7 +22,7 @@ Windows 10 64bit
 1. 파판14를 DirectX11 모드로 실행한다.  
 2. IronworksTranslator.exe를 실행한다.  
 3. "Attached ffxiv_dx11.exe" 메시지가 뜰 때까지 기다린다.
-4. 잠시 후 IronworksTranlator v0.0.2 이름을 가진 프로그램이 뜨면 적당한 곳에 두고 쓰면 됨.  
+4. 잠시 후 IronworksTranlator v0.0.3 이름을 가진 프로그램이 뜨면 적당한 곳에 두고 쓰면 됨.  
   
 * 다운받고 첨으로 실행하면 준비작업 한다고 30초에서 1분? 정도 걸림.  
 * 최초 실행 시 좌측 상단에 있는 메뉴를 열어 본인 취향에 맞게 설정하는게 좋습니다.
