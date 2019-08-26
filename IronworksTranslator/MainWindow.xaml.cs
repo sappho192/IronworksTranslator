@@ -131,7 +131,7 @@ namespace IronworksTranslator
                 var chat = ChatQueue.q.Take();
                 int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var intCode);
                 ChatCode code = (ChatCode)intCode;
-                if (code <= ChatCode.Recruitment) // For now, Recruitment(0x48) is upper bound of chat related code.
+                if (code <= ChatCode.CWLinkShell8) // For now, CWLinkShell8(0x6B) is upper bound of chat related code.
                 {
                     if (ironworksSettings.Chat.ChannelVisibility.TryGetValue(code, out bool show))
                     {
