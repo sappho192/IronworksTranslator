@@ -43,7 +43,7 @@ namespace IronworksTranslator
             LoadSettings();
 
             const int period = 500;
-            chatboxTimer = new Timer(RefreshChatbox, null, 0, period);
+            chatboxTimer = new Timer(UpdateChatbox, null, 0, period);
             Log.Debug($"New RefreshChatbox timer with period {period}ms");
         }
 
@@ -108,11 +108,6 @@ namespace IronworksTranslator
             TranslatedChatBox.FontFamily = font;
         }
 
-        private void RefreshChatbox(object state)
-        {
-            UpdateChatbox();
-        }
-
         private void Window_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             Window window = (Window)sender;
@@ -124,7 +119,7 @@ namespace IronworksTranslator
             CaptureTouch(e.TouchDevice);
         }
 
-        private void UpdateChatbox()
+        private void UpdateChatbox(object state)
         {
             if (ChatQueue.q.Any())
             {// Should q be locked?
