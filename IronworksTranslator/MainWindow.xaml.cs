@@ -2,6 +2,7 @@
 using IronworksTranslator.Core;
 using IronworksTranslator.Util;
 using Serilog;
+using Sharlayan.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -132,25 +133,22 @@ namespace IronworksTranslator
                     {
                         if (show)
                         {
-                            Log.Debug("Chat: {@Chat}", chat);
-                            var autoTranslates = chat.Bytes.ExtractAutoTranslate();
-                            if(autoTranslates.Count != 0)
-                            {
-                                throw new Exception("AutoTranslate found");
-                            }
+                            string line = chat.Line;
+                            ChatLogItem decodedChat = chat.Bytes.DecodeAutoTranslate();
+                            Log.Debug("Chat: {@Chat}", decodedChat);
 
                             if (code == ChatCode.Recruitment || code == ChatCode.System || code == ChatCode.Error
                                 || code == ChatCode.Notice || code == ChatCode.Emote || code == ChatCode.MarketSold)
                             {
-                                if (!ContainsNativeLanguage(chat.Line))
+                                if (!ContainsNativeLanguage(decodedChat.Line))
                                 {
-                                    var translated = ironworksContext.TranslateChat(chat.Line, ironworksSettings.Chat.ChannelLanguage[code]);
+                                    var translated = ironworksContext.TranslateChat(decodedChat.Line, ironworksSettings.Chat.ChannelLanguage[code]);
 
                                     Application.Current.Dispatcher.Invoke(() =>
                                     {
                                         TranslatedChatBox.Text +=
 #if DEBUG
-                                        $"[{chat.Code}]{translated}{Environment.NewLine}";
+                                        $"[{decodedChat.Code}]{translated}{Environment.NewLine}";
 #else
                                         $"{translated}{Environment.NewLine}";
 #endif
@@ -159,9 +157,9 @@ namespace IronworksTranslator
                             }
                             else
                             {
-                                var author = chat.Line.RemoveAfter(":");
-                                var sentence = chat.Line.RemoveBefore(":");
-                                if (!ContainsNativeLanguage(chat.Line))
+                                var author = decodedChat.Line.RemoveAfter(":");
+                                var sentence = decodedChat.Line.RemoveBefore(":");
+                                if (!ContainsNativeLanguage(decodedChat.Line))
                                 {
                                     var translated = ironworksContext.TranslateChat(sentence, ironworksSettings.Chat.ChannelLanguage[code]);
 
@@ -170,7 +168,7 @@ namespace IronworksTranslator
 
                                         TranslatedChatBox.Text +=
 #if DEBUG
-                                        $"[{chat.Code}]{author}:{translated}{Environment.NewLine}";
+                                        $"[{decodedChat.Code}]{author}:{translated}{Environment.NewLine}";
 #else
                                         $"{author}:{translated}{Environment.NewLine}";
 #endif
