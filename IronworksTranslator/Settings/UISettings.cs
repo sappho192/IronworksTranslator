@@ -29,6 +29,21 @@ namespace IronworksTranslator.Settings
         } //px
         private int chatTextboxFontSize;
 
+        [JsonProperty]
+        public string ChatTextboxFontFamily
+        {
+            get => chatTextboxFontFamily;
+            set
+            {
+                if (value != chatTextboxFontFamily)
+                {
+                    chatTextboxFontFamily = value;
+                    OnSettingsChanged?.Invoke(this, nameof(chatTextboxFontFamily), chatTextboxFontFamily);
+                }
+            }
+        }
+        private string chatTextboxFontFamily;
+
         public event SettingsChangedEventHandler OnSettingsChanged;
     }
 }

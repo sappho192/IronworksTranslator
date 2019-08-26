@@ -124,10 +124,14 @@
                                         Increment="1" Maximum="30" Minimum="6" Value="6"
                                         ValueChanged="ChatFontSizeSpinner_ValueChanged"/>
                                 </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="채팅 글꼴"/>
+                                    <ComboBox Name="ChatFontFamilyComboBox"
+                                              SelectionChanged="ChatFontFamilyComboBox_SelectionChanged"/>
+                                </StackPanel>
                                 <TextBox Name="exampleChatBox" 
                                          IsReadOnly="True"
                                          Foreground="White" Background="Black"/>
-                                <!--<Label Name="chatFontSizeExample" Content="예시"/>-->
                             </StackPanel>
                         </Grid>
                     </ScrollViewer>

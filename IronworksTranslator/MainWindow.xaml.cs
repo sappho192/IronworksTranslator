@@ -3,12 +3,14 @@ using IronworksTranslator.Core;
 using IronworksTranslator.Util;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Xceed.Wpf.Toolkit;
 
 namespace IronworksTranslator
@@ -27,7 +29,7 @@ namespace IronworksTranslator
         {
             Topmost = true;
             InitializeComponent();
-            exampleChatBox.Text = $"이프 저격하는 무작위 레벨링 가실 분~{Environment.NewLine}エキルレ行く方いますか？{Environment.NewLine}Mechanics are for Cars KUPO!";
+            InitializeGeneralSettingsUI();
 
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             mainWindow.Title += $" v{version}";
@@ -36,13 +38,38 @@ namespace IronworksTranslator
 
             ironworksContext = IronworksContext.Instance();
             ironworksSettings = IronworksSettings.Instance;
-            LoadSettings();
 
             Welcome();
+            LoadSettings();
 
             const int period = 500;
             chatboxTimer = new Timer(RefreshChatbox, null, 0, period);
             Log.Debug($"New RefreshChatbox timer with period {period}ms");
+        }
+
+        private void InitializeGeneralSettingsUI()
+        {
+            exampleChatBox.Text = $"이프 저격하는 무작위 레벨링 가실 분~{Environment.NewLine}エキルレ行く方いますか？{Environment.NewLine}Mechanics are for Cars KUPO!";
+            var cond = System.Windows.Markup.XmlLanguage.GetLanguage(System.Globalization.CultureInfo.CurrentUICulture.Name);
+            var listFont = new List<string>();
+            foreach (FontFamily font in Fonts.SystemFontFamilies)
+            {
+                if (font.FamilyNames.ContainsKey(cond))
+                    listFont.Add(font.FamilyNames[cond]);
+                else
+                    listFont.Add(font.ToString());
+            }
+            listFont.Sort();
+            ChatFontFamilyComboBox.ItemsSource = listFont;
+
+            foreach (string fontName in ChatFontFamilyComboBox.ItemsSource)
+            {
+                if (fontName.Equals(exampleChatBox.FontFamily.FamilyNames[cond]))
+                {
+                    ChatFontFamilyComboBox.SelectedValue = fontName;
+                    break;
+                }
+            }
         }
 
         private void Welcome()
@@ -53,12 +80,21 @@ namespace IronworksTranslator
             {
                 TranslatedChatBox.Text += $"프로그램을 처음 쓰시는군요.{Environment.NewLine}";
                 TranslatedChatBox.Text += $"메뉴 버튼을 눌러 채널별 언어 설정을 마무리해주세요.{Environment.NewLine}";
+                ironworksSettings.UI.ChatTextboxFontFamily = ChatFontFamilyComboBox.SelectedValue as string;
             }
         }
 
         private void LoadSettings()
         {
             Log.Debug("Applying settings from file");
+            LoadUISettings();
+            LoadChatSettings();
+
+            Log.Debug("Settings applied");
+        }
+
+        private void LoadUISettings()
+        {
             chatFontSizeSpinner.Value = ironworksSettings.UI.ChatTextboxFontSize;
             TranslatedChatBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
 
@@ -66,9 +102,10 @@ namespace IronworksTranslator
 
             TranslatorEngineComboBox.SelectedIndex = (int)ironworksSettings.Translator.DefaultTranslatorEngine;
 
-            LoadChatSettings();
-
-            Log.Debug("Settings applied");
+            ChatFontFamilyComboBox.SelectedValue = ironworksSettings.UI.ChatTextboxFontFamily;
+            var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
+            exampleChatBox.FontFamily = font;
+            TranslatedChatBox.FontFamily = font;
         }
 
         private void RefreshChatbox(object state)
@@ -302,6 +339,18 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 channel.MajorLanguage = language;
+            }
+        }
+
+        private void ChatFontFamilyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                var box = sender as ComboBox;
+                ironworksSettings.UI.ChatTextboxFontFamily = box.SelectedItem as string;
+                var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
+                exampleChatBox.FontFamily = font;
+                TranslatedChatBox.FontFamily = font;
             }
         }
     }
