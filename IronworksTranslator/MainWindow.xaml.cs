@@ -131,15 +131,16 @@ namespace IronworksTranslator
                 var chat = ChatQueue.q.Take();
                 int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var intCode);
                 ChatCode code = (ChatCode)intCode;
-                if (code <= ChatCode.CWLinkShell8) // For now, CWLinkShell8(0x6B) is upper bound of chat related code.
-                {
+                if (code <= ChatCode.CWLinkShell8 && code != ChatCode.GilReceive)
+                {// For now, CWLinkShell8(0x6B) is upper bound of chat related code. Gil received message will be ignored.
                     if (ironworksSettings.Chat.ChannelVisibility.TryGetValue(code, out bool show))
                     {
                         if (show)
                         {
                             Log.Debug("Chat: {@Chat}", chat);
 
-                            if (code == ChatCode.Recruitment || code == ChatCode.System || code == ChatCode.Error)
+                            if (code == ChatCode.Recruitment || code == ChatCode.System || code == ChatCode.Error
+                                || code == ChatCode.Notice || code == ChatCode.Emote || code == ChatCode.MarketSold)
                             {
                                 if (!ContainsNativeLanguage(chat.Line))
                                 {
@@ -180,7 +181,7 @@ namespace IronworksTranslator
                     }
                     else
                     {
-                        Log.Error("UNEXPECTED CHATCODE {@Code} when translating {@Message}", intCode, chat.Line);
+                        Log.Warning("UNEXPECTED CHATCODE {@Code} when translating {@Message}", intCode, chat.Line);
                         Application.Current.Dispatcher.Invoke(() =>
                         {
                             TranslatedChatBox.Text +=

@@ -9,6 +9,7 @@ namespace IronworksTranslator.Settings
         public ChatSettings()
         {
             Echo = new Channel(ChatCode.Echo);
+            Emote = new Channel(ChatCode.Emote);
             Say = new Channel(ChatCode.Say);
             Yell = new Channel(ChatCode.Yell);
             Shout = new Channel(ChatCode.Shout);
@@ -34,13 +35,16 @@ namespace IronworksTranslator.Settings
             FreeCompany = new Channel(ChatCode.FreeCompany);
             Novice = new Channel(ChatCode.Novice);
             System = new Channel(ChatCode.System);
+            Notice = new Channel(ChatCode.Notice);
             Error = new Channel(ChatCode.Error);
             NPCDialog = new Channel(ChatCode.NPCDialog);
             NPCAnnounce = new Channel(ChatCode.NPCAnnounce);
+            MarketSold = new Channel(ChatCode.MarketSold);
             Recruitment = new Channel(ChatCode.Recruitment);
 
             ChannelVisibility = new Dictionary<ChatCode, bool>() {
                 {ChatCode.Echo, Echo.Show },
+                {ChatCode.Emote, Echo.Show },
                 {ChatCode.Say, Say.Show },
                 {ChatCode.Yell, Yell.Show },
                 {ChatCode.Shout, Shout.Show },
@@ -66,14 +70,17 @@ namespace IronworksTranslator.Settings
                 {ChatCode.FreeCompany, FreeCompany.Show },
                 {ChatCode.Novice, Novice.Show },
                 {ChatCode.System, System.Show },
+                {ChatCode.Notice, Notice.Show },
                 {ChatCode.Error, Error.Show },
                 {ChatCode.NPCDialog, NPCDialog.Show },
                 {ChatCode.NPCAnnounce, NPCAnnounce.Show },
+                {ChatCode.MarketSold, MarketSold.Show },
                 {ChatCode.Recruitment, Recruitment.Show },
             };
 
             ChannelLanguage = new Dictionary<ChatCode, ClientLanguage>(){
                 {ChatCode.Echo, Echo.MajorLanguage },
+                {ChatCode.Emote, Emote.MajorLanguage },
                 {ChatCode.Say, Say.MajorLanguage },
                 {ChatCode.Yell, Yell.MajorLanguage },
                 {ChatCode.Shout, Shout.MajorLanguage },
@@ -99,13 +106,16 @@ namespace IronworksTranslator.Settings
                 {ChatCode.FreeCompany, FreeCompany.MajorLanguage },
                 {ChatCode.Novice, Novice.MajorLanguage },
                 {ChatCode.System, System.MajorLanguage },
+                {ChatCode.Notice, Notice.MajorLanguage },
                 {ChatCode.Error, Error.MajorLanguage },
                 {ChatCode.NPCDialog, NPCDialog.MajorLanguage },
                 {ChatCode.NPCAnnounce, NPCAnnounce.MajorLanguage },
+                {ChatCode.MarketSold, MarketSold.MajorLanguage },
                 {ChatCode.Recruitment, Recruitment.MajorLanguage },
             };
 
             Echo.OnSettingsChanged += Channel_OnSettingsChanged;
+            Emote.OnSettingsChanged += Channel_OnSettingsChanged;
             Say.OnSettingsChanged += Channel_OnSettingsChanged;
             Yell.OnSettingsChanged += Channel_OnSettingsChanged;
             Shout.OnSettingsChanged += Channel_OnSettingsChanged;
@@ -131,9 +141,11 @@ namespace IronworksTranslator.Settings
             FreeCompany.OnSettingsChanged += Channel_OnSettingsChanged;
             Novice.OnSettingsChanged += Channel_OnSettingsChanged;
             System.OnSettingsChanged += Channel_OnSettingsChanged;
+            Notice.OnSettingsChanged += Channel_OnSettingsChanged;
             Error.OnSettingsChanged += Channel_OnSettingsChanged;
             NPCDialog.OnSettingsChanged += Channel_OnSettingsChanged;
             NPCAnnounce.OnSettingsChanged += Channel_OnSettingsChanged;
+            MarketSold.OnSettingsChanged += Channel_OnSettingsChanged;
             Recruitment.OnSettingsChanged += Channel_OnSettingsChanged;
         }
 
@@ -159,6 +171,7 @@ namespace IronworksTranslator.Settings
         public Dictionary<ChatCode, ClientLanguage> ChannelLanguage;
 
         public Channel Echo;
+        public Channel Emote;
         public Channel Say;
         public Channel Yell;
         public Channel Shout;
@@ -184,9 +197,11 @@ namespace IronworksTranslator.Settings
         public Channel FreeCompany;
         public Channel Novice;
         public Channel System;
+        public Channel Notice;
         public Channel Error;
         public Channel NPCDialog;
         public Channel NPCAnnounce;
+        public Channel MarketSold;
         public Channel Recruitment;
     }
 }

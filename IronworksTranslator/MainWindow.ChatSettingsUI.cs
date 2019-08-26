@@ -15,6 +15,7 @@ namespace IronworksTranslator
         {
             Log.Debug("Applying chat settings");
 
+            LoadChannelState(EmotePanel, ironworksSettings.Chat.Emote);
             LoadChannelState(TellPanel, ironworksSettings.Chat.Tell);
             LoadChannelState(SayPanel, ironworksSettings.Chat.Say);
             LoadChannelState(YellPanel, ironworksSettings.Chat.Yell);
@@ -41,10 +42,12 @@ namespace IronworksTranslator
             LoadChannelState(CWLinkShell7Panel, ironworksSettings.Chat.CWLinkShell7);
             LoadChannelState(CWLinkShell8Panel, ironworksSettings.Chat.CWLinkShell8);
 
+            LoadChannelState(NoticePanel, ironworksSettings.Chat.Notice);
             LoadChannelState(SystemPanel, ironworksSettings.Chat.System);
             LoadChannelState(ErrorPanel, ironworksSettings.Chat.Error);
             LoadChannelState(NPCDialogPanel, ironworksSettings.Chat.NPCDialog);
             LoadChannelState(NPCAnnouncePanel, ironworksSettings.Chat.NPCAnnounce);
+            LoadChannelState(MarketSoldPanel, ironworksSettings.Chat.Recruitment);
             LoadChannelState(RecruitmentPanel, ironworksSettings.Chat.Recruitment);
 
             Log.Debug("Chat settings applied");
@@ -72,6 +75,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 var languageIndex = ((ComboBox)sender).SelectedIndex;
+                ChangeMajorLanguage(ironworksSettings.Chat.Emote, (ClientLanguage)languageIndex);
                 ChangeMajorLanguage(ironworksSettings.Chat.Tell, (ClientLanguage)languageIndex);
                 ChangeMajorLanguage(ironworksSettings.Chat.Say, (ClientLanguage)languageIndex);
                 ChangeMajorLanguage(ironworksSettings.Chat.Yell, (ClientLanguage)languageIndex);
@@ -79,7 +83,7 @@ namespace IronworksTranslator
                 ChangeMajorLanguage(ironworksSettings.Chat.Party, (ClientLanguage)languageIndex);
                 ChangeMajorLanguage(ironworksSettings.Chat.Alliance, (ClientLanguage)languageIndex);
 
-                TellComboBox.SelectedIndex = languageIndex;
+                EmoteComboBox.SelectedIndex = languageIndex;
                 SayComboBox.SelectedIndex = languageIndex;
                 YellComboBox.SelectedIndex = languageIndex;
                 ShoutComboBox.SelectedIndex = languageIndex;
@@ -91,6 +95,7 @@ namespace IronworksTranslator
 
         private void DisplayFieldGroup(bool display, FontAwesomeIcon icon)
         {
+            (EmoteShowButton.Content as ImageAwesome).Icon = icon;
             (TellShowButton.Content as ImageAwesome).Icon = icon;
             (SayShowButton.Content as ImageAwesome).Icon = icon;
             (YellShowButton.Content as ImageAwesome).Icon = icon;
@@ -98,6 +103,7 @@ namespace IronworksTranslator
             (PartyShowButton.Content as ImageAwesome).Icon = icon;
             (AllianceShowButton.Content as ImageAwesome).Icon = icon;
 
+            ironworksSettings.Chat.Emote.Show = display;
             ironworksSettings.Chat.Tell.Show = display;
             ironworksSettings.Chat.Say.Show = display;
             ironworksSettings.Chat.Yell.Show = display;
@@ -264,6 +270,15 @@ namespace IronworksTranslator
             }
         }
 
+
+        private void EmoteComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                ChangeMajorLanguage(ironworksSettings.Chat.Emote, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+            }
+        }
+
         private void TellComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ironworksSettings != null)
@@ -310,6 +325,11 @@ namespace IronworksTranslator
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.Alliance, (ClientLanguage)((ComboBox)sender).SelectedIndex);
             }
+        }
+
+        private void EmoteShowButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Emote);
         }
 
         private void TellShowButton_Click(object sender, RoutedEventArgs e)
@@ -601,16 +621,20 @@ namespace IronworksTranslator
 
         private void DisplaySystemGroup(bool display, FontAwesomeIcon icon)
         {
+            (NoticeShowButton.Content as ImageAwesome).Icon = icon;
             (SystemShowButton.Content as ImageAwesome).Icon = icon;
             (ErrorShowButton.Content as ImageAwesome).Icon = icon;
             (NPCDialogShowButton.Content as ImageAwesome).Icon = icon;
             (NPCAnnounceShowButton.Content as ImageAwesome).Icon = icon;
+            (MarketSoldShowButton.Content as ImageAwesome).Icon = icon;
             (RecruitmentShowButton.Content as ImageAwesome).Icon = icon;
 
+            ironworksSettings.Chat.Notice.Show = display;
             ironworksSettings.Chat.System.Show = display;
             ironworksSettings.Chat.Error.Show = display;
             ironworksSettings.Chat.NPCDialog.Show = display;
             ironworksSettings.Chat.NPCAnnounce.Show = display;
+            ironworksSettings.Chat.MarketSold.Show = display;
             ironworksSettings.Chat.Recruitment.Show = display;
         }
 
@@ -619,18 +643,26 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 var languageIndex = ((ComboBox)sender).SelectedIndex;
+                ChangeMajorLanguage(ironworksSettings.Chat.Notice, (ClientLanguage)languageIndex);
                 ChangeMajorLanguage(ironworksSettings.Chat.System, (ClientLanguage)languageIndex);
                 ChangeMajorLanguage(ironworksSettings.Chat.Error, (ClientLanguage)languageIndex);
                 ChangeMajorLanguage(ironworksSettings.Chat.NPCDialog, (ClientLanguage)languageIndex);
                 ChangeMajorLanguage(ironworksSettings.Chat.NPCAnnounce, (ClientLanguage)languageIndex);
+                ChangeMajorLanguage(ironworksSettings.Chat.MarketSold, (ClientLanguage)languageIndex);
                 ChangeMajorLanguage(ironworksSettings.Chat.Recruitment, (ClientLanguage)languageIndex);
 
+                NoticeComboBox.SelectedIndex = languageIndex;
                 SystemComboBox.SelectedIndex = languageIndex;
                 ErrorComboBox.SelectedIndex = languageIndex;
                 NPCDialogComboBox.SelectedIndex = languageIndex;
                 NPCAnnounceComboBox.SelectedIndex = languageIndex;
+                MarketSoldComboBox.SelectedIndex = languageIndex;
                 RecruitmentComboBox.SelectedIndex = languageIndex;
             }
+        }
+        private void NoticeShowButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Notice);
         }
 
         private void SystemShowButton_Click(object sender, RoutedEventArgs e)
@@ -641,6 +673,11 @@ namespace IronworksTranslator
         private void ErrorShowButton_Click(object sender, RoutedEventArgs e)
         {
             ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Error);
+        }
+
+        private void MarketSoldShowButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.MarketSold);
         }
 
         private void RecruitmentShowButton_Click(object sender, RoutedEventArgs e)
@@ -658,6 +695,14 @@ namespace IronworksTranslator
             ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.NPCAnnounce);
         }
 
+        private void NoticeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                ChangeMajorLanguage(ironworksSettings.Chat.Notice, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+            }
+        }
+
         private void SystemComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ironworksSettings != null)
@@ -672,6 +717,11 @@ namespace IronworksTranslator
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.Error, (ClientLanguage)((ComboBox)sender).SelectedIndex);
             }
+        }
+
+        private void MarketSoldComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ChangeMajorLanguage(ironworksSettings.Chat.MarketSold, (ClientLanguage)((ComboBox)sender).SelectedIndex);
         }
 
         private void RecruitmentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

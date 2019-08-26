@@ -188,6 +188,17 @@
                                     </StackPanel>
                                     </Expander.Header>
                                 <StackPanel Orientation="Vertical">
+                                    <StackPanel Name="EmotePanel" Orientation="Horizontal">
+                                        <Label Content="감정표현"/>
+                                        <Button Name="EmoteShowButton" Width="24" Height="24"
+                                                Click="EmoteShowButton_Click">
+                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                        </Button>
+                                        <Label Content="상대방 언어"/>
+                                        <ComboBox Name="EmoteComboBox" SelectedIndex="0"
+                                        ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
+                                        SelectionChanged="EmoteComboBox_SelectionChanged"/>
+                                    </StackPanel>
                                     <StackPanel Name="TellPanel" Orientation="Horizontal">
                                         <Label Content="귓속말"/>
                                         <Button Name="TellShowButton" Width="24" Height="24"
@@ -544,6 +555,17 @@
                                     </StackPanel>
                                 </Expander.Header>
                                 <StackPanel Orientation="Vertical">
+                                    <StackPanel Name="NoticePanel" Orientation="Horizontal">
+                                        <Label Content="서버 공지"/>
+                                        <Button Name="NoticeShowButton" Width="24" Height="24"
+                                                Click="NoticeShowButton_Click">
+                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                        </Button>
+                                        <Label Content="상대방 언어"/>
+                                        <ComboBox Name="NoticeComboBox" SelectedIndex="0"
+                                        ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
+                                        SelectionChanged="NoticeComboBox_SelectionChanged"/>
+                                    </StackPanel>
                                     <StackPanel Name="SystemPanel" Orientation="Horizontal">
                                         <Label Content="시스템"/>
                                         <Button Name="SystemShowButton" Width="24" Height="24"
@@ -565,6 +587,17 @@
                                         <ComboBox Name="ErrorComboBox" SelectedIndex="0"
                                         ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
                                         SelectionChanged="ErrorComboBox_SelectionChanged"/>
+                                    </StackPanel>
+                                    <StackPanel Name="MarketSoldPanel" Orientation="Horizontal">
+                                        <Label Content="장터물품 판매"/>
+                                        <Button Name="MarketSoldShowButton" Width="24" Height="24"
+                                                Click="MarketSoldShowButton_Click">
+                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                        </Button>
+                                        <Label Content="상대방 언어"/>
+                                        <ComboBox Name="MarketSoldComboBox" SelectedIndex="0"
+                                        ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
+                                        SelectionChanged="MarketSoldComboBox_SelectionChanged"/>
                                     </StackPanel>
                                     <StackPanel Name="RecruitmentPanel" Orientation="Horizontal">
                                         <Label Content="임무 모집"/>

@@ -4,6 +4,7 @@ namespace IronworksTranslator.Core
 {
     public enum ChatCode
     {
+        Notice = 0x3,
         Say = 0xA,
         Shout = 0xB,
         Tell = 0xD,
@@ -19,13 +20,16 @@ namespace IronworksTranslator.Core
         LinkShell8 = 0x17,
         FreeCompany = 0x18,
         Novice = 0x1B,
+        Emote = 0x1D,
         Yell = 0x1E,
         CWLinkShell1 = 0x25,
         System = 0x39,
         Echo = 0x38,
         Error = 0x3C,
         NPCDialog = 0x3D,
+        GilReceive = 0x3E,
         NPCAnnounce = 0x44,
+        MarketSold = 0x47,
         Recruitment = 0x48,
         CWLinkShell2 = 0x65,
         CWLinkShell3 = 0x66,
