@@ -18,6 +18,7 @@ namespace IronworksTranslator.Core
             Translator.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("Translator", sender, name, value); };
 
             Chat = new ChatSettings();
+            Chat.Emote.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("Emote@Chat", sender, name, value); };
             Chat.Tell.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("Tell@Chat", sender, name, value); };
             Chat.Say.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("Say@Chat", sender, name, value); };
             Chat.Yell.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("Yell@Chat", sender, name, value); };
@@ -43,10 +44,12 @@ namespace IronworksTranslator.Core
             Chat.FreeCompany.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("FreeCompany@Chat", sender, name, value); };
             Chat.Novice.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("Novice@Chat", sender, name, value); };
             Chat.Echo.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("Echo@Chat", sender, name, value); };
+            Chat.Notice.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("Notice@Chat", sender, name, value); };
             Chat.System.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("System@Chat", sender, name, value); };
             Chat.Error.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("Error@Chat", sender, name, value); };
             Chat.NPCDialog.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("NPCDialog@Chat", sender, name, value); };
             Chat.NPCAnnounce.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("NPCAnnounce@Chat", sender, name, value); };
+            Chat.MarketSold.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("MarketSold@Chat", sender, name, value); };
             Chat.Recruitment.OnSettingsChanged += (sender, name, value) => { onSettingsChanged("Recruitment@Chat", sender, name, value); };
         }
 
