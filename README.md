@@ -3,9 +3,15 @@
 파이널판타지 14 게임 내의 채팅을 한국어로 실시간 번역해줍니다.  
 Translates chat log in FFXIV into Korean in realtime.  
 
+## 동작 화면
 ![Image01](https://github.com/sappho192/IronworksTranslator/blob/master/IronworksTranslator/github/ImageDemo01.gif)  
+번역 과정
+
 ![Image02](https://github.com/sappho192/IronworksTranslator/blob/master/IronworksTranslator/github/ImageDemo02.gif)  
+외관 설정
+
 ![Image03](https://github.com/sappho192/IronworksTranslator/blob/master/IronworksTranslator/github/ImageDemo03.gif)  
+채널별 세부 설정
 
 ## 권장 실행환경  
 Windows 10 64bit
