@@ -105,7 +105,7 @@ namespace IronworksTranslator.Core
                 foreach (var item in readResult.ChatLogItems)
                 {
                     //ProcessChatMsg(readResult.ChatLogItems[i]);
-                    if (int.Parse(item.Code, System.Globalization.NumberStyles.HexNumber) < 2000) // Skips battle log
+                    if (int.Parse(item.Code, System.Globalization.NumberStyles.HexNumber) < 0x9F) // Skips battle log
                     {
                         ChatQueue.q.Add(item);
                     }
