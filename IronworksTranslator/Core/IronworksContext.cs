@@ -104,9 +104,11 @@ namespace IronworksTranslator.Core
             {
                 foreach (var item in readResult.ChatLogItems)
                 {
+                    ChatCode code = (ChatCode)int.Parse(item.Code, System.Globalization.NumberStyles.HexNumber);
                     //ProcessChatMsg(readResult.ChatLogItems[i]);
-                    if (int.Parse(item.Code, System.Globalization.NumberStyles.HexNumber) < 0x9F) // Skips battle log
+                    if ((int)code < 0x9F) // Skips battle log
                     {
+                        if (code == ChatCode.GilReceive || code == ChatCode.Gather || code == ChatCode.FieldAttack) continue;
                         ChatQueue.q.Add(item);
                     }
                 }
