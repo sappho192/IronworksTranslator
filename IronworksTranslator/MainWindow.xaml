@@ -13,7 +13,7 @@
         mc:Ignorable="d"
         Name="mainWindow"
         Title="IronworksTranslator" Height="200" Width="420"
-        MinHeight="200" MinWidth="420"
+        MinHeight="150" MinWidth="300"
         AllowsTransparency="True" WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
         PreviewLostKeyboardFocus="Window_PreviewLostKeyboardFocus">
