@@ -108,7 +108,7 @@ namespace IronworksTranslator.Core
                     //ProcessChatMsg(readResult.ChatLogItems[i]);
                     if ((int)code < 0x9F) // Skips battle log
                     {
-                        if (code == ChatCode.GilReceive || code == ChatCode.Gather || code == ChatCode.FieldAttack) continue;
+                        if (code == ChatCode.GilReceive || code == ChatCode.Gather || code == ChatCode.FieldAttack || code == ChatCode.EmoteCustom) continue;
                         ChatQueue.q.Add(item);
                     }
                 }
