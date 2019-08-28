@@ -20,6 +20,7 @@ namespace IronworksTranslator.Core
         LinkShell8 = 0x17,
         FreeCompany = 0x18,
         Novice = 0x1B,
+        EmoteCustom = 0x1C,
         Emote = 0x1D,
         Yell = 0x1E,
         CWLinkShell1 = 0x25,
