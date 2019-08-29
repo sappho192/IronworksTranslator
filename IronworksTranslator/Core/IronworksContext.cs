@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows;
 using Serilog;
+using System.Linq;
 
 namespace IronworksTranslator.Core
 {
@@ -65,7 +66,10 @@ namespace IronworksTranslator.Core
         {
             string processName = "ffxiv_dx11";
             Log.Debug($"Finding process {processName}");
-            processes = Process.GetProcessesByName(processName);
+
+            // ko client filtering
+            processes = Process.GetProcessesByName(processName).Where( x => { try { return System.IO.File.Exists(x.MainModule.FileName.Replace("game\\ffxiv_dx11.exe", "boot\\ffxivboot.exe")); } catch { return false; } }).ToArray();
+
             if (processes.Length > 0)
             {
                 // supported: English, Chinese, Japanese, French, German, Korean
