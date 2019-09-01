@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows;
 using Serilog;
+using System.Collections.Generic;
 
 namespace IronworksTranslator.Core
 {
@@ -19,6 +20,7 @@ namespace IronworksTranslator.Core
         public bool Attached { get; }
         private static Process[] processes;
         private readonly Timer chatTimer;
+        private readonly Timer rawChatTimer;
 
         // For chatlog you must locally store previous array offsets and indexes in order to pull the correct log from the last time you read it.
         private static int _previousArrayIndex = 0;
@@ -48,12 +50,44 @@ namespace IronworksTranslator.Core
                 Log.Debug($"PhantomJS created, page load wait time: {waitFor}s");
 
                 const int period = 500;
-                chatTimer = new Timer(RefreshChat, null, 0, 500);
+                chatTimer = new Timer(RefreshChat, null, 0, period);
                 Log.Debug($"New RefreshChat timer with period {period}ms");
+                const int rawPeriod = 100;
+                rawChatTimer = new Timer(RefreshMessages, null, 0, rawPeriod);
+                Log.Debug($"New RefreshMessages timer with period {rawPeriod}ms");
             }
             else
             {
                 Application.Current.Shutdown();
+            }
+        }
+
+        private void RefreshMessages(object state)
+        {
+            var raw = AdvancedReader.getMessage();
+            lock (ChatQueue.rq)
+            {
+                if (ChatQueue.rq.TryPeek(out string lastMsg))
+                {
+                    if (!lastMsg.Equals(raw))
+                    {
+                        ChatQueue.rq.Enqueue(raw);
+                        lock (ChatQueue.lastMsg)
+                        {
+                            ChatQueue.lastMsg = raw;
+                        }
+                    }
+                } else
+                {
+                    if(!ChatQueue.lastMsg.Equals(raw))
+                    {
+                        ChatQueue.rq.Enqueue(raw);
+                        lock (ChatQueue.lastMsg)
+                        {
+                            ChatQueue.lastMsg = raw;
+                        }
+                    }
+                }
             }
         }
 
@@ -82,6 +116,43 @@ namespace IronworksTranslator.Core
                 };
 
                 MemoryHandler.Instance.SetProcess(processModel, gameLanguage, patchVersion, useLocalCache);
+                var signatures = new List<Signature>();
+                // typical signature
+                signatures.Add(new Signature
+                {
+                    Key = "ALLMESSAGES",
+
+                    PointerPath = new List<long>
+                {
+                    0x01B28298,
+                    0L, // ASM assumes first pointer is always 0
+		            0x360L,
+                    0x8L,
+                    0x18L,
+                    0x20L,
+                    0xF8L,
+                    0L
+                }
+                });
+                signatures.Add(new Signature
+                {
+                    Key = "ALLMESSAGES2",
+
+                    PointerPath = new List<long>
+                {
+                    0x01B0A350,
+                    0x108L, // ASM assumes first pointer is always 0
+		            0x30L,
+                    0x8L,
+                    0x8L,
+                    0x20L,
+                    0xF8L,
+                    0L
+                }
+                });
+                Scanner.Instance.LoadOffsets(signatures, true);
+                ChatQueue.rq.Enqueue("test");
+                ChatQueue.lastMsg = "test";
                 Log.Debug($"Attached {processName}.exe ({gameLanguage})");
                 MessageBox.Show($"Attached {processName}.exe");
 
