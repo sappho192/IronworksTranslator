@@ -179,12 +179,12 @@ namespace IronworksTranslator
                     }
                     else
                     {
-                        Log.Warning("UNEXPECTED CHATCODE {@Code} when translating {@Message}", intCode, chat.Line);
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            TranslatedChatBox.Text +=
-                        $"[모르는 채널-제보요망][{chat.Code}]{chat.Line}{Environment.NewLine}";
-                        });
+                        Log.Information("Unexpected {@Code} when translating {@Message}", intCode, chat.Line);
+                        //Application.Current.Dispatcher.Invoke(() =>
+                        //{
+                        //    TranslatedChatBox.Text +=
+                        //$"[모르는 채널-제보요망][{chat.Code}]{chat.Line}{Environment.NewLine}";
+                        //});
                     }
                 }
                 else
