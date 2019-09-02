@@ -98,6 +98,8 @@ namespace IronworksTranslator
         {
             chatFontSizeSpinner.Value = ironworksSettings.UI.ChatTextboxFontSize;
             TranslatedChatBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
+            mainWindow.Width = ironworksSettings.UI.MainWindowWidth;
+            mainWindow.Height = ironworksSettings.UI.MainWindowHeight;
 
             ClientLanguageComboBox.SelectedIndex = (int)ironworksSettings.Translator.NativeLanguage;
 
@@ -360,10 +362,23 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 var box = sender as ComboBox;
-                ironworksSettings.UI.ChatTextboxFontFamily = box.SelectedItem as string;
-                var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
-                exampleChatBox.FontFamily = font;
-                TranslatedChatBox.FontFamily = font;
+                if(box.SelectedItem != null)
+                {
+                    ironworksSettings.UI.ChatTextboxFontFamily = box.SelectedItem as string;
+                    var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
+                    exampleChatBox.FontFamily = font;
+                    TranslatedChatBox.FontFamily = font;
+                }
+            }
+        }
+
+        private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                var window = sender as Window;
+                ironworksSettings.UI.MainWindowWidth = window.Width;
+                ironworksSettings.UI.MainWindowHeight = window.Height;
             }
         }
     }

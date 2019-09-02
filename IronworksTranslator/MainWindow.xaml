@@ -16,7 +16,8 @@
         MinHeight="150" MinWidth="300"
         AllowsTransparency="True" WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
-        PreviewLostKeyboardFocus="Window_PreviewLostKeyboardFocus">
+        PreviewLostKeyboardFocus="Window_PreviewLostKeyboardFocus"
+        SizeChanged="MainWindow_SizeChanged">
     <Window.Background>
         <SolidColorBrush Opacity="0" Color="White"></SolidColorBrush>
     </Window.Background>
