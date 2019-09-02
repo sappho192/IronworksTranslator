@@ -126,6 +126,7 @@ namespace IronworksTranslator
 
         private void UpdateChatbox(object state)
         {
+            /*
             if (ChatQueue.rq.Any())
             {
                 var result = ChatQueue.rq.TryDequeue(out string msg);
@@ -138,7 +139,7 @@ namespace IronworksTranslator
                     });
                 }
             }
-            /*
+            */
             if (ChatQueue.q.Any())
             {// Should q be locked?
                 var chat = ChatQueue.q.Take();
@@ -222,7 +223,6 @@ namespace IronworksTranslator
                     //TranslatedChatBox.ScrollToVerticalOffset(double.MaxValue);
                 });
             }
-            */
         }
 
         private bool ContainsNativeLanguage(string sentence)
