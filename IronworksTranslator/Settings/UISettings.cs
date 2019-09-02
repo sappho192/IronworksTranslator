@@ -8,12 +8,58 @@ namespace IronworksTranslator.Settings
         public UISettings()
         {
             ChatTextboxFontSize = 12;
+            MainWindowWidth = 420;
+            MainWindowHeight = 200;
+            ContentBackgroundOpacity = 0.75;
         }
 
         /* General UI settings */
+        [JsonProperty]
+        public double MainWindowWidth
+        {
+            get => mainWindowWidth;
+            set
+            {
+                if (value != mainWindowWidth)
+                {
+                    mainWindowWidth = value;
+                    OnSettingsChanged?.Invoke(this, nameof(mainWindowWidth), mainWindowWidth);
+                }
+            }
+        }
+        private double mainWindowWidth;
 
+        [JsonProperty]
+        public double MainWindowHeight
+        {
+            get => mainWindowHeight;
+            set
+            {
+                if (value != mainWindowHeight)
+                {
+                    mainWindowHeight = value;
+                    OnSettingsChanged?.Invoke(this, nameof(mainWindowHeight), mainWindowHeight);
+                }
+            }
+        }
+        private double mainWindowHeight;
 
         /* Chat UI settings  */
+        [JsonProperty]
+        public double ContentBackgroundOpacity
+        {
+            get => contentBackgroundOpacity;
+            set
+            {
+                if (value != contentBackgroundOpacity)
+                {
+                    contentBackgroundOpacity = value;
+                    OnSettingsChanged?.Invoke(this, nameof(contentBackgroundOpacity), contentBackgroundOpacity);
+                }
+            }
+        }
+        private double contentBackgroundOpacity;
+
         [JsonProperty]
         public int ChatTextboxFontSize
         {

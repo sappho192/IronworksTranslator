@@ -16,7 +16,8 @@
         MinHeight="150" MinWidth="300"
         AllowsTransparency="True" WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
-        PreviewLostKeyboardFocus="Window_PreviewLostKeyboardFocus">
+        PreviewLostKeyboardFocus="Window_PreviewLostKeyboardFocus"
+        SizeChanged="MainWindow_SizeChanged">
     <Window.Background>
         <SolidColorBrush Opacity="0" Color="White"></SolidColorBrush>
     </Window.Background>
@@ -58,8 +59,8 @@
             </Grid>
 
             <!-- General toolbar -->
-            <Grid Name="ToolbarGrid" Visibility="Collapsed" DockPanel.Dock="Top">
-            <!--<Grid Name="ToolbarGrid" Visibility="Visible" DockPanel.Dock="Top">-->
+            <!--<Grid Name="ToolbarGrid" Visibility="Collapsed" DockPanel.Dock="Top">-->
+            <Grid Name="ToolbarGrid" Visibility="Visible" DockPanel.Dock="Top">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
@@ -87,6 +88,36 @@
                         </Button>
                     </StackPanel>
                 </DockPanel>
+                <DockPanel Grid.Column="0" HorizontalAlignment="Right">
+                    <StackPanel Orientation="Horizontal" Margin="0">
+                        <Button Width="24" Height="24"
+                                Margin="0,0,4,0" VerticalAlignment="Center"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                Name="HideContentBackground"
+                                Click="HideContentBackground_Click">
+                            <fa:ImageAwesome Icon="EyeSlash"/>
+                        </Button>
+                        <Slider Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Name="ContentOpacitySlider"
+                                Width="50"
+                                Margin="0,0,4,0"
+                                Minimum="0"
+                                Maximum="1.0"
+                                PreviewMouseDoubleClick="ContentOpacitySlider_PreviewMouseDoubleClick"
+                                ValueChanged="ContentOpacitySlider_ValueChanged"/>
+
+                        <Button Width="24" Height="24"
+                                Margin="0,0,4,0" VerticalAlignment="Center"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                Name="ShowContentBackground"
+                                Click="ShowContentBackground_Click">
+                            <fa:ImageAwesome Icon="Eye" />
+                        </Button>
+                    </StackPanel>
+                </DockPanel>
             </Grid>
 
             <!-- Content area-->
@@ -95,6 +126,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0" Panel.ZIndex="0"
+                      Name="ContentBackgroundGrid"
                       Margin="0"
                       Opacity="0.75"
                       Background="Black">
