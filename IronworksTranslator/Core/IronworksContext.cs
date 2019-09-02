@@ -71,6 +71,7 @@ namespace IronworksTranslator.Core
                 {
                     if (!lastMsg.Equals(raw))
                     {
+                        Log.Debug("Enqueue new message: {@message}", raw);
                         ChatQueue.rq.Enqueue(raw);
                         lock (ChatQueue.lastMsg)
                         {
@@ -81,6 +82,7 @@ namespace IronworksTranslator.Core
                 {
                     if(!ChatQueue.lastMsg.Equals(raw))
                     {
+                        Log.Debug("Enqueue new message: {@message}", raw);
                         ChatQueue.rq.Enqueue(raw);
                         lock (ChatQueue.lastMsg)
                         {
@@ -150,9 +152,12 @@ namespace IronworksTranslator.Core
                     0L
                 }
                 });
-                Scanner.Instance.LoadOffsets(signatures, true);
-                ChatQueue.rq.Enqueue("test");
-                ChatQueue.lastMsg = "test";
+
+                // adding parameter scanAllMemoryRegions as true makes huge memory leak and CPU usage. Why?
+                Scanner.Instance.LoadOffsets(signatures);
+
+                ChatQueue.rq.Enqueue(" ");
+                ChatQueue.lastMsg = " ";
                 Log.Debug($"Attached {processName}.exe ({gameLanguage})");
                 MessageBox.Show($"Attached {processName}.exe");
 
