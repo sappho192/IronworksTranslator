@@ -105,6 +105,8 @@ namespace IronworksTranslator
 
             TranslatorEngineComboBox.SelectedIndex = (int)ironworksSettings.Translator.DefaultTranslatorEngine;
 
+            ContentBackgroundGrid.Opacity = ironworksSettings.UI.ContentBackgroundOpacity;
+            ContentOpacitySlider.Value = ironworksSettings.UI.ContentBackgroundOpacity;
             ChatFontFamilyComboBox.SelectedValue = ironworksSettings.UI.ChatTextboxFontFamily;
             var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
             exampleChatBox.FontFamily = font;
@@ -362,7 +364,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 var box = sender as ComboBox;
-                if(box.SelectedItem != null)
+                if (box.SelectedItem != null)
                 {
                     ironworksSettings.UI.ChatTextboxFontFamily = box.SelectedItem as string;
                     var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
@@ -380,6 +382,44 @@ namespace IronworksTranslator
                 ironworksSettings.UI.MainWindowWidth = window.Width;
                 ironworksSettings.UI.MainWindowHeight = window.Height;
             }
+        }
+
+        private void ContentOpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (ironworksSettings != null)
+            {
+                var slider = sender as Slider;
+                ChangeBackgroundOpacity(slider.Value);
+            }
+        }
+
+        private void ChangeBackgroundOpacity(double opacity)
+        {
+            ContentBackgroundGrid.Opacity = opacity;
+            ironworksSettings.UI.ContentBackgroundOpacity = opacity;
+        }
+
+        private void ContentOpacitySlider_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                var slider = sender as Slider;
+                const double ORIGINAL = 0.75;
+                slider.Value = ORIGINAL;
+                ChangeBackgroundOpacity(ORIGINAL);
+            }
+        }
+
+        private void ShowContentBackground_Click(object sender, RoutedEventArgs e)
+        {
+            ContentOpacitySlider.Value = 1;
+            ChangeBackgroundOpacity(1);
+        }
+
+        private void HideContentBackground_Click(object sender, RoutedEventArgs e)
+        {
+            ContentOpacitySlider.Value = 0;
+            ChangeBackgroundOpacity(0);
         }
     }
 }

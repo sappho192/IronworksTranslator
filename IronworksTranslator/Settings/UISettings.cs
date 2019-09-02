@@ -10,6 +10,7 @@ namespace IronworksTranslator.Settings
             ChatTextboxFontSize = 12;
             MainWindowWidth = 420;
             MainWindowHeight = 200;
+            ContentBackgroundOpacity = 0.75;
         }
 
         /* General UI settings */
@@ -27,6 +28,7 @@ namespace IronworksTranslator.Settings
             }
         }
         private double mainWindowWidth;
+
         [JsonProperty]
         public double MainWindowHeight
         {
@@ -43,6 +45,21 @@ namespace IronworksTranslator.Settings
         private double mainWindowHeight;
 
         /* Chat UI settings  */
+        [JsonProperty]
+        public double ContentBackgroundOpacity
+        {
+            get => contentBackgroundOpacity;
+            set
+            {
+                if (value != contentBackgroundOpacity)
+                {
+                    contentBackgroundOpacity = value;
+                    OnSettingsChanged?.Invoke(this, nameof(contentBackgroundOpacity), contentBackgroundOpacity);
+                }
+            }
+        }
+        private double contentBackgroundOpacity;
+
         [JsonProperty]
         public int ChatTextboxFontSize
         {
