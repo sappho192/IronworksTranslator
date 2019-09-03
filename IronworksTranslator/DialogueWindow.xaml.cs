@@ -61,12 +61,16 @@ namespace IronworksTranslator
                             msg = filter.Groups[1].Value;
                         }
                     }
-
-                    Application.Current.Dispatcher.Invoke(() =>
+                    if(!msg.Equals(string.Empty))
                     {
-                        DialogueTextBox.Text += $"{Environment.NewLine}{msg}";
-                        DialogueTextBox.ScrollToEnd();
-                    });
+                        var translated = ironworksContext.TranslateChat(msg, ironworksSettings.Translator.DialogueLanguage);
+
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            DialogueTextBox.Text += $"{Environment.NewLine}{translated}";
+                            DialogueTextBox.ScrollToEnd();
+                        });
+                    }
                 }
             }
         }
