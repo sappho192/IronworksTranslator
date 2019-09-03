@@ -21,10 +21,11 @@ namespace IronworksTranslator
     /// </summary>
     public partial class MainWindow : Window
     {
-        private IronworksContext ironworksContext;
-        private IronworksSettings ironworksSettings;
+        public IronworksContext ironworksContext;
+        public IronworksSettings ironworksSettings;
         //private 
         private readonly Timer chatboxTimer;
+        private DialogueWindow dialogueWindow;
 
         public MainWindow()
         {
@@ -43,9 +44,17 @@ namespace IronworksTranslator
             Welcome();
             LoadSettings();
 
+            ShowDialogueWindow();
+
             const int period = 500;
             chatboxTimer = new Timer(UpdateChatbox, null, 0, period);
             Log.Debug($"New RefreshChatbox timer with period {period}ms");
+        }
+
+        private void ShowDialogueWindow()
+        {
+            dialogueWindow = new DialogueWindow(GetWindow(this) as MainWindow);
+            dialogueWindow.Show();
         }
 
         private void InitializeGeneralSettingsUI()
@@ -105,8 +114,8 @@ namespace IronworksTranslator
 
             TranslatorEngineComboBox.SelectedIndex = (int)ironworksSettings.Translator.DefaultTranslatorEngine;
 
-            ContentBackgroundGrid.Opacity = ironworksSettings.UI.ContentBackgroundOpacity;
-            ContentOpacitySlider.Value = ironworksSettings.UI.ContentBackgroundOpacity;
+            ContentBackgroundGrid.Opacity = ironworksSettings.UI.ChatBackgroundOpacity;
+            ContentOpacitySlider.Value = ironworksSettings.UI.ChatBackgroundOpacity;
             ChatFontFamilyComboBox.SelectedValue = ironworksSettings.UI.ChatTextboxFontFamily;
             var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
             exampleChatBox.FontFamily = font;
@@ -126,20 +135,6 @@ namespace IronworksTranslator
 
         private void UpdateChatbox(object state)
         {
-            /*
-            if (ChatQueue.rq.Any())
-            {
-                var result = ChatQueue.rq.TryDequeue(out string msg);
-                if (result)
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        TranslatedChatBox.Text += $"{msg}{Environment.NewLine}";
-                        TranslatedChatBox.ScrollToEnd();
-                    });
-                }
-            }
-            */
             if (ChatQueue.q.Any())
             {// Should q be locked?
                 var chat = ChatQueue.q.Take();
@@ -382,6 +377,7 @@ namespace IronworksTranslator
                 ironworksSettings.UI.MainWindowWidth = window.Width;
                 ironworksSettings.UI.MainWindowHeight = window.Height;
             }
+            TranslatedChatBox.ScrollToEnd();
         }
 
         private void ContentOpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -396,7 +392,7 @@ namespace IronworksTranslator
         private void ChangeBackgroundOpacity(double opacity)
         {
             ContentBackgroundGrid.Opacity = opacity;
-            ironworksSettings.UI.ContentBackgroundOpacity = opacity;
+            ironworksSettings.UI.ChatBackgroundOpacity = opacity;
         }
 
         private void ContentOpacitySlider_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -420,6 +416,18 @@ namespace IronworksTranslator
         {
             ContentOpacitySlider.Value = 0;
             ChangeBackgroundOpacity(0);
+        }
+
+        private void ToggleDialogueWindowButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (dialogueWindow.Visibility.Equals(Visibility.Visible))
+            {
+                dialogueWindow.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                dialogueWindow.Visibility = Visibility.Visible;
+            }
         }
     }
 }

@@ -71,6 +71,7 @@ namespace IronworksTranslator.Core
                 {
                     if (!lastMsg.Equals(raw))
                     {
+                        Log.Debug("Enqueue new message: {@message}", raw);
                         ChatQueue.rq.Enqueue(raw);
                         lock (ChatQueue.lastMsg)
                         {
@@ -81,6 +82,7 @@ namespace IronworksTranslator.Core
                 {
                     if(!ChatQueue.lastMsg.Equals(raw))
                     {
+                        Log.Debug("Enqueue new message: {@message}", raw);
                         ChatQueue.rq.Enqueue(raw);
                         lock (ChatQueue.lastMsg)
                         {
@@ -150,9 +152,12 @@ namespace IronworksTranslator.Core
                     0L
                 }
                 });
-                Scanner.Instance.LoadOffsets(signatures, true);
-                ChatQueue.rq.Enqueue("test");
-                ChatQueue.lastMsg = "test";
+
+                // adding parameter scanAllMemoryRegions as true makes huge memory leak and CPU usage. Why?
+                Scanner.Instance.LoadOffsets(signatures);
+
+                ChatQueue.rq.Enqueue("Dialogue window");
+                ChatQueue.lastMsg = "Dialogue window";
                 Log.Debug($"Attached {processName}.exe ({gameLanguage})");
                 MessageBox.Show($"Attached {processName}.exe");
 
@@ -215,8 +220,17 @@ namespace IronworksTranslator.Core
             {
                 //Log.Debug($"Translate URL: {testUrl}");
                 Log.Debug($"Locked web browser for {sentence}");
-                driver.Url = testUrl;
-                driver.Navigate();
+                try
+                {
+                    driver.Url = testUrl;
+                    driver.Navigate();
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Exception {e.Message} when translating {sentence}");
+                    MessageBox.Show($"번역엔진이 예기치 않게 종료되었습니다.");
+                    Application.Current.Shutdown();
+                }
                 //the driver can now provide you with what you need (it will execute the script)
                 //get the source of the page
                 //var source = driver.PageSource;

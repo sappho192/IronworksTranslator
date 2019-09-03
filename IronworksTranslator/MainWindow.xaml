@@ -35,12 +35,19 @@
                       Margin="0"
                       Background="White">
                 </Grid>
-                <StackPanel Grid.Row="0" HorizontalAlignment="Left">
-                    <Button Grid.Row="0"
+                <StackPanel Grid.Row="0" HorizontalAlignment="Left"
+                            Orientation="Horizontal">
+                    <Button
                         Name="ToggleToolboxButton"
                         Width="24" Height="24" 
                         Click="CollapseButton_Click">
                         <fa:ImageAwesome Icon="Bars" Margin="2"/>
+                    </Button>
+                    <Button
+                        Name="ToggleDialogueWindowButton"
+                        Width="24" Height="24"
+                        Click="ToggleDialogueWindowButton_Click">
+                        <fa:ImageAwesome Icon="VideoCamera" Margin="2"/>
                     </Button>
                 </StackPanel>
                 <StackPanel Grid.Row="0" HorizontalAlignment="Center">
@@ -59,8 +66,8 @@
             </Grid>
 
             <!-- General toolbar -->
-            <!--<Grid Name="ToolbarGrid" Visibility="Collapsed" DockPanel.Dock="Top">-->
-            <Grid Name="ToolbarGrid" Visibility="Visible" DockPanel.Dock="Top">
+            <Grid Name="ToolbarGrid" Visibility="Collapsed" DockPanel.Dock="Top">
+            <!--<Grid Name="ToolbarGrid" Visibility="Visible" DockPanel.Dock="Top">-->
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
@@ -139,6 +146,7 @@
                          x:Name="TranslatedChatBox" x:FieldModifier="public"
                          IsReadOnly="True"
                          Foreground="White"
+                         BorderBrush="Transparent"
                          Background="Transparent"
                 />
 

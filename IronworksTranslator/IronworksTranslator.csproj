@@ -143,6 +143,9 @@
     <Compile Include="Core\LanguageCodeList.cs" />
     <Compile Include="Core\LanguageCodeModel.cs" />
     <Compile Include="Core\TranslatorEngineEnumeration.cs" />
+    <Compile Include="DialogueWindow.xaml.cs">
+      <DependentUpon>DialogueWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MainWindow.ChatSettingsUI.cs" />
     <Compile Include="Settings\Channel.cs" />
     <Compile Include="Settings\ChatSettings.cs" />
@@ -157,6 +160,10 @@
     <Compile Include="Util\EnumToCollectionExtension.cs" />
     <Compile Include="Util\StringExtension.cs" />
     <Compile Include="Util\MiniDump.cs" />
+    <Page Include="DialogueWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
