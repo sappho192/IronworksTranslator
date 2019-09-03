@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -26,6 +27,7 @@ namespace IronworksTranslator
         private IronworksContext ironworksContext;
         private IronworksSettings ironworksSettings;
         private readonly Timer chatboxTimer;
+        private static Regex regexItem = new Regex(@"&\u0003(.*)\u0002I\u0002");
 
         public DialogueWindow(MainWindow mainWindow)
         {
@@ -47,9 +49,22 @@ namespace IronworksTranslator
                 var result = ChatQueue.rq.TryDequeue(out string msg);
                 if (result)
                 {
+                    msg = Regex.Replace(msg, @"\uE03C", "[HQ]");
+                    msg = Regex.Replace(msg, @"\uE06F", "⇒");
+                    msg = Regex.Replace(msg, @"\uE0BB", string.Empty);
+                    msg = Regex.Replace(msg, @"\uFFFD", string.Empty);
+                    if(msg.IndexOf('\u0002') == 0)
+                    {
+                        var filter = regexItem.Match(msg);
+                        if(filter.Success)
+                        {
+                            msg = filter.Groups[1].Value;
+                        }
+                    }
+
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        DialogueTextBox.Text += $"{msg}{Environment.NewLine}";
+                        DialogueTextBox.Text += $"{Environment.NewLine}{msg}";
                         DialogueTextBox.ScrollToEnd();
                     });
                 }
