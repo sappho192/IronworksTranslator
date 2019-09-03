@@ -15,6 +15,7 @@ namespace IronworksTranslator.Settings
                 TranslatorEngine.Papago
             };
             NativeLanguage = ClientLanguage.Korean;
+            DialogueLanguage = ClientLanguage.English;
         }
 
 
@@ -46,6 +47,20 @@ namespace IronworksTranslator.Settings
                 }
             }
         }
+        [JsonProperty]
+        public ClientLanguage DialogueLanguage
+        {
+            get => dialogueLanguage;
+            set
+            {
+                if (value != dialogueLanguage)
+                {
+                    dialogueLanguage = value;
+                    OnSettingsChanged?.Invoke(this, nameof(DialogueLanguage), DialogueLanguage);
+                }
+            }
+        }
+        private ClientLanguage dialogueLanguage;
 
         private TranslatorEngine defaultTranslatorEngine;
         private ClientLanguage nativeLanguage;

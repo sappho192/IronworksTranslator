@@ -75,6 +75,6 @@ namespace IronworksTranslator.Core
         public readonly TranslatorSettings Translator;
         public readonly ChatSettings Chat;
         [JsonProperty]
-        public const string SettingsVersion = "0.0.3";
+        public const string SettingsVersion = "0.0.5";
     }
 }

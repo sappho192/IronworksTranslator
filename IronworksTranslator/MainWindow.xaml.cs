@@ -21,10 +21,11 @@ namespace IronworksTranslator
     /// </summary>
     public partial class MainWindow : Window
     {
-        private IronworksContext ironworksContext;
-        private IronworksSettings ironworksSettings;
+        public IronworksContext ironworksContext;
+        public IronworksSettings ironworksSettings;
         //private 
         private readonly Timer chatboxTimer;
+        private DialogueWindow dialogueWindow;
 
         public MainWindow()
         {
@@ -43,9 +44,17 @@ namespace IronworksTranslator
             Welcome();
             LoadSettings();
 
+            ShowDialogueWindow();
+
             const int period = 500;
             chatboxTimer = new Timer(UpdateChatbox, null, 0, period);
             Log.Debug($"New RefreshChatbox timer with period {period}ms");
+        }
+
+        private void ShowDialogueWindow()
+        {
+            dialogueWindow = new DialogueWindow(GetWindow(this) as MainWindow);
+            dialogueWindow.Show();
         }
 
         private void InitializeGeneralSettingsUI()
@@ -98,11 +107,15 @@ namespace IronworksTranslator
         {
             chatFontSizeSpinner.Value = ironworksSettings.UI.ChatTextboxFontSize;
             TranslatedChatBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
+            mainWindow.Width = ironworksSettings.UI.MainWindowWidth;
+            mainWindow.Height = ironworksSettings.UI.MainWindowHeight;
 
             ClientLanguageComboBox.SelectedIndex = (int)ironworksSettings.Translator.NativeLanguage;
 
             TranslatorEngineComboBox.SelectedIndex = (int)ironworksSettings.Translator.DefaultTranslatorEngine;
 
+            ContentBackgroundGrid.Opacity = ironworksSettings.UI.ChatBackgroundOpacity;
+            ContentOpacitySlider.Value = ironworksSettings.UI.ChatBackgroundOpacity;
             ChatFontFamilyComboBox.SelectedValue = ironworksSettings.UI.ChatTextboxFontFamily;
             var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
             exampleChatBox.FontFamily = font;
@@ -179,12 +192,12 @@ namespace IronworksTranslator
                     }
                     else
                     {
-                        Log.Warning("UNEXPECTED CHATCODE {@Code} when translating {@Message}", intCode, chat.Line);
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            TranslatedChatBox.Text +=
-                        $"[모르는 채널-제보요망][{chat.Code}]{chat.Line}{Environment.NewLine}";
-                        });
+                        Log.Information("Unexpected {@Code} when translating {@Message}", intCode, chat.Line);
+                        //Application.Current.Dispatcher.Invoke(() =>
+                        //{
+                        //    TranslatedChatBox.Text +=
+                        //$"[모르는 채널-제보요망][{chat.Code}]{chat.Line}{Environment.NewLine}";
+                        //});
                     }
                 }
                 else
@@ -346,10 +359,74 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 var box = sender as ComboBox;
-                ironworksSettings.UI.ChatTextboxFontFamily = box.SelectedItem as string;
-                var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
-                exampleChatBox.FontFamily = font;
-                TranslatedChatBox.FontFamily = font;
+                if (box.SelectedItem != null)
+                {
+                    ironworksSettings.UI.ChatTextboxFontFamily = box.SelectedItem as string;
+                    var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
+                    exampleChatBox.FontFamily = font;
+                    TranslatedChatBox.FontFamily = font;
+                }
+            }
+        }
+
+        private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                var window = sender as Window;
+                ironworksSettings.UI.MainWindowWidth = window.Width;
+                ironworksSettings.UI.MainWindowHeight = window.Height;
+            }
+            TranslatedChatBox.ScrollToEnd();
+        }
+
+        private void ContentOpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (ironworksSettings != null)
+            {
+                var slider = sender as Slider;
+                ChangeBackgroundOpacity(slider.Value);
+            }
+        }
+
+        private void ChangeBackgroundOpacity(double opacity)
+        {
+            ContentBackgroundGrid.Opacity = opacity;
+            ironworksSettings.UI.ChatBackgroundOpacity = opacity;
+        }
+
+        private void ContentOpacitySlider_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                var slider = sender as Slider;
+                const double ORIGINAL = 0.75;
+                slider.Value = ORIGINAL;
+                ChangeBackgroundOpacity(ORIGINAL);
+            }
+        }
+
+        private void ShowContentBackground_Click(object sender, RoutedEventArgs e)
+        {
+            ContentOpacitySlider.Value = 1;
+            ChangeBackgroundOpacity(1);
+        }
+
+        private void HideContentBackground_Click(object sender, RoutedEventArgs e)
+        {
+            ContentOpacitySlider.Value = 0;
+            ChangeBackgroundOpacity(0);
+        }
+
+        private void ToggleDialogueWindowButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (dialogueWindow.Visibility.Equals(Visibility.Visible))
+            {
+                dialogueWindow.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                dialogueWindow.Visibility = Visibility.Visible;
             }
         }
     }
