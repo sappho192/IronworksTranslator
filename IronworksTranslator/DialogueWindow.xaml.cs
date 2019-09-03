@@ -75,6 +75,8 @@ namespace IronworksTranslator
         {
             ContentBackgroundGrid.Opacity = ironworksSettings.UI.DialogueBackgroundOpacity;
             ContentOpacitySlider.Value = ironworksSettings.UI.DialogueBackgroundOpacity;
+
+            LanguageComboBox.SelectedIndex = (int)ironworksSettings.Translator.DialogueLanguage;
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -151,6 +153,15 @@ namespace IronworksTranslator
         private void MaskGrid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             DialogueTextBox.RaiseEvent(e);
+        }
+
+        private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                var languageIndex = ((ComboBox)sender).SelectedIndex;
+                ironworksSettings.Translator.DialogueLanguage = (ClientLanguage)languageIndex;
+            }
         }
     }
 }

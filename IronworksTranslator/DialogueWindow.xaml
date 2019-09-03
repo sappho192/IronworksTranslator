@@ -6,7 +6,9 @@
         xmlns:local="clr-namespace:IronworksTranslator"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:core="clr-namespace:IronworksTranslator.Core"
         xmlns:ui="clr-namespace:IronworksTranslator.UI"
+        xmlns:util="clr-namespace:IronworksTranslator.Util"
         mc:Ignorable="d"
         WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
@@ -19,7 +21,6 @@
         <ui:DragMoveBehavior/>
     </i:Interaction.Behaviors>
     <Grid Background="Transparent">
-
         <DockPanel>
             <!-- General toolbar -->
             <Grid Name="ToolbarGrid" Visibility="Collapsed" DockPanel.Dock="Top">
@@ -61,6 +62,9 @@
                             <fa:ImageAwesome Icon="Eye" />
                         </Button>
                     </StackPanel>
+                    <ComboBox Name="LanguageComboBox" SelectedIndex="0"
+                                        ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
+                                        SelectionChanged="LanguageComboBox_SelectionChanged"/>
                 </DockPanel>
                 <StackPanel Grid.Column="0" HorizontalAlignment="Right"
                                 Orientation="Horizontal">
