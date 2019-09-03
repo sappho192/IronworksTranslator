@@ -135,20 +135,6 @@ namespace IronworksTranslator
 
         private void UpdateChatbox(object state)
         {
-            /*
-            if (ChatQueue.rq.Any())
-            {
-                var result = ChatQueue.rq.TryDequeue(out string msg);
-                if (result)
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        TranslatedChatBox.Text += $"{msg}{Environment.NewLine}";
-                        TranslatedChatBox.ScrollToEnd();
-                    });
-                }
-            }
-            */
             if (ChatQueue.q.Any())
             {// Should q be locked?
                 var chat = ChatQueue.q.Take();
