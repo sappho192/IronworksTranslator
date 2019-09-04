@@ -17,7 +17,7 @@ namespace IronworksTranslator.UI
 
         protected override void OnDetaching()
         {
-            AssociatedObject.MouseLeftButtonDown += AssociatedObject_MouseLeftButtonDown;
+            AssociatedObject.MouseLeftButtonDown -= AssociatedObject_MouseLeftButtonDown;
         }
 
         private void AssociatedObject_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
