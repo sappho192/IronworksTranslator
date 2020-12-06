@@ -170,8 +170,18 @@ namespace IronworksTranslator
                             }
                             else
                             {
-                                var author = decodedChat.Line.RemoveAfter(":");
-                                var sentence = decodedChat.Line.RemoveBefore(":");
+                                var strings = chat.Raw.Split('\u001f');
+                                var author = strings[1];
+                                int i = author.IndexOf('\u0003');
+                                if(i != -1)
+                                {
+                                    author = author.Substring(i + 1);
+                                    int end = author.IndexOf('\u0002');
+                                    author = author.Substring(0, end);
+                                }
+                                var sentence = strings[2];
+                                //var author = decodedChat.Line.RemoveAfter(":");
+                                //var sentence = decodedChat.Line.RemoveBefore(":");
                                 if (!ContainsNativeLanguage(decodedChat.Line))
                                 {
                                     var translated = ironworksContext.TranslateChat(sentence, ironworksSettings.Chat.ChannelLanguage[code]);
