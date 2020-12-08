@@ -11,7 +11,7 @@
         xmlns:ui="clr-namespace:IronworksTranslator.UI"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Name="mainWindow"
+        Name="mainWindow" Icon="icon.ico"
         Title="IronworksTranslator" Height="200" Width="420"
         MinHeight="150" MinWidth="300"
         AllowsTransparency="True" WindowStyle="None"
