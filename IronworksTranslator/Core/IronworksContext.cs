@@ -56,6 +56,17 @@ namespace IronworksTranslator.Core
                 const int rawPeriod = 100;
                 rawChatTimer = new Timer(RefreshMessages, null, 0, rawPeriod);
                 Log.Debug($"New RefreshMessages timer with period {rawPeriod}ms");
+
+                // Following code will watch automatically kill chromeDriver.exe
+                // WatchDogMain.exe is from my repo: https://github.com/sappho192/WatchDogDotNet
+                var pid = Process.GetCurrentProcess().Id;
+                ProcessStartInfo info = new ProcessStartInfo();
+                info.FileName = "WatchDogMain.exe";
+                info.Arguments = $"{pid}";
+                info.WorkingDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
+                info.UseShellExecute = false;
+                info.CreateNoWindow = true;
+                Process watchdogProcess = Process.Start(info);
             }
             else
             {
