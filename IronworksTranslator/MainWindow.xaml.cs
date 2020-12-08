@@ -60,6 +60,7 @@ namespace IronworksTranslator
         private void InitializeGeneralSettingsUI()
         {
             exampleChatBox.Text = $"이프 저격하는 무작위 레벨링 가실 분~{Environment.NewLine}エキルレ行く方いますか？{Environment.NewLine}Mechanics are for Cars KUPO!";
+            exampleChatBox.Text += $"{Environment.NewLine}제작자: 사포 (sappho192@gmail.com)";
             var cond = System.Windows.Markup.XmlLanguage.GetLanguage(System.Globalization.CultureInfo.CurrentUICulture.Name);
             var listFont = new List<string>();
             foreach (FontFamily font in Fonts.SystemFontFamilies)
