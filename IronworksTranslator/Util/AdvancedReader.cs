@@ -1,4 +1,6 @@
-﻿namespace Sharlayan
+﻿using System.Windows;
+
+namespace Sharlayan
 {
     public static class AdvancedReader
     {
@@ -10,11 +12,18 @@
             //var str = BitConverter.ToString(array);
             //var str2 = BitConverter.ToString(array2);
             //var raw =
-            var message = MemoryHandler.Instance.GetString(Scanner.Instance.Locations["ALLMESSAGES2"]);
-            if (message != lastMessage)
+            try
             {
-                lastMessage = message;
-                return message;
+                var message = MemoryHandler.Instance.GetString(Scanner.Instance.Locations["ALLMESSAGES2"]);
+                if (message != lastMessage)
+                {
+                    lastMessage = message;
+                    return message;
+                }
+            }
+            catch (System.ComponentModel.Win32Exception ex)
+            {
+                Application.Current.Shutdown();
             }
             return "";
         }
