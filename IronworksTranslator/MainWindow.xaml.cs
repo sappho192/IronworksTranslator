@@ -84,7 +84,7 @@ namespace IronworksTranslator
 
         private void Welcome()
         {
-            TranslatedChatBox.Text += $"최근에 강제종료했다면 작업관리자에서 PhantomJS.exe도 종료해주세요.{Environment.NewLine}";
+            //TranslatedChatBox.Text += $"최근에 강제종료했다면 작업관리자에서 PhantomJS.exe도 종료해주세요.{Environment.NewLine}";
             if (App.newcomer)
             //if (true)
             {
