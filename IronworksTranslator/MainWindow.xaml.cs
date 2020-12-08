@@ -325,6 +325,10 @@ namespace IronworksTranslator
                 ironworksSettings.UI.ChatTextboxFontSize = spinner.Value ?? 6;
                 TranslatedChatBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
                 exampleChatBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
+                if (dialogueWindow != null)
+                {
+                    dialogueWindow.DialogueTextBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
+                }
             }
         }
 
@@ -365,6 +369,10 @@ namespace IronworksTranslator
                     var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
                     exampleChatBox.FontFamily = font;
                     TranslatedChatBox.FontFamily = font;
+                    if (dialogueWindow != null)
+                    {
+                        dialogueWindow.DialogueTextBox.FontFamily = font;
+                    }
                 }
             }
         }

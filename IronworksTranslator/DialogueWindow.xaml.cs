@@ -81,6 +81,8 @@ namespace IronworksTranslator
             ContentOpacitySlider.Value = ironworksSettings.UI.DialogueBackgroundOpacity;
 
             LanguageComboBox.SelectedIndex = (int)ironworksSettings.Translator.DialogueLanguage;
+            var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
+            DialogueTextBox.FontFamily = font;
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
