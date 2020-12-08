@@ -66,6 +66,10 @@ namespace IronworksTranslator.Core
         private void RefreshMessages(object state)
         {
             var raw = AdvancedReader.getMessage();
+            if (raw.Equals(""))
+            {
+                return;
+            }
             lock (ChatQueue.rq)
             {
                 if (ChatQueue.rq.TryPeek(out string lastMsg))
@@ -130,11 +134,10 @@ namespace IronworksTranslator.Core
 
                     PointerPath = new List<long>
                 {
-                    0x01B28298,
-                    0L, // ASM assumes first pointer is always 0
-		            0x360L,
-                    0x8L,
-                    0x18L,
+                    0x01D3CCA8,
+                    0x3C8L,
+		            0x7B8L,
+                    0x298L,
                     0x20L,
                     0xF8L,
                     0L
@@ -146,14 +149,13 @@ namespace IronworksTranslator.Core
 
                     PointerPath = new List<long>
                 {
-                    0x01B0A350,
-                    0x108L, // ASM assumes first pointer is always 0
-		            0x30L,
+                    0x01D69E68,
                     0x8L,
-                    0x8L,
+		            0x18L,
+                    0x520L,
                     0x20L,
                     0xF8L,
-                    0L
+                    0x0L
                 }
                 });
 
