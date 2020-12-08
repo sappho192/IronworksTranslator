@@ -37,7 +37,13 @@ namespace IronworksTranslator.UI
             e.Handled = true;
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                window.DragMove();
+                try
+                {
+                    window.DragMove();
+                }
+                catch (Exception ex)
+                {
+                }
             }));
         }
     }
