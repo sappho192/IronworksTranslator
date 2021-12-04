@@ -44,6 +44,7 @@
                         <fa:ImageAwesome Icon="Bars" Margin="2"/>
                     </Button>
                     <Button
+                        Visibility="Visible"
                         Name="ToggleDialogueWindowButton"
                         Width="24" Height="24"
                         Click="ToggleDialogueWindowButton_Click">
@@ -180,7 +181,7 @@
                 <Grid x:Name="LanguageSettingsGrid"
                     Grid.Row="0" Panel.ZIndex="2"
                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                    Background="White" Visibility="Hidden">
+                    Background="White" Visibility="Collapsed">
                     <ScrollViewer>
                         <Grid>
                             <StackPanel Orientation="Vertical">
@@ -195,6 +196,16 @@
                                     <ComboBox Name="TranslatorEngineComboBox" SelectedIndex="0"
                                         ItemsSource="{util:EnumToCollection EnumType={x:Type core:TranslatorEngine}}"
                                         SelectionChanged="TranslatorEngineComboBox_SelectionChanged"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="NPC 대사 번역 방식"/>
+                                    <ComboBox Name="DialogueTranslateMethodComboBox" SelectedIndex="0"
+                                        ItemsSource="{util:EnumToCollection EnumType={x:Type core:DialogueTranslationMethod}}"
+                                        SelectionChanged="DialogueTranslateMethod_SelectionChanged"
+                                              IsEnabled="False"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Name="lbDialogueTranslationMethodHint" Content="  * (NPC 대사가 채팅에 나오게 설정해야합니다)"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>

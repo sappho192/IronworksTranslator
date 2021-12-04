@@ -75,6 +75,15 @@ namespace IronworksTranslator
             }
         }
 
+        public void PushDialogueTextBox(string dialogue)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                DialogueTextBox.Text += $"{Environment.NewLine}{dialogue}";
+                DialogueTextBox.ScrollToEnd();
+            });
+        }
+
         private void LoadUISettings()
         {
             ContentBackgroundGrid.Opacity = ironworksSettings.UI.DialogueBackgroundOpacity;

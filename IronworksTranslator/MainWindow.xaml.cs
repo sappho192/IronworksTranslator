@@ -114,6 +114,7 @@ namespace IronworksTranslator
             ClientLanguageComboBox.SelectedIndex = (int)ironworksSettings.Translator.NativeLanguage;
 
             TranslatorEngineComboBox.SelectedIndex = (int)ironworksSettings.Translator.DefaultTranslatorEngine;
+            DialogueTranslateMethodComboBox.SelectedIndex = (int)ironworksSettings.Translator.DefaultDialogueTranslationMethod;
 
             ContentBackgroundGrid.Opacity = ironworksSettings.UI.ChatBackgroundOpacity;
             ContentOpacitySlider.Value = ironworksSettings.UI.ChatBackgroundOpacity;
@@ -171,22 +172,39 @@ namespace IronworksTranslator
                             }
                             else
                             {
-                                var author = decodedChat.Line.RemoveAfter(":");
-                                var sentence = decodedChat.Line.RemoveBefore(":");
-                                if (!ContainsNativeLanguage(decodedChat.Line))
+                                if (!code.Equals(ChatCode.NPCDialog))
                                 {
-                                    var translated = ironworksContext.TranslateChat(sentence, ironworksSettings.Chat.ChannelLanguage[code]);
-
-                                    Application.Current.Dispatcher.Invoke(() =>
+                                    var author = decodedChat.Line.RemoveAfter(":");
+                                    var sentence = decodedChat.Line.RemoveBefore(":");
+                                    if (!ContainsNativeLanguage(decodedChat.Line))
                                     {
+                                        var translated = ironworksContext.TranslateChat(sentence, ironworksSettings.Chat.ChannelLanguage[code]);
 
-                                        TranslatedChatBox.Text +=
+                                        Application.Current.Dispatcher.Invoke(() =>
+                                        {
+
+                                            TranslatedChatBox.Text +=
 #if DEBUG
                                         $"[{decodedChat.Code}]{author}:{translated}{Environment.NewLine}";
 #else
                                         $"{author}:{translated}{Environment.NewLine}";
 #endif
-                                    });
+                                        });
+                                    }
+                                } else
+                                {
+                                    var author = decodedChat.Line.RemoveAfter(":");
+                                    var sentence = decodedChat.Line.RemoveBefore(":");
+                                    if (!ContainsNativeLanguage(decodedChat.Line))
+                                    {
+                                        var translated = ironworksContext.TranslateChat(sentence, ironworksSettings.Chat.ChannelLanguage[code]);
+
+                                        Application.Current.Dispatcher.Invoke(() =>
+                                        {
+
+                                            dialogueWindow.PushDialogueTextBox($"{author}:{translated}{Environment.NewLine}");
+                                        });
+                                    }
                                 }
                             }
                         }
@@ -436,6 +454,27 @@ namespace IronworksTranslator
             else
             {
                 dialogueWindow.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void DialogueTranslateMethod_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                ComboBox box = sender as ComboBox;
+                var idx = (DialogueTranslationMethod)box.SelectedIndex;
+                ironworksSettings.Translator.DefaultDialogueTranslationMethod = idx;
+                switch (idx)
+                {
+                    case DialogueTranslationMethod.ChatMessage:
+                        lbDialogueTranslationMethodHint.Content = "  * (NPC 대사가 채팅에 나오게 설정해야합니다)";
+                        break;
+                    case DialogueTranslationMethod.MemorySearch:
+                        lbDialogueTranslationMethodHint.Content = "  * (매번 패치 이후에 동작하지 않을 수 있습니다)";
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }

@@ -16,6 +16,7 @@ namespace IronworksTranslator.Settings
             };
             NativeLanguage = ClientLanguage.Korean;
             DialogueLanguage = ClientLanguage.English;
+            DefaultDialogueTranslationMethod = DialogueTranslationMethod.ChatMessage;
         }
 
 
@@ -32,6 +33,20 @@ namespace IronworksTranslator.Settings
                 }
             }
         }
+        [JsonProperty]
+        public DialogueTranslationMethod DefaultDialogueTranslationMethod
+        {
+            get => dialogueTranslationMethod;
+            set
+            {
+                if (value != dialogueTranslationMethod)
+                {
+                    dialogueTranslationMethod = value;
+                    OnSettingsChanged?.Invoke(this, nameof(dialogueTranslationMethod), dialogueTranslationMethod);
+                }
+            }
+        }
+
         [JsonProperty]
         public HashSet<TranslatorEngine> ActiveTranslatorEngines { get; } // How to attach event?
         [JsonProperty]
@@ -64,6 +79,8 @@ namespace IronworksTranslator.Settings
 
         private TranslatorEngine defaultTranslatorEngine;
         private ClientLanguage nativeLanguage;
+
+        private DialogueTranslationMethod dialogueTranslationMethod;
 
         public event SettingsChangedEventHandler OnSettingsChanged;
     }
