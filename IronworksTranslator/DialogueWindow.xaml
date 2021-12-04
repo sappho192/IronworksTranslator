@@ -16,7 +16,9 @@
         Background="Transparent"
         Title="DialogueWindow" Height="80" Width="500"
         MinHeight="50" MinWidth="300"
-        SizeChanged="Window_SizeChanged">
+        Name="dialogueWindow"
+        SizeChanged="dialogueWindow_SizeChanged"
+        LocationChanged="dialogueWindow_LocationChanged">
     <i:Interaction.Behaviors>
         <ui:DragMoveBehavior/>
     </i:Interaction.Behaviors>

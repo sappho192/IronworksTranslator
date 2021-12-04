@@ -28,11 +28,13 @@ namespace IronworksTranslator
         private IronworksSettings ironworksSettings;
         private readonly Timer chatboxTimer;
         private static Regex regexItem = new Regex(@"&\u0003(.*)\u0002I\u0002");
+        private bool isUIInitialized = false;
 
         public DialogueWindow(MainWindow mainWindow)
         {
             Topmost = true;
             InitializeComponent();
+            isUIInitialized = true;
             ironworksContext = mainWindow.ironworksContext;
             ironworksSettings = mainWindow.ironworksSettings;
             LoadUISettings();
@@ -88,6 +90,19 @@ namespace IronworksTranslator
         {
             ContentBackgroundGrid.Opacity = ironworksSettings.UI.DialogueBackgroundOpacity;
             ContentOpacitySlider.Value = ironworksSettings.UI.DialogueBackgroundOpacity;
+
+            if (ironworksSettings.UI.DialogueWindowPosTop < 0 ||
+    ironworksSettings.UI.DialogueWindowPosTop > SystemParameters.PrimaryScreenHeight)
+            {
+                ironworksSettings.UI.DialogueWindowPosTop = 100;
+            }
+            dialogueWindow.Top = ironworksSettings.UI.DialogueWindowPosTop;
+            if (ironworksSettings.UI.DialogueWindowPosLeft < 0 ||
+                ironworksSettings.UI.DialogueWindowPosLeft > SystemParameters.PrimaryScreenWidth)
+            {
+                ironworksSettings.UI.DialogueWindowPosLeft = 100;
+            }
+            dialogueWindow.Left = ironworksSettings.UI.DialogueWindowPosLeft;
 
             LanguageComboBox.SelectedIndex = (int)ironworksSettings.Translator.DialogueLanguage;
             var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
@@ -154,7 +169,7 @@ namespace IronworksTranslator
             ChangeBackgroundOpacity(0);
         }
 
-        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void dialogueWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (ironworksSettings != null)
             {
@@ -176,6 +191,24 @@ namespace IronworksTranslator
             {
                 var languageIndex = ((ComboBox)sender).SelectedIndex;
                 ironworksSettings.Translator.DialogueLanguage = (ClientLanguage)languageIndex;
+            }
+        }
+
+        private void dialogueWindow_LocationChanged(object sender, EventArgs e)
+        {
+            if(isUIInitialized)
+            {
+                if (dialogueWindow.WindowState == System.Windows.WindowState.Normal)
+                {
+                    if (dialogueWindow.Top > 0 && dialogueWindow.Top < SystemParameters.PrimaryScreenHeight)
+                    {
+                        ironworksSettings.UI.DialogueWindowPosTop = dialogueWindow.Top;
+                    }
+                    if (dialogueWindow.Left > 0 && dialogueWindow.Left < SystemParameters.PrimaryScreenWidth)
+                    {
+                        ironworksSettings.UI.DialogueWindowPosLeft = dialogueWindow.Left;
+                    }
+                }
             }
         }
     }

@@ -27,10 +27,13 @@ namespace IronworksTranslator
         private readonly Timer chatboxTimer;
         private DialogueWindow dialogueWindow;
 
+        private bool isUiInitialized = false;
+
         public MainWindow()
         {
             Topmost = true;
             InitializeComponent();
+            isUiInitialized = true;
             InitializeGeneralSettingsUI();
 
             var version = Assembly.GetExecutingAssembly().GetName().Version;
@@ -110,6 +113,18 @@ namespace IronworksTranslator
             TranslatedChatBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
             mainWindow.Width = ironworksSettings.UI.MainWindowWidth;
             mainWindow.Height = ironworksSettings.UI.MainWindowHeight;
+            if(ironworksSettings.UI.MainWindowPosTop < 0 ||
+                ironworksSettings.UI.MainWindowPosTop > System.Windows.SystemParameters.PrimaryScreenHeight)
+            {
+                ironworksSettings.UI.MainWindowPosTop = 100;
+            }
+            mainWindow.Top = ironworksSettings.UI.MainWindowPosTop;
+            if(ironworksSettings.UI.MainWindowPosLeft < 0 ||
+                ironworksSettings.UI.MainWindowPosLeft > System.Windows.SystemParameters.PrimaryScreenWidth)
+            {
+                ironworksSettings.UI.MainWindowPosLeft = 100;
+            }
+            mainWindow.Left = ironworksSettings.UI.MainWindowPosLeft;
 
             ClientLanguageComboBox.SelectedIndex = (int)ironworksSettings.Translator.NativeLanguage;
 
@@ -191,7 +206,8 @@ namespace IronworksTranslator
 #endif
                                         });
                                     }
-                                } else
+                                }
+                                else
                                 {
                                     var author = decodedChat.Line.RemoveAfter(":");
                                     var sentence = decodedChat.Line.RemoveBefore(":");
@@ -474,6 +490,24 @@ namespace IronworksTranslator
                         break;
                     default:
                         break;
+                }
+            }
+        }
+
+        private void mainWindow_LocationChanged(object sender, EventArgs e)
+        {
+            if (isUiInitialized)
+            {
+                if (mainWindow.WindowState == System.Windows.WindowState.Normal)
+                {
+                    if (mainWindow.Top > 0 && mainWindow.Top < SystemParameters.PrimaryScreenHeight)
+                    {
+                        ironworksSettings.UI.MainWindowPosTop = mainWindow.Top;
+                    }
+                    if (mainWindow.Left > 0 && mainWindow.Left < SystemParameters.PrimaryScreenWidth)
+                    {
+                        ironworksSettings.UI.MainWindowPosLeft = mainWindow.Left;
+                    }
                 }
             }
         }

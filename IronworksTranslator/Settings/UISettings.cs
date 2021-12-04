@@ -10,10 +10,14 @@ namespace IronworksTranslator.Settings
             ChatTextboxFontSize = 12;
             MainWindowWidth = 420;
             MainWindowHeight = 200;
+            MainWindowPosTop = 200;
+            MainWindowPosLeft = 100;
             ChatBackgroundOpacity = 0.75;
 
             DialogueWindowWidth = 500;
             DialogueWindowHeight = 80;
+            DialogueWindowPosTop = 100;
+            DialogueWindowPosLeft = 100;
             DialogueBackgroundOpacity = 0.75;
         }
 
@@ -47,6 +51,36 @@ namespace IronworksTranslator.Settings
             }
         }
         private double mainWindowHeight;
+
+        [JsonProperty]
+        public double MainWindowPosTop
+        {
+            get => mainWindowPosTop;
+            set
+            {
+                if (value != mainWindowPosTop)
+                {
+                    mainWindowPosTop = value;
+                    OnSettingsChanged?.Invoke(this, nameof(mainWindowPosTop), mainWindowPosTop);
+                }
+            }
+        }
+        private double mainWindowPosTop;
+
+        [JsonProperty]
+        public double MainWindowPosLeft
+        {
+            get => mainWindowPosLeft;
+            set
+            {
+                if (value != mainWindowPosLeft)
+                {
+                    mainWindowPosLeft = value;
+                    OnSettingsChanged?.Invoke(this, nameof(mainWindowPosLeft), mainWindowPosLeft);
+                }
+            }
+        }
+        private double mainWindowPosLeft;
 
         /* Chat UI settings  */
         [JsonProperty]
@@ -124,6 +158,36 @@ namespace IronworksTranslator.Settings
             }
         }
         private double dialogueWindowHeight;
+
+        [JsonProperty]
+        public double DialogueWindowPosTop
+        {
+            get => dialogueWindowPosTop;
+            set
+            {
+                if (value != dialogueWindowPosTop)
+                {
+                    dialogueWindowPosTop = value;
+                    OnSettingsChanged?.Invoke(this, nameof(dialogueWindowPosTop), dialogueWindowPosTop);
+                }
+            }
+        }
+        private double dialogueWindowPosTop;
+
+        [JsonProperty]
+        public double DialogueWindowPosLeft
+        {
+            get => dialogueWindowPosLeft;
+            set
+            {
+                if (value != dialogueWindowPosLeft)
+                {
+                    dialogueWindowPosLeft = value;
+                    OnSettingsChanged?.Invoke(this, nameof(dialogueWindowPosLeft), dialogueWindowPosLeft);
+                }
+            }
+        }
+        private double dialogueWindowPosLeft;
 
         [JsonProperty]
         public double DialogueBackgroundOpacity

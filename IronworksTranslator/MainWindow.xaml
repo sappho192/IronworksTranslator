@@ -17,7 +17,8 @@
         AllowsTransparency="True" WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
         PreviewLostKeyboardFocus="Window_PreviewLostKeyboardFocus"
-        SizeChanged="MainWindow_SizeChanged">
+        SizeChanged="MainWindow_SizeChanged"
+        LocationChanged="mainWindow_LocationChanged">
     <Window.Background>
         <SolidColorBrush Opacity="0" Color="White"></SolidColorBrush>
     </Window.Background>
