@@ -15,6 +15,7 @@ namespace IronworksTranslator
         {
             Log.Debug("Applying chat settings");
 
+            /* Field Group */
             LoadChannelState(EmotePanel, ironworksSettings.Chat.Emote);
             LoadChannelState(TellPanel, ironworksSettings.Chat.Tell);
             LoadChannelState(SayPanel, ironworksSettings.Chat.Say);
@@ -23,8 +24,10 @@ namespace IronworksTranslator
             LoadChannelState(PartyPanel, ironworksSettings.Chat.Party);
             LoadChannelState(AlliancePanel, ironworksSettings.Chat.Alliance);
 
+            /* Community group */
             LoadChannelState(FreeCompanyPanel, ironworksSettings.Chat.FreeCompany);
             LoadChannelState(NovicePanel, ironworksSettings.Chat.Novice);
+            /* Linkshell group */
             LoadChannelState(LinkShell1Panel, ironworksSettings.Chat.LinkShell1);
             LoadChannelState(LinkShell2Panel, ironworksSettings.Chat.LinkShell2);
             LoadChannelState(LinkShell3Panel, ironworksSettings.Chat.LinkShell3);
@@ -33,6 +36,7 @@ namespace IronworksTranslator
             LoadChannelState(LinkShell6Panel, ironworksSettings.Chat.LinkShell6);
             LoadChannelState(LinkShell7Panel, ironworksSettings.Chat.LinkShell7);
             LoadChannelState(LinkShell8Panel, ironworksSettings.Chat.LinkShell8);
+            /* CWLinkshell group*/
             LoadChannelState(CWLinkShell1Panel, ironworksSettings.Chat.CWLinkShell1);
             LoadChannelState(CWLinkShell2Panel, ironworksSettings.Chat.CWLinkShell2);
             LoadChannelState(CWLinkShell3Panel, ironworksSettings.Chat.CWLinkShell3);
@@ -42,6 +46,7 @@ namespace IronworksTranslator
             LoadChannelState(CWLinkShell7Panel, ironworksSettings.Chat.CWLinkShell7);
             LoadChannelState(CWLinkShell8Panel, ironworksSettings.Chat.CWLinkShell8);
 
+            /* System group */
             LoadChannelState(NoticePanel, ironworksSettings.Chat.Notice);
             LoadChannelState(SystemPanel, ironworksSettings.Chat.System);
             LoadChannelState(ErrorPanel, ironworksSettings.Chat.Error);
@@ -50,7 +55,109 @@ namespace IronworksTranslator
             LoadChannelState(MarketSoldPanel, ironworksSettings.Chat.Recruitment);
             LoadChannelState(RecruitmentPanel, ironworksSettings.Chat.Recruitment);
 
+            // Update each representative group language if all the items are same language
+            UpdateFieldGroupCommonLanguage();
+            UpdateCommunityGroupCommonLanguage();
+            UpdateLinkShellGroupCommonLanguage();
+            UpdateCWLinkShellGroupCommonLanguage();
+            UpdateSystemGroupCommonLanguage();
+
             Log.Debug("Chat settings applied");
+        }
+
+        private void UpdateCWLinkShellGroupCommonLanguage()
+        {
+            var language = ironworksSettings.Chat.CWLinkShell1.MajorLanguage;
+
+            if(language == ironworksSettings.Chat.CWLinkShell2.MajorLanguage
+            && language == ironworksSettings.Chat.CWLinkShell3.MajorLanguage
+            && language == ironworksSettings.Chat.CWLinkShell4.MajorLanguage
+            && language == ironworksSettings.Chat.CWLinkShell5.MajorLanguage
+            && language == ironworksSettings.Chat.CWLinkShell6.MajorLanguage
+            && language == ironworksSettings.Chat.CWLinkShell7.MajorLanguage
+            && language == ironworksSettings.Chat.CWLinkShell8.MajorLanguage)
+            {
+                CWLinkShellGroupComboBox.SelectedIndex = (int)language;
+                CWLinkShellGroupComboBoxHelp.Content = "";
+            }
+            else
+            {
+                CWLinkShellGroupComboBoxHelp.Content = "* 채널별 설정이 다름";
+            }
+        }
+
+        private void UpdateLinkShellGroupCommonLanguage()
+        {
+            var language = ironworksSettings.Chat.LinkShell1.MajorLanguage;
+            if(
+            language == ironworksSettings.Chat.LinkShell2.MajorLanguage
+            && language == ironworksSettings.Chat.LinkShell3.MajorLanguage
+            && language == ironworksSettings.Chat.LinkShell4.MajorLanguage
+            && language == ironworksSettings.Chat.LinkShell5.MajorLanguage
+            && language == ironworksSettings.Chat.LinkShell6.MajorLanguage
+            && language == ironworksSettings.Chat.LinkShell7.MajorLanguage
+            && language == ironworksSettings.Chat.LinkShell8.MajorLanguage)
+            {
+                LinkShellGroupComboBox.SelectedIndex = (int)language;
+                LinkShellGroupComboBoxHelp.Content = "";
+            } else
+            {
+                LinkShellGroupComboBoxHelp.Content = "* 채널별 설정이 다름";
+            }
+        }
+
+        private void UpdateCommunityGroupCommonLanguage()
+        {
+            var language = ironworksSettings.Chat.FreeCompany.MajorLanguage;
+            
+            if(language == ironworksSettings.Chat.Novice.MajorLanguage)
+            {
+                CommunityGroupComboBox.SelectedIndex = (int)language;
+                CommunityGroupComboBoxHelp.Content = "";
+            } else
+            {
+                CommunityGroupComboBoxHelp.Content = "* 채널별 설정이 다름";
+            }
+        }
+
+        private void UpdateFieldGroupCommonLanguage()
+        {
+            var language = ironworksSettings.Chat.Emote.MajorLanguage;
+
+            if(
+            language == ironworksSettings.Chat.Tell.MajorLanguage
+            && language == ironworksSettings.Chat.Say.MajorLanguage
+            && language == ironworksSettings.Chat.Yell.MajorLanguage
+            && language == ironworksSettings.Chat.Shout.MajorLanguage
+            && language == ironworksSettings.Chat.Party.MajorLanguage
+            && language == ironworksSettings.Chat.Alliance.MajorLanguage)
+            {
+                FieldGroupComboBox.SelectedIndex = (int)language;
+                FieldGroupComboBoxHelp.Content = "";
+            } else
+            {
+                FieldGroupComboBoxHelp.Content = "* 채널별 설정이 다름";
+            }
+        }
+
+        private void UpdateSystemGroupCommonLanguage()
+        {
+            var language = ironworksSettings.Chat.Notice.MajorLanguage;
+            
+            if(
+            language == ironworksSettings.Chat.System.MajorLanguage
+            && language == ironworksSettings.Chat.Error.MajorLanguage
+            && language == ironworksSettings.Chat.NPCDialog.MajorLanguage
+            && language == ironworksSettings.Chat.NPCAnnounce.MajorLanguage
+            && language == ironworksSettings.Chat.MarketSold.MajorLanguage
+            && language == ironworksSettings.Chat.Recruitment.MajorLanguage)
+            {
+                SystemGroupComboBox.SelectedIndex = (int)language;
+                SystemGroupComboBoxHelp.Content = "";
+            } else
+            {
+                SystemGroupComboBoxHelp.Content = "* 채널별 설정이 다름";
+            }
         }
 
         private void LoadChannelState(StackPanel channelPanel, Settings.Channel channel)
@@ -85,6 +192,7 @@ namespace IronworksTranslator
 
                 EmoteComboBox.SelectedIndex = languageIndex;
                 SayComboBox.SelectedIndex = languageIndex;
+                TellComboBox.SelectedIndex = languageIndex;
                 YellComboBox.SelectedIndex = languageIndex;
                 ShoutComboBox.SelectedIndex = languageIndex;
                 PartyComboBox.SelectedIndex = languageIndex;
@@ -276,6 +384,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.Emote, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateFieldGroupCommonLanguage();
             }
         }
 
@@ -284,6 +393,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.Tell, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateFieldGroupCommonLanguage();
             }
         }
 
@@ -292,6 +402,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.Say, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateFieldGroupCommonLanguage();
             }
         }
 
@@ -300,6 +411,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.Yell, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateFieldGroupCommonLanguage();
             }
         }
 
@@ -308,6 +420,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.Shout, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateFieldGroupCommonLanguage();
             }
         }
 
@@ -316,6 +429,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.Party, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateFieldGroupCommonLanguage();
             }
         }
 
@@ -324,6 +438,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.Alliance, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateFieldGroupCommonLanguage();
             }
         }
 
@@ -377,6 +492,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.FreeCompany, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateCommunityGroupCommonLanguage();
             }
         }
 
@@ -385,6 +501,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.Novice, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateCommunityGroupCommonLanguage();
             }
         }
 
@@ -403,6 +520,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.LinkShell1, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateLinkShellGroupCommonLanguage();
             }
         }
 
@@ -411,6 +529,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.LinkShell2, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateLinkShellGroupCommonLanguage();
             }
         }
 
@@ -419,6 +538,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.LinkShell3, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateLinkShellGroupCommonLanguage();
             }
         }
 
@@ -427,6 +547,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.LinkShell4, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateLinkShellGroupCommonLanguage();
             }
         }
 
@@ -435,6 +556,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.LinkShell5, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateLinkShellGroupCommonLanguage();
             }
         }
 
@@ -443,6 +565,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.LinkShell6, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateLinkShellGroupCommonLanguage();
             }
         }
 
@@ -451,6 +574,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.LinkShell7, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateLinkShellGroupCommonLanguage();
             }
         }
 
@@ -459,6 +583,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.LinkShell8, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateLinkShellGroupCommonLanguage();
             }
         }
 
@@ -510,6 +635,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.CWLinkShell1, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateCWLinkShellGroupCommonLanguage();
             }
         }
 
@@ -518,6 +644,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.CWLinkShell2, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateCWLinkShellGroupCommonLanguage();
             }
         }
 
@@ -526,6 +653,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.CWLinkShell3, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateCWLinkShellGroupCommonLanguage();
             }
         }
 
@@ -534,6 +662,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.CWLinkShell4, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateCWLinkShellGroupCommonLanguage();
             }
         }
 
@@ -542,6 +671,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.CWLinkShell5, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateCWLinkShellGroupCommonLanguage();
             }
         }
 
@@ -550,6 +680,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.CWLinkShell6, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateCWLinkShellGroupCommonLanguage();
             }
         }
 
@@ -558,6 +689,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.CWLinkShell7, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateCWLinkShellGroupCommonLanguage();
             }
         }
 
@@ -566,6 +698,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.CWLinkShell8, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateCWLinkShellGroupCommonLanguage();
             }
         }
 
@@ -700,6 +833,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.Notice, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateSystemGroupCommonLanguage();
             }
         }
 
@@ -708,6 +842,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.System, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateSystemGroupCommonLanguage();
             }
         }
 
@@ -716,6 +851,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.Error, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateSystemGroupCommonLanguage();
             }
         }
 
@@ -723,7 +859,8 @@ namespace IronworksTranslator
         {
             if (ironworksSettings != null)
             {
-                ChangeMajorLanguage(ironworksSettings.Chat.MarketSold, (ClientLanguage)((ComboBox)sender).SelectedIndex); 
+                ChangeMajorLanguage(ironworksSettings.Chat.MarketSold, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateSystemGroupCommonLanguage();
             }
         }
 
@@ -732,6 +869,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.Recruitment, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateSystemGroupCommonLanguage();
             }
         }
 
@@ -740,6 +878,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.NPCDialog, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateSystemGroupCommonLanguage();
             }
         }
 
@@ -748,6 +887,7 @@ namespace IronworksTranslator
             if (ironworksSettings != null)
             {
                 ChangeMajorLanguage(ironworksSettings.Chat.NPCAnnounce, (ClientLanguage)((ComboBox)sender).SelectedIndex);
+                UpdateSystemGroupCommonLanguage();
             }
         }
     }

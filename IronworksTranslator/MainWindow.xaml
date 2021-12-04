@@ -225,6 +225,7 @@
                                         <ComboBox Name="FieldGroupComboBox" SelectedIndex="0"
                                         ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
                                         SelectionChanged="FieldGroupComboBox_SelectionChanged"/>
+                                        <Label Name="FieldGroupComboBoxHelp" Content=""/>
                                     </StackPanel>
                                     </Expander.Header>
                                 <StackPanel Orientation="Vertical">
@@ -325,6 +326,7 @@
                                         <ComboBox Name="CommunityGroupComboBox" SelectedIndex="0"
                                         ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
                                         SelectionChanged="CommunityGroupComboBox_SelectionChanged"/>
+                                        <Label Name="CommunityGroupComboBoxHelp" Content=""/>
                                     </StackPanel>
                                 </Expander.Header>
                                 <StackPanel Orientation="Vertical">
@@ -370,6 +372,7 @@
                                         <ComboBox Name="LinkShellGroupComboBox" SelectedIndex="0"
                                         ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
                                         SelectionChanged="LinkShellGroupComboBox_SelectionChanged"/>
+                                        <Label Name="LinkShellGroupComboBoxHelp" Content=""/>
                                     </StackPanel>
                                 </Expander.Header>
                                 <StackPanel Orientation="Vertical">
@@ -481,6 +484,7 @@
                                         <ComboBox Name="CWLinkShellGroupComboBox" SelectedIndex="0"
                                         ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
                                         SelectionChanged="CWLinkShellGroupComboBox_SelectionChanged"/>
+                                        <Label Name="CWLinkShellGroupComboBoxHelp" Content=""/>
                                     </StackPanel>
                                 </Expander.Header>
                                 <StackPanel Orientation="Vertical">
@@ -592,6 +596,7 @@
                                         <ComboBox Name="SystemGroupComboBox" SelectedIndex="0"
                                         ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
                                         SelectionChanged="SystemGroupComboBox_SelectionChanged"/>
+                                        <Label Name="SystemGroupComboBoxHelp" Content=""/>
                                     </StackPanel>
                                 </Expander.Header>
                                 <StackPanel Orientation="Vertical">
