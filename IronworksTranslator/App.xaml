@@ -5,6 +5,93 @@
              StartupUri="MainWindow.xaml"
              Exit="Application_Exit">
     <Application.Resources>
-         
+        <!-- referred https://hgko1207.github.io/2021/06/04/wpf-3/ -->
+        <SolidColorBrush x:Key="CustomSliderBackgroundSolidColorBrush" Color="#1E211B" />
+        <LinearGradientBrush x:Key="CustomSliderForegroundBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#000000" Offset="0.2" />
+            <GradientStop Color="#FFFFFF" Offset="0.5" />
+            <GradientStop Color="#000000" Offset="0.8" />
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="CustomSliderThumBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#3B3C39" Offset="0.2" />
+            <GradientStop Color="#454543" Offset="0.5" />
+            <GradientStop Color="#3B3C39" Offset="0.8" />
+        </LinearGradientBrush>
+        <Style x:Key="CustomSliderThumbStyle" TargetType="{x:Type Thumb}">
+            <Setter Property="Focusable" Value="false"/>
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Canvas SnapsToDevicePixels="true">
+                            <Grid Height="15" Width="15">
+                                <Rectangle x:Name="Background"
+                            Fill="{StaticResource CustomSliderThumBrush}" Stroke="#FFDADADA"
+                            Height="15" Width="15"
+                            RadiusX="1" RadiusY="1"/>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Foreground="White" FontSize="10"/>
+                            </Grid>
+                        </Canvas>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Fill" TargetName="Background" Value="Gray"/>
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="true">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource CustomSliderThumBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Fill" TargetName="Background"  Value="Gray"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <ControlTemplate x:Key="CustomSliderControlTemplate" TargetType="{x:Type Slider}">
+            <Border Background="Transparent" SnapsToDevicePixels="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="{TemplateBinding MinHeight}" />
+                    </Grid.RowDefinitions>
+
+                    <DockPanel LastChildFill="True">
+                        <Border x:Name="PART_SelectionRange" Height="5" ClipToBounds="True" Visibility="Visible">
+                            <Rectangle Margin="0 0 -10 0" RadiusX="2" RadiusY="2" Fill="{StaticResource CustomSliderForegroundBrush}" />
+                        </Border>
+                        <Border ClipToBounds="True" Height="5" Visibility="Visible">
+                            <Rectangle Margin="0 0 0 0" RadiusX="2" RadiusY="2" Fill="{StaticResource CustomSliderBackgroundSolidColorBrush}" />
+                        </Border>
+                    </DockPanel>
+
+                    <Track x:Name="PART_Track">
+                        <Track.Thumb>
+                            <Thumb Style="{StaticResource CustomSliderThumbStyle}" VerticalAlignment="Center"
+                            Width="{TemplateBinding MinWidth}" Height="{TemplateBinding MinHeight}" OverridesDefaultStyle="True" Focusable="False" />
+                        </Track.Thumb>
+                    </Track>
+                </Grid>
+            </Border>
+        </ControlTemplate>
+        <Style x:Key="CustomSliderStyle" TargetType="{x:Type Slider}">
+            <Setter Property="Template" Value="{StaticResource CustomSliderControlTemplate}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="MinWidth" Value="15" />
+            <Setter Property="MinHeight" Value="15" />
+            <Setter Property="Height" Value="15" />
+            <Setter Property="MaxHeight" Value="15" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="AutoToolTipPlacement" Value="None" />
+            <Setter Property="IsMoveToPointEnabled" Value="True" />
+            <Setter Property="SelectionStart" Value="0" />
+            <Setter Property="SelectionEnd" Value="{Binding Path=Value, RelativeSource={RelativeSource Self}}" />
+            <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false" />
+        </Style>
     </Application.Resources>
 </Application>

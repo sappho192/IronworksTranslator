@@ -32,8 +32,8 @@
                 </Grid.ColumnDefinitions>
                 <Grid Grid.Column="0"
                       Margin="0"
-                      Opacity="1"
-                      Background="WhiteSmoke">
+                      Opacity="0.4"
+                      Background="Black">
                 </Grid>
                 <DockPanel Grid.Column="0" HorizontalAlignment="Left">
                     <StackPanel Orientation="Horizontal" Margin="0">
@@ -43,15 +43,16 @@
                                 BorderBrush="Transparent"
                                 Name="HideContentBackground"
                                 Click="HideContentBackground_Click">
-                            <fa:ImageAwesome Icon="EyeSlash"/>
+                            <fa:ImageAwesome Foreground="White" Icon="EyeSlash"/>
                         </Button>
                         <Slider Orientation="Horizontal"
                                 VerticalAlignment="Center"
                                 Name="ContentOpacitySlider"
-                                Width="50"
+                                Width="80"
                                 Margin="0,0,4,0"
                                 Minimum="0"
                                 Maximum="1.0"
+                                Style="{StaticResource CustomSliderStyle}"
                                 PreviewMouseDoubleClick="ContentOpacitySlider_PreviewMouseDoubleClick"
                                 ValueChanged="ContentOpacitySlider_ValueChanged"/>
 
@@ -61,7 +62,7 @@
                                 BorderBrush="Transparent"
                                 Name="ShowContentBackground"
                                 Click="ShowContentBackground_Click">
-                            <fa:ImageAwesome Icon="Eye" />
+                            <fa:ImageAwesome Foreground="White" Icon="Eye" />
                         </Button>
                     </StackPanel>
                     <ComboBox Name="LanguageComboBox" SelectedIndex="0"
@@ -71,14 +72,21 @@
                 <StackPanel Grid.Column="0" HorizontalAlignment="Right"
                                 Orientation="Horizontal">
                     <Button Width="24" Height="24" Margin="0,0,0,0"
+                            Background="#00000000"
+                            Foreground="White"
+                            BorderBrush="#FF7C7C7C"
                                 Click="MinimizeButton_Click">
-                        <fa:ImageAwesome Icon="WindowMinimize" Margin="4,12,4,0"/>
+                        <fa:ImageAwesome Foreground="White" Icon="WindowMinimize" Margin="4,12,4,0"/>
                     </Button>
-                    <Button Width="24" Height="24" Click="CloseButton_Click">
-                        <fa:ImageAwesome Icon="PowerOff" Margin="2"/>
+                    <Button Width="24" Height="24"
+                            Background="#00000000"
+                            Foreground="White"
+                            BorderBrush="#FF7C7C7C"
+                            Click="CloseButton_Click">
+                        <fa:ImageAwesome Foreground="White" Icon="PowerOff" Margin="2"/>
                     </Button>
                     <Button Width="24" Height="24" 
-                            IsEnabled="False"
+                            IsEnabled="True"
                             Background="Transparent"
                             BorderBrush="Transparent"
                             Foreground="Transparent">
@@ -120,8 +128,11 @@
                             VerticalAlignment="Top"
                         Name="ToggleToolboxButton"
                         Width="24" Height="24" 
+                            Background="#00000000"
+                            Foreground="White"
+                            BorderBrush="#FF7C7C7C"
                         Click="CollapseButton_Click">
-                        <fa:ImageAwesome Icon="Bars" Margin="2"/>
+                        <fa:ImageAwesome Foreground="White" Icon="Bars" Margin="2"/>
                     </Button>
                 </Grid>
                 <!--<Grid Grid.Row="0" Panel.ZIndex="2"

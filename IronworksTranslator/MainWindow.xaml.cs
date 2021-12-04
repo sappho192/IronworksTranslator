@@ -38,7 +38,7 @@ namespace IronworksTranslator
 
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             mainWindow.Title += $" v{version}";
-            AppHeaderLabel.Content += $" v{version}";
+            //AppHeaderLabel.Content += $" v{version}";
             Log.Information($"Current version: {version}");
 
             ironworksContext = IronworksContext.Instance();
