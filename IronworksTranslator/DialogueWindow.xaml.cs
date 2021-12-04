@@ -107,6 +107,7 @@ namespace IronworksTranslator
             LanguageComboBox.SelectedIndex = (int)ironworksSettings.Translator.DialogueLanguage;
             var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
             DialogueTextBox.FontFamily = font;
+            DialogueTextBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
