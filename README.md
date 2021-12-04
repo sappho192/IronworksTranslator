@@ -8,10 +8,10 @@ Translates chat log in FFXIV into Korean in realtime.
 번역 과정
 
 ![Image02](https://github.com/sappho192/IronworksTranslator/blob/master/images/demo02.gif)  
-외관 설정
+외관 설정, 채널별 세부 설정
 
 ![Image03](https://github.com/sappho192/IronworksTranslator/blob/master/images/demo03.gif)  
-채널별 세부 설정
+NPC 대사 번역
 
 ## 권장 실행환경  
 Windows 10 64bit
