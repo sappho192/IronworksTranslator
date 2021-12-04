@@ -37,9 +37,9 @@ namespace IronworksTranslator
             ironworksSettings = mainWindow.ironworksSettings;
             LoadUISettings();
 
-            const int period = 500;
-            chatboxTimer = new Timer(RefreshDialogueTextBox, null, 0, period);
-            Log.Debug($"New RefreshChatbox timer with period {period}ms");
+            //const int period = 500;
+            //chatboxTimer = new Timer(RefreshDialogueTextBox, null, 0, period);
+            //Log.Debug($"New RefreshChatbox timer with period {period}ms");
         }
 
         private void RefreshDialogueTextBox(object state)

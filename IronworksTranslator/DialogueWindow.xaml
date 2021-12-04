@@ -64,7 +64,7 @@
                     </StackPanel>
                     <ComboBox Name="LanguageComboBox" SelectedIndex="0"
                                         ItemsSource="{util:EnumToCollection EnumType={x:Type core:ClientLanguage}}"
-                                        SelectionChanged="LanguageComboBox_SelectionChanged"/>
+                                        SelectionChanged="LanguageComboBox_SelectionChanged" Visibility="Hidden"/>
                 </DockPanel>
                 <StackPanel Grid.Column="0" HorizontalAlignment="Right"
                                 Orientation="Horizontal">
