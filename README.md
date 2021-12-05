@@ -45,29 +45,32 @@ Windows 10 64bit
 다만 실시간 방식은 매 패치 (6.1, 6.2, 6.3 등...) 마다 막힐 수 있습니다. 그땐 제가 직접 업데이트를 공개하기 전까진 채팅 로그 방식만 이용하실 수 있으니 두 가지 방법 모두 기억해주세요.
 
 ### [실시간 메모리 검사 방식] NPC 대사가 번역되어 표시되도록 하는 방법!
-번역기 설정에서 아래 그림과 같이 NPC 대사 번역 방식을 "Memory Search"로, 대사 언어를 본인 클라이언트 언어에 맞게 바꿔주세요.
+번역기 설정에서 아래 그림과 같이 NPC 대사 번역 방식을 "Memory Search"로, 대사 언어를 본인 클라이언트 언어에 맞게 바꿔주세요.  
 ![image](https://user-images.githubusercontent.com/7788738/144746163-0aed3e6f-d138-43e2-8cc9-3571413affaa.png)  
 
 ### [채팅 로그 방식] NPC 대사가 번역되어 표시되도록 하는 방법!
-채팅 로그 방식은 실시간 번역이 아니며, 구조적 한계 때문에 다음 대사로 넘어가야 이전 대사의 내용이 번역됩니다.
-1. 채팅 설정으로 갑니다.
+채팅 로그 방식은 실시간 번역이 아니며, 구조적 한계 때문에 다음 대사로 넘어가야 이전 대사의 내용이 번역됩니다.  
+
+1. 아래 그림처럼 NPC 대사 번역 방식을 `Chat Message`로, 대사 언어를 본인의 클라이언트 언어에 맞게 바꿔주세요.  
+![chatnpc-settings-01](https://user-images.githubusercontent.com/7788738/144747525-c1c6cbcd-9f10-4983-a55f-442ce566324a.png)  
+1. 채팅 설정으로 갑니다.  
 ![image](https://user-images.githubusercontent.com/7788738/144707292-614ae1a7-3981-4ce4-966a-deeea6690125.png)  
-1. 로그 필터 중 General (맨 위에 있는 것)으로 들어갑니다.
+1. 로그 필터 중 General (맨 위에 있는 것)으로 들어갑니다.  
 ![image](https://user-images.githubusercontent.com/7788738/144707307-1b688c4e-76fd-48be-b12c-0b59f99f98cd.png)  
-1. Announcements 탭 (3번째 탭)에서 NPC Dialogue에 체크가 되어있도록 합니다.
+1. Announcements 탭 (3번째 탭)에서 NPC Dialogue에 체크가 되어있도록 합니다.  
 ![image](https://user-images.githubusercontent.com/7788738/144707323-735cc57c-bae9-4059-851b-13703c65ae46.png)  
 
-만약 게임 내 채팅창에 NPC 대사가 보이는게 싫은 분들은 아래와 같이 설정해주시면 됩니다.
-1. 로그 필터 중 General (맨 위에 있는 것)으로 들어갑니다.
+만약 게임 내 채팅창에 NPC 대사가 보이는게 싫은 분들은 아래와 같이 설정해주시면 됩니다.  
+1. 로그 필터 중 General (맨 위에 있는 것)으로 들어갑니다.  
 ![image](https://user-images.githubusercontent.com/7788738/144707307-1b688c4e-76fd-48be-b12c-0b59f99f98cd.png)  
-1. Announcements 탭 (3번째 탭)에서 NPC Dialogue에 **체크를 해제**합니다.
+1. Announcements 탭 (3번째 탭)에서 NPC Dialogue에 **체크를 해제**합니다.  
 ![image](https://user-images.githubusercontent.com/7788738/144707368-8974b6b8-3f18-4c54-9a41-e0fa474399e5.png)  
-1. 로그 필터 중 Battle (두 번째)로 들어갑니다.
+1. 로그 필터 중 Battle (두 번째)로 들어갑니다.  
 ![image](https://user-images.githubusercontent.com/7788738/144707307-1b688c4e-76fd-48be-b12c-0b59f99f98cd.png)  
-1. Announcements 탭 (3번째 탭)에서 NPC Dialogue에 체크가 되어있도록 합니다.
+1. Announcements 탭 (3번째 탭)에서 NPC Dialogue에 체크가 되어있도록 합니다.  
 ![image](https://user-images.githubusercontent.com/7788738/144707323-735cc57c-bae9-4059-851b-13703c65ae46.png)  
 
-중요한 점은 4가지 로그 필터 중에 단 한 곳에만 NPC Dialogue가 체크되어있도록 하는 것이니 참고해주세요.
+중요한 점은 4가지 로그 필터 중에 단 한 곳에만 NPC Dialogue가 체크되어있도록 하는 것이니 참고해주세요.  
 
 
 ## Dependencies (with NuGet) 
