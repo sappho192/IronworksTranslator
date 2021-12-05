@@ -15,8 +15,8 @@ namespace IronworksTranslator.Settings
                 TranslatorEngine.Papago
             };
             NativeLanguage = ClientLanguage.Korean;
-            DialogueLanguage = ClientLanguage.English;
-            DefaultDialogueTranslationMethod = DialogueTranslationMethod.ChatMessage;
+            DialogueLanguage = ClientLanguage.Japanese;
+            DefaultDialogueTranslationMethod = 0; // Memory Search
         }
 
 

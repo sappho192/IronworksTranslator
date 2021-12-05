@@ -107,7 +107,6 @@ namespace IronworksTranslator
             }
             dialogueWindow.Left = ironworksSettings.UI.DialogueWindowPosLeft;
 
-            LanguageComboBox.SelectedIndex = (int)ironworksSettings.Translator.DialogueLanguage;
             var font = new FontFamily(ironworksSettings.UI.ChatTextboxFontFamily);
             DialogueTextBox.FontFamily = font;
             DialogueTextBox.FontSize = ironworksSettings.UI.ChatTextboxFontSize;
@@ -187,15 +186,6 @@ namespace IronworksTranslator
         private void MaskGrid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             DialogueTextBox.RaiseEvent(e);
-        }
-
-        private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (ironworksSettings != null)
-            {
-                var languageIndex = ((ComboBox)sender).SelectedIndex;
-                ironworksSettings.Translator.DialogueLanguage = (ClientLanguage)languageIndex;
-            }
         }
 
         private void dialogueWindow_LocationChanged(object sender, EventArgs e)

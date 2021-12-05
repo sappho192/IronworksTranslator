@@ -4,9 +4,9 @@ namespace IronworksTranslator.Core
 {
     public enum DialogueTranslationMethod
     {
-        [Description("Chat Message")]
-        ChatMessage = 0,
         [Description("Memory Search")]
-        MemorySearch = 1
+        MemorySearch = 0,
+        [Description("Chat Message")]
+        ChatMessage = 1
     }
 }

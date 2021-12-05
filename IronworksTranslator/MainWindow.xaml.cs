@@ -127,6 +127,7 @@ namespace IronworksTranslator
             mainWindow.Left = ironworksSettings.UI.MainWindowPosLeft;
 
             ClientLanguageComboBox.SelectedIndex = (int)ironworksSettings.Translator.NativeLanguage;
+            DialogueLanguageComboBox.SelectedIndex = (int)ironworksSettings.Translator.DialogueLanguage;
 
             TranslatorEngineComboBox.SelectedIndex = (int)ironworksSettings.Translator.DefaultTranslatorEngine;
             DialogueTranslateMethodComboBox.SelectedIndex = (int)ironworksSettings.Translator.DefaultDialogueTranslationMethod;
@@ -487,9 +488,13 @@ namespace IronworksTranslator
                 {
                     case DialogueTranslationMethod.ChatMessage:
                         lbDialogueTranslationMethodHint.Content = "  * (NPC 대사가 채팅에 나오게 설정해야합니다)";
+                        DialogueLanguageMemoryGroup.Visibility = Visibility.Collapsed;
+                        DialogueLanguageChatMessageGroup.Visibility = Visibility.Visible;
                         break;
                     case DialogueTranslationMethod.MemorySearch:
                         lbDialogueTranslationMethodHint.Content = "  * (매번 패치 이후에 동작하지 않을 수 있습니다)";
+                        DialogueLanguageMemoryGroup.Visibility = Visibility.Visible;
+                        DialogueLanguageChatMessageGroup.Visibility = Visibility.Collapsed;
                         break;
                     default:
                         break;
@@ -512,6 +517,25 @@ namespace IronworksTranslator
                         ironworksSettings.UI.MainWindowPosLeft = mainWindow.Left;
                     }
                 }
+            }
+        }
+
+        private void DialogueLanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                var languageIndex = ((ComboBox)sender).SelectedIndex;
+                ironworksSettings.Translator.DialogueLanguage = (ClientLanguage)languageIndex;
+            }
+        }
+
+        private void ChatDialogueLanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ironworksSettings != null)
+            {
+                var languageIndex = ((ComboBox)sender).SelectedIndex;
+                ironworksSettings.Chat.NPCDialog.MajorLanguage = (ClientLanguage)languageIndex;
+                NPCDialogComboBox.SelectedIndex = languageIndex;
             }
         }
     }
