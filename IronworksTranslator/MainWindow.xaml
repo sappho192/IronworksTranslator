@@ -228,7 +228,7 @@
                                               IsEnabled="False"/>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Label Name="lbDialogueTranslationMethodHint" Content="  * (NPC 대사가 채팅에 나오게 설정해야합니다)"/>
+                                    <Label Foreground="White" Name="lbDialogueTranslationMethodHint" Content="  * (NPC 대사가 채팅에 나오게 설정해야합니다)"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
