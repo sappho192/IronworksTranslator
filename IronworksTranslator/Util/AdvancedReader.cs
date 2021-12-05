@@ -14,7 +14,7 @@ namespace Sharlayan
             //var raw =
             try
             {
-                var message = MemoryHandler.Instance.GetString(Scanner.Instance.Locations["ALLMESSAGES2"]);
+                var message = MemoryHandler.Instance.GetString(Scanner.Instance.Locations["ALLMESSAGES"], 0, 1024);
                 if (message != lastMessage)
                 {
                     lastMessage = message;
