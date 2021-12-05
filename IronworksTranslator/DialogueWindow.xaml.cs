@@ -39,9 +39,9 @@ namespace IronworksTranslator
             ironworksSettings = mainWindow.ironworksSettings;
             LoadUISettings();
 
-            //const int period = 500;
-            //chatboxTimer = new Timer(RefreshDialogueTextBox, null, 0, period);
-            //Log.Debug($"New RefreshChatbox timer with period {period}ms");
+            const int period = 500;
+            chatboxTimer = new Timer(RefreshDialogueTextBox, null, 0, period);
+            Log.Debug($"New RefreshChatbox timer with period {period}ms");
         }
 
         private void RefreshDialogueTextBox(object state)
@@ -49,29 +49,32 @@ namespace IronworksTranslator
             if (ChatQueue.rq.Any())
             {
                 var result = ChatQueue.rq.TryDequeue(out string msg);
-                if (result)
+                if(ironworksSettings.Translator.DefaultDialogueTranslationMethod == DialogueTranslationMethod.MemorySearch)
                 {
-                    msg = Regex.Replace(msg, @"\uE03C", "[HQ]");
-                    msg = Regex.Replace(msg, @"\uE06F", "⇒");
-                    msg = Regex.Replace(msg, @"\uE0BB", string.Empty);
-                    msg = Regex.Replace(msg, @"\uFFFD", string.Empty);
-                    if(msg.IndexOf('\u0002') == 0)
+                    if (result)
                     {
-                        var filter = regexItem.Match(msg);
-                        if(filter.Success)
+                        msg = Regex.Replace(msg, @"\uE03C", "[HQ]");
+                        msg = Regex.Replace(msg, @"\uE06F", "⇒");
+                        msg = Regex.Replace(msg, @"\uE0BB", string.Empty);
+                        msg = Regex.Replace(msg, @"\uFFFD", string.Empty);
+                        if (msg.IndexOf('\u0002') == 0)
                         {
-                            msg = filter.Groups[1].Value;
+                            var filter = regexItem.Match(msg);
+                            if (filter.Success)
+                            {
+                                msg = filter.Groups[1].Value;
+                            }
                         }
-                    }
-                    if(!msg.Equals(string.Empty))
-                    {
-                        var translated = ironworksContext.TranslateChat(msg, ironworksSettings.Translator.DialogueLanguage);
-
-                        Application.Current.Dispatcher.Invoke(() =>
+                        if (!msg.Equals(string.Empty))
                         {
-                            DialogueTextBox.Text += $"{Environment.NewLine}{translated}";
-                            DialogueTextBox.ScrollToEnd();
-                        });
+                            var translated = ironworksContext.TranslateChat(msg, ironworksSettings.Translator.DialogueLanguage);
+
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                DialogueTextBox.Text += $"{Environment.NewLine}{translated}";
+                                DialogueTextBox.ScrollToEnd();
+                            });
+                        }
                     }
                 }
             }

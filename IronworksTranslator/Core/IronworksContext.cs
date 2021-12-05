@@ -53,9 +53,9 @@ namespace IronworksTranslator.Core
                 const int period = 500;
                 chatTimer = new Timer(RefreshChat, null, 0, period);
                 Log.Debug($"New RefreshChat timer with period {period}ms");
-                //const int rawPeriod = 100;
-                //rawChatTimer = new Timer(RefreshMessages, null, 0, rawPeriod);
-                //Log.Debug($"New RefreshMessages timer with period {rawPeriod}ms");
+                const int rawPeriod = 100;
+                rawChatTimer = new Timer(RefreshMessages, null, 0, rawPeriod);
+                Log.Debug($"New RefreshMessages timer with period {rawPeriod}ms");
 
                 // Following code will watch automatically kill chromeDriver.exe
                 // WatchDogMain.exe is from my repo: https://github.com/sappho192/WatchDogDotNet
@@ -137,41 +137,39 @@ namespace IronworksTranslator.Core
                 };
 
                 MemoryHandler.Instance.SetProcess(processModel, gameLanguage, patchVersion, useLocalCache);
-                //var signatures = new List<Signature>();
-                //// typical signature
-                //signatures.Add(new Signature
-                //{
-                //    Key = "ALLMESSAGES",
+                var signatures = new List<Signature>();
+                // typical signature
+                signatures.Add(new Signature
+                {
+                    Key = "ALLMESSAGES",
 
-                //    PointerPath = new List<long>
-                //{
-                //    0x01E7AE30,
-                //    0x10L,
-                //    0x28L,
-                //    0xF8L,
-                //    0x68L,
-                //    0x240L,
-                //    0X0L
-                //}
-                //});
-                //signatures.Add(new Signature
-                //{
-                //    Key = "ALLMESSAGES2",
+                    PointerPath = new List<long>
+                {
+                    //0x01EC0F40
+                    0x01EB24F8,
+                    0x8L,
+                    0x18L,
+                    0x20L,
+                    0x100L,
+                    0x0L
+                }
+                });
+                signatures.Add(new Signature
+                {
+                    Key = "ALLMESSAGES2",
 
-                //    PointerPath = new List<long>
-                //{
-                //    0x01E53E40,
-                //    0xC0L,
-                //    0x8L,
-                //    0x18L,
-                //    0x20L,
-                //    0x100L,
-                //    0x0L
-                //}
-                //});
+                    PointerPath = new List<long>
+                {
+                    0x01E7AE30,
+                    0x180L,
+                    0x68L,
+                    0x240L,
+                    0x0L
+                }
+                });
 
-                // adding parameter scanAllMemoryRegions as true makes huge memory leak and CPU usage. Why?
-                //Scanner.Instance.LoadOffsets(signatures);
+                // adding parameter scanAllMemoryRegions as true makes huge memory leak and CPU usage.Why?
+                Scanner.Instance.LoadOffsets(signatures);
 
                 ChatQueue.rq.Enqueue("Dialogue window");
                 ChatQueue.lastMsg = "Dialogue window";

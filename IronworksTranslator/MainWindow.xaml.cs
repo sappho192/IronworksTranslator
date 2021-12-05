@@ -209,17 +209,20 @@ namespace IronworksTranslator
                                 }
                                 else
                                 {
-                                    var author = decodedChat.Line.RemoveAfter(":");
-                                    var sentence = decodedChat.Line.RemoveBefore(":");
-                                    if (!ContainsNativeLanguage(decodedChat.Line))
+                                    if(ironworksSettings.Translator.DefaultDialogueTranslationMethod == DialogueTranslationMethod.ChatMessage)
                                     {
-                                        var translated = ironworksContext.TranslateChat(sentence, ironworksSettings.Chat.ChannelLanguage[code]);
-
-                                        Application.Current.Dispatcher.Invoke(() =>
+                                        var author = decodedChat.Line.RemoveAfter(":");
+                                        var sentence = decodedChat.Line.RemoveBefore(":");
+                                        if (!ContainsNativeLanguage(decodedChat.Line))
                                         {
+                                            var translated = ironworksContext.TranslateChat(sentence, ironworksSettings.Chat.ChannelLanguage[code]);
 
-                                            dialogueWindow.PushDialogueTextBox($"{author}:{translated}{Environment.NewLine}");
-                                        });
+                                            Application.Current.Dispatcher.Invoke(() =>
+                                            {
+
+                                                dialogueWindow.PushDialogueTextBox($"{author}:{translated}{Environment.NewLine}");
+                                            });
+                                        }
                                     }
                                 }
                             }

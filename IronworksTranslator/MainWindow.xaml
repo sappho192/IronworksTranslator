@@ -225,7 +225,7 @@
                                     <ComboBox Name="DialogueTranslateMethodComboBox" SelectedIndex="0"
                                         ItemsSource="{util:EnumToCollection EnumType={x:Type core:DialogueTranslationMethod}}"
                                         SelectionChanged="DialogueTranslateMethod_SelectionChanged"
-                                              IsEnabled="False"/>
+                                              IsEnabled="True"/>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <Label Foreground="White" Name="lbDialogueTranslationMethodHint" Content="  * (NPC 대사가 채팅에 나오게 설정해야합니다)"/>
