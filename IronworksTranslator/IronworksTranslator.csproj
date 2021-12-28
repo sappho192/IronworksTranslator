@@ -162,6 +162,7 @@
     <Compile Include="Util\AdvancedReader.cs" />
     <Compile Include="Util\ByteArrayExtension.cs" />
     <Compile Include="Util\EnumToCollectionExtension.cs" />
+    <Compile Include="Util\HermesAddress.cs" />
     <Compile Include="Util\StringExtension.cs" />
     <Compile Include="Util\MiniDump.cs" />
     <Page Include="DialogueWindow.xaml">

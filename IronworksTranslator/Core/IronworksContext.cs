@@ -9,6 +9,7 @@ using System.Windows;
 using Serilog;
 using System.Linq;
 using System.Collections.Generic;
+using IronworksTranslator.Util;
 
 namespace IronworksTranslator.Core
 {
@@ -143,30 +144,30 @@ namespace IronworksTranslator.Core
                 {
                     Key = "ALLMESSAGES",
 
-                    PointerPath = new List<long>
+                    PointerPath = HermesAddress.GetLatestAddress().Address
+                    /*PointerPath = new List<long>
                 {
-                    //0x01EC0F40
-                    0x01EB24F8,
+                    0x01EB7478,
                     0x8L,
                     0x18L,
                     0x20L,
                     0x100L,
                     0x0L
                 }
+                });*/
                 });
-                signatures.Add(new Signature
-                {
-                    Key = "ALLMESSAGES2",
-
-                    PointerPath = new List<long>
-                {
-                    0x01E7AE30,
-                    0x180L,
-                    0x68L,
-                    0x240L,
-                    0x0L
-                }
-                });
+                //signatures.Add(new Signature
+                //{
+                //    Key = "ALLMESSAGES2",
+                //    PointerPath = new List<long>
+                //{
+                //    0x01E7FD80,
+                //    0x108L,
+                //    0x68L,
+                //    0x240L,
+                //    0x0L
+                //}
+                //});
 
                 // adding parameter scanAllMemoryRegions as true makes huge memory leak and CPU usage.Why?
                 Scanner.Instance.LoadOffsets(signatures);
