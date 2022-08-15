@@ -1,5 +1,4 @@
-﻿using OpenQA.Selenium.PhantomJS;
-using Sharlayan;
+﻿using Sharlayan;
 using Sharlayan.Models;
 using Sharlayan.Models.ReadResults;
 using System;
@@ -7,19 +6,37 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows;
 using Serilog;
-using System.Linq;
 using System.Collections.Generic;
 using IronworksTranslator.Util;
+using Sharlayan.Enums;
+using HtmlAgilityPack;
+using PuppeteerSharp;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace IronworksTranslator.Core
 {
     public class IronworksContext
     {
         /* Web stuff */
-        public static PhantomJSDriver driver;
+        public Browser webBrowser = null;
+        private async Task<Browser> initBrowser()
+        {
+            await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
+            var _browser = await Puppeteer.LaunchAsync(new LaunchOptions
+            {
+                Headless = true,
+                Args = new[] {
+                    "--js-flags=\"--max-old-space-size=128\""
+                },
+            });
+            return _browser;
+        }
+        private Page webPage = null;
 
         /* FFXIV stuff */
         public bool Attached { get; }
+        public static MemoryHandler CurrentMemoryHandler { get; set; }
         private static Process[] processes;
         private readonly Timer chatTimer;
         private readonly Timer rawChatTimer;
@@ -34,7 +51,7 @@ namespace IronworksTranslator.Core
 
         public static IronworksContext Instance()
         {// make new instance if null
-            return _instance ?? (_instance = new IronworksContext());
+            return _instance ??= new IronworksContext();
         }
         protected IronworksContext()
         {
@@ -42,14 +59,7 @@ namespace IronworksTranslator.Core
             if (Attached)
             {
                 Log.Information("Creating PhantomJS");
-                var driverService = PhantomJSDriverService.CreateDefaultService();
-                driverService.HideCommandPromptWindow = true;
-                driver = new PhantomJSDriver(driverService);
-                const int waitFor = 10;
-                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(waitFor);
-                driver.Manage().Timeouts().AsynchronousJavaScript = TimeSpan.FromSeconds(10);
-                driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(10);
-                Log.Debug($"PhantomJS created, page load wait time: {waitFor}s");
+                InitWebBrowser();
 
                 const int period = 500;
                 chatTimer = new Timer(RefreshChat, null, 0, period);
@@ -60,19 +70,39 @@ namespace IronworksTranslator.Core
 
                 // Following code will watch automatically kill chromeDriver.exe
                 // WatchDogMain.exe is from my repo: https://github.com/sappho192/WatchDogDotNet
-                var pid = Process.GetCurrentProcess().Id;
-                ProcessStartInfo info = new ProcessStartInfo();
-                info.FileName = "WatchDogMain.exe";
-                info.Arguments = $"{pid}";
-                info.WorkingDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
-                info.UseShellExecute = false;
-                info.CreateNoWindow = true;
-                Process watchdogProcess = Process.Start(info);
+                BootWatchDog();
             }
             else
             {
                 Application.Current.Shutdown();
             }
+        }
+
+        private static void BootWatchDog()
+        {
+            var pid = Process.GetCurrentProcess().Id;
+            ProcessStartInfo info = new()
+            {
+                FileName = "WatchDogMain.exe",
+                Arguments = $"{pid}",
+                WorkingDirectory = System.AppDomain.CurrentDomain.BaseDirectory,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            Process watchdogProcess = Process.Start(info);
+        }
+
+        private void InitWebBrowser()
+        {
+            const int waitFor = 0;
+
+            var browserTask = Task.Run(async () => await initBrowser());
+            webBrowser = browserTask.GetAwaiter().GetResult();
+            var pageTask = Task.Run(async () => await webBrowser.NewPageAsync());
+            webPage = pageTask.GetAwaiter().GetResult();
+            webPage.DefaultTimeout = waitFor;
+
+            Log.Debug($"PhantomJS created, page load wait time: {waitFor}s");
         }
 
         private void RefreshMessages(object state)
@@ -95,9 +125,10 @@ namespace IronworksTranslator.Core
                             ChatQueue.lastMsg = raw;
                         }
                     }
-                } else
+                }
+                else
                 {
-                    if(!ChatQueue.lastMsg.Equals(raw))
+                    if (!ChatQueue.lastMsg.Equals(raw))
                     {
                         Log.Debug("Enqueue new message: {@message}", raw);
                         ChatQueue.rq.Enqueue(raw);
@@ -125,19 +156,28 @@ namespace IronworksTranslator.Core
             if (processes.Length > 0)
             {
                 // supported: English, Chinese, Japanese, French, German, Korean
-                string gameLanguage = "English";
+                GameRegion gameRegion = GameRegion.Global;
+                GameLanguage gameLanguage = GameLanguage.English;
                 // whether to always hit API on start to get the latest sigs based on patchVersion, or use the local json cache (if the file doesn't exist, API will be hit)
                 bool useLocalCache = true;
                 // patchVersion of game, or latest
                 string patchVersion = "latest";
                 Process process = processes[0];
-                ProcessModel processModel = new ProcessModel
+                ProcessModel processModel = new()
                 {
-                    Process = process,
-                    IsWin64 = true
+                    Process = process
                 };
 
-                MemoryHandler.Instance.SetProcess(processModel, gameLanguage, patchVersion, useLocalCache);
+                var configuration = new SharlayanConfiguration
+                {
+                    ProcessModel = processModel,
+                    GameLanguage = gameLanguage,
+                    GameRegion = gameRegion,
+                    PatchVersion = patchVersion,
+                    UseLocalCache = useLocalCache
+                };
+
+                CurrentMemoryHandler = SharlayanMemoryManager.Instance.AddHandler(configuration);
                 var signatures = new List<Signature>();
                 // typical signature
                 signatures.Add(new Signature
@@ -170,26 +210,26 @@ namespace IronworksTranslator.Core
                 //});
 
                 // adding parameter scanAllMemoryRegions as true makes huge memory leak and CPU usage.Why?
-                Scanner.Instance.LoadOffsets(signatures);
+                CurrentMemoryHandler.Scanner.LoadOffsets(signatures.ToArray());
 
                 ChatQueue.rq.Enqueue("Dialogue window");
                 ChatQueue.lastMsg = "Dialogue window";
                 Log.Debug($"Attached {processName}.exe ({gameLanguage})");
-                MessageBox.Show($"Attached {processName}.exe");
+                MessageBox.Show($"아이언웍스 번역기를 실행합니다.");
 
                 return true;
             }
             else
             {
                 Log.Fatal($"Can't find {processName}.exe");
-                MessageBox.Show($"Can't find {processName}.exe");
+                MessageBox.Show($"파판을 먼저 켠 다음에 번역기를 실행해주세요.");
                 return false;
             }
         }
 
         public bool UpdateChat()
         {
-            ChatLogResult readResult = Reader.GetChatLog(_previousArrayIndex, _previousOffset);
+            ChatLogResult readResult = CurrentMemoryHandler.Reader.GetChatLog(_previousArrayIndex, _previousOffset);
             _previousArrayIndex = readResult.PreviousArrayIndex;
             _previousOffset = readResult.PreviousOffset;
             if (readResult.ChatLogItems.Count > 0)
@@ -209,9 +249,29 @@ namespace IronworksTranslator.Core
             return false;
         }
 
+        private async Task<string> RequestTranslate(string url)
+        {
+            await webPage.GoToAsync(url, WaitUntilNavigation.Networkidle2);
+            var content = await webPage.GetContentAsync();
+
+            var doc = new HtmlDocument();
+            doc.LoadHtml(content);
+            string translated = string.Empty;
+            try
+            {
+                var pathElement = doc.GetElementbyId("txtTarget");
+                translated = pathElement.InnerText.Trim();
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Exception {e.Message} when translating the sentence.");
+            }
+            return translated;
+        }
+
         public string TranslateChat(string sentence, ClientLanguage from)
         {
-            if(IronworksSettings.Instance == null)
+            if (IronworksSettings.Instance == null)
             {
                 throw new Exception("IronworksSettings is null");
             }
@@ -232,14 +292,15 @@ namespace IronworksTranslator.Core
                 }
             }
             string testUrl = $"https://papago.naver.com/?sk={sk}&tk={tk}&st={Uri.EscapeDataString(sentence)}";
-            lock (driver)
+            lock (webPage)
             {
                 //Log.Debug($"Translate URL: {testUrl}");
                 Log.Debug($"Locked web browser for {sentence}");
+                string translated = sentence;
                 try
                 {
-                    driver.Url = testUrl;
-                    driver.Navigate();
+                    var translateTask = Task.Run(async () => await RequestTranslate(testUrl));
+                    translated = translateTask.GetAwaiter().GetResult();
                 }
                 catch (Exception e)
                 {
@@ -247,24 +308,9 @@ namespace IronworksTranslator.Core
                     MessageBox.Show($"번역엔진이 예기치 않게 종료되었습니다.");
                     Application.Current.Shutdown();
                 }
-                //the driver can now provide you with what you need (it will execute the script)
-                //get the source of the page
-                //var source = driver.PageSource;
-                string translated = string.Copy(sentence);
-                //fully navigate the dom
-                try
+
+                if (translated == null)
                 {
-                    OpenQA.Selenium.IWebElement pathElement;
-                    do
-                    {
-                        pathElement = driver.FindElementById("txtTarget");
-                    } while (pathElement.Text.Equals(""));
-                    translated = pathElement.Text;
-                    Log.Debug($"Successfully translated {sentence} -> {translated}");
-                }
-                catch (Exception e)
-                {
-                    Log.Error($"Exception {e.Message} when translating {sentence}");
                     translated = translated.Insert(0, "[원문]");
                 }
                 return translated;

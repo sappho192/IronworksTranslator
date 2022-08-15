@@ -23,7 +23,7 @@ namespace IronworksTranslator
         {
             if(IronworksContext.Instance().Attached)
             {
-                IronworksContext.driver.Dispose();
+                IronworksContext.Instance().webBrowser.Dispose();
             }
             Log.Debug("Closing program");
         }
@@ -104,10 +104,8 @@ namespace IronworksTranslator
         {
             if (makeMiniDump)
             {
-                using (FileStream fs = new FileStream($"./logs/log-{Birthdate}.mdmp", FileMode.Create, FileAccess.ReadWrite, FileShare.Write))
-                {
-                    MiniDump.Write(fs.SafeFileHandle, MiniDump.Option.WithFullMemory, MiniDump.ExceptionInfo.Present);
-                }
+                using FileStream fs = new($"./logs/log-{Birthdate}.mdmp", FileMode.Create, FileAccess.ReadWrite, FileShare.Write);
+                MiniDump.Write(fs.SafeFileHandle, MiniDump.Option.WithFullMemory, MiniDump.ExceptionInfo.Present);
             }
             else
             {
