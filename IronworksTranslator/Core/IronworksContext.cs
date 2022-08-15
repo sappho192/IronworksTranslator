@@ -215,14 +215,14 @@ namespace IronworksTranslator.Core
                 ChatQueue.rq.Enqueue("Dialogue window");
                 ChatQueue.lastMsg = "Dialogue window";
                 Log.Debug($"Attached {processName}.exe ({gameLanguage})");
-                MessageBox.Show($"Attached {processName}.exe");
+                MessageBox.Show($"아이언웍스 번역기를 실행합니다.");
 
                 return true;
             }
             else
             {
                 Log.Fatal($"Can't find {processName}.exe");
-                MessageBox.Show($"Can't find {processName}.exe");
+                MessageBox.Show($"파판을 먼저 켠 다음에 번역기를 실행해주세요.");
                 return false;
             }
         }
