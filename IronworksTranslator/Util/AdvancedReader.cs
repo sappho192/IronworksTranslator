@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using IronworksTranslator.Core;
+using System.Windows;
 
 namespace Sharlayan
 {
@@ -14,14 +15,15 @@ namespace Sharlayan
             //var raw =
             try
             {
-                var message = MemoryHandler.Instance.GetString(Scanner.Instance.Locations["ALLMESSAGES"], 0, 1024);
+                var handler = IronworksContext.CurrentMemoryHandler;
+                var message = handler.GetString(handler.Scanner.Locations["ALLMESSAGES"], 0, 1024);
                 if (message != lastMessage)
                 {
                     lastMessage = message;
                     return message;
                 }
             }
-            catch (System.ComponentModel.Win32Exception ex)
+            catch (System.ComponentModel.Win32Exception)
             {
                 Application.Current.Shutdown();
             }

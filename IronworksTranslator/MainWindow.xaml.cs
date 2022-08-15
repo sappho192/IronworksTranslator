@@ -1,4 +1,4 @@
-﻿using FontAwesome.WPF;
+﻿using FontAwesome5;
 using IronworksTranslator.Core;
 using IronworksTranslator.Util;
 using Serilog;
@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Xceed.Wpf.Toolkit;
+using Fonts = System.Windows.Media.Fonts;
 
 namespace IronworksTranslator
 {
@@ -307,11 +308,11 @@ namespace IronworksTranslator
 
         private void CollapseButton_Click(object sender, RoutedEventArgs e)
         {
-            var icon = (sender as Button).Content as ImageAwesome;
+            var icon = (sender as Button).Content as SvgAwesome;
             icon.Icon =
-                icon.Icon.Equals(FontAwesomeIcon.Bars) ?
-                FontAwesomeIcon.AngleDoubleUp
-                : FontAwesomeIcon.Bars;
+                icon.Icon.Equals(EFontAwesomeIcon.Solid_Bars) ?
+                EFontAwesomeIcon.Solid_AngleDoubleUp
+                : EFontAwesomeIcon.Solid_Bars;
             ToolbarGrid.Visibility =
                 ToolbarGrid.Visibility.Equals(Visibility.Collapsed) ?
                  Visibility.Visible : Visibility.Collapsed;

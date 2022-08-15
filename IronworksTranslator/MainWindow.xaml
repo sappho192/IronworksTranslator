@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        xmlns:fa="http://schemas.fontawesome.io/icons/"
+        xmlns:Behaviors="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:fa5="http://schemas.fontawesome.com/icons/"
         xmlns:local="clr-namespace:IronworksTranslator"
         xmlns:core="clr-namespace:IronworksTranslator.Core"
         xmlns:util="clr-namespace:IronworksTranslator.Util"
@@ -22,9 +22,9 @@
     <Window.Background>
         <SolidColorBrush Opacity="0.2" Color="Black"></SolidColorBrush>
     </Window.Background>
-    <i:Interaction.Behaviors>
+    <Behaviors:Interaction.Behaviors>
         <ui:DragMoveBehavior/>
-    </i:Interaction.Behaviors>
+    </Behaviors:Interaction.Behaviors>
     <Grid>
         <DockPanel>
             <!-- System command toolbar -->
@@ -44,7 +44,7 @@
                         Foreground="White"
                         BorderBrush="#FF7C7C7C"
                         Click="CollapseButton_Click">
-                        <fa:ImageAwesome Foreground="White" Icon="Bars" Margin="2"/>
+                        <fa5:SvgAwesome Foreground="White" Icon="Solid_Bars" Margin="2"/>
                     </Button>
                     <Button
                         Visibility="Visible"
@@ -54,7 +54,7 @@
                         Foreground="White"
                         BorderBrush="#FF7C7C7C"
                         Click="ToggleDialogueWindowButton_Click">
-                        <fa:ImageAwesome Foreground="White" Icon="VideoCamera" Margin="2"/>
+                        <fa5:SvgAwesome Foreground="White" Icon="Solid_Camera" Margin="2"/>
                     </Button>
                 </StackPanel>
                 <!--<StackPanel Grid.Row="0" HorizontalAlignment="Center">
@@ -67,14 +67,14 @@
                             Foreground="White"
                             BorderBrush="#FF7C7C7C"
                             Click="MinimizeButton_Click">
-                        <fa:ImageAwesome Foreground="White" Icon="WindowMinimize" Margin="4,12,4,0"/>
+                        <fa5:SvgAwesome Foreground="White" Icon="Solid_WindowMinimize" Margin="4,12,4,0"/>
                     </Button>
                     <Button Width="24" Height="24"
                             Background="#00000000"
                             Foreground="White"
                             BorderBrush="#FF7C7C7C"
                             Click="ExitButton_Click">
-                        <fa:ImageAwesome Foreground="White" Icon="PowerOff" Margin="2"/>
+                        <fa5:SvgAwesome Foreground="White" Icon="Solid_PowerOff" Margin="2"/>
                     </Button>
                 </StackPanel>
             </Grid>
@@ -98,7 +98,7 @@
                             Foreground="White"
                             BorderBrush="#FF7C7C7C"
                                 Click="GeneralSettingsButton_Click">
-                            <fa:ImageAwesome Foreground="White" Icon="Wrench" Margin="2"/>
+                            <fa5:SvgAwesome Foreground="White" Icon="Solid_Wrench" Margin="2"/>
                         </Button>
                         <Button x:Name="LanguageSettingsButton"
                             Width="24" Height="24"
@@ -106,7 +106,7 @@
                             Foreground="White"
                             BorderBrush="#FF7C7C7C"
                                 Click="LanguageSettingsButton_Click">
-                            <fa:ImageAwesome Foreground="White" Icon="Language" Margin="2"/>
+                            <fa5:SvgAwesome Foreground="White" Icon="Solid_Language" Margin="2"/>
                         </Button>
                         <Button x:Name="ChatSettingsButton"
                             Width="24" Height="24"
@@ -114,7 +114,7 @@
                             Foreground="White"
                             BorderBrush="#FF7C7C7C"
                                 Click="ChatSettingsButton_Click">
-                            <fa:ImageAwesome Foreground="White" Icon="CommentsOutline" Margin="2"/>
+                            <fa5:SvgAwesome Foreground="White" Icon="Solid_Comments" Margin="2"/>
                         </Button>
                     </StackPanel>
                 </DockPanel>
@@ -126,7 +126,7 @@
                                 BorderBrush="Transparent"
                                 Name="HideContentBackground"
                                 Click="HideContentBackground_Click">
-                            <fa:ImageAwesome Foreground="White" Icon="EyeSlash"/>
+                            <fa5:SvgAwesome Foreground="White" Icon="Solid_EyeSlash"/>
                         </Button>
                         <Slider Orientation="Horizontal"
                                 VerticalAlignment="Center"
@@ -145,7 +145,7 @@
                                 BorderBrush="Transparent"
                                 Name="ShowContentBackground"
                                 Click="ShowContentBackground_Click">
-                            <fa:ImageAwesome Foreground="White" Icon="Eye" />
+                            <fa5:SvgAwesome Foreground="White" Icon="Solid_Eye" />
                         </Button>
                     </StackPanel>
                 </DockPanel>
@@ -261,11 +261,11 @@
                                         <!--<Label Content=""/>-->
                                         <Button Name="FieldGroupShowButton" Width="24" Height="24"
                                                 Click="FieldGroupShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Button Name="FieldGroupHideButton" Width="24" Height="24"
                                                 Click="FieldGroupHideButton_Click">
-                                            <fa:ImageAwesome Icon="EyeSlash" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_EyeSlash" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="FieldGroupComboBox" SelectedIndex="0"
@@ -279,7 +279,7 @@
                                         <Label Foreground="White" Content="감정표현"/>
                                         <Button Name="EmoteShowButton" Width="24" Height="24"
                                                 Click="EmoteShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="EmoteComboBox" SelectedIndex="0"
@@ -290,7 +290,7 @@
                                         <Label Foreground="White" Content="귓속말"/>
                                         <Button Name="TellShowButton" Width="24" Height="24"
                                                 Click="TellShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="TellComboBox" SelectedIndex="0"
@@ -301,7 +301,7 @@
                                         <Label Foreground="White" Content="말하기"/>
                                         <Button Name="SayShowButton" Width="24" Height="24"
                                                 Click="SayShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="SayComboBox" SelectedIndex="0"
@@ -312,7 +312,7 @@
                                         <Label Foreground="White" Content="떠들기"/>
                                         <Button Name="YellShowButton" Width="24" Height="24"
                                                 Click="YellShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="YellComboBox" SelectedIndex="0"
@@ -323,7 +323,7 @@
                                         <Label Foreground="White" Content="외치기"/>
                                         <Button Name="ShoutShowButton" Width="24" Height="24"
                                                 Click="ShoutShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="ShoutComboBox" SelectedIndex="0"
@@ -334,7 +334,7 @@
                                         <Label Foreground="White" Content="파티"/>
                                         <Button Name="PartyShowButton" Width="24" Height="24"
                                                 Click="PartyShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="PartyComboBox" SelectedIndex="0"
@@ -345,7 +345,7 @@
                                         <Label Foreground="White" Content="연합 파티"/>
                                         <Button Name="AllianceShowButton" Width="24" Height="24"
                                                 Click="AllianceShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="AllianceComboBox" SelectedIndex="0"
@@ -362,11 +362,11 @@
                                         <!--<Label Foreground="White" Content=""/>-->
                                         <Button Name="CommunityGroupShowButton" Width="24" Height="24"
                                                 Click="CommunityGroupShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Button Name="CommunityGroupHideButton" Width="24" Height="24"
                                                 Click="CommunityGroupHideButton_Click">
-                                            <fa:ImageAwesome Icon="EyeSlash" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_EyeSlash" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="CommunityGroupComboBox" SelectedIndex="0"
@@ -380,7 +380,7 @@
                                         <Label Foreground="White" Content="자유부대"/>
                                         <Button Name="FreeCompanyShowButton" Width="24" Height="24"
                                                 Click="FreeCompanyShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="FreeCompanyComboBox" SelectedIndex="0"
@@ -391,7 +391,7 @@
                                         <Label Foreground="White" Content="초보자 채널"/>
                                         <Button Name="NoviceShowButton" Width="24" Height="24"
                                                 Click="NoviceShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="NoviceComboBox" SelectedIndex="0"
@@ -408,11 +408,11 @@
                                         <!--<Label Foreground="White" Content=""/>-->
                                         <Button Name="LinkShellGroupShowButton" Width="24" Height="24"
                                                 Click="LinkShellGroupShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Button Name="LinkShellGroupHideButton" Width="24" Height="24"
                                                 Click="LinkShellGroupHideButton_Click">
-                                            <fa:ImageAwesome Icon="EyeSlash" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_EyeSlash" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="LinkShellGroupComboBox" SelectedIndex="0"
@@ -426,7 +426,7 @@
                                         <Label Foreground="White" Content="링크셸1"/>
                                         <Button Name="LinkShell1ShowButton" Width="24" Height="24"
                                                 Click="LinkShell1ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="LinkShell1ComboBox" SelectedIndex="0"
@@ -437,7 +437,7 @@
                                         <Label Foreground="White" Content="링크셸2"/>
                                         <Button Name="LinkShell2ShowButton" Width="24" Height="24"
                                                 Click="LinkShell2ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="LinkShell2ComboBox" SelectedIndex="0"
@@ -448,7 +448,7 @@
                                         <Label Foreground="White" Content="링크셸3"/>
                                         <Button Name="LinkShell3ShowButton" Width="24" Height="24"
                                                 Click="LinkShell3ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="LinkShell3ComboBox" SelectedIndex="0"
@@ -459,7 +459,7 @@
                                         <Label Foreground="White" Content="링크셸4"/>
                                         <Button Name="LinkShell4ShowButton" Width="24" Height="24"
                                                 Click="LinkShell4ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="LinkShell4ComboBox" SelectedIndex="0"
@@ -470,7 +470,7 @@
                                         <Label Foreground="White" Content="링크셸5"/>
                                         <Button Name="LinkShell5ShowButton" Width="24" Height="24"
                                                 Click="LinkShell5ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="LinkShell5ComboBox" SelectedIndex="0"
@@ -481,7 +481,7 @@
                                         <Label Foreground="White" Content="링크셸6"/>
                                         <Button Name="LinkShell6ShowButton" Width="24" Height="24"
                                                 Click="LinkShell6ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="LinkShell6ComboBox" SelectedIndex="0"
@@ -492,7 +492,7 @@
                                         <Label Foreground="White" Content="링크셸7"/>
                                         <Button Name="LinkShell7ShowButton" Width="24" Height="24"
                                                 Click="LinkShell7ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="LinkShell7ComboBox" SelectedIndex="0"
@@ -503,7 +503,7 @@
                                         <Label Foreground="White" Content="링크셸8"/>
                                         <Button Name="LinkShell8ShowButton" Width="24" Height="24"
                                                 Click="LinkShell8ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="LinkShell8ComboBox" SelectedIndex="0"
@@ -520,11 +520,11 @@
                                         <!--<Label Foreground="White" Content=""/>-->
                                         <Button Name="CWLinkShellGroupShowButton" Width="24" Height="24"
                                                 Click="CWLinkShellGroupShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Button Name="CWLinkShellGroupHideButton" Width="24" Height="24"
                                                 Click="CWLinkShellGroupHideButton_Click">
-                                            <fa:ImageAwesome Icon="EyeSlash" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_EyeSlash" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="CWLinkShellGroupComboBox" SelectedIndex="0"
@@ -538,7 +538,7 @@
                                         <Label Foreground="White" Content="서버초월링크쉘1"/>
                                         <Button Name="CWLinkShell1ShowButton" Width="24" Height="24"
                                                 Click="CWLinkShell1ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="CWLinkShell1ComboBox" SelectedIndex="0"
@@ -549,7 +549,7 @@
                                         <Label Foreground="White" Content="서버초월링크쉘2"/>
                                         <Button Name="CWLinkShell2ShowButton" Width="24" Height="24"
                                                 Click="CWLinkShell2ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="CWLinkShell2ComboBox" SelectedIndex="0"
@@ -560,7 +560,7 @@
                                         <Label Foreground="White" Content="서버초월링크쉘3"/>
                                         <Button Name="CWLinkShell3ShowButton" Width="24" Height="24"
                                                 Click="CWLinkShell3ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="CWLinkShell3ComboBox" SelectedIndex="0"
@@ -571,7 +571,7 @@
                                         <Label Foreground="White" Content="서버초월링크쉘4"/>
                                         <Button Name="CWLinkShell4ShowButton" Width="24" Height="24"
                                                 Click="CWLinkShell4ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="CWLinkShell4ComboBox" SelectedIndex="0"
@@ -582,7 +582,7 @@
                                         <Label Foreground="White" Content="서버초월링크쉘5"/>
                                         <Button Name="CWLinkShell5ShowButton" Width="24" Height="24"
                                                 Click="CWLinkShell5ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="CWLinkShell5ComboBox" SelectedIndex="0"
@@ -593,7 +593,7 @@
                                         <Label Foreground="White" Content="서버초월링크쉘6"/>
                                         <Button Name="CWLinkShell6ShowButton" Width="24" Height="24"
                                                 Click="CWLinkShell6ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="CWLinkShell6ComboBox" SelectedIndex="0"
@@ -604,7 +604,7 @@
                                         <Label Foreground="White" Content="서버초월링크쉘7"/>
                                         <Button Name="CWLinkShell7ShowButton" Width="24" Height="24"
                                                 Click="CWLinkShell7ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="CWLinkShell7ComboBox" SelectedIndex="0"
@@ -615,7 +615,7 @@
                                         <Label Foreground="White" Content="서버초월링크쉘8"/>
                                         <Button Name="CWLinkShell8ShowButton" Width="24" Height="24"
                                                 Click="CWLinkShell8ShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="CWLinkShell8ComboBox" SelectedIndex="0"
@@ -632,11 +632,11 @@
                                         <!--<Label Foreground="White" Content=""/>-->
                                         <Button Name="SystemGroupShowButton" Width="24" Height="24"
                                                 Click="SystemGroupShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Button Name="SystemGroupHideButton" Width="24" Height="24"
                                                 Click="SystemGroupHideButton_Click">
-                                            <fa:ImageAwesome Icon="EyeSlash" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_EyeSlash" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="SystemGroupComboBox" SelectedIndex="0"
@@ -650,7 +650,7 @@
                                         <Label Foreground="White" Content="서버 공지"/>
                                         <Button Name="NoticeShowButton" Width="24" Height="24"
                                                 Click="NoticeShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="NoticeComboBox" SelectedIndex="0"
@@ -661,7 +661,7 @@
                                         <Label Foreground="White" Content="시스템"/>
                                         <Button Name="SystemShowButton" Width="24" Height="24"
                                                 Click="SystemShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="SystemComboBox" SelectedIndex="0"
@@ -672,7 +672,7 @@
                                         <Label Foreground="White" Content="에러"/>
                                         <Button Name="ErrorShowButton" Width="24" Height="24"
                                                 Click="ErrorShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="ErrorComboBox" SelectedIndex="0"
@@ -683,7 +683,7 @@
                                         <Label Foreground="White" Content="장터물품 판매"/>
                                         <Button Name="MarketSoldShowButton" Width="24" Height="24"
                                                 Click="MarketSoldShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="MarketSoldComboBox" SelectedIndex="0"
@@ -694,7 +694,7 @@
                                         <Label Foreground="White" Content="임무 모집"/>
                                         <Button Name="RecruitmentShowButton" Width="24" Height="24"
                                                 Click="RecruitmentShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="RecruitmentComboBox" SelectedIndex="0"
@@ -705,7 +705,7 @@
                                         <Label Foreground="White" Content="NPC 대사"/>
                                         <Button Name="NPCDialogShowButton" Width="24" Height="24"
                                                 Click="NPCDialogShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="NPCDialogComboBox" SelectedIndex="0"
@@ -716,7 +716,7 @@
                                         <Label Foreground="White" Content="NPC 공지"/>
                                         <Button Name="NPCAnnounceShowButton" Width="24" Height="24"
                                                 Click="NPCAnnounceShowButton_Click">
-                                            <fa:ImageAwesome Icon="Eye" Margin="2"/>
+                                            <fa5:SvgAwesome Icon="Solid_Eye" Margin="2"/>
                                         </Button>
                                         <Label Foreground="White" Content="상대방 언어"/>
                                         <ComboBox Name="NPCAnnounceComboBox" SelectedIndex="0"

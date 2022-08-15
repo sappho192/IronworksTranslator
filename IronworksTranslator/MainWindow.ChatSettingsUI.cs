@@ -1,8 +1,8 @@
-﻿using FontAwesome.WPF;
-using IronworksTranslator.Core;
+﻿using IronworksTranslator.Core;
 using Serilog;
 using System.Windows;
 using System.Windows.Controls;
+using FontAwesome5;
 
 namespace IronworksTranslator
 {
@@ -167,8 +167,8 @@ namespace IronworksTranslator
             {
                 if (ui is Button)
                 {
-                    var icon = ((Button)ui).Content as ImageAwesome;
-                    icon.Icon = show ? FontAwesomeIcon.Eye : FontAwesomeIcon.EyeSlash;
+                    var icon = ((Button)ui).Content as SvgAwesome;
+                    icon.Icon = show ? EFontAwesomeIcon.Solid_Eye : EFontAwesomeIcon.Solid_EyeSlash;
                 }
                 else if (ui is ComboBox)
                 {
@@ -200,16 +200,15 @@ namespace IronworksTranslator
             }
         }
 
-
-        private void DisplayFieldGroup(bool display, FontAwesomeIcon icon)
+        private void DisplayFieldGroup(bool display, EFontAwesomeIcon icon)
         {
-            (EmoteShowButton.Content as ImageAwesome).Icon = icon;
-            (TellShowButton.Content as ImageAwesome).Icon = icon;
-            (SayShowButton.Content as ImageAwesome).Icon = icon;
-            (YellShowButton.Content as ImageAwesome).Icon = icon;
-            (ShoutShowButton.Content as ImageAwesome).Icon = icon;
-            (PartyShowButton.Content as ImageAwesome).Icon = icon;
-            (AllianceShowButton.Content as ImageAwesome).Icon = icon;
+            (EmoteShowButton.Content as SvgAwesome).Icon = icon;
+            (TellShowButton.Content as SvgAwesome).Icon = icon;
+            (SayShowButton.Content as SvgAwesome).Icon = icon;
+            (YellShowButton.Content as SvgAwesome).Icon = icon;
+            (ShoutShowButton.Content as SvgAwesome).Icon = icon;
+            (PartyShowButton.Content as SvgAwesome).Icon = icon;
+            (AllianceShowButton.Content as SvgAwesome).Icon = icon;
 
             ironworksSettings.Chat.Emote.Show = display;
             ironworksSettings.Chat.Tell.Show = display;
@@ -222,32 +221,32 @@ namespace IronworksTranslator
 
         private void FieldGroupShowButton_Click(object sender, RoutedEventArgs e)
         {
-            DisplayFieldGroup(true, FontAwesomeIcon.Eye);
+            DisplayFieldGroup(true, EFontAwesomeIcon.Solid_Eye);
         }
 
         private void FieldGroupHideButton_Click(object sender, RoutedEventArgs e)
         {
-            DisplayFieldGroup(false, FontAwesomeIcon.EyeSlash);
+            DisplayFieldGroup(false, EFontAwesomeIcon.Solid_EyeSlash);
         }
 
-        private void ToggleChannelShowButton(ImageAwesome icon, Settings.Channel channel)
+        private void ToggleChannelShowButton(SvgAwesome icon, Settings.Channel channel)
         {
-            if (icon.Icon.Equals(FontAwesomeIcon.Eye))
+            if (icon.Icon.Equals(EFontAwesomeIcon.Solid_Eye))
             {
-                icon.Icon = FontAwesomeIcon.EyeSlash;
+                icon.Icon = EFontAwesomeIcon.Solid_EyeSlash;
                 channel.Show = false;
             }
             else
             {
-                icon.Icon = FontAwesomeIcon.Eye;
+                icon.Icon = EFontAwesomeIcon.Solid_Eye;
                 channel.Show = true;
             }
         }
 
-        private void DisplayCommunityGroup(bool display, FontAwesomeIcon icon)
+        private void DisplayCommunityGroup(bool display, EFontAwesomeIcon icon)
         {
-            (FreeCompanyShowButton.Content as ImageAwesome).Icon = icon;
-            (NoviceShowButton.Content as ImageAwesome).Icon = icon;
+            (FreeCompanyShowButton.Content as SvgAwesome).Icon = icon;
+            (NoviceShowButton.Content as SvgAwesome).Icon = icon;
 
             ironworksSettings.Chat.FreeCompany.Show = display;
             ironworksSettings.Chat.Novice.Show = display;
@@ -268,24 +267,24 @@ namespace IronworksTranslator
 
         private void LinkShellGroupShowButton_Click(object sender, RoutedEventArgs e)
         {
-            DisplayLinkShellGroup(true, FontAwesomeIcon.Eye);
+            DisplayLinkShellGroup(true, EFontAwesomeIcon.Solid_Eye);
         }
 
         private void LinkShellGroupHideButton_Click(object sender, RoutedEventArgs e)
         {
-            DisplayLinkShellGroup(false, FontAwesomeIcon.EyeSlash);
+            DisplayLinkShellGroup(false, EFontAwesomeIcon.Solid_EyeSlash);
         }
 
-        private void DisplayLinkShellGroup(bool display, FontAwesomeIcon icon)
+        private void DisplayLinkShellGroup(bool display, EFontAwesomeIcon icon)
         {
-            (LinkShell1ShowButton.Content as ImageAwesome).Icon = icon;
-            (LinkShell2ShowButton.Content as ImageAwesome).Icon = icon;
-            (LinkShell3ShowButton.Content as ImageAwesome).Icon = icon;
-            (LinkShell4ShowButton.Content as ImageAwesome).Icon = icon;
-            (LinkShell5ShowButton.Content as ImageAwesome).Icon = icon;
-            (LinkShell6ShowButton.Content as ImageAwesome).Icon = icon;
-            (LinkShell7ShowButton.Content as ImageAwesome).Icon = icon;
-            (LinkShell8ShowButton.Content as ImageAwesome).Icon = icon;
+            (LinkShell1ShowButton.Content as SvgAwesome).Icon = icon;
+            (LinkShell2ShowButton.Content as SvgAwesome).Icon = icon;
+            (LinkShell3ShowButton.Content as SvgAwesome).Icon = icon;
+            (LinkShell4ShowButton.Content as SvgAwesome).Icon = icon;
+            (LinkShell5ShowButton.Content as SvgAwesome).Icon = icon;
+            (LinkShell6ShowButton.Content as SvgAwesome).Icon = icon;
+            (LinkShell7ShowButton.Content as SvgAwesome).Icon = icon;
+            (LinkShell8ShowButton.Content as SvgAwesome).Icon = icon;
 
             ironworksSettings.Chat.LinkShell1.Show = display;
             ironworksSettings.Chat.LinkShell2.Show = display;
@@ -324,24 +323,24 @@ namespace IronworksTranslator
 
         private void CWLinkShellGroupShowButton_Click(object sender, RoutedEventArgs e)
         {
-            DisplayCWLinkShellGroup(true, FontAwesomeIcon.Eye);
+            DisplayCWLinkShellGroup(true, EFontAwesomeIcon.Solid_Eye);
         }
 
         private void CWLinkShellGroupHideButton_Click(object sender, RoutedEventArgs e)
         {
-            DisplayCWLinkShellGroup(false, FontAwesomeIcon.EyeSlash);
+            DisplayCWLinkShellGroup(false, EFontAwesomeIcon.Solid_EyeSlash);
         }
 
-        private void DisplayCWLinkShellGroup(bool display, FontAwesomeIcon icon)
+        private void DisplayCWLinkShellGroup(bool display, EFontAwesomeIcon icon)
         {
-            (CWLinkShell1ShowButton.Content as ImageAwesome).Icon = icon;
-            (CWLinkShell2ShowButton.Content as ImageAwesome).Icon = icon;
-            (CWLinkShell3ShowButton.Content as ImageAwesome).Icon = icon;
-            (CWLinkShell4ShowButton.Content as ImageAwesome).Icon = icon;
-            (CWLinkShell5ShowButton.Content as ImageAwesome).Icon = icon;
-            (CWLinkShell6ShowButton.Content as ImageAwesome).Icon = icon;
-            (CWLinkShell7ShowButton.Content as ImageAwesome).Icon = icon;
-            (CWLinkShell8ShowButton.Content as ImageAwesome).Icon = icon;
+            (CWLinkShell1ShowButton.Content as SvgAwesome).Icon = icon;
+            (CWLinkShell2ShowButton.Content as SvgAwesome).Icon = icon;
+            (CWLinkShell3ShowButton.Content as SvgAwesome).Icon = icon;
+            (CWLinkShell4ShowButton.Content as SvgAwesome).Icon = icon;
+            (CWLinkShell5ShowButton.Content as SvgAwesome).Icon = icon;
+            (CWLinkShell6ShowButton.Content as SvgAwesome).Icon = icon;
+            (CWLinkShell7ShowButton.Content as SvgAwesome).Icon = icon;
+            (CWLinkShell8ShowButton.Content as SvgAwesome).Icon = icon;
 
             ironworksSettings.Chat.CWLinkShell1.Show = display;
             ironworksSettings.Chat.CWLinkShell2.Show = display;
@@ -444,47 +443,47 @@ namespace IronworksTranslator
 
         private void EmoteShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Emote);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.Emote);
         }
 
         private void TellShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Tell);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.Tell);
         }
 
         private void SayShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Say);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.Say);
         }
 
         private void YellShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Yell);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.Yell);
         }
 
         private void ShoutShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Shout);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.Shout);
         }
 
         private void PartyShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Party);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.Party);
         }
 
         private void AllianceShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Alliance);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.Alliance);
         }
 
         private void CommunityGroupHideButton_Click(object sender, RoutedEventArgs e)
         {
-            DisplayCommunityGroup(false, FontAwesomeIcon.EyeSlash);
+            DisplayCommunityGroup(false, EFontAwesomeIcon.Solid_EyeSlash);
         }
 
         private void CommunityGroupShowButton_Click(object sender, RoutedEventArgs e)
         {
-            DisplayCommunityGroup(true, FontAwesomeIcon.Eye);
+            DisplayCommunityGroup(true, EFontAwesomeIcon.Solid_Eye);
         }
 
         private void FreeCompanyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -507,12 +506,12 @@ namespace IronworksTranslator
 
         private void FreeCompanyShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.FreeCompany);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.FreeCompany);
         }
 
         private void NoviceShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Novice);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.Novice);
         }
 
         private void LinkShell1ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -589,45 +588,45 @@ namespace IronworksTranslator
 
         private void LinkShell1ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.LinkShell1);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.LinkShell1);
         }
 
         private void LinkShell2ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.LinkShell2);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.LinkShell2);
         }
 
 
         private void LinkShell3ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.LinkShell3);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.LinkShell3);
         }
 
 
         private void LinkShell4ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.LinkShell4);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.LinkShell4);
         }
 
 
         private void LinkShell5ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.LinkShell5);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.LinkShell5);
         }
 
         private void LinkShell6ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.LinkShell6);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.LinkShell6);
         }
 
         private void LinkShell7ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.LinkShell7);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.LinkShell7);
         }
 
         private void LinkShell8ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.LinkShell8);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.LinkShell8);
         }
 
         private void CWLinkShell1ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -704,63 +703,63 @@ namespace IronworksTranslator
 
         private void CWLinkShell1ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.CWLinkShell1);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.CWLinkShell1);
         }
 
         private void CWLinkShell2ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.CWLinkShell2);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.CWLinkShell2);
         }
 
         private void CWLinkShell3ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.CWLinkShell3);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.CWLinkShell3);
         }
 
         private void CWLinkShell4ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.CWLinkShell4);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.CWLinkShell4);
         }
 
         private void CWLinkShell5ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.CWLinkShell5);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.CWLinkShell5);
         }
 
         private void CWLinkShell6ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.CWLinkShell6);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.CWLinkShell6);
         }
 
         private void CWLinkShell7ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.CWLinkShell7);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.CWLinkShell7);
         }
 
         private void CWLinkShell8ShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.CWLinkShell8);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.CWLinkShell8);
         }
 
         private void SystemGroupShowButton_Click(object sender, RoutedEventArgs e)
         {
-            DisplaySystemGroup(true, FontAwesomeIcon.Eye);
+            DisplaySystemGroup(true, EFontAwesomeIcon.Solid_Eye);
         }
 
         private void SystemGroupHideButton_Click(object sender, RoutedEventArgs e)
         {
-            DisplaySystemGroup(false, FontAwesomeIcon.EyeSlash);
+            DisplaySystemGroup(false, EFontAwesomeIcon.Solid_EyeSlash);
         }
 
-        private void DisplaySystemGroup(bool display, FontAwesomeIcon icon)
+        private void DisplaySystemGroup(bool display, EFontAwesomeIcon icon)
         {
-            (NoticeShowButton.Content as ImageAwesome).Icon = icon;
-            (SystemShowButton.Content as ImageAwesome).Icon = icon;
-            (ErrorShowButton.Content as ImageAwesome).Icon = icon;
-            (NPCDialogShowButton.Content as ImageAwesome).Icon = icon;
-            (NPCAnnounceShowButton.Content as ImageAwesome).Icon = icon;
-            (MarketSoldShowButton.Content as ImageAwesome).Icon = icon;
-            (RecruitmentShowButton.Content as ImageAwesome).Icon = icon;
+            (NoticeShowButton.Content as SvgAwesome).Icon = icon;
+            (SystemShowButton.Content as SvgAwesome).Icon = icon;
+            (ErrorShowButton.Content as SvgAwesome).Icon = icon;
+            (NPCDialogShowButton.Content as SvgAwesome).Icon = icon;
+            (NPCAnnounceShowButton.Content as SvgAwesome).Icon = icon;
+            (MarketSoldShowButton.Content as SvgAwesome).Icon = icon;
+            (RecruitmentShowButton.Content as SvgAwesome).Icon = icon;
 
             ironworksSettings.Chat.Notice.Show = display;
             ironworksSettings.Chat.System.Show = display;
@@ -795,37 +794,37 @@ namespace IronworksTranslator
         }
         private void NoticeShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Notice);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.Notice);
         }
 
         private void SystemShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.System);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.System);
         }
 
         private void ErrorShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Error);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.Error);
         }
 
         private void MarketSoldShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.MarketSold);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.MarketSold);
         }
 
         private void RecruitmentShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.Recruitment);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.Recruitment);
         }
 
         private void NPCDialogShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.NPCDialog);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.NPCDialog);
         }
 
         private void NPCAnnounceShowButton_Click(object sender, RoutedEventArgs e)
         {
-            ToggleChannelShowButton((sender as Button).Content as ImageAwesome, ironworksSettings.Chat.NPCAnnounce);
+            ToggleChannelShowButton((sender as Button).Content as SvgAwesome, ironworksSettings.Chat.NPCAnnounce);
         }
 
         private void NoticeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

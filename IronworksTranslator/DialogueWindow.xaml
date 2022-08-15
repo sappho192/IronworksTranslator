@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:IronworksTranslator"
-        xmlns:fa="http://schemas.fontawesome.io/icons/"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:fa5="http://schemas.fontawesome.com/icons/"
+        xmlns:Behaviors="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:core="clr-namespace:IronworksTranslator.Core"
         xmlns:ui="clr-namespace:IronworksTranslator.UI"
         xmlns:util="clr-namespace:IronworksTranslator.Util"
@@ -19,9 +19,9 @@
         Name="dialogueWindow"
         SizeChanged="dialogueWindow_SizeChanged"
         LocationChanged="dialogueWindow_LocationChanged">
-    <i:Interaction.Behaviors>
+    <Behaviors:Interaction.Behaviors>
         <ui:DragMoveBehavior/>
-    </i:Interaction.Behaviors>
+    </Behaviors:Interaction.Behaviors>
     <Grid Background="Transparent">
         <DockPanel>
             <!-- General toolbar -->
@@ -43,7 +43,7 @@
                                 BorderBrush="Transparent"
                                 Name="HideContentBackground"
                                 Click="HideContentBackground_Click">
-                            <fa:ImageAwesome Foreground="White" Icon="EyeSlash"/>
+                            <fa5:SvgAwesome Foreground="White" Icon="Solid_EyeSlash"/>
                         </Button>
                         <Slider Orientation="Horizontal"
                                 VerticalAlignment="Center"
@@ -62,7 +62,7 @@
                                 BorderBrush="Transparent"
                                 Name="ShowContentBackground"
                                 Click="ShowContentBackground_Click">
-                            <fa:ImageAwesome Foreground="White" Icon="Eye" />
+                            <fa5:SvgAwesome Foreground="White" Icon="Solid_Eye" />
                         </Button>
                     </StackPanel>
                 </DockPanel>
@@ -73,21 +73,21 @@
                             Foreground="White"
                             BorderBrush="#FF7C7C7C"
                                 Click="MinimizeButton_Click">
-                        <fa:ImageAwesome Foreground="White" Icon="WindowMinimize" Margin="4,12,4,0"/>
+                        <fa5:SvgAwesome Foreground="White" Icon="Solid_WindowMaximize" Margin="4,12,4,0"/>
                     </Button>
                     <Button Width="24" Height="24"
                             Background="#00000000"
                             Foreground="White"
                             BorderBrush="#FF7C7C7C"
                             Click="CloseButton_Click">
-                        <fa:ImageAwesome Foreground="White" Icon="PowerOff" Margin="2"/>
+                        <fa5:SvgAwesome Foreground="White" Icon="Solid_PowerOff" Margin="2"/>
                     </Button>
                     <Button Width="24" Height="24" 
                             IsEnabled="True"
                             Background="Transparent"
                             BorderBrush="Transparent"
                             Foreground="Transparent">
-                        <fa:ImageAwesome Icon="None" Margin="2"/>
+                        <fa5:SvgAwesome Icon="None" Margin="2"/>
                     </Button>
                 </StackPanel>
             </Grid>
@@ -129,7 +129,7 @@
                             Foreground="White"
                             BorderBrush="#FF7C7C7C"
                         Click="CollapseButton_Click">
-                        <fa:ImageAwesome Foreground="White" Icon="Bars" Margin="2"/>
+                        <fa5:SvgAwesome Foreground="White" Icon="Solid_Bars" Margin="2"/>
                     </Button>
                 </Grid>
                 <!--<Grid Grid.Row="0" Panel.ZIndex="2"
