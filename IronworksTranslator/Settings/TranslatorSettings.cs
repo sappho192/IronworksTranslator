@@ -17,6 +17,7 @@ namespace IronworksTranslator.Settings
             NativeLanguage = ClientLanguage.Korean;
             DialogueLanguage = ClientLanguage.Japanese;
             DefaultDialogueTranslationMethod = 0; // Memory Search
+            UseInternalAddress = false;
         }
 
 
@@ -75,12 +76,29 @@ namespace IronworksTranslator.Settings
                 }
             }
         }
+
+        [JsonProperty]
+        public bool UseInternalAddress
+        {
+            get => useInternalAddress;
+            set
+            {
+                if (value != useInternalAddress)
+                {
+                    useInternalAddress = value;
+                    OnSettingsChanged?.Invoke(this, nameof(UseInternalAddress), UseInternalAddress);
+                }
+            }
+        }
+
         private ClientLanguage dialogueLanguage;
 
         private TranslatorEngine defaultTranslatorEngine;
         private ClientLanguage nativeLanguage;
 
         private DialogueTranslationMethod dialogueTranslationMethod;
+
+        private bool useInternalAddress;
 
         public event SettingsChangedEventHandler OnSettingsChanged;
     }
