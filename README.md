@@ -17,7 +17,7 @@ NPC 대사 번역
 Windows 10 64bit
 
 ## 요구 환경
-.Net Framework 4.7.2 (다운로드: http://go.microsoft.com/fwlink/?linkid=863265 )
+.NET 6 (다운로드: https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-6.0.8-windows-x64-installer )
 
 1. 파판14를 DirectX11 모드로 실행한다.  
 2. IronworksTranslator.exe를 실행한다.  
@@ -29,7 +29,7 @@ Windows 10 64bit
 오류 제보, 기능 추가 문의는 https://github.com/sappho192/IronworksTranslator/issues 혹은 [Discord](https://discord.gg/HJ8Y2sMjfu)로 문의바랍니다.
 
 ## 다운로드
-최신 버전(0.0.7): [다운로드](https://github.com/sappho192/IronworksTranslator/releases/download/0.0.7/IronworksTranslator.v0.0.7.zip)
+최신 버전(0.0.9): [다운로드](https://github.com/sappho192/IronworksTranslator/releases/download/0.0.9/IronworksTranslator.v0.0.9.zip)
 [변경 내역](https://github.com/sappho192/IronworksTranslator/releases)
 
 ## 사용 방법
