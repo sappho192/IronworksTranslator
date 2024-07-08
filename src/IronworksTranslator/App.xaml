@@ -12,6 +12,12 @@
                 <ui:ThemesDictionary Theme="Light" />
                 <ui:ControlsDictionary />
             </ResourceDictionary.MergedDictionaries>
+            <FontFamily x:Key="KoPubWorldDotumLight">Fonts/KoPubWorld Dotum Light.ttf#KoPubWorld Dotum</FontFamily>
+            <FontFamily x:Key="KoPubWorldDotumBold">Fonts/KoPubWorld Dotum Bold.ttf#KoPubWorld Dotum</FontFamily>
+            <FontFamily x:Key="KoPubWorldDotum">Fonts/KoPubWorld Dotum Medium.ttf#KoPubWorld Dotum</FontFamily>
+            <Style x:Key="PageAll" TargetType="{x:Type Page}">
+                <Setter Property="FontFamily" Value="{StaticResource KoPubWorldDotum}" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

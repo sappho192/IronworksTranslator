@@ -37,6 +37,9 @@
   <ItemGroup>
     <None Remove="Assets\wpfui-icon-256.png" />
     <None Remove="Assets\wpfui-icon-1024.png" />
+    <None Remove="Fonts\KoPubWorld Dotum Bold.ttf" />
+    <None Remove="Fonts\KoPubWorld Dotum Light.ttf" />
+    <None Remove="Fonts\KoPubWorld Dotum Medium.ttf" />
     <None Remove="Resources\Strings\en-US.yaml" />
     <None Remove="Resources\Strings\ko-KR.yaml" />
   </ItemGroup>
@@ -53,6 +56,15 @@
   <ItemGroup>
     <Resource Include="Assets\wpfui-icon-256.png" />
     <Resource Include="Assets\wpfui-icon-1024.png" />
+    <Resource Include="Fonts\KoPubWorld Dotum Bold.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Fonts\KoPubWorld Dotum Light.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Fonts\KoPubWorld Dotum Medium.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>
