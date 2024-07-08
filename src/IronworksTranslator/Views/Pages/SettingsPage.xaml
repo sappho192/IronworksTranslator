@@ -12,8 +12,8 @@
     Style="{StaticResource PageAll}"
     d:DataContext="{d:DesignInstance local:SettingsPage,
                                      IsDesignTimeCreatable=False}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DesignHeight="550"
+    d:DesignWidth="900"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -23,26 +23,62 @@
     </Page.Resources>
 
     <TabControl Margin="0,48,0,16">
-        <StackPanel>
-            <TextBlock FontSize="20" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general}" />
-            <TextBlock Margin="0,12,0,0" Text="{i18n:StringLocalizer settings.general.theme}" />
-            <RadioButton
-                Margin="0,12,0,0"
-                Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
-                CommandParameter="theme_light"
-                Content="{i18n:StringLocalizer settings.general.theme.light}"
-                GroupName="themeSelect"
-                IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}" />
-            <RadioButton
-                Margin="0,8,0,0"
-                Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
-                CommandParameter="theme_dark"
-                Content="{i18n:StringLocalizer settings.general.theme.dark}"
-                GroupName="themeSelect"
-                IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}" />
+        <TabItem Name="General">
+            <TabItem.Header>
+                <ui:TextBlock Text="{i18n:StringLocalizer settings.general}" FontWeight="Bold" FontTypography="Caption"/>
+            </TabItem.Header>
+            <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
+                <StackPanel>
+                    <ui:TextBlock FontTypography="Subtitle" Text="{i18n:StringLocalizer settings.general.theme}"/>
+                    <RadioButton
+                        Margin="0,12,0,0"
+                        Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
+                        CommandParameter="theme_light"
+                        Content="{i18n:StringLocalizer settings.general.theme.light}"
+                        GroupName="themeSelect"
+                        IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}" />
+                    <RadioButton
+                        Margin="0,8,0,0"
+                        Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
+                        CommandParameter="theme_dark"
+                        Content="{i18n:StringLocalizer settings.general.theme.dark}"
+                        GroupName="themeSelect"
+                        IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}" />
 
-            <TextBlock Margin="0,24,0,0" FontSize="20" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.app_info}" />
-            <TextBlock Margin="0,12,0,0" Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
-        </StackPanel>
+                    <TextBlock Margin="0,24,0,0" FontSize="20" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.app_info}" />
+                    <TextBlock Margin="0,12,0,0" Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
+                </StackPanel>
+            </ui:Card>
+        </TabItem>
+        <TabItem Name="ChatAppearance">
+            <TabItem.Header>
+                <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat}" FontWeight="Bold" FontTypography="Caption"/>
+            </TabItem.Header>
+            <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
+                <StackPanel>
+                    <Label Content="aaa"/>
+                </StackPanel>
+            </ui:Card>
+        </TabItem>
+        <TabItem Name="Translator">
+            <TabItem.Header>
+                <ui:TextBlock Text="{i18n:StringLocalizer settings.translator}" FontWeight="Bold" FontTypography="Caption"/>
+            </TabItem.Header>
+            <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
+                <StackPanel>
+                    <Label Content="bbb"/>
+                </StackPanel>
+            </ui:Card>
+        </TabItem>
+        <TabItem Name="Channel">
+            <TabItem.Header>
+                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel}" FontWeight="Bold" FontTypography="Caption"/>
+            </TabItem.Header>
+            <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
+                <StackPanel>
+                    <Label Content="bbb"/>
+                </StackPanel>
+            </ui:Card>
+        </TabItem>
     </TabControl>
 </Page>

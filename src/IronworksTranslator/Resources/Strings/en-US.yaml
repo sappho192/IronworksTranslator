@@ -7,6 +7,8 @@ remove: "Remove"
 yes: "Yes"
 no: "No"
 
+version: "Version"
+
 main.navigation.home: "Dashboard"
 main.navigation.settings: "Settings"
 
@@ -27,6 +29,12 @@ settings.general.theme.dark: "Dark"
 settings.general.language: "Language"
 settings.general.language.comment: "Takes effect after the program restarts."
 settings.general.app_info: "About IronworksTranslator"
+
+settings.ui.chat: "Chat UI"
+
+settings.translator: "Translator"
+
+settings.channel: "Channels"
 
 settings.game: "In-game information"
 settings.game.chat: "Chat"

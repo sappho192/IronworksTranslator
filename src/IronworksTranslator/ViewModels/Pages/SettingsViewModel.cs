@@ -1,4 +1,5 @@
-﻿using Wpf.Ui.Appearance;
+﻿using IronworksTranslator.Utils;
+using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 
 namespace IronworksTranslator.ViewModels.Pages
@@ -24,7 +25,7 @@ namespace IronworksTranslator.ViewModels.Pages
         private void InitializeViewModel()
         {
             CurrentTheme = ApplicationThemeManager.GetAppTheme();
-            AppVersion = $"UiDesktopApp1 - {GetAssemblyVersion()}";
+            AppVersion = $"{Localizer.GetString("version")}: {GetAssemblyVersion()}";
 
             _isInitialized = true;
         }
