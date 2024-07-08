@@ -8,7 +8,7 @@ namespace IronworksTranslator.ViewModels.Pages
         private bool _isInitialized = false;
 
         [ObservableProperty]
-        private string _appVersion = String.Empty;
+        private string _appVersion = string.Empty;
 
         [ObservableProperty]
         private ApplicationTheme _currentTheme = ApplicationTheme.Unknown;
@@ -29,10 +29,10 @@ namespace IronworksTranslator.ViewModels.Pages
             _isInitialized = true;
         }
 
-        private string GetAssemblyVersion()
+        private static string GetAssemblyVersion()
         {
-            return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString()
-                ?? String.Empty;
+            return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3)
+                ?? string.Empty;
         }
 
         [RelayCommand]

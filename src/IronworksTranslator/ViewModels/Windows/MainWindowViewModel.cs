@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using IronworksTranslator.Utils;
+using System.Collections.ObjectModel;
 using Wpf.Ui.Controls;
 
 namespace IronworksTranslator.ViewModels.Windows
@@ -6,34 +7,34 @@ namespace IronworksTranslator.ViewModels.Windows
     public partial class MainWindowViewModel : ObservableObject
     {
         [ObservableProperty]
-        private string _applicationTitle = "IronworksTranslator";
+        private string _applicationTitle = Localizer.GetString("app.name");
 
         [ObservableProperty]
-        private ObservableCollection<object> _menuItems = new()
-        {
+        private ObservableCollection<object> _menuItems =
+        [
             new NavigationViewItem()
             {
-                Content = "Home",
+                Content = Localizer.GetString("main.navigation.home"),
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Home24 },
                 TargetPageType = typeof(Views.Pages.DashboardPage)
             },
-        };
+        ];
 
         [ObservableProperty]
-        private ObservableCollection<object> _footerMenuItems = new()
-        {
+        private ObservableCollection<object> _footerMenuItems =
+        [
             new NavigationViewItem()
             {
-                Content = "Settings",
+                Content = Localizer.GetString("main.navigation.settings"),
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Settings24 },
                 TargetPageType = typeof(Views.Pages.SettingsPage)
             }
-        };
+        ];
 
         [ObservableProperty]
-        private ObservableCollection<MenuItem> _trayMenuItems = new()
-        {
+        private ObservableCollection<MenuItem> _trayMenuItems =
+        [
             new MenuItem { Header = "Home", Tag = "tray_home" }
-        };
+        ];
     }
 }

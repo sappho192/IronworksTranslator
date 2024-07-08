@@ -1,11 +1,15 @@
 ﻿using IronworksTranslator.Services;
+using IronworksTranslator.Utils;
 using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.ViewModels.Windows;
 using IronworksTranslator.Views.Pages;
 using IronworksTranslator.Views.Windows;
+using Lepo.i18n.DependencyInjection;
+using Lepo.i18n.Yaml;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using System.IO;
 using System.Reflection;
 using System.Windows.Threading;
@@ -25,10 +29,18 @@ namespace IronworksTranslator
         // https://docs.microsoft.com/dotnet/core/extensions/logging
         private static readonly IHost _host = Host
             .CreateDefaultBuilder()
-            .ConfigureAppConfiguration(c => { c.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)); })
+            .ConfigureAppConfiguration(c => { c.SetBasePath(Path.GetDirectoryName(AppContext.BaseDirectory)); })
             .ConfigureServices((context, services) =>
             {
                 services.AddHostedService<ApplicationHostService>();
+
+                // Add i18n
+                services.AddStringLocalizer(b =>
+                {
+                    b.FromYaml(Assembly.GetExecutingAssembly(), "Resources/Strings/ko-KR.yaml", new("ko-KR"));
+                    b.FromYaml(Assembly.GetExecutingAssembly(), "Resources/Strings/en-US.yaml", new("en-US"));
+                });
+                Localizer.ChangeLanguage("ko-KR");
 
                 // Page resolver service
                 services.AddSingleton<IPageService, PageService>();
@@ -42,14 +54,15 @@ namespace IronworksTranslator
                 // Service containing navigation, same as INavigationWindow... but without window
                 services.AddSingleton<INavigationService, NavigationService>();
 
+                // Dialog manipulation
+                services.AddSingleton<IContentDialogService, ContentDialogService>();
+
                 // Main window with navigation
                 services.AddSingleton<INavigationWindow, MainWindow>();
                 services.AddSingleton<MainWindowViewModel>();
 
                 services.AddSingleton<DashboardPage>();
                 services.AddSingleton<DashboardViewModel>();
-                services.AddSingleton<DataPage>();
-                services.AddSingleton<DataViewModel>();
                 services.AddSingleton<SettingsPage>();
                 services.AddSingleton<SettingsViewModel>();
             }).Build();
@@ -70,6 +83,9 @@ namespace IronworksTranslator
         /// </summary>
         private void OnStartup(object sender, StartupEventArgs e)
         {
+            InitLogger();
+            // LoadSettings();
+
             _host.Start();
         }
 
@@ -78,8 +94,9 @@ namespace IronworksTranslator
         /// </summary>
         private async void OnExit(object sender, ExitEventArgs e)
         {
-            await _host.StopAsync();
+            Log.Information("IronworksTranslator is closing.");
 
+            await _host.StopAsync();
             _host.Dispose();
         }
 
@@ -89,6 +106,32 @@ namespace IronworksTranslator
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
+        }
+
+        public static void RequestShutdown()
+        {
+            _host.StopAsync().Wait();
+            Log.Information("IronworksTranslator is closing.");
+            Log.CloseAndFlush();
+            _host.Dispose();
+
+            Current.Shutdown();
+        }
+
+        private static void InitLogger()
+        {
+            /*
+             Enabled Log levels: Debug, Information, Warning, Error, Fatal
+             Disabled Log levels: Verbose
+             */
+
+            // Logging
+            var date = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.File($"logs/{date}.txt")
+                .CreateLogger();
+            Log.Information($"IronworksTranslator {Assembly.GetExecutingAssembly().GetName().Version.ToString(3)} started.");
         }
     }
 }

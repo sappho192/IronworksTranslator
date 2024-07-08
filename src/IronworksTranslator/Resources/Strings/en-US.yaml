@@ -1,0 +1,29 @@
+﻿---
+app.name: "IronworksTranslator"
+
+add: "Add"
+remove: "Remove"
+
+yes: "Yes"
+no: "No"
+
+main.navigation.home: "Dashboard"
+main.navigation.settings: "Settings"
+
+main.update.title: "Update available"
+main.update.description: "**A new version of IronworksTranslator is available. Would you like to download?**"
+main.update.current_version: "Current version: "
+main.update.latest_version: "New version: "
+
+settings.general: "General"
+settings.general.theme: "Theme"
+settings.general.theme.light: "Light"
+settings.general.theme.dark: "Dark"
+settings.general.language: "Language"
+settings.general.language.comment: "Takes effect after the program restarts."
+settings.general.app_info: "About IronworksTranslator"
+
+settings.game: "In-game information"
+settings.game.chat: "Chat"
+settings.game.chat.ignored_players_list: "Ignore following player's chat (Click to edit)"
+settings.game.chat.enabled_channels_list: "Read chat from following channel (Click to edit)"

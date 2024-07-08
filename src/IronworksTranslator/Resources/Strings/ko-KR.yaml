@@ -1,0 +1,30 @@
+﻿---
+app.name: "IronworksTranslator"
+
+add: "추가"
+remove: "제거"
+
+yes: "예"
+no: "아니요"
+
+main.navigation.home: "대시보드"
+main.navigation.settings: "설정"
+
+main.update.title: "업데이트 가능"
+main.update.description: "**IronworksTranslator의 새 버전이 있습니다. 다운로드 하시겠습니까?**"
+main.update.current_version: "현재 버전: "
+main.update.latest_version: "새 버전: "
+
+settings.general: "일반"
+settings.general.theme: "테마"
+settings.general.theme.light: "밝게"
+settings.general.theme.dark: "어둡게"
+settings.general.ui.language: "UI 언어"
+settings.general.ui.language.comment: "프로그램 재시작 후에 적용됩니다."
+settings.general.app_info: "IronworksTranslator 정보"
+
+settings.game: "게임 내 정보"
+settings.game.chat: "채팅"
+settings.game.chat.ignored_players_list: "채팅을 번역하지 않을 플레이어 목록 (클릭하여 편집)"
+settings.game.chat.enabled_channels_list: "TTS로 읽을 채널 목록 (클릭하여 편집)"
+
