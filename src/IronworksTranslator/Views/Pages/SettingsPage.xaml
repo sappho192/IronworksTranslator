@@ -7,6 +7,7 @@
     xmlns:local="clr-namespace:IronworksTranslator.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:i18n="http://schemas.lepo.co/i18n/2022/xaml"
     Title="SettingsPage"
     Style="{StaticResource PageAll}"
     d:DataContext="{d:DesignInstance local:SettingsPage,
@@ -21,32 +22,27 @@
         <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
     </Page.Resources>
 
-    <StackPanel>
-        <TextBlock
-            FontSize="20"
-            FontWeight="Medium"
-            Text="Personalization" />
-        <TextBlock Margin="0,12,0,0" Text="Theme" />
-        <RadioButton
-            Margin="0,12,0,0"
-            Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
-            CommandParameter="theme_light"
-            Content="Light"
-            GroupName="themeSelect"
-            IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}" />
-        <RadioButton
-            Margin="0,8,0,0"
-            Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
-            CommandParameter="theme_dark"
-            Content="Dark"
-            GroupName="themeSelect"
-            IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}" />
+    <TabControl Margin="0,48,0,16">
+        <StackPanel>
+            <TextBlock FontSize="20" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general}" />
+            <TextBlock Margin="0,12,0,0" Text="{i18n:StringLocalizer settings.general.theme}" />
+            <RadioButton
+                Margin="0,12,0,0"
+                Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
+                CommandParameter="theme_light"
+                Content="{i18n:StringLocalizer settings.general.theme.light}"
+                GroupName="themeSelect"
+                IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}" />
+            <RadioButton
+                Margin="0,8,0,0"
+                Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
+                CommandParameter="theme_dark"
+                Content="{i18n:StringLocalizer settings.general.theme.dark}"
+                GroupName="themeSelect"
+                IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}" />
 
-        <TextBlock
-            Margin="0,24,0,0"
-            FontSize="20"
-            FontWeight="Medium"
-            Text="About IronworksTranslator" />
-        <TextBlock Margin="0,12,0,0" Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
-    </StackPanel>
+            <TextBlock Margin="0,24,0,0" FontSize="20" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.app_info}" />
+            <TextBlock Margin="0,12,0,0" Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
+        </StackPanel>
+    </TabControl>
 </Page>

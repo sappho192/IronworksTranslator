@@ -14,7 +14,6 @@ namespace IronworksTranslator.ViewModels.Windows
         [
             new NavigationViewItem()
             {
-                Content = Localizer.GetString("main.navigation.home"),
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Home24 },
                 TargetPageType = typeof(Views.Pages.DashboardPage)
             },

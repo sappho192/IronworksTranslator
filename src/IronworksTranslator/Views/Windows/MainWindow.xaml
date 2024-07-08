@@ -7,12 +7,16 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="{Binding ViewModel.ApplicationTitle, Mode=OneWay}"
-    Width="1100"
-    Height="650"
+    MinWidth="750"
+    MinHeight="500"
+    Width="850"
+    Height="550"
+    MaxWidth="1080"
+    MaxHeight="800"
     d:DataContext="{d:DesignInstance local:MainWindow,
                                      IsDesignTimeCreatable=True}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DesignWidth="850"
+    d:DesignHeight="550"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     ExtendsContentIntoTitleBar="True"
@@ -38,7 +42,7 @@
             MenuItemsSource="{Binding ViewModel.MenuItems, Mode=OneWay}"
             PaneDisplayMode="LeftFluent">
             <ui:NavigationView.Header>
-                <ui:BreadcrumbBar x:Name="BreadcrumbBar" Margin="42,32,42,20" />
+                <ui:BreadcrumbBar x:Name="BreadcrumbBar" Margin="42,32,42,20" Visibility="Collapsed"/>
             </ui:NavigationView.Header>
             <ui:NavigationView.ContentOverlay>
                 <Grid>

@@ -6,6 +6,7 @@
     xmlns:local="clr-namespace:IronworksTranslator.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:i18n="http://schemas.lepo.co/i18n/2022/xaml"
     Title="DashboardPage"
     Style="{StaticResource PageAll}"
     d:DataContext="{d:DesignInstance local:DashboardPage,
@@ -18,20 +19,43 @@
     mc:Ignorable="d">
 
     <Grid VerticalAlignment="Top">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="2*" />
+        </Grid.RowDefinitions>
 
-        <ui:Button
-            Grid.Column="0"
-            Command="{Binding ViewModel.CounterIncrementCommand, Mode=OneWay}"
-            Content="Click me!"
-            Icon="Fluent24" />
-        <TextBlock
-            Grid.Column="1"
-            Margin="12,0,0,0"
-            VerticalAlignment="Center"
-            Text="{Binding ViewModel.Counter, Mode=OneWay}" />
+        <Grid Margin="0,48,0,0" Grid.Row="0" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+            <ui:SymbolIcon
+                    Grid.Column="0"
+                    Symbol="{Binding ViewModel.TranslatorIcon, FallbackValue=DesktopSpeakerOff20}"
+                    FontSize="80"/>
+            <StackPanel Grid.Column="1"
+                VerticalAlignment="Center" HorizontalAlignment="Left">
+                <ui:ToggleSwitch 
+                    IsChecked="{Binding ViewModel.IsTranslatorActive, Mode=TwoWay}"
+                    Command="{Binding ViewModel.TranslatorToggleCommand, Mode=OneWay}"/>
+                <Border Height="16"/>
+                <ui:TextBlock FontTypography="Subtitle" Text="{Binding ViewModel.TranslatorToogleState, FallbackValue=Translator disabled}" />
+                <ui:TextBlock FontTypography="Caption" Text="{Binding ViewModel.TranslatorToogleStateDescription, FallbackValue=Please enable the translator.}" />
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <ui:Card VerticalAlignment="Top" Margin="16">
+                </ui:Card>
+            </Grid>
+            <Grid Grid.Column="1">
+                <ui:Card VerticalAlignment="Top" Margin="16">
+                </ui:Card>
+            </Grid>
+        </Grid>
     </Grid>
 </Page>
