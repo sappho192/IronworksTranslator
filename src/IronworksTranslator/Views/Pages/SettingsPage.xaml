@@ -28,7 +28,7 @@
                 <ui:TextBlock Text="{i18n:StringLocalizer settings.general}" FontWeight="Bold" FontTypography="Caption"/>
             </TabItem.Header>
             <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
-                <StackPanel>
+                <StackPanel Orientation="Vertical">
                     <ui:TextBlock FontTypography="Subtitle" Text="{i18n:StringLocalizer settings.general.theme}"/>
                     <RadioButton
                         Margin="0,12,0,0"
@@ -55,8 +55,20 @@
                 <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat}" FontWeight="Bold" FontTypography="Caption"/>
             </TabItem.Header>
             <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
-                <StackPanel>
-                    <Label Content="aaa"/>
+                <StackPanel Orientation="Vertical">
+                    <ui:CardControl Icon="{ui:SymbolIcon LocalLanguage24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.font.size}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ComboBox/>
+                    </ui:CardControl>
+                    <ui:CardControl Icon="{ui:SymbolIcon LocalLanguage24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.font.family}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ComboBox/>
+                    </ui:CardControl>
+                    <ui:TextBox Text="{Binding ViewModel.ExampleChatBox, FallbackValue=Lorem Ipsum}" IsReadOnly="True"/>
                 </StackPanel>
             </ui:Card>
         </TabItem>
@@ -65,8 +77,25 @@
                 <ui:TextBlock Text="{i18n:StringLocalizer settings.translator}" FontWeight="Bold" FontTypography="Caption"/>
             </TabItem.Header>
             <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
-                <StackPanel>
-                    <Label Content="bbb"/>
+                <StackPanel Orientation="Vertical">
+                    <ui:CardControl Icon="{ui:SymbolIcon LocalLanguage24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.client_language}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ComboBox/>
+                    </ui:CardControl>
+                    <ui:CardControl Icon="{ui:SymbolIcon ServerSurface16}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ComboBox/>
+                    </ui:CardControl>
+                    <ui:CardControl Icon="{ui:SymbolIcon Search24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.dialogue.translation_method}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ComboBox/>
+                    </ui:CardControl>
                 </StackPanel>
             </ui:Card>
         </TabItem>
@@ -75,8 +104,62 @@
                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel}" FontWeight="Bold" FontTypography="Caption"/>
             </TabItem.Header>
             <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
-                <StackPanel>
-                    <Label Content="bbb"/>
+                <StackPanel Orientation="Vertical">
+                    <ui:CardExpander>
+                        <ui:CardExpander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" />
+                            </StackPanel>
+                        </ui:CardExpander.Header>
+                    </ui:CardExpander>
+                    <ui:CardExpander>
+                        <ui:CardExpander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.community}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" />
+                            </StackPanel>
+                        </ui:CardExpander.Header>
+                    </ui:CardExpander>
+                    <ui:CardExpander>
+                        <ui:CardExpander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" />
+                            </StackPanel>
+                        </ui:CardExpander.Header>
+                    </ui:CardExpander>
+                    <ui:CardExpander>
+                        <ui:CardExpander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" />
+                            </StackPanel>
+                        </ui:CardExpander.Header>
+                    </ui:CardExpander>
+                    <ui:CardExpander>
+                        <ui:CardExpander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" />
+                            </StackPanel>
+                        </ui:CardExpander.Header>
+                    </ui:CardExpander>
                 </StackPanel>
             </ui:Card>
         </TabItem>

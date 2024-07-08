@@ -13,6 +13,8 @@ namespace IronworksTranslator.ViewModels.Pages
 
         [ObservableProperty]
         private ApplicationTheme _currentTheme = ApplicationTheme.Unknown;
+        [ObservableProperty]
+        private string _exampleChatBox = $"이프 저격하는 무작위 레벨링 가실 분~{Environment.NewLine}エキルレ行く方いますか？{Environment.NewLine}Mechanics are for Cars KUPO!{Environment.NewLine}제작자: 사포 (sappho192@gmail.com)";
 
         public void OnNavigatedTo()
         {

@@ -31,10 +31,21 @@ settings.general.ui.language.comment: "프로그램 재시작 후에 적용됩�
 settings.general.app_info: "앱 정보"
 
 settings.ui.chat: "채팅 UI"
+settings.ui.chat.font.size: "채팅 글자 크기"
+settings.ui.chat.font.family: "채팅 글꼴"
 
 settings.translator: "번역기"
+settings.translator.client_language: "모국어"
+settings.translator.engine: "번역 엔진"
+settings.translator.dialogue.translation_method: "NPC 대사 탐색 방식"
 
 settings.channel: "채널별 설정"
+settings.channel.party_field: "파티, 필드"
+settings.channel.community: "커뮤니티"
+settings.channel.linkshell: "링크쉘"
+settings.channel.cw_linkshell: "서버 초월 링크쉘"
+settings.channel.system: "시스템"
+settings.channel.language: "채널 언어: "
 
 settings.game: "게임 내 정보"
 settings.game.chat: "채팅"

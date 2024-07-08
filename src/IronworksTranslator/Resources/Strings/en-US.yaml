@@ -31,10 +31,21 @@ settings.general.language.comment: "Takes effect after the program restarts."
 settings.general.app_info: "About IronworksTranslator"
 
 settings.ui.chat: "Chat UI"
+settings.ui.chat.font.size: "Font size"
+settings.ui.chat.font.family: "Font family"
 
 settings.translator: "Translator"
+settings.translator.client_language: "My language"
+settings.translator.engine: "Translator Engine"
+settings.translator.dialogue.translation_method: "Method of searching NPC dialogue"
 
 settings.channel: "Channels"
+settings.channel.party_field: "Party, Field"
+settings.channel.community: "Community"
+settings.channel.linkshell: "Linkshell"
+settings.channel.cw_linkshell: "Crossworld Linkshell"
+settings.channel.system: "System"
+settings.channel.language: "Channel Language: "
 
 settings.game: "In-game information"
 settings.game.chat: "Chat"
