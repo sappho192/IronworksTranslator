@@ -1,10 +1,11 @@
-﻿using IronworksTranslator.Utils;
+﻿using IronworksTranslator.Models.Settings;
+using IronworksTranslator.Utils;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 
 namespace IronworksTranslator.ViewModels.Pages
 {
-    public partial class SettingsViewModel : ObservableObject, INavigationAware
+    public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         private bool _isInitialized = false;
 
@@ -12,7 +13,8 @@ namespace IronworksTranslator.ViewModels.Pages
         private string _appVersion = string.Empty;
 
         [ObservableProperty]
-        private ApplicationTheme _currentTheme = ApplicationTheme.Unknown;
+        [NotifyPropertyChangedRecipients]
+        private ApplicationTheme _currentTheme = IronworksSettings.Instance.UiSettings.Theme;
         [ObservableProperty]
         private string _exampleChatBox = $"이프 저격하는 무작위 레벨링 가실 분~{Environment.NewLine}エキルレ行く方いますか？{Environment.NewLine}Mechanics are for Cars KUPO!{Environment.NewLine}제작자: 사포 (sappho192@gmail.com)";
 

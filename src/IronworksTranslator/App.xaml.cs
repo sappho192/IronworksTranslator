@@ -84,7 +84,6 @@ namespace IronworksTranslator
         private void OnStartup(object sender, StartupEventArgs e)
         {
             InitLogger();
-            // LoadSettings();
 
             _host.Start();
         }

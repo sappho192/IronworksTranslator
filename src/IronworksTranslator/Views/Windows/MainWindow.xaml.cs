@@ -1,4 +1,5 @@
-﻿using IronworksTranslator.ViewModels.Windows;
+﻿using IronworksTranslator.Models.Settings;
+using IronworksTranslator.ViewModels.Windows;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
@@ -21,6 +22,9 @@ namespace IronworksTranslator.Views.Windows
             SystemThemeWatcher.Watch(this);
 
             InitializeComponent();
+
+            ApplicationThemeManager.Apply(IronworksSettings.Instance.UiSettings.Theme);
+
             SetPageService(pageService);
 
             navigationService.SetNavigationControl(RootNavigation);

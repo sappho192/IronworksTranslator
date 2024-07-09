@@ -1,8 +1,12 @@
-﻿using IronworksTranslator.Views.Pages;
+﻿using IronworksTranslator.Models.Settings;
+using IronworksTranslator.Utils;
 using IronworksTranslator.Views.Windows;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Wpf.Ui;
+using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.Serialization;
+using System.IO;
+using Serilog;
 
 namespace IronworksTranslator.Services
 {
@@ -18,6 +22,44 @@ namespace IronworksTranslator.Services
         public ApplicationHostService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
+            LoadSettings();
+        }
+
+
+        private static void LoadSettings()
+        {
+            var fileName = "settings.yaml";
+            if (!File.Exists(fileName))
+            {
+                var settings = IronworksSettings.CreateDefault();
+                IronworksSettings.Instance = settings;
+                IronworksSettings.UpdateSettingsFile(settings);
+            }
+            else
+            {
+                var deserializer = new DeserializerBuilder()
+                                    .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                                    .Build();
+                var settings = deserializer.Deserialize<IronworksSettings>(
+                    File.ReadAllText("settings.yaml")
+                );
+                if (settings == null || settings.UiSettings == null)
+                {
+                    Log.Error("Failed to load settings.");
+                    if (MessageBox.Show(Localizer.GetString("app.settings.failed_to_load"), "Error", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+                    {
+                        settings = IronworksSettings.CreateDefault();
+                        IronworksSettings.Instance = settings;
+                        IronworksSettings.UpdateSettingsFile(settings);
+                    }
+                    else
+                    {
+                        App.RequestShutdown();
+                        return;
+                    }
+                }
+                IronworksSettings.Instance = settings;
+            }
         }
 
         /// <summary>
