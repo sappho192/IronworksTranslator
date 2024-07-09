@@ -18,13 +18,13 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
-    <Grid VerticalAlignment="Top">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="1*" />
-            <RowDefinition Height="2*" />
+            <RowDefinition Height="1.2*" />
+            <RowDefinition Height="2.2*" />
         </Grid.RowDefinitions>
 
-        <Grid Margin="0,48,0,0" Grid.Row="0" VerticalAlignment="Top">
+        <Grid Margin="0,64,0,0" Grid.Row="0" VerticalAlignment="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="3*"/>
