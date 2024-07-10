@@ -9,7 +9,7 @@ namespace IronworksTranslator.Models.Settings
     {
         public ChatUISettings()
         {
-            Messenger.Register<PropertyChangedMessage<int>>(this, OnThemeMessage);
+            Messenger.Register<PropertyChangedMessage<int>>(this, OnIntMessage);
         }
 
         [ObservableProperty]
@@ -25,7 +25,7 @@ namespace IronworksTranslator.Models.Settings
             }
         }
 
-        private void OnThemeMessage(object s, PropertyChangedMessage<int> m)
+        private void OnIntMessage(object s, PropertyChangedMessage<int> m)
         {
             switch (m.PropertyName)
             {
