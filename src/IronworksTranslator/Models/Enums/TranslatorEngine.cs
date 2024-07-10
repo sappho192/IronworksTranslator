@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace IronworksTranslator.Models
+namespace IronworksTranslator.Models.Enums
 {
     public enum TranslatorEngine
     {

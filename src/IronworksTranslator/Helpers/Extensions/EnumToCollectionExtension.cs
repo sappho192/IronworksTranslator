@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows.Markup;
 
-namespace IronworksTranslator.Helpers
+namespace IronworksTranslator.Helpers.Extension
 {
     public class EnumToCollectionExtension : MarkupExtension
     {

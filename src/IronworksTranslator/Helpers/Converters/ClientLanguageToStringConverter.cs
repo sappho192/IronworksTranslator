@@ -1,8 +1,9 @@
-﻿using IronworksTranslator.Models;
+﻿using IronworksTranslator.Helpers.Extension;
+using IronworksTranslator.Models.Enums;
 using System.Globalization;
 using System.Windows.Data;
 
-namespace IronworksTranslator.Helpers
+namespace IronworksTranslator.Helpers.Converter
 {
     internal class ClientLanguageToStringConverter : IValueConverter
     {
