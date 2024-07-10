@@ -37,6 +37,13 @@ namespace IronworksTranslator.ViewModels.Pages
         [ObservableProperty]
         private int _translatorEngineIndex = (int)IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        [NotifyPropertyChangedFor(nameof(DialogueTranslationMethodIndex))]
+        private DialogueTranslationMethod _dialogueTranslationMethod = IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod;
+        [ObservableProperty]
+        private int _dialogueTranslationMethodIndex = (int)IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod;
+
         public void OnNavigatedTo()
         {
             if (!_isInitialized)

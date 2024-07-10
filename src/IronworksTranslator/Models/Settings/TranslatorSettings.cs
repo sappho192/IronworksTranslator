@@ -12,6 +12,7 @@ namespace IronworksTranslator.Models.Settings
         {
             Messenger.Register<PropertyChangedMessage<ClientLanguage>>(this, OnClientLanguageMessage);
             Messenger.Register<PropertyChangedMessage<TranslatorEngine>>(this, OnTranslatorEngineMessage);
+            Messenger.Register<PropertyChangedMessage<DialogueTranslationMethod>>(this, OnDialogueTranslationMethodMessage);
         }
 
         [ObservableProperty]
@@ -21,6 +22,10 @@ namespace IronworksTranslator.Models.Settings
         [ObservableProperty]
         [property: YamlMember(Alias = "translator_engine")]
         private TranslatorEngine _translatorEngine;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "dialogue_translation_method")]
+        private DialogueTranslationMethod _dialogueTranslationMethod;
 
         partial void OnClientLanguageChanged(ClientLanguage value)
         {
@@ -56,6 +61,25 @@ namespace IronworksTranslator.Models.Settings
             {
                 case "TranslatorEngine":
                     TranslatorEngine = m.NewValue;
+                    break;
+            }
+        }
+
+        partial void OnDialogueTranslationMethodChanged(DialogueTranslationMethod value)
+        {
+            Log.Information($"DialogueTranslationMethod changed to {value}");
+            if (IronworksSettings.Instance != null)
+            {
+                IronworksSettings.UpdateSettingsFile(IronworksSettings.Instance);
+            }
+        }
+
+        private void OnDialogueTranslationMethodMessage(object s, PropertyChangedMessage<DialogueTranslationMethod> m)
+        {
+            switch (m.PropertyName)
+            {
+                case "DialogueTranslationMethod":
+                    DialogueTranslationMethod = m.NewValue;
                     break;
             }
         }

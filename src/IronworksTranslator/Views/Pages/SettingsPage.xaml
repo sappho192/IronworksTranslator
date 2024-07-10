@@ -25,6 +25,7 @@
         <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
         <converters:ClientLanguageToStringConverter x:Key="ClientLanguageToStringConverter"/>
         <converters:TranslatorEngineToStringConverter x:Key="TranslatorEngineToStringConverter"/>
+        <converters:DialogueTranslationMethodToStringConverter x:Key="DialogueTranslationMethodToStringConverter"/>
     </Page.Resources>
 
     <TabControl Margin="0,48,0,16">
@@ -81,7 +82,9 @@
                         <ui:CardControl.Header>
                             <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.dialogue.translation_method}" FontTypography="BodyStrong"/>
                         </ui:CardControl.Header>
-                        <ComboBox/>
+                        <ComboBox ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:DialogueTranslationMethod}}"
+                                  SelectedValue="{Binding ViewModel.DialogueTranslationMethod, Converter={StaticResource DialogueTranslationMethodToStringConverter}}"
+                                  SelectedIndex="{Binding ViewModel.DialogueTranslationMethodIndex}"/>
                     </ui:CardControl>
                 </StackPanel>
             </ui:Card>
