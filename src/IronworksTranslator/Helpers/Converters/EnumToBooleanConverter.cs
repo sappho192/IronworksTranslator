@@ -2,7 +2,7 @@
 using System.Windows.Data;
 using Wpf.Ui.Appearance;
 
-namespace IronworksTranslator.Helpers.Converter
+namespace IronworksTranslator.Helpers.Converters
 {
     internal class EnumToBooleanConverter : IValueConverter
     {

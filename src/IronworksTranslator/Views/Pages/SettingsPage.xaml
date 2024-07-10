@@ -3,8 +3,10 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:helpers="clr-namespace:IronworksTranslator.Helpers"
+    xmlns:converters="clr-namespace:IronworksTranslator.Helpers.Converters"
+    xmlns:extensions="clr-namespace:IronworksTranslator.Helpers.Extensions"
     xmlns:models="clr-namespace:IronworksTranslator.Models"
+    xmlns:enums="clr-namespace:IronworksTranslator.Models.Enums"
     xmlns:local="clr-namespace:IronworksTranslator.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -20,8 +22,8 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
     <Page.Resources>
-        <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
-        <helpers:ClientLanguageToStringConverter x:Key="DescriptionStringToEnumConverter"/>
+        <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+        <converters:ClientLanguageToStringConverter x:Key="DescriptionStringToEnumConverter"/>
     </Page.Resources>
 
     <TabControl Margin="0,48,0,16">
@@ -62,7 +64,7 @@
                         <ui:CardControl.Header>
                             <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.client_language}" FontTypography="BodyStrong"/>
                         </ui:CardControl.Header>
-                        <ComboBox ItemsSource="{helpers:EnumToCollection EnumType={x:Type models:ClientLanguage}}"
+                        <ComboBox ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                 SelectedValue="{Binding ViewModel.ClientLanguage, Converter={StaticResource DescriptionStringToEnumConverter}}"
                                 SelectedIndex="{Binding ViewModel.ClientLanguageIndex}"/>
                     </ui:CardControl>
