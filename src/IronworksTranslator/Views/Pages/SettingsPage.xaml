@@ -87,7 +87,9 @@
                         <ui:CardControl.Header>
                             <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.font.size}" FontTypography="BodyStrong"/>
                         </ui:CardControl.Header>
-                        <ComboBox/>
+                        <ui:NumberBox Name="nbChatFontSize" Minimum="8" Maximum="32" MaxDecimalPlaces="0"
+                            ValueChanged="ChatFontSize_ValueChanged"
+                            Value="{Binding ViewModel.ChatBoxFontSize}" PlaceholderEnabled="False" ClearButtonEnabled="False"/>
                     </ui:CardControl>
                     <ui:CardControl Icon="{ui:SymbolIcon LocalLanguage24}">
                         <ui:CardControl.Header>

@@ -18,6 +18,10 @@ namespace IronworksTranslator.ViewModels.Pages
         [ObservableProperty]
         private string _exampleChatBox = $"이프 저격하는 무작위 레벨링 가실 분~{Environment.NewLine}エキルレ行く方いますか？{Environment.NewLine}Mechanics are for Cars KUPO!{Environment.NewLine}제작자: 사포 (sappho192@gmail.com)";
 
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private int _chatBoxFontSize = IronworksSettings.Instance.chatUiSettings.ChatboxFontSize;
+
         public void OnNavigatedTo()
         {
             if (!_isInitialized)
@@ -63,6 +67,12 @@ namespace IronworksTranslator.ViewModels.Pages
 
                     break;
             }
+        }
+
+        [RelayCommand]
+        private void OnChangeChatboxFontSize(int parameter)
+        {
+
         }
     }
 }
