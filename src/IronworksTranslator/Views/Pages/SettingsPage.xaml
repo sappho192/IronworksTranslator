@@ -50,28 +50,6 @@
                 </StackPanel>
             </ui:Card>
         </TabItem>
-        <TabItem Name="ChatAppearance">
-            <TabItem.Header>
-                <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat}" FontWeight="Bold" FontTypography="Caption"/>
-            </TabItem.Header>
-            <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
-                <StackPanel Orientation="Vertical">
-                    <ui:CardControl Icon="{ui:SymbolIcon LocalLanguage24}">
-                        <ui:CardControl.Header>
-                            <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.font.size}" FontTypography="BodyStrong"/>
-                        </ui:CardControl.Header>
-                        <ComboBox/>
-                    </ui:CardControl>
-                    <ui:CardControl Icon="{ui:SymbolIcon LocalLanguage24}">
-                        <ui:CardControl.Header>
-                            <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.font.family}" FontTypography="BodyStrong"/>
-                        </ui:CardControl.Header>
-                        <ComboBox/>
-                    </ui:CardControl>
-                    <ui:TextBox Text="{Binding ViewModel.ExampleChatBox, FallbackValue=Lorem Ipsum}" IsReadOnly="True"/>
-                </StackPanel>
-            </ui:Card>
-        </TabItem>
         <TabItem Name="Translator">
             <TabItem.Header>
                 <ui:TextBlock Text="{i18n:StringLocalizer settings.translator}" FontWeight="Bold" FontTypography="Caption"/>
@@ -96,6 +74,28 @@
                         </ui:CardControl.Header>
                         <ComboBox/>
                     </ui:CardControl>
+                </StackPanel>
+            </ui:Card>
+        </TabItem>
+        <TabItem Name="ChatAppearance">
+            <TabItem.Header>
+                <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat}" FontWeight="Bold" FontTypography="Caption"/>
+            </TabItem.Header>
+            <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
+                <StackPanel Orientation="Vertical">
+                    <ui:CardControl Icon="{ui:SymbolIcon LocalLanguage24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.font.size}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ComboBox/>
+                    </ui:CardControl>
+                    <ui:CardControl Icon="{ui:SymbolIcon LocalLanguage24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.font.family}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ComboBox/>
+                    </ui:CardControl>
+                    <ui:TextBox Text="{Binding ViewModel.ExampleChatBox, FallbackValue=Lorem Ipsum}" IsReadOnly="True"/>
                 </StackPanel>
             </ui:Card>
         </TabItem>
