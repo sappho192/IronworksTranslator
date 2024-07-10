@@ -1,4 +1,4 @@
-﻿using IronworksTranslator.Models;
+﻿using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Utils;
 using Wpf.Ui.Appearance;

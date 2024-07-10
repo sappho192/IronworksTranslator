@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
+using IronworksTranslator.Models.Enums;
 using Serilog;
 using YamlDotNet.Serialization;
 
