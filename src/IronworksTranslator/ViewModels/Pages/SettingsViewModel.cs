@@ -1,4 +1,5 @@
-﻿using IronworksTranslator.Models.Settings;
+﻿using IronworksTranslator.Models;
+using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Utils;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
@@ -21,6 +22,10 @@ namespace IronworksTranslator.ViewModels.Pages
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         private int _chatBoxFontSize = IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private ClientLanguage _clientLanguage = IronworksSettings.Instance.TranslatorSettings.ClientLanguage;
 
         public void OnNavigatedTo()
         {
@@ -67,12 +72,6 @@ namespace IronworksTranslator.ViewModels.Pages
 
                     break;
             }
-        }
-
-        [RelayCommand]
-        private void OnChangeChatboxFontSize(int parameter)
-        {
-
         }
     }
 }

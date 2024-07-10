@@ -43,7 +43,9 @@ namespace IronworksTranslator.Services
                 var settings = deserializer.Deserialize<IronworksSettings>(
                     File.ReadAllText("settings.yaml")
                 );
-                if (settings == null || settings.UiSettings == null || settings.ChatUiSettings == null)
+                if (settings == null || 
+                    settings.UiSettings == null || settings.ChatUiSettings == null ||
+                    settings.TranslatorSettings == null)
                 {
                     Log.Error("Failed to load settings.");
                     if (MessageBox.Show(Localizer.GetString("app.settings.failed_to_load"), "Error", MessageBoxButton.OKCancel) == MessageBoxResult.OK)

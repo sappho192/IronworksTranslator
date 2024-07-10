@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:helpers="clr-namespace:IronworksTranslator.Helpers"
+    xmlns:models="clr-namespace:IronworksTranslator.Models"
     xmlns:local="clr-namespace:IronworksTranslator.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -20,6 +21,7 @@
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+        <helpers:DescriptionStringToEnumConverter x:Key="DescriptionStringToEnumConverter"/>
     </Page.Resources>
 
     <TabControl Margin="0,48,0,16">
@@ -60,7 +62,8 @@
                         <ui:CardControl.Header>
                             <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.client_language}" FontTypography="BodyStrong"/>
                         </ui:CardControl.Header>
-                        <ComboBox/>
+                        <ComboBox ItemsSource="{helpers:EnumToCollection EnumType={x:Type models:ClientLanguage}}"
+                                SelectedValue="{Binding ViewModel.ClientLanguage, Converter={StaticResource DescriptionStringToEnumConverter}}"/>
                     </ui:CardControl>
                     <ui:CardControl Icon="{ui:SymbolIcon ServerSurface16}">
                         <ui:CardControl.Header>
