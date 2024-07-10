@@ -52,6 +52,7 @@ namespace IronworksTranslator.ViewModels.Pages
 
         public void OnNavigatedFrom() { }
 
+        [TraceMethod]
         private void InitializeViewModel()
         {
             CurrentTheme = ApplicationThemeManager.GetAppTheme();
@@ -67,6 +68,7 @@ namespace IronworksTranslator.ViewModels.Pages
         }
 
         [RelayCommand]
+        [TraceMethod]
         private void OnChangeTheme(string parameter)
         {
             switch (parameter)

@@ -25,7 +25,7 @@ namespace IronworksTranslator.Services
             LoadSettings();
         }
 
-
+        [TraceMethod]
         private static void LoadSettings()
         {
             var fileName = "settings.yaml";

@@ -1,5 +1,6 @@
 ﻿using IronworksTranslator.Helpers;
 using IronworksTranslator.Models.Enums;
+using IronworksTranslator.Utils;
 using System.IO;
 using Wpf.Ui.Appearance;
 using YamlDotNet.Serialization;
@@ -15,6 +16,7 @@ namespace IronworksTranslator.Models.Settings
         public ChatUISettings? ChatUiSettings { get; set; }
         public TranslatorSettings? TranslatorSettings { get; set; }
 
+        [TraceMethod]
         public static IronworksSettings CreateDefault()
         {
             return new IronworksSettings
