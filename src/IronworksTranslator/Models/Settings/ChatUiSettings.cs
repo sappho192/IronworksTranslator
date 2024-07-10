@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using Serilog;
 using YamlDotNet.Serialization;
+using IronworksTranslator.Utils;
 
 namespace IronworksTranslator.Models.Settings
 {
@@ -16,13 +17,10 @@ namespace IronworksTranslator.Models.Settings
         [property: YamlMember(Alias = "chatbox_font_size")]
         private int _chatboxFontSize;
 
+        [SaveSettingsOnChange]
         partial void OnChatboxFontSizeChanged(int value)
         {
             Log.Information($"Chatbox font size changed to {value}");
-            if (IronworksSettings.Instance != null)
-            {
-                IronworksSettings.UpdateSettingsFile(IronworksSettings.Instance);
-            }
         }
 
         private void OnIntMessage(object s, PropertyChangedMessage<int> m)

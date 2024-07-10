@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Messaging.Messages;
 using IronworksTranslator.Models.Enums;
 using Serilog;
 using YamlDotNet.Serialization;
+using IronworksTranslator.Utils;
 
 namespace IronworksTranslator.Models.Settings
 {
@@ -27,13 +28,10 @@ namespace IronworksTranslator.Models.Settings
         [property: YamlMember(Alias = "dialogue_translation_method")]
         private DialogueTranslationMethod _dialogueTranslationMethod;
 
+        [SaveSettingsOnChange]
         partial void OnClientLanguageChanged(ClientLanguage value)
         {
             Log.Information($"ClientLanguage changed to {value}");
-            if (IronworksSettings.Instance != null)
-            {
-                IronworksSettings.UpdateSettingsFile(IronworksSettings.Instance);
-            }
         }
 
         private void OnClientLanguageMessage(object s, PropertyChangedMessage<ClientLanguage> m)
@@ -46,13 +44,10 @@ namespace IronworksTranslator.Models.Settings
             }
         }
 
+        [SaveSettingsOnChange]
         partial void OnTranslatorEngineChanged(TranslatorEngine value)
         {
             Log.Information($"TranslatorEngine changed to {value}");
-            if (IronworksSettings.Instance != null)
-            {
-                IronworksSettings.UpdateSettingsFile(IronworksSettings.Instance);
-            }
         }
 
         private void OnTranslatorEngineMessage(object s, PropertyChangedMessage<TranslatorEngine> m)
@@ -65,13 +60,10 @@ namespace IronworksTranslator.Models.Settings
             }
         }
 
+        [SaveSettingsOnChange]
         partial void OnDialogueTranslationMethodChanged(DialogueTranslationMethod value)
         {
             Log.Information($"DialogueTranslationMethod changed to {value}");
-            if (IronworksSettings.Instance != null)
-            {
-                IronworksSettings.UpdateSettingsFile(IronworksSettings.Instance);
-            }
         }
 
         private void OnDialogueTranslationMethodMessage(object s, PropertyChangedMessage<DialogueTranslationMethod> m)

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Messaging.Messages;
 using Serilog;
 using Wpf.Ui.Appearance;
 using YamlDotNet.Serialization;
+using IronworksTranslator.Utils;
 
 namespace IronworksTranslator.Models.Settings
 {
@@ -17,13 +18,10 @@ namespace IronworksTranslator.Models.Settings
         [property: YamlMember(Alias = "theme")]
         private ApplicationTheme _theme;
 
+        [SaveSettingsOnChange]
         partial void OnThemeChanged(ApplicationTheme value)
         {
             Log.Information($"Theme changed to {value}");
-            if (IronworksSettings.Instance != null)
-            {
-                IronworksSettings.UpdateSettingsFile(IronworksSettings.Instance);
-            }
         }
 
         private void OnThemeMessage(object s, PropertyChangedMessage<ApplicationTheme> m)
