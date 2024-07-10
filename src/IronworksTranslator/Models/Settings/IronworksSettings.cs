@@ -11,7 +11,7 @@ namespace IronworksTranslator.Models.Settings
         public static IronworksSettings? Instance { get; set; }
 
         public UISettings? UiSettings { get; set; }
-        public ChatUISettings? chatUiSettings { get; set; }
+        public ChatUISettings? ChatUiSettings { get; set; }
 
         public static IronworksSettings CreateDefault()
         {
@@ -21,7 +21,7 @@ namespace IronworksTranslator.Models.Settings
                 {
                     Theme = ApplicationTheme.Light
                 },
-                chatUiSettings = new ChatUISettings
+                ChatUiSettings = new ChatUISettings
                 {
                     ChatboxFontSize = 12
                 }

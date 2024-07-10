@@ -21,7 +21,7 @@ namespace IronworksTranslator.Views.Pages
             var numberBox = sender as NumberBox;
             if (numberBox.Value == null)
             {
-                numberBox.Value = IronworksSettings.Instance.chatUiSettings.ChatboxFontSize;
+                numberBox.Value = IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize;
             }
         }
     }
