@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace IronworksTranslator.Helpers
+namespace IronworksTranslator.Helpers.Extension
 {
     public static class EnumExtension
     {

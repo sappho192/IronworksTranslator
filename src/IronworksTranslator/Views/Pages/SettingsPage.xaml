@@ -21,7 +21,7 @@
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
-        <helpers:DescriptionStringToEnumConverter x:Key="DescriptionStringToEnumConverter"/>
+        <helpers:ClientLanguageToStringConverter x:Key="DescriptionStringToEnumConverter"/>
     </Page.Resources>
 
     <TabControl Margin="0,48,0,16">
