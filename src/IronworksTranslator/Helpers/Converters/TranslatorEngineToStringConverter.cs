@@ -5,7 +5,7 @@ using IronworksTranslator.Models.Enums;
 
 namespace IronworksTranslator.Helpers.Converters
 {
-    internal class TranslatorToStringConverter : IValueConverter
+    internal class TranslatorEngineToStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

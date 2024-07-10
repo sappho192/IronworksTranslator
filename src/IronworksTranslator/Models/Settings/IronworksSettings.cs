@@ -29,7 +29,8 @@ namespace IronworksTranslator.Models.Settings
                 },
                 TranslatorSettings = new TranslatorSettings
                 {
-                    ClientLanguage = ClientLanguage.Korean
+                    ClientLanguage = ClientLanguage.Korean,
+                    TranslatorEngine = TranslatorEngine.Papago
                 }
             };
         }
