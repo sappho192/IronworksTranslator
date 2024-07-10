@@ -63,7 +63,8 @@
                             <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.client_language}" FontTypography="BodyStrong"/>
                         </ui:CardControl.Header>
                         <ComboBox ItemsSource="{helpers:EnumToCollection EnumType={x:Type models:ClientLanguage}}"
-                                SelectedValue="{Binding ViewModel.ClientLanguage, Converter={StaticResource DescriptionStringToEnumConverter}}"/>
+                                SelectedValue="{Binding ViewModel.ClientLanguage, Converter={StaticResource DescriptionStringToEnumConverter}}"
+                                SelectedIndex="{Binding ViewModel.ClientLanguageIndex}"/>
                     </ui:CardControl>
                     <ui:CardControl Icon="{ui:SymbolIcon ServerSurface16}">
                         <ui:CardControl.Header>

@@ -25,7 +25,11 @@ namespace IronworksTranslator.ViewModels.Pages
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
+        [NotifyPropertyChangedFor(nameof(ClientLanguageIndex))]
         private ClientLanguage _clientLanguage = IronworksSettings.Instance.TranslatorSettings.ClientLanguage;
+
+        [ObservableProperty]
+        private int _clientLanguageIndex = (int)IronworksSettings.Instance.TranslatorSettings.ClientLanguage;
 
         public void OnNavigatedTo()
         {
