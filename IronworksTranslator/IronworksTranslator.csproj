@@ -47,8 +47,8 @@
     <PackageReference Include="Extended.Wpf.Toolkit" Version="4.4.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="PuppeteerSharp" Version="7.1.0" />
-    <PackageReference Include="Sharlayan" Version="7.0.1" />
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.0" />
+    <PackageReference Include="Sharlayan" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="8.0.7" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Serilog.Formatting.Compact" Version="1.1.0" />
