@@ -4,6 +4,7 @@ using IronworksTranslator.Models.Enums;
 using Serilog;
 using YamlDotNet.Serialization;
 using IronworksTranslator.Utils;
+using IronworksTranslator.ViewModels.Pages;
 
 namespace IronworksTranslator.Models.Settings
 {
@@ -38,7 +39,7 @@ namespace IronworksTranslator.Models.Settings
         {
             switch (m.PropertyName)
             {
-                case "ClientLanguage":
+                case nameof(SettingsViewModel.ClientLanguage):
                     ClientLanguage = m.NewValue;
                     break;
             }
@@ -54,7 +55,7 @@ namespace IronworksTranslator.Models.Settings
         {
             switch (m.PropertyName)
             {
-                case "TranslatorEngine":
+                case nameof(SettingsViewModel.TranslatorEngine):
                     TranslatorEngine = m.NewValue;
                     break;
             }
@@ -70,7 +71,7 @@ namespace IronworksTranslator.Models.Settings
         {
             switch (m.PropertyName)
             {
-                case "DialogueTranslationMethod":
+                case nameof(SettingsViewModel.DialogueTranslationMethod):
                     DialogueTranslationMethod = m.NewValue;
                     break;
             }

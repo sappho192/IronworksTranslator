@@ -4,6 +4,7 @@ using Serilog;
 using Wpf.Ui.Appearance;
 using YamlDotNet.Serialization;
 using IronworksTranslator.Utils;
+using IronworksTranslator.ViewModels.Pages;
 
 namespace IronworksTranslator.Models.Settings
 {
@@ -28,7 +29,7 @@ namespace IronworksTranslator.Models.Settings
         {
             switch (m.PropertyName)
             {
-                case "CurrentTheme":
+                case nameof(SettingsViewModel.CurrentTheme):
                     Theme = m.NewValue;
                     break;
             }
