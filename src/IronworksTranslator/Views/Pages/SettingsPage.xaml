@@ -112,7 +112,7 @@
                             SelectedIndex="{Binding ViewModel.CurrentFontIndex}"/>
                     </ui:CardControl>
                     <ui:TextBox Text="{Binding ViewModel.ExampleChatBox, FallbackValue=Lorem Ipsum}" IsReadOnly="True"
-                        FontFamily="{Binding ViewModel.CurrentFont}"/>
+                        FontFamily="{Binding ViewModel.CurrentFont}" FontSize="{Binding ViewModel.ChatBoxFontSize}"/>
                 </StackPanel>
             </ui:Card>
         </TabItem>
