@@ -48,10 +48,9 @@ namespace IronworksTranslator.Models.Settings
             return true;
         }
 
-        //[SaveSettingsOnChange]
         private static void UseDefaultFont(ChatUISettings chatUISettings)
         {
-            MessageBox.Show($"The selected font ({chatUISettings.Font}) does not exist. Using default font.");
+            MessageBox.Show(string.Format(Localizer.GetString("app.settings.font_not_exist"), chatUISettings.Font));
             chatUISettings.Font = "KoPubWorld Dotum";
         }
 

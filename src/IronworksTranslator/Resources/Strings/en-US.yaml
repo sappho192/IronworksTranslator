@@ -10,6 +10,7 @@ no: "No"
 version: "Version"
 
 app.settings.failed_to_load: "Couldn't open the settings file because it was invalid. Do you want to create a new settings file? The existing configuration file will be lost."
+app.settings.font_not_exist: "The selected font ({0}) does not exist. Using default font."
 
 main.navigation.home: "Dashboard"
 main.navigation.settings: "Settings"
