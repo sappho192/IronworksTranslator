@@ -43,9 +43,8 @@ namespace IronworksTranslator.Services
                 var settings = deserializer.Deserialize<IronworksSettings>(
                     File.ReadAllText("settings.yaml")
                 );
-                if (settings == null || 
-                    settings.UiSettings == null || settings.ChatUiSettings == null ||
-                    settings.TranslatorSettings == null)
+                IronworksSettings.Instance = settings;
+                if (IronworksSettings.IsSettingsFileInValid(settings))
                 {
                     Log.Error("Failed to load settings.");
                     if (MessageBox.Show(Localizer.GetString("app.settings.failed_to_load"), "Error", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
@@ -60,7 +59,6 @@ namespace IronworksTranslator.Services
                         return;
                     }
                 }
-                IronworksSettings.Instance = settings;
             }
         }
 

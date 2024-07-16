@@ -44,6 +44,15 @@ namespace IronworksTranslator.ViewModels.Pages
         [ObservableProperty]
         private int _dialogueTranslationMethodIndex = (int)IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod;
 
+        [ObservableProperty]
+        private List<string> _fontList = ChatUISettings.systemFontList;
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        [NotifyPropertyChangedFor(nameof(CurrentFontIndex))]
+        private string _currentFont = IronworksSettings.Instance.ChatUiSettings.Font;
+        [ObservableProperty]
+        private int _currentFontIndex = ChatUISettings.systemFontList.IndexOf(IronworksSettings.Instance.ChatUiSettings.Font);
+
         public void OnNavigatedTo()
         {
             if (!_isInitialized)

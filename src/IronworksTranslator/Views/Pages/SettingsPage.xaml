@@ -107,9 +107,12 @@
                         <ui:CardControl.Header>
                             <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.font.family}" FontTypography="BodyStrong"/>
                         </ui:CardControl.Header>
-                        <ComboBox/>
+                        <ComboBox ItemsSource="{Binding ViewModel.FontList}" ScrollViewer.VerticalScrollBarVisibility="Visible"
+                            SelectedValue="{Binding ViewModel.CurrentFont}"
+                            SelectedIndex="{Binding ViewModel.CurrentFontIndex}"/>
                     </ui:CardControl>
-                    <ui:TextBox Text="{Binding ViewModel.ExampleChatBox, FallbackValue=Lorem Ipsum}" IsReadOnly="True"/>
+                    <ui:TextBox Text="{Binding ViewModel.ExampleChatBox, FallbackValue=Lorem Ipsum}" IsReadOnly="True"
+                        FontFamily="{Binding ViewModel.CurrentFont}"/>
                 </StackPanel>
             </ui:Card>
         </TabItem>

@@ -27,7 +27,8 @@ namespace IronworksTranslator.Models.Settings
                 },
                 ChatUiSettings = new ChatUISettings
                 {
-                    ChatboxFontSize = 12
+                    ChatboxFontSize = 12,
+                    Font = "KoPubWorld Dotum"
                 },
                 TranslatorSettings = new TranslatorSettings
                 {
@@ -45,6 +46,29 @@ namespace IronworksTranslator.Models.Settings
                 .WithTypeInspector(inspector => new SettingsTypeInspector(inspector))
                 .Build();
             File.WriteAllText("settings.yaml", serializer.Serialize(settings));
+        }
+
+        public static bool IsSettingsFileInValid(IronworksSettings settings)
+        {
+            if (settings == null ||
+                settings.UiSettings == null ||
+                settings.ChatUiSettings == null ||
+                settings.TranslatorSettings == null)
+            {
+                return true;
+            }
+
+            if (settings.ChatUiSettings.Font == null)
+            {
+                return true;
+            }
+
+            if (!ChatUISettings.CheckSpecificFontExists(settings.ChatUiSettings, settings.ChatUiSettings.Font))
+            {
+                return false;
+            }
+
+            return false;
         }
     }
 }
