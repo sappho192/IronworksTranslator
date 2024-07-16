@@ -36,7 +36,10 @@
             </TabItem.Header>
             <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
                 <StackPanel Orientation="Vertical">
-                    <ui:TextBlock FontTypography="Subtitle" Text="{i18n:StringLocalizer settings.general.theme}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Margin="0,0,8,0" Symbol="Color24" FontSize="24"/>
+                        <ui:TextBlock FontTypography="Subtitle" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.theme}"/>
+                    </StackPanel>
                     <RadioButton
                         Margin="0,12,0,0"
                         Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
@@ -52,12 +55,18 @@
                         GroupName="themeSelect"
                         IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}" />
 
-                    <TextBlock Margin="0,24,0,0" FontSize="20" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.ui.language}" />
-                    <ComboBox Margin="0,12,0,0" ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:AppLanguage}}"
-                                  SelectedValue="{Binding ViewModel.AppLanguage, Converter={StaticResource AppLanguageToStringConverter}}"
-                                  SelectedIndex="{Binding ViewModel.AppLanguageIndex}"/>
-                    <TextBlock Margin="0,24,0,0" FontSize="20" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.app_info}" />
-                    <TextBlock Margin="0,12,0,0" Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Margin="0,0,8,0" Symbol="LocalLanguage24" FontSize="24"/>
+                        <ui:TextBlock Margin="0,24,0,0" FontTypography="Subtitle" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.ui.language}" />
+                    </StackPanel>
+                    <ComboBox Margin="0,8,0,0" ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:AppLanguage}}"
+                        SelectedValue="{Binding ViewModel.AppLanguage, Converter={StaticResource AppLanguageToStringConverter}}"
+                        SelectedIndex="{Binding ViewModel.AppLanguageIndex}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Margin="0,0,8,0" Symbol="AppGeneric24" FontSize="24"/>
+                        <ui:TextBlock Margin="0,24,0,0" FontTypography="Subtitle" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.app_info}" />
+                    </StackPanel>
+                    <ui:TextBlock Margin="0,12,0,0" Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
                 </StackPanel>
             </ui:Card>
         </TabItem>
@@ -100,7 +109,7 @@
             </TabItem.Header>
             <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
                 <StackPanel Orientation="Vertical">
-                    <ui:CardControl Icon="{ui:SymbolIcon LocalLanguage24}">
+                    <ui:CardControl Icon="{ui:SymbolIcon TextFont24}">
                         <ui:CardControl.Header>
                             <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.font.size}" FontTypography="BodyStrong"/>
                         </ui:CardControl.Header>
@@ -108,7 +117,7 @@
                             ValueChanged="ChatFontSize_ValueChanged"
                             Value="{Binding ViewModel.ChatBoxFontSize}" PlaceholderEnabled="False" ClearButtonEnabled="False"/>
                     </ui:CardControl>
-                    <ui:CardControl Icon="{ui:SymbolIcon LocalLanguage24}">
+                    <ui:CardControl Icon="{ui:SymbolIcon TextEffects24}">
                         <ui:CardControl.Header>
                             <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.font.family}" FontTypography="BodyStrong"/>
                         </ui:CardControl.Header>
