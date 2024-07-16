@@ -59,6 +59,7 @@
                         <ui:SymbolIcon Margin="0,0,8,0" Symbol="LocalLanguage24" FontSize="24"/>
                         <ui:TextBlock FontTypography="Subtitle" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.ui.language}" />
                     </StackPanel>
+                    <ui:TextBlock FontTypography="Caption" Text="{i18n:StringLocalizer settings.general.ui.language.comment}"/>
                     <ComboBox Margin="0,8,0,0" HorizontalAlignment="Left"
                         ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:AppLanguage}}"
                         SelectedValue="{Binding ViewModel.AppLanguage, Converter={StaticResource AppLanguageToStringConverter}}"
