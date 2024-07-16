@@ -7,6 +7,7 @@ using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization;
 using System.IO;
 using Serilog;
+using IronworksTranslator.Models.Enums;
 
 namespace IronworksTranslator.Services
 {
@@ -60,6 +61,19 @@ namespace IronworksTranslator.Services
                     }
                 }
             }
+
+            ApplyAppLanguage();
+        }
+
+        private static void ApplyAppLanguage()
+        {
+            var appLanguage = IronworksSettings.Instance.UiSettings.AppLanguage;
+            string languageCode = appLanguage switch
+            {
+                AppLanguage.Korean => "ko-KR",
+                _ => "en-US",
+            };
+            Localizer.ChangeLanguage(languageCode);
         }
 
         /// <summary>

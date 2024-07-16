@@ -23,6 +23,7 @@
     mc:Ignorable="d">
     <Page.Resources>
         <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+        <converters:AppLanguageToStringConverter x:Key="AppLanguageToStringConverter"/>
         <converters:ClientLanguageToStringConverter x:Key="ClientLanguageToStringConverter"/>
         <converters:TranslatorEngineToStringConverter x:Key="TranslatorEngineToStringConverter"/>
         <converters:DialogueTranslationMethodToStringConverter x:Key="DialogueTranslationMethodToStringConverter"/>
@@ -51,6 +52,10 @@
                         GroupName="themeSelect"
                         IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}" />
 
+                    <TextBlock Margin="0,24,0,0" FontSize="20" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.ui.language}" />
+                    <ComboBox Margin="0,12,0,0" ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:AppLanguage}}"
+                                  SelectedValue="{Binding ViewModel.AppLanguage, Converter={StaticResource AppLanguageToStringConverter}}"
+                                  SelectedIndex="{Binding ViewModel.AppLanguageIndex}"/>
                     <TextBlock Margin="0,24,0,0" FontSize="20" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.app_info}" />
                     <TextBlock Margin="0,12,0,0" Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
                 </StackPanel>

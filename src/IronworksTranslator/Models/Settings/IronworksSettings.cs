@@ -19,11 +19,18 @@ namespace IronworksTranslator.Models.Settings
         [TraceMethod]
         public static IronworksSettings CreateDefault()
         {
+            var currentLocale = System.Globalization.CultureInfo.CurrentCulture.Name;
+
             return new IronworksSettings
             {
                 UiSettings = new UISettings
                 {
-                    Theme = ApplicationTheme.Light
+                    Theme = ApplicationTheme.Light,
+                    AppLanguage = currentLocale switch
+                    {
+                        "ko-KR" => AppLanguage.Korean,
+                        _ => AppLanguage.English
+                    }
                 },
                 ChatUiSettings = new ChatUISettings
                 {
