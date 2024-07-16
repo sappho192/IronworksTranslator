@@ -9,6 +9,9 @@ no: "No"
 
 version: "Version"
 
+app.exception.title: "IronworksTranslator Error"
+app.exception.description: "The program exits under unexpected situations. Please report it to the developer with the latest log file in the logs folder."
+
 app.settings.failed_to_load: "Couldn't open the settings file because it was invalid. Do you want to create a new settings file? The existing configuration file will be lost."
 app.settings.font_not_exist: "The selected font ({0}) does not exist. Using default font."
 

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows.Threading;
@@ -84,6 +85,7 @@ namespace IronworksTranslator
         private void OnStartup(object sender, StartupEventArgs e)
         {
             InitLogger();
+            SetupUnhandledExceptionHandlers();
 
             // Check if the _host is disposed
             try
@@ -97,30 +99,59 @@ namespace IronworksTranslator
             }
         }
 
+        private void SetupUnhandledExceptionHandlers()
+        {
+            // Catch exceptions from all threads in the AppDomain.
+            AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+                ShowUnhandledException(args.ExceptionObject as Exception, "AppDomain.CurrentDomain.UnhandledException");
+
+            // Catch exceptions from each AppDomain that uses a task scheduler for async operations.
+            TaskScheduler.UnobservedTaskException += (sender, args) =>
+                ShowUnhandledException(args.Exception, "TaskScheduler.UnobservedTaskException");
+
+            // Catch exceptions from a single specific UI dispatcher thread.
+            Dispatcher.UnhandledException += (sender, args) =>
+            {
+                if (!Debugger.IsAttached)
+                {
+                    args.Handled = true;
+                    ShowUnhandledException(args.Exception, "Dispatcher.UnhandledException");
+                }
+            };
+        }
+
+        private static void ShowUnhandledException(Exception e, string unhandledExceptionType)
+        {
+            var messageBoxTitle = Localizer.GetString("app.exception.title"); 
+            var messageBoxMessage = Localizer.GetString("app.exception.description");
+            var messageBoxButtons = MessageBoxButton.OK;
+
+            Log.Error(e, unhandledExceptionType);
+
+            var t = new Thread(() =>
+            {
+                MessageBox.Show(messageBoxMessage, messageBoxTitle, messageBoxButtons);
+            });
+            t.SetApartmentState(ApartmentState.STA);
+            t.Start();
+        }
+
         /// <summary>
         /// Occurs when the application is closing.
         /// </summary>
         private async void OnExit(object sender, ExitEventArgs e)
         {
-            Log.Information("IronworksTranslator is closing.");
+            Log.Information("OnExit: IronworksTranslator is closing.");
+            Log.CloseAndFlush();
 
             await _host.StopAsync();
             _host.Dispose();
         }
 
-        /// <summary>
-        /// Occurs when an exception is thrown by an application but not handled.
-        /// </summary>
-        private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
-        {
-            // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
-        }
-
         public static void RequestShutdown()
         {
             _host.StopAsync().Wait();
-            Log.Information("IronworksTranslator is closing.");
-            Log.CloseAndFlush();
+            Log.Information("RequestShutdown: IronworksTranslator is closing.");
             _host.Dispose();
 
             Current.Shutdown();
@@ -141,5 +172,7 @@ namespace IronworksTranslator
                 .CreateLogger();
             Log.Information($"IronworksTranslator {Assembly.GetExecutingAssembly().GetName().Version.ToString(3)} started.");
         }
+
+
     }
 }
