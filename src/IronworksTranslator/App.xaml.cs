@@ -85,7 +85,16 @@ namespace IronworksTranslator
         {
             InitLogger();
 
-            _host.Start();
+            // Check if the _host is disposed
+            try
+            {
+                _host.Start();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to start host.");
+                return;
+            }
         }
 
         /// <summary>
