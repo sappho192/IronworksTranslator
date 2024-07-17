@@ -7,7 +7,7 @@ namespace IronworksTranslator.Models.Settings
     public partial class ChannelSettings : ObservableRecipient
     {
         /*
-         * Echo, Say, Yell, Shout, Tell, Party, Alliance, Emote, EmoteCustom
+         * Say, Yell, Shout, Tell, Party, Alliance, Emote, EmoteCustom
          * LinkShell1, LinkShell2, LinkShell3, LinkShell4, LinkShell5, LinkShell6, LinkShell7, LinkShell8,
          * CWLinkShell1, CWLinkShell2, CWLinkShell3, CWLinkShell4, CWLinkShell5, CWLinkShell6, CWLinkShell7, CWLinkShell8,
          * FreeCompany, Novice, System, Notice, Error, Gather, GilReceive, NPCDialog, NPCAnnounce, MarketSold, Recruitment,
@@ -20,7 +20,6 @@ namespace IronworksTranslator.Models.Settings
 
         private void InitChannels()
         {
-            Echo = new ChatChannel { Code = ChatCode.Echo, IsActive = true, Show = true, MajorLanguage = ClientLanguage.Japanese };
             Say = new ChatChannel { Code = ChatCode.Say, IsActive = true, Show = true, MajorLanguage = ClientLanguage.Japanese };
             Yell = new ChatChannel { Code = ChatCode.Yell, IsActive = true, Show = true, MajorLanguage = ClientLanguage.Japanese };
             Shout = new ChatChannel { Code = ChatCode.Shout, IsActive = true, Show = true, MajorLanguage = ClientLanguage.Japanese };
@@ -61,10 +60,6 @@ namespace IronworksTranslator.Models.Settings
             Recruitment = new ChatChannel { Code = ChatCode.Recruitment, IsActive = true, Show = true, MajorLanguage = ClientLanguage.Japanese };
             BossQuotes = new ChatChannel { Code = ChatCode.BossQuotes, IsActive = true, Show = true, MajorLanguage = ClientLanguage.Japanese };
         }
-
-        [ObservableProperty]
-        [property: YamlMember(Alias = "echo")]
-        private ChatChannel _echo;
 
         [ObservableProperty]
         [property: YamlMember(Alias = "say")]

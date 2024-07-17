@@ -148,6 +148,80 @@
                                 <ComboBox Margin="16,0,0,0" />
                             </StackPanel>
                         </ui:CardExpander.Header>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.say}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.SayLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.SayLanguageIndex}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.yell}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.YellLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.YellLanguageIndex}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.shout}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.ShoutLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.ShoutLanguageIndex}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.tell}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.TellLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.TellLanguageIndex}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.party}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.PartyLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.PartyLanguageIndex}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.alliance}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.AllianceLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.AllianceLanguageIndex}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.emote}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0"
+                                          ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                          SelectedValue="{Binding ViewModel.EmoteLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                          SelectedIndex="{Binding ViewModel.EmoteLanguageIndex}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.emote_custom}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0"
+                                          ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                          SelectedValue="{Binding ViewModel.EmoteCustomLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                          SelectedIndex="{Binding ViewModel.EmoteCustomLanguageIndex}"/>
+                            </StackPanel>
+                        </StackPanel>
                     </ui:CardExpander>
                     <ui:CardExpander>
                         <ui:CardExpander.Header>

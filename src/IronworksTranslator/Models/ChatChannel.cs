@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Utils;
+using IronworksTranslator.ViewModels.Pages;
 using Serilog;
 using YamlDotNet.Serialization;
 
@@ -52,12 +53,48 @@ namespace IronworksTranslator.Models
 
         private void OnClientLanguageMessage(object recipient, PropertyChangedMessage<ClientLanguage> message)
         {
-            //switch (message.PropertyName)
-            //{
-            //    case nameof(SettingsViewModel.ChatChannelMajorLanguage):
-            MajorLanguage = message.NewValue;
-            //        break;
-            //}
+            if (recipient is not ChatChannel recipientChannel)
+            {
+                string errorMessage = $"ChatChannel: Unknown recipient {recipient}";
+                Log.Error(errorMessage);
+                MessageBox.Show(errorMessage);
+                return;
+            }
+            switch (message.PropertyName)
+            {
+                case nameof(SettingsViewModel.SayLanguage):
+                    if (recipientChannel.Code == ChatCode.Say)
+                        MajorLanguage = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.YellLanguage):
+                    if (recipientChannel.Code == ChatCode.Yell)
+                        MajorLanguage = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShoutLanguage):
+                    if (recipientChannel.Code == ChatCode.Shout)
+                        MajorLanguage = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.TellLanguage):
+                    if (recipientChannel.Code == ChatCode.Tell)
+                        MajorLanguage = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.PartyLanguage):
+                    if (recipientChannel.Code == ChatCode.Party)
+                        MajorLanguage = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.AllianceLanguage):
+                    if (recipientChannel.Code == ChatCode.Alliance)
+                        MajorLanguage = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.EmoteLanguage):
+                    if (recipientChannel.Code == ChatCode.Emote)
+                        MajorLanguage = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.EmoteCustomLanguage):
+                    if (recipientChannel.Code == ChatCode.EmoteCustom)
+                        MajorLanguage = message.NewValue;
+                    break;
+            }
         }
     }
 }
