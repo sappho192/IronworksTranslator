@@ -133,6 +133,15 @@ namespace IronworksTranslator.ViewModels.Pages
         #region Linkshells
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
+        private ClientLanguage _groupLinkShellLanguage;
+        [ObservableProperty]
+        private int _groupLinkShellLanguageIndex = -1;
+
+        [ObservableProperty]
+        private Visibility _groupLinkShellHintVisibility = Visibility.Hidden;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
         private ClientLanguage _linkshell1Language = IronworksSettings.Instance.ChannelSettings.Linkshell1.MajorLanguage;
         [ObservableProperty]
         private int _linkshell1LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Linkshell1.MajorLanguage;
@@ -178,9 +187,73 @@ namespace IronworksTranslator.ViewModels.Pages
         private ClientLanguage _linkshell8Language = IronworksSettings.Instance.ChannelSettings.Linkshell8.MajorLanguage;
         [ObservableProperty]
         private int _linkshell8LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Linkshell8.MajorLanguage;
+        #region Listeners
+        partial void OnGroupLinkShellLanguageChanged(ClientLanguage value)
+        {
+            CheckLinkShellIntegrity();
+        }
+        partial void OnLinkshell1LanguageChanged(ClientLanguage value)
+        {
+            CheckLinkShellIntegrity();
+        }
+        partial void OnLinkshell2LanguageChanged(ClientLanguage value)
+        {
+            CheckLinkShellIntegrity();
+        }
+        partial void OnLinkshell3LanguageChanged(ClientLanguage value)
+        {
+            CheckLinkShellIntegrity();
+        }
+        partial void OnLinkshell4LanguageChanged(ClientLanguage value)
+        {
+            CheckLinkShellIntegrity();
+        }
+        partial void OnLinkshell5LanguageChanged(ClientLanguage value)
+        {
+            CheckLinkShellIntegrity();
+        }
+        partial void OnLinkshell6LanguageChanged(ClientLanguage value)
+        {
+            CheckLinkShellIntegrity();
+        }
+        partial void OnLinkshell7LanguageChanged(ClientLanguage value)
+        {
+            CheckLinkShellIntegrity();
+        }
+        partial void OnLinkshell8LanguageChanged(ClientLanguage value)
+        {
+            CheckLinkShellIntegrity();
+        }
+        public void CheckLinkShellIntegrity()
+        {
+            if (Linkshell1Language == Linkshell2Language &&
+                Linkshell1Language == Linkshell3Language &&
+                Linkshell1Language == Linkshell4Language &&
+                Linkshell1Language == Linkshell5Language &&
+                Linkshell1Language == Linkshell6Language &&
+                Linkshell1Language == Linkshell7Language &&
+                Linkshell1Language == Linkshell8Language )
+            {
+                GroupLinkShellHintVisibility = Visibility.Hidden;
+            }
+            else
+            {
+                GroupLinkShellHintVisibility = Visibility.Visible;
+            }
+        }
+        #endregion
         #endregion
 
         #region CrossWorld Linkshells
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private ClientLanguage _groupCwLinkShellLanguage;
+        [ObservableProperty]
+        private int _groupCwLinkShellLanguageIndex = -1;
+
+        [ObservableProperty]
+        private Visibility _groupCwLinkShellHintVisibility = Visibility.Hidden;
+
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         private ClientLanguage _cwLinkshell1Language = IronworksSettings.Instance.ChannelSettings.CwLinkshell1.MajorLanguage;
@@ -228,9 +301,82 @@ namespace IronworksTranslator.ViewModels.Pages
         private ClientLanguage _cwLinkshell8Language = IronworksSettings.Instance.ChannelSettings.CwLinkshell8.MajorLanguage;
         [ObservableProperty]
         private int _cwLinkshell8LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.CwLinkshell8.MajorLanguage;
+        #region Listeners
+        partial void OnGroupCwLinkShellLanguageChanged(ClientLanguage value)
+        {
+            CheckCwLinkShellIntegrity();
+        }
+
+        partial void OnCwLinkshell1LanguageChanged(ClientLanguage value)
+        {
+            CheckCwLinkShellIntegrity();
+        }
+
+        partial void OnCwLinkshell2LanguageChanged(ClientLanguage value)
+        {
+            CheckCwLinkShellIntegrity();
+        }
+
+        partial void OnCwLinkshell3LanguageChanged(ClientLanguage value)
+        {
+            CheckCwLinkShellIntegrity();
+        }
+
+        partial void OnCwLinkshell4LanguageChanged(ClientLanguage value)
+        {
+            CheckCwLinkShellIntegrity();
+        }
+
+        partial void OnCwLinkshell5LanguageChanged(ClientLanguage value)
+        {
+            CheckCwLinkShellIntegrity();
+        }
+
+        partial void OnCwLinkshell6LanguageChanged(ClientLanguage value)
+        {
+            CheckCwLinkShellIntegrity();
+        }
+
+        partial void OnCwLinkshell7LanguageChanged(ClientLanguage value)
+        {
+            CheckCwLinkShellIntegrity();
+        }
+
+        partial void OnCwLinkshell8LanguageChanged(ClientLanguage value)
+        {
+            CheckCwLinkShellIntegrity();
+        }
+
+        public void CheckCwLinkShellIntegrity()
+        {
+            if (CwLinkshell1Language == CwLinkshell2Language &&
+                CwLinkshell1Language == CwLinkshell3Language &&
+                CwLinkshell1Language == CwLinkshell4Language &&
+                CwLinkshell1Language == CwLinkshell5Language &&
+                CwLinkshell1Language == CwLinkshell6Language &&
+                CwLinkshell1Language == CwLinkshell7Language &&
+                CwLinkshell1Language == CwLinkshell8Language)
+            {
+                GroupCwLinkShellHintVisibility = Visibility.Hidden;
+            }
+            else
+            {
+                GroupCwLinkShellHintVisibility = Visibility.Visible;
+            }
+        }
+        #endregion
         #endregion
 
         #region Community
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private ClientLanguage _groupCommunityLanguage;
+        [ObservableProperty]
+        private int _groupCommunityLanguageIndex = -1;
+
+        [ObservableProperty]
+        private Visibility _groupCommunityHintVisibility = Visibility.Hidden;
+
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         private ClientLanguage _freecompanyLanguage = IronworksSettings.Instance.ChannelSettings.Freecompany.MajorLanguage;
@@ -242,9 +388,46 @@ namespace IronworksTranslator.ViewModels.Pages
         private ClientLanguage _noviceLanguage = IronworksSettings.Instance.ChannelSettings.Novice.MajorLanguage;
         [ObservableProperty]
         private int _noviceLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Novice.MajorLanguage;
+        #region Listeners
+        partial void OnGroupCommunityLanguageChanged(ClientLanguage value)
+        {
+            CheckCommunityIntegrity();
+        }
+
+        partial void OnNoviceLanguageChanged(ClientLanguage value)
+        {
+            CheckCommunityIntegrity();
+        }
+
+        partial void OnFreecompanyLanguageChanged(ClientLanguage value)
+        {
+            CheckCommunityIntegrity();
+        }
+
+        public void CheckCommunityIntegrity()
+        {
+            if (NoviceLanguage == FreecompanyLanguage)
+            {
+                GroupCommunityHintVisibility = Visibility.Hidden;
+            }
+            else
+            {
+                GroupCommunityHintVisibility = Visibility.Visible;
+            }
+        }
+        #endregion
         #endregion
 
         #region System
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private ClientLanguage _groupSystemLanguage;
+        [ObservableProperty]
+        private int _groupSystemLanguageIndex = -1;
+
+        [ObservableProperty]
+        private Visibility _groupSystemHintVisibility = Visibility.Hidden;
+
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         private ClientLanguage _gameSystemLanguage = IronworksSettings.Instance.ChannelSettings.System.MajorLanguage;
@@ -304,6 +487,83 @@ namespace IronworksTranslator.ViewModels.Pages
         private ClientLanguage _bossQuotesLanguage = IronworksSettings.Instance.ChannelSettings.BossQuotes.MajorLanguage;
         [ObservableProperty]
         private int _bossQuotesLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.BossQuotes.MajorLanguage;
+        #region Listeners
+        partial void OnGroupSystemLanguageChanged(ClientLanguage value)
+        {
+            CheckSystemIntegrity();
+        }
+
+        partial void OnGameSystemLanguageChanged(ClientLanguage value)
+        {
+            CheckSystemIntegrity();
+        }
+
+        partial void OnGameNoticeLanguageChanged(ClientLanguage value)
+        {
+            CheckSystemIntegrity();
+        }
+
+        partial void OnGameErrorLanguageChanged(ClientLanguage value)
+        {
+            CheckSystemIntegrity();
+        }
+
+        partial void OnGilReceiveLanguageChanged(ClientLanguage value)
+        {
+            CheckSystemIntegrity();
+        }
+
+        partial void OnNpcDialogLanguageChanged(ClientLanguage value)
+        {
+            CheckSystemIntegrity();
+        }
+
+        partial void OnNpcAnnounceLanguageChanged(ClientLanguage value)
+        {
+            CheckSystemIntegrity();
+        }
+
+        partial void OnMarketSoldLanguageChanged(ClientLanguage value)
+        {
+            CheckSystemIntegrity();
+        }
+
+        partial void OnRecruitmentLanguageChanged(ClientLanguage value)
+        {
+            CheckSystemIntegrity();
+        }
+
+        partial void OnBossQuotesLanguageChanged(ClientLanguage value)
+        {
+            CheckSystemIntegrity();
+        }
+
+        partial void OnGatherLanguageChanged(ClientLanguage value)
+        {
+            CheckSystemIntegrity();
+        }
+
+
+        public void CheckSystemIntegrity()
+        {
+            if (GameNoticeLanguage == GameSystemLanguage &&
+                GameNoticeLanguage == GameErrorLanguage &&
+                GameNoticeLanguage == NpcDialogLanguage &&
+                GameNoticeLanguage == NpcAnnounceLanguage &&
+                GameNoticeLanguage == BossQuotesLanguage &&
+                GameNoticeLanguage == RecruitmentLanguage &&
+                GameNoticeLanguage == GatherLanguage &&
+                GameNoticeLanguage == MarketSoldLanguage &&
+                GameNoticeLanguage == GilReceiveLanguage)
+            {
+                GroupSystemHintVisibility = Visibility.Hidden;
+            }
+            else
+            {
+                GroupSystemHintVisibility = Visibility.Visible;
+            }
+        }
+        #endregion
         #endregion
     }
 #pragma warning restore CS8602

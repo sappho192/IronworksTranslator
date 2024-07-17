@@ -235,7 +235,12 @@
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language_group}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0" />
+                                <ComboBox Margin="16,0,0,0" 
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.GroupCommunityLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.GroupCommunityLanguageIndex}"
+                                    SelectionChanged="GroupCommunityComboBox_SelectionChanged"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.different_languages}" Visibility="{Binding ViewModel.GroupCommunityHintVisibility}" FontTypography="Caption" VerticalAlignment="Center"/>
                             </StackPanel>
                         </ui:CardExpander.Header>
                         <StackPanel Orientation="Vertical">
@@ -243,7 +248,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.community.freecompany}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbFreecompany"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.FreecompanyLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.FreecompanyLanguageIndex}"/>
@@ -252,7 +257,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.community.novice}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbNovice"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.NoviceLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.NoviceLanguageIndex}"/>
@@ -266,7 +271,12 @@
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language_group}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0" />
+                                <ComboBox Margin="16,0,0,0" 
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.GroupLinkShellLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.GroupLinkShellLanguageIndex}"
+                                    SelectionChanged="GroupLinkShellComboBox_SelectionChanged"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.different_languages}" Visibility="{Binding ViewModel.GroupLinkShellHintVisibility}" FontTypography="Caption" VerticalAlignment="Center"/>
                             </StackPanel>
                         </ui:CardExpander.Header>
                         <StackPanel Orientation="Vertical">
@@ -274,7 +284,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch1}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell1"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell1Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell1LanguageIndex}"/>
@@ -283,7 +293,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch2}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell2"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell2Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell2LanguageIndex}"/>
@@ -292,7 +302,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch3}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell3"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell3Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell3LanguageIndex}"/>
@@ -301,7 +311,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch4}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell4"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell4Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell4LanguageIndex}"/>
@@ -310,7 +320,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch5}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell5"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell5Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell5LanguageIndex}"/>
@@ -319,7 +329,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch6}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell6"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell6Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell6LanguageIndex}"/>
@@ -328,7 +338,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch7}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell7"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell7Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell7LanguageIndex}"/>
@@ -337,7 +347,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch8}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell8"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell8Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell8LanguageIndex}"/>
@@ -351,7 +361,12 @@
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language_group}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0" />
+                                <ComboBox Margin="16,0,0,0" 
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.GroupCwLinkShellLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.GroupCwLinkShellLanguageIndex}"
+                                    SelectionChanged="GroupCwLinkShellComboBox_SelectionChanged"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.different_languages}" Visibility="{Binding ViewModel.GroupCwLinkShellHintVisibility}" FontTypography="Caption" VerticalAlignment="Center"/>
                             </StackPanel>
                         </ui:CardExpander.Header>
                         <StackPanel Orientation="Vertical">
@@ -359,7 +374,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch1}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell1"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell1Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell1LanguageIndex}"/>
@@ -368,7 +383,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch2}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell2"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell2Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell2LanguageIndex}"/>
@@ -377,7 +392,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch3}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell3"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell3Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell3LanguageIndex}"/>
@@ -386,7 +401,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch4}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell4"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell4Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell4LanguageIndex}"/>
@@ -395,7 +410,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch5}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell5"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell5Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell5LanguageIndex}"/>
@@ -404,7 +419,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch6}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell6"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell6Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell6LanguageIndex}"/>
@@ -413,7 +428,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch7}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell7"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell7Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell7LanguageIndex}"/>
@@ -422,7 +437,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch8}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell8"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell8Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell8LanguageIndex}"/>
@@ -436,7 +451,12 @@
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language_group}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0" />
+                                <ComboBox Margin="16,0,0,0" 
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.GroupSystemLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.GroupSystemLanguageIndex}"
+                                    SelectionChanged="GroupSystemComboBox_SelectionChanged"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.different_languages}" Visibility="{Binding ViewModel.GroupSystemHintVisibility}" FontTypography="Caption" VerticalAlignment="Center"/>
                             </StackPanel>
                         </ui:CardExpander.Header>
                         <StackPanel Orientation="Vertical">
@@ -444,7 +464,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.notice}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbGameNotice"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.GameNoticeLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.GameNoticeLanguageIndex}"/>
@@ -453,7 +473,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.system}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbGameSystem"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.GameSystemLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.GameSystemLanguageIndex}"/>
@@ -462,7 +482,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.error}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbGameError"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.GameErrorLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.GameErrorLanguageIndex}"/>
@@ -471,7 +491,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.npc_dialog}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbNpcDialog"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.NpcDialogLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.NpcDialogLanguageIndex}"/>
@@ -480,7 +500,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.npc_announce}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbNpcAnnounce"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.NpcAnnounceLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.NpcAnnounceLanguageIndex}"/>
@@ -489,7 +509,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.boss_quotes}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbBossQuotes"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.BossQuotesLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.BossQuotesLanguageIndex}"/>
@@ -498,7 +518,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.recruitment}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbRecruitment"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.RecruitmentLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.RecruitmentLanguageIndex}"/>
@@ -507,7 +527,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.gather}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbGather"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.GatherLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.GatherLanguageIndex}"/>
@@ -516,7 +536,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.market_sold}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbMarketSold"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.MarketSoldLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.MarketSoldLanguageIndex}"/>
@@ -525,7 +545,7 @@
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.gil_receive}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
-                                <ComboBox Margin="16,0,0,0"
+                                <ComboBox Margin="16,0,0,0" Name="cbGilReceive"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.GilReceiveLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.GilReceiveLanguageIndex}"/>
