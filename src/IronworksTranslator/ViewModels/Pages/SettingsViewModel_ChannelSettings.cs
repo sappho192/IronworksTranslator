@@ -14,6 +14,7 @@ namespace IronworksTranslator.ViewModels.Pages
             private ApplicationTheme _currentTheme = IronworksSettings.Instance.UiSettings.Theme;
          */
 
+        #region Party & Field
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         [NotifyPropertyChangedFor(nameof(SayLanguageIndex))]
@@ -70,6 +71,9 @@ namespace IronworksTranslator.ViewModels.Pages
         [ObservableProperty]
         private int _emoteCustomLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.EmoteCustom.MajorLanguage;
 
+        #endregion
+
+        #region Linkshells
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         [NotifyPropertyChangedFor(nameof(Linkshell1LanguageIndex))]
@@ -125,7 +129,9 @@ namespace IronworksTranslator.ViewModels.Pages
         private ClientLanguage _linkshell8Language = IronworksSettings.Instance.ChannelSettings.Linkshell8.MajorLanguage;
         [ObservableProperty]
         private int _linkshell8LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Linkshell8.MajorLanguage;
+        #endregion
 
+        #region CrossWorld Linkshells
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         [NotifyPropertyChangedFor(nameof(CwLinkshell1LanguageIndex))]
@@ -181,7 +187,9 @@ namespace IronworksTranslator.ViewModels.Pages
         private ClientLanguage _cwLinkshell8Language = IronworksSettings.Instance.ChannelSettings.CwLinkshell8.MajorLanguage;
         [ObservableProperty]
         private int _cwLinkshell8LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.CwLinkshell8.MajorLanguage;
+        #endregion
 
+        #region Community
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         [NotifyPropertyChangedFor(nameof(FreecompanyLanguageIndex))]
@@ -195,7 +203,9 @@ namespace IronworksTranslator.ViewModels.Pages
         private ClientLanguage _noviceLanguage = IronworksSettings.Instance.ChannelSettings.Novice.MajorLanguage;
         [ObservableProperty]
         private int _noviceLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Novice.MajorLanguage;
+        #endregion
 
+        #region System
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         [NotifyPropertyChangedFor(nameof(GameSystemLanguageIndex))]
@@ -265,6 +275,7 @@ namespace IronworksTranslator.ViewModels.Pages
         private ClientLanguage _bossQuotesLanguage = IronworksSettings.Instance.ChannelSettings.BossQuotes.MajorLanguage;
         [ObservableProperty]
         private int _bossQuotesLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.BossQuotes.MajorLanguage;
+        #endregion
     }
 #pragma warning restore CS8602
 }
