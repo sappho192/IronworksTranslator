@@ -15,6 +15,7 @@ namespace IronworksTranslator.Models.Settings
         public UISettings? UiSettings { get; set; }
         public ChatUISettings? ChatUiSettings { get; set; }
         public TranslatorSettings? TranslatorSettings { get; set; }
+        public ChannelSettings? ChannelSettings { get; set; }
 
         [TraceMethod]
         public static IronworksSettings CreateDefault()
@@ -42,7 +43,8 @@ namespace IronworksTranslator.Models.Settings
                     ClientLanguage = ClientLanguage.Korean,
                     TranslatorEngine = TranslatorEngine.Papago,
                     DialogueTranslationMethod = DialogueTranslationMethod.MemorySearch
-                }
+                },
+                ChannelSettings = new ChannelSettings()
             };
         }
 
@@ -60,7 +62,8 @@ namespace IronworksTranslator.Models.Settings
             if (settings == null ||
                 settings.UiSettings == null ||
                 settings.ChatUiSettings == null ||
-                settings.TranslatorSettings == null)
+                settings.TranslatorSettings == null ||
+                settings.ChannelSettings == null)
             {
                 return true;
             }
