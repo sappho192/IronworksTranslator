@@ -17,6 +17,15 @@ namespace IronworksTranslator.ViewModels.Pages
         #region Party & Field
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
+        private ClientLanguage _groupPartyFieldLanguage;// = IronworksSettings.Instance.ChannelSettings.GroupPartyField.MajorLanguage;
+        [ObservableProperty]
+        private int _groupPartyFieldLanguageIndex = -1;
+
+        [ObservableProperty]
+        private Visibility _groupPartyFieldHintVisibility = Visibility.Hidden;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
         private ClientLanguage _sayLanguage = IronworksSettings.Instance.ChannelSettings.Say.MajorLanguage;
         [ObservableProperty]
         private int _sayLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Say.MajorLanguage;
@@ -63,6 +72,62 @@ namespace IronworksTranslator.ViewModels.Pages
         [ObservableProperty]
         private int _emoteCustomLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.EmoteCustom.MajorLanguage;
 
+        #region Listeners
+        partial void OnGroupPartyFieldLanguageChanged(ClientLanguage value)
+        {
+            CheckPartyFieldIntegrity();
+        }
+        partial void OnSayLanguageChanged(ClientLanguage value)
+        {
+            CheckPartyFieldIntegrity();
+        }
+        partial void OnYellLanguageChanged(ClientLanguage value)
+        {
+            CheckPartyFieldIntegrity();
+        }
+        partial void OnShoutLanguageChanged(ClientLanguage value)
+        {
+            CheckPartyFieldIntegrity();
+        }
+        partial void OnTellLanguageChanged(ClientLanguage value)
+        {
+            CheckPartyFieldIntegrity();
+        }
+        partial void OnPartyLanguageChanged(ClientLanguage value)
+        {
+            CheckPartyFieldIntegrity();
+        }
+        partial void OnAllianceLanguageChanged(ClientLanguage value)
+        {
+            CheckPartyFieldIntegrity();
+        }
+        partial void OnEmoteLanguageChanged(ClientLanguage value)
+        {
+            CheckPartyFieldIntegrity();
+        }
+        partial void OnEmoteCustomLanguageChanged(ClientLanguage value)
+        {
+            CheckPartyFieldIntegrity();
+        }
+        public void CheckPartyFieldIntegrity()
+        {
+            if (SayLanguage == YellLanguage &&
+                SayLanguage == ShoutLanguage &&
+                SayLanguage == TellLanguage &&
+                SayLanguage == PartyLanguage &&
+                SayLanguage == AllianceLanguage &&
+                SayLanguage == EmoteLanguage &&
+                SayLanguage == EmoteCustomLanguage)
+            {
+                GroupPartyFieldHintVisibility = Visibility.Hidden;
+                //GroupPartyFieldLanguageIndex = SayLanguageIndex;
+            }
+            else
+            {
+                GroupPartyFieldHintVisibility = Visibility.Visible;
+            }
+        }
+        #endregion
         #endregion
 
         #region Linkshells

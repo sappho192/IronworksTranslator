@@ -46,6 +46,7 @@ settings.translator.engine: "Translator Engine"
 settings.translator.dialogue.translation_method: "Method of searching NPC dialogue"
 
 settings.channel: "Channels"
+settings.channel.different_languages: "*Different languages are set for each channels*"
 settings.channel.party_field: "Party, Field"
 settings.channel.party_field.emote: "Emote"
 settings.channel.party_field.tell: "Emote (Custom)"
@@ -92,6 +93,7 @@ settings.channel.system.market_sold: "Market (Sold)"
 settings.channel.system.gil_receive: "Gil (Received)"
 
 settings.channel.language: "Channel Language: "
+settings.channel.language_group: "Change each channel's language to: "
 
 settings.game: "In-game information"
 settings.game.chat: "Chat"
