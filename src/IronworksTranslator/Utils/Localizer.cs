@@ -2,6 +2,7 @@
 
 namespace IronworksTranslator.Utils
 {
+#pragma warning disable CS8602, CS8603, CS8604
     public class Localizer
     {
         public static string GetString(string key)
@@ -25,4 +26,5 @@ namespace IronworksTranslator.Utils
             return localizationSet[key];
         }
     }
+#pragma warning restore CS8602, CS8603, CS8604
 }

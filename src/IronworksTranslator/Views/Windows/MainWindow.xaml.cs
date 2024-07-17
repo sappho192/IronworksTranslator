@@ -6,6 +6,7 @@ using Wpf.Ui.Controls;
 
 namespace IronworksTranslator.Views.Windows
 {
+#pragma warning disable CS8602
     public partial class MainWindow : INavigationWindow
     {
         public MainWindowViewModel ViewModel { get; }
@@ -65,4 +66,5 @@ namespace IronworksTranslator.Views.Windows
             throw new NotImplementedException();
         }
     }
+#pragma warning restore CS8602
 }

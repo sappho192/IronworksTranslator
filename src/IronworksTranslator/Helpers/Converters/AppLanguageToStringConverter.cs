@@ -5,6 +5,7 @@ using System.Windows.Data;
 
 namespace IronworksTranslator.Helpers.Converters
 {
+#pragma warning disable CS8604
     internal class AppLanguageToStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -25,4 +26,5 @@ namespace IronworksTranslator.Helpers.Converters
             return EnumExtension.GetValueFromDescription<AppLanguage>(value.ToString());
         }
     }
+#pragma warning restore CS8604
 }

@@ -2,6 +2,7 @@
 
 namespace IronworksTranslator.Helpers.Extensions
 {
+#pragma warning disable CS8603
     public static class EnumExtension
     {
         public static T GetValueFromDescription<T>(string description) where T : Enum
@@ -25,4 +26,5 @@ namespace IronworksTranslator.Helpers.Extensions
             // Or return default(T);
         }
     }
+#pragma warning restore CS8603
 }

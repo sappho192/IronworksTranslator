@@ -9,6 +9,7 @@ using IronworksTranslator.ViewModels.Pages;
 
 namespace IronworksTranslator.Models.Settings
 {
+#pragma warning disable CS8618
     public partial class ChatUISettings : ObservableRecipient
     {
         public ChatUISettings()
@@ -96,4 +97,5 @@ namespace IronworksTranslator.Models.Settings
             }
         }
     }
+#pragma warning restore CS8618
 }

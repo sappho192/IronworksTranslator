@@ -18,6 +18,7 @@ using Wpf.Ui;
 
 namespace IronworksTranslator
 {
+#pragma warning disable CS8602, CS8603, CS8604
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
@@ -175,4 +176,5 @@ namespace IronworksTranslator
 
 
     }
+#pragma warning restore CS8602, CS8603, CS8604
 }

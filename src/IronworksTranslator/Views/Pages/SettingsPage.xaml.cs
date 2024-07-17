@@ -4,6 +4,7 @@ using Wpf.Ui.Controls;
 
 namespace IronworksTranslator.Views.Pages
 {
+#pragma warning disable CS8602
     public partial class SettingsPage : INavigableView<SettingsViewModel>
     {
         public SettingsViewModel ViewModel { get; }
@@ -25,4 +26,5 @@ namespace IronworksTranslator.Views.Pages
             }
         }
     }
+#pragma warning restore CS8602
 }

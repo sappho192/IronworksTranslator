@@ -6,6 +6,7 @@ using Wpf.Ui.Controls;
 
 namespace IronworksTranslator.ViewModels.Pages
 {
+#pragma warning disable CS8602
     public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         private bool _isInitialized = false;
@@ -107,4 +108,5 @@ namespace IronworksTranslator.ViewModels.Pages
             }
         }
     }
+#pragma warning restore CS8602
 }

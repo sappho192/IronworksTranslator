@@ -11,6 +11,7 @@ using IronworksTranslator.Models.Enums;
 
 namespace IronworksTranslator.Services
 {
+#pragma warning disable CS8602, CS8618
     /// <summary>
     /// Managed host of the application.
     /// </summary>
@@ -112,4 +113,5 @@ namespace IronworksTranslator.Services
             await Task.CompletedTask;
         }
     }
+#pragma warning restore CS8602, CS8618
 }

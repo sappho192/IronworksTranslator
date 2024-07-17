@@ -3,6 +3,7 @@ using System.Windows.Markup;
 
 namespace IronworksTranslator.Helpers.Extensions
 {
+#pragma warning disable CS8602
     public class EnumToCollectionExtension : MarkupExtension
     {
         public Type? EnumType { get; set; }
@@ -22,4 +23,5 @@ namespace IronworksTranslator.Helpers.Extensions
                        .FirstOrDefault()?.Description ?? value.ToString();
         }
     }
+#pragma warning restore CS8602
 }
