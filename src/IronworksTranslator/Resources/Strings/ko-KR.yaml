@@ -81,7 +81,7 @@ settings.channel.cw_linkshell.ch7: "서버 초월 링크쉘 7"
 settings.channel.cw_linkshell.ch8: "서버 초월 링크쉘 8"
 
 settings.channel.system: "시스템"
-settings.channel.system.noice: "공지"
+settings.channel.system.notice: "공지"
 settings.channel.system.system: "시스템 메시지"
 settings.channel.system.error: "시스템 에러"
 settings.channel.system.npc_dialog: "NPC 대사"

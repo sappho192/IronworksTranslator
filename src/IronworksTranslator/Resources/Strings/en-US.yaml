@@ -80,7 +80,7 @@ settings.channel.cw_linkshell.ch7: "Crossworld Linkshell 7"
 settings.channel.cw_linkshell.ch8: "Crossworld Linkshell 8"
 
 settings.channel.system: "System"
-settings.channel.system.noice: "Notice"
+settings.channel.system.notice: "Notice"
 settings.channel.system.system: "System"
 settings.channel.system.error: "Error"
 settings.channel.system.npc_dialog: "NPC (Dialogue)"
