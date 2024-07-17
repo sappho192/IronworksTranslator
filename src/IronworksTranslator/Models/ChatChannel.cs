@@ -51,6 +51,7 @@ namespace IronworksTranslator.Models
             //}
         }
 
+        private const string groupSystem = nameof(ChatCode.GroupSystem);
         private void OnClientLanguageMessage(object recipient, PropertyChangedMessage<ClientLanguage> message)
         {
             if (recipient is not ChatChannel recipientChannel)
@@ -60,39 +61,40 @@ namespace IronworksTranslator.Models
                 MessageBox.Show(errorMessage);
                 return;
             }
+            
             switch (message.PropertyName)
             {
                 case nameof(SettingsViewModel.SayLanguage):
-                    if (recipientChannel.Code == ChatCode.Say)
-                        MajorLanguage = message.NewValue;
-                    break;
+                    if (recipientChannel.Code != ChatCode.Say) break;
+                    goto case groupSystem;
                 case nameof(SettingsViewModel.YellLanguage):
-                    if (recipientChannel.Code == ChatCode.Yell)
-                        MajorLanguage = message.NewValue;
-                    break;
+                    if (recipientChannel.Code != ChatCode.Yell) break;
+                    goto case groupSystem;
                 case nameof(SettingsViewModel.ShoutLanguage):
-                    if (recipientChannel.Code == ChatCode.Shout)
-                        MajorLanguage = message.NewValue;
-                    break;
+                    if (recipientChannel.Code != ChatCode.Shout) break;
+                    goto case groupSystem;
                 case nameof(SettingsViewModel.TellLanguage):
-                    if (recipientChannel.Code == ChatCode.Tell)
-                        MajorLanguage = message.NewValue;
-                    break;
+                    if (recipientChannel.Code != ChatCode.Tell) break;
+                    goto case groupSystem;
                 case nameof(SettingsViewModel.PartyLanguage):
-                    if (recipientChannel.Code == ChatCode.Party)
-                        MajorLanguage = message.NewValue;
-                    break;
+                    if (recipientChannel.Code != ChatCode.Party) break;
+                    goto case groupSystem;
                 case nameof(SettingsViewModel.AllianceLanguage):
-                    if (recipientChannel.Code == ChatCode.Alliance)
-                        MajorLanguage = message.NewValue;
-                    break;
+                    if (recipientChannel.Code != ChatCode.Alliance) break;
+                    goto case groupSystem;
                 case nameof(SettingsViewModel.EmoteLanguage):
-                    if (recipientChannel.Code == ChatCode.Emote)
-                        MajorLanguage = message.NewValue;
-                    break;
+                    if (recipientChannel.Code != ChatCode.Emote) break;
+                    goto case groupSystem;
                 case nameof(SettingsViewModel.EmoteCustomLanguage):
-                    if (recipientChannel.Code == ChatCode.EmoteCustom)
-                        MajorLanguage = message.NewValue;
+                    if (recipientChannel.Code != ChatCode.EmoteCustom) break;
+                    goto case groupSystem;
+                case groupSystem:
+                    MajorLanguage = message.NewValue;
+                    break;
+                default:
+                    string errorMessage = $"OnClientLanguageMessage: Unhandled channel: {recipientChannel.Code}";
+                    Log.Error(errorMessage);
+                    MessageBox.Show(errorMessage);
                     break;
             }
         }

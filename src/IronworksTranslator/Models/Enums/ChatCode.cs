@@ -40,5 +40,11 @@
         CWLinkShell7 = 0x6A,
         CWLinkShell8 = 0x6B,
         BossQuotes = 0x2AB9,
+        // Custom Chat Code for categorization
+        GroupPartyField = 0xFFF1,
+        GroupCommunity = 0xFFF2,
+        GroupLinkShell = 0xFFF3,
+        GroupCWLinkShell = 0xFFF4,
+        GroupSystem = 0xFFF5
     }
 }
