@@ -72,115 +72,199 @@ namespace IronworksTranslator.ViewModels.Pages
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _linkshell1 = IronworksSettings.Instance.ChannelSettings.Linkshell1;
+        [NotifyPropertyChangedFor(nameof(Linkshell1LanguageIndex))]
+        private ClientLanguage _linkshell1Language = IronworksSettings.Instance.ChannelSettings.Linkshell1.MajorLanguage;
+        [ObservableProperty]
+        private int _linkshell1LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Linkshell1.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _linkshell2 = IronworksSettings.Instance.ChannelSettings.Linkshell2;
+        [NotifyPropertyChangedFor(nameof(Linkshell2LanguageIndex))]
+        private ClientLanguage _linkshell2Language = IronworksSettings.Instance.ChannelSettings.Linkshell2.MajorLanguage;
+        [ObservableProperty]
+        private int _linkshell2LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Linkshell2.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _linkshell3 = IronworksSettings.Instance.ChannelSettings.Linkshell3;
+        [NotifyPropertyChangedFor(nameof(Linkshell3LanguageIndex))]
+        private ClientLanguage _linkshell3Language = IronworksSettings.Instance.ChannelSettings.Linkshell3.MajorLanguage;
+        [ObservableProperty]
+        private int _linkshell3LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Linkshell3.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _linkshell4 = IronworksSettings.Instance.ChannelSettings.Linkshell4;
+        [NotifyPropertyChangedFor(nameof(Linkshell4LanguageIndex))]
+        private ClientLanguage _linkshell4Language = IronworksSettings.Instance.ChannelSettings.Linkshell4.MajorLanguage;
+        [ObservableProperty]
+        private int _linkshell4LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Linkshell4.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _linkshell5 = IronworksSettings.Instance.ChannelSettings.Linkshell5;
+        [NotifyPropertyChangedFor(nameof(Linkshell5LanguageIndex))]
+        private ClientLanguage _linkshell5Language = IronworksSettings.Instance.ChannelSettings.Linkshell5.MajorLanguage;
+        [ObservableProperty]
+        private int _linkshell5LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Linkshell5.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _linkshell6 = IronworksSettings.Instance.ChannelSettings.Linkshell6;
+        [NotifyPropertyChangedFor(nameof(Linkshell6LanguageIndex))]
+        private ClientLanguage _linkshell6Language = IronworksSettings.Instance.ChannelSettings.Linkshell6.MajorLanguage;
+        [ObservableProperty]
+        private int _linkshell6LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Linkshell6.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _linkshell7 = IronworksSettings.Instance.ChannelSettings.Linkshell7;
+        [NotifyPropertyChangedFor(nameof(Linkshell7LanguageIndex))]
+        private ClientLanguage _linkshell7Language = IronworksSettings.Instance.ChannelSettings.Linkshell7.MajorLanguage;
+        [ObservableProperty]
+        private int _linkshell7LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Linkshell7.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _linkshell8 = IronworksSettings.Instance.ChannelSettings.Linkshell8;
+        [NotifyPropertyChangedFor(nameof(Linkshell8LanguageIndex))]
+        private ClientLanguage _linkshell8Language = IronworksSettings.Instance.ChannelSettings.Linkshell8.MajorLanguage;
+        [ObservableProperty]
+        private int _linkshell8LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Linkshell8.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _cwLinkshell1 = IronworksSettings.Instance.ChannelSettings.CwLinkshell1;
+        [NotifyPropertyChangedFor(nameof(CwLinkshell1LanguageIndex))]
+        private ClientLanguage _cwLinkshell1Language = IronworksSettings.Instance.ChannelSettings.CwLinkshell1.MajorLanguage;
+        [ObservableProperty]
+        private int _cwLinkshell1LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.CwLinkshell1.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _cwLinkshell2 = IronworksSettings.Instance.ChannelSettings.CwLinkshell2;
+        [NotifyPropertyChangedFor(nameof(CwLinkshell2LanguageIndex))]
+        private ClientLanguage _cwLinkshell2Language = IronworksSettings.Instance.ChannelSettings.CwLinkshell2.MajorLanguage;
+        [ObservableProperty]
+        private int _cwLinkshell2LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.CwLinkshell2.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _cwLinkshell3 = IronworksSettings.Instance.ChannelSettings.CwLinkshell3;
+        [NotifyPropertyChangedFor(nameof(CwLinkshell3LanguageIndex))]
+        private ClientLanguage _cwLinkshell3Language = IronworksSettings.Instance.ChannelSettings.CwLinkshell3.MajorLanguage;
+        [ObservableProperty]
+        private int _cwLinkshell3LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.CwLinkshell3.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _cwLinkshell4 = IronworksSettings.Instance.ChannelSettings.CwLinkshell4;
+        [NotifyPropertyChangedFor(nameof(CwLinkshell4LanguageIndex))]
+        private ClientLanguage _cwLinkshell4Language = IronworksSettings.Instance.ChannelSettings.CwLinkshell4.MajorLanguage;
+        [ObservableProperty]
+        private int _cwLinkshell4LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.CwLinkshell4.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _cwLinkshell5 = IronworksSettings.Instance.ChannelSettings.CwLinkshell5;
+        [NotifyPropertyChangedFor(nameof(CwLinkshell5LanguageIndex))]
+        private ClientLanguage _cwLinkshell5Language = IronworksSettings.Instance.ChannelSettings.CwLinkshell5.MajorLanguage;
+        [ObservableProperty]
+        private int _cwLinkshell5LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.CwLinkshell5.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _cwLinkshell6 = IronworksSettings.Instance.ChannelSettings.CwLinkshell6;
+        [NotifyPropertyChangedFor(nameof(CwLinkshell6LanguageIndex))]
+        private ClientLanguage _cwLinkshell6Language = IronworksSettings.Instance.ChannelSettings.CwLinkshell6.MajorLanguage;
+        [ObservableProperty]
+        private int _cwLinkshell6LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.CwLinkshell6.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _cwLinkshell7 = IronworksSettings.Instance.ChannelSettings.CwLinkshell7;
+        [NotifyPropertyChangedFor(nameof(CwLinkshell7LanguageIndex))]
+        private ClientLanguage _cwLinkshell7Language = IronworksSettings.Instance.ChannelSettings.CwLinkshell7.MajorLanguage;
+        [ObservableProperty]
+        private int _cwLinkshell7LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.CwLinkshell7.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _cwLinkshell8 = IronworksSettings.Instance.ChannelSettings.CwLinkshell8;
+        [NotifyPropertyChangedFor(nameof(CwLinkshell8LanguageIndex))]
+        private ClientLanguage _cwLinkshell8Language = IronworksSettings.Instance.ChannelSettings.CwLinkshell8.MajorLanguage;
+        [ObservableProperty]
+        private int _cwLinkshell8LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.CwLinkshell8.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _freecompany = IronworksSettings.Instance.ChannelSettings.Freecompany;
+        [NotifyPropertyChangedFor(nameof(FreecompanyLanguageIndex))]
+        private ClientLanguage _freecompanyLanguage = IronworksSettings.Instance.ChannelSettings.Freecompany.MajorLanguage;
+        [ObservableProperty]
+        private int _freecompanyLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Freecompany.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _novice = IronworksSettings.Instance.ChannelSettings.Novice;
+        [NotifyPropertyChangedFor(nameof(NoviceLanguageIndex))]
+        private ClientLanguage _noviceLanguage = IronworksSettings.Instance.ChannelSettings.Novice.MajorLanguage;
+        [ObservableProperty]
+        private int _noviceLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Novice.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _gameSystem = IronworksSettings.Instance.ChannelSettings.System;
+        [NotifyPropertyChangedFor(nameof(GameSystemLanguageIndex))]
+        private ClientLanguage _gameSystemLanguage = IronworksSettings.Instance.ChannelSettings.System.MajorLanguage;
+        [ObservableProperty]
+        private int _gameSystemLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.System.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _gather = IronworksSettings.Instance.ChannelSettings.Gather;
+        [NotifyPropertyChangedFor(nameof(GatherLanguageIndex))]
+        private ClientLanguage _gatherLanguage = IronworksSettings.Instance.ChannelSettings.Gather.MajorLanguage;
+        [ObservableProperty]
+        private int _gatherLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Gather.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _gameNotice = IronworksSettings.Instance.ChannelSettings.Notice;
+        [NotifyPropertyChangedFor(nameof(GameNoticeLanguageIndex))]
+        private ClientLanguage _gameNoticeLanguage = IronworksSettings.Instance.ChannelSettings.Notice.MajorLanguage;
+        [ObservableProperty]
+        private int _gameNoticeLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Notice.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _gameError = IronworksSettings.Instance.ChannelSettings.Error;
+        [NotifyPropertyChangedFor(nameof(GameErrorLanguageIndex))]
+        private ClientLanguage _gameErrorLanguage = IronworksSettings.Instance.ChannelSettings.Error.MajorLanguage;
+        [ObservableProperty]
+        private int _gameErrorLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Error.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _gilReceive = IronworksSettings.Instance.ChannelSettings.GilReceive;
+        [NotifyPropertyChangedFor(nameof(GilReceiveLanguageIndex))]
+        private ClientLanguage _gilReceiveLanguage = IronworksSettings.Instance.ChannelSettings.GilReceive.MajorLanguage;
+        [ObservableProperty]
+        private int _gilReceiveLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.GilReceive.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _npcDialog = IronworksSettings.Instance.ChannelSettings.NpcDialog;
+        [NotifyPropertyChangedFor(nameof(NpcDialogLanguageIndex))]
+        private ClientLanguage _npcDialogLanguage = IronworksSettings.Instance.ChannelSettings.NpcDialog.MajorLanguage;
+        [ObservableProperty]
+        private int _npcDialogLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.NpcDialog.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _npcAnnounce = IronworksSettings.Instance.ChannelSettings.NpcAnnounce;
+        [NotifyPropertyChangedFor(nameof(NpcAnnounceLanguageIndex))]
+        private ClientLanguage _npcAnnounceLanguage = IronworksSettings.Instance.ChannelSettings.NpcAnnounce.MajorLanguage;
+        [ObservableProperty]
+        private int _npcAnnounceLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.NpcAnnounce.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _marketSold = IronworksSettings.Instance.ChannelSettings.MarketSold;
+        [NotifyPropertyChangedFor(nameof(MarketSoldLanguageIndex))]
+        private ClientLanguage _marketSoldLanguage = IronworksSettings.Instance.ChannelSettings.MarketSold.MajorLanguage;
+        [ObservableProperty]
+        private int _marketSoldLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.MarketSold.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _recruitment = IronworksSettings.Instance.ChannelSettings.Recruitment;
+        [NotifyPropertyChangedFor(nameof(RecruitmentLanguageIndex))]
+        private ClientLanguage _recruitmentLanguage = IronworksSettings.Instance.ChannelSettings.Recruitment.MajorLanguage;
+        [ObservableProperty]
+        private int _recruitmentLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Recruitment.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ChatChannel _bossQuotes = IronworksSettings.Instance.ChannelSettings.BossQuotes;
+        [NotifyPropertyChangedFor(nameof(BossQuotesLanguageIndex))]
+        private ClientLanguage _bossQuotesLanguage = IronworksSettings.Instance.ChannelSettings.BossQuotes.MajorLanguage;
+        [ObservableProperty]
+        private int _bossQuotesLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.BossQuotes.MajorLanguage;
     }
 #pragma warning restore CS8602
 }
