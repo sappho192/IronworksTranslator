@@ -44,12 +44,163 @@ namespace IronworksTranslator.Models
 
         private void OnBoolMessage(object recipient, PropertyChangedMessage<bool> message)
         {
-            //switch (message.PropertyName)
-            //{
-            //    case nameof(SettingsViewModel.ChatChannelShow):
-            Show = message.NewValue;
-            //        break;
-            //}
+            if (recipient is not ChatChannel recipientChannel)
+            {
+                string errorMessage = $"ChatChannel: Unknown recipient {recipient}";
+                Log.Error(errorMessage);
+                MessageBox.Show(errorMessage);
+                return;
+            }
+
+            switch (message.PropertyName)
+            {
+                case nameof(SettingsViewModel.ShowSayChannel):
+                    if (recipientChannel.Code != ChatCode.Say) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowYellChannel):
+                    if (recipientChannel.Code != ChatCode.Yell) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowShoutChannel):
+                    if (recipientChannel.Code != ChatCode.Shout) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowTellChannel):
+                    if (recipientChannel.Code != ChatCode.Tell) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowPartyChannel):
+                    if (recipientChannel.Code != ChatCode.Party) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowAllianceChannel):
+                    if (recipientChannel.Code != ChatCode.Alliance) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowEmoteChannel):
+                    if (recipientChannel.Code != ChatCode.Emote) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowEmoteCustomChannel):
+                    if (recipientChannel.Code != ChatCode.EmoteCustom) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowFreecompanyChannel):
+                    if (recipientChannel.Code != ChatCode.FreeCompany) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowNoviceChannel):
+                    if (recipientChannel.Code != ChatCode.Novice) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowLinkshell1Channel):
+                    if (recipientChannel.Code != ChatCode.LinkShell1) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowLinkshell2Channel):
+                    if (recipientChannel.Code != ChatCode.LinkShell2) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowLinkshell3Channel):
+                    if (recipientChannel.Code != ChatCode.LinkShell3) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowLinkshell4Channel):
+                    if (recipientChannel.Code != ChatCode.LinkShell4) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowLinkshell5Channel):
+                    if (recipientChannel.Code != ChatCode.LinkShell5) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowLinkshell6Channel):
+                    if (recipientChannel.Code != ChatCode.LinkShell6) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowLinkshell7Channel):
+                    if (recipientChannel.Code != ChatCode.LinkShell7) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowLinkshell8Channel):
+                    if (recipientChannel.Code != ChatCode.LinkShell8) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowCwLinkshell1Channel):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell1) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowCwLinkshell2Channel):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell2) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowCwLinkshell3Channel):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell3) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowCwLinkshell4Channel):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell4) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowCwLinkshell5Channel):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell5) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowCwLinkshell6Channel):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell6) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowCwLinkshell7Channel):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell7) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowCwLinkshell8Channel):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell8) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowGameSystemChannel):
+                    if (recipientChannel.Code != ChatCode.System) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowGameNoticeChannel):
+                    if (recipientChannel.Code != ChatCode.Notice) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowGameErrorChannel):
+                    if (recipientChannel.Code != ChatCode.Error) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowGatherChannel):
+                    if (recipientChannel.Code != ChatCode.Gather) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowGilReceiveChannel):
+                    if (recipientChannel.Code != ChatCode.GilReceive) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowMarketSoldChannel):
+                    if (recipientChannel.Code != ChatCode.MarketSold) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowRecruitmentChannel):
+                    if (recipientChannel.Code != ChatCode.Recruitment) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowNpcDialogChannel):
+                    if (recipientChannel.Code != ChatCode.NPCDialog) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowNpcAnnounceChannel):
+                    if (recipientChannel.Code != ChatCode.NPCAnnounce) break;
+                    Show = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ShowBossQuotesChannel):
+                    if (recipientChannel.Code != ChatCode.BossQuotes) break;
+                    Show = message.NewValue;
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void OnClientLanguageMessage(object recipient, PropertyChangedMessage<ClientLanguage> message)
@@ -62,7 +213,6 @@ namespace IronworksTranslator.Models
                 return;
             }
 
-            var channelSettings = IronworksSettings.Instance.ChannelSettings;
             switch (message.PropertyName)
             {
                 //case nameof(SettingsViewModel.GroupPartyFieldLanguage):

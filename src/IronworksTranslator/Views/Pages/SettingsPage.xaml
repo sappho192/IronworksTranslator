@@ -27,6 +27,7 @@
         <converters:ClientLanguageToStringConverter x:Key="ClientLanguageToStringConverter"/>
         <converters:TranslatorEngineToStringConverter x:Key="TranslatorEngineToStringConverter"/>
         <converters:DialogueTranslationMethodToStringConverter x:Key="DialogueTranslationMethodToStringConverter"/>
+        <converters:BooleanToEyeSymbolConverter x:Key="BooleanToEyeSymbolConverter"/>
     </Page.Resources>
 
     <TabControl Margin="0,48,0,16">
@@ -156,7 +157,11 @@
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.say}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowSay"
+                                    Command="{Binding ViewModel.ShowSayChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowSayChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbSay"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -165,7 +170,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.yell}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowYell"
+                                    Command="{Binding ViewModel.ShowYellChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowYellChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbYell"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -174,7 +183,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.shout}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowShout"
+                                    Command="{Binding ViewModel.ShowShoutChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowShoutChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbShout"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -183,7 +196,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.tell}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowTell"
+                                    Command="{Binding ViewModel.ShowTellChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowTellChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbTell"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -192,7 +209,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.party}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowParty"
+                                    Command="{Binding ViewModel.ShowPartyChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowPartyChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbParty"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -201,7 +222,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.alliance}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowAlliance"
+                                    Command="{Binding ViewModel.ShowAllianceChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowAllianceChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbAlliance"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -210,7 +235,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.emote}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowEmote"
+                                    Command="{Binding ViewModel.ShowEmoteChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowEmoteChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbEmote"
                                           ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -219,7 +248,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.emote_custom}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowEmoteCustom"
+                                    Command="{Binding ViewModel.ShowEmoteCustomChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowEmoteCustomChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbEmoteCustom"
                                           ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -246,7 +279,11 @@
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.community.freecompany}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowFreecompany"
+                                    Command="{Binding ViewModel.ShowFreecompanyChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowFreecompanyChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbFreecompany"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -255,7 +292,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.community.novice}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowNovice"
+                                    Command="{Binding ViewModel.ShowNoviceChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowNoviceChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbNovice"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -282,7 +323,11 @@
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch1}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowLinkshell1"
+                                    Command="{Binding ViewModel.ShowLinkshell1ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowLinkshell1Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbLinkshell1"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -291,7 +336,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch2}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowLinkshell2"
+                                    Command="{Binding ViewModel.ShowLinkshell2ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowLinkshell2Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbLinkshell2"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -300,7 +349,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch3}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowLinkshell3"
+                                    Command="{Binding ViewModel.ShowLinkshell3ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowLinkshell3Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbLinkshell3"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -309,7 +362,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch4}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowLinkshell4"
+                                    Command="{Binding ViewModel.ShowLinkshell4ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowLinkshell4Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbLinkshell4"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -318,7 +375,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch5}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowLinkshell5"
+                                    Command="{Binding ViewModel.ShowLinkshell5ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowLinkshell5Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbLinkshell5"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -327,7 +388,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch6}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowLinkshell6"
+                                    Command="{Binding ViewModel.ShowLinkshell6ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowLinkshell6Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbLinkshell6"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -336,7 +401,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch7}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowLinkshell7"
+                                    Command="{Binding ViewModel.ShowLinkshell7ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowLinkshell7Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbLinkshell7"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -345,7 +414,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch8}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowLinkshell8"
+                                    Command="{Binding ViewModel.ShowLinkshell8ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowLinkshell8Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbLinkshell8"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -372,7 +445,11 @@
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch1}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowCwLinkshell1"
+                                    Command="{Binding ViewModel.ShowCwLinkshell1ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowCwLinkshell1Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell1"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -381,7 +458,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch2}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowCwLinkshell2"
+                                    Command="{Binding ViewModel.ShowCwLinkshell2ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowCwLinkshell2Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell2"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -390,7 +471,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch3}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowCwLinkshell3"
+                                    Command="{Binding ViewModel.ShowCwLinkshell3ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowCwLinkshell3Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell3"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -399,7 +484,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch4}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowCwLinkshell4"
+                                    Command="{Binding ViewModel.ShowCwLinkshell4ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowCwLinkshell4Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell4"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -408,7 +497,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch5}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowCwLinkshell5"
+                                    Command="{Binding ViewModel.ShowCwLinkshell5ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowCwLinkshell5Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell5"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -417,7 +510,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch6}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowCwLinkshell6"
+                                    Command="{Binding ViewModel.ShowCwLinkshell6ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowCwLinkshell6Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell6"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -426,7 +523,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch7}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowCwLinkshell7"
+                                    Command="{Binding ViewModel.ShowCwLinkshell7ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowCwLinkshell7Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell7"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -435,7 +536,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch8}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowCwLinkshell8"
+                                    Command="{Binding ViewModel.ShowCwLinkshell8ChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowCwLinkshell8Channel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell8"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -462,7 +567,11 @@
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.notice}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowGameNotice"
+                                    Command="{Binding ViewModel.ShowGameNoticeChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowGameNoticeChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbGameNotice"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -471,7 +580,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.system}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowGameSystem"
+                                    Command="{Binding ViewModel.ShowGameSystemChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowGameSystemChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbGameSystem"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -480,7 +593,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.error}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowGameerror"
+                                    Command="{Binding ViewModel.ShowGameErrorChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowGameErrorChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbGameError"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -489,7 +606,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.npc_dialog}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowNpcDialog"
+                                    Command="{Binding ViewModel.ShowNpcDialogChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowNpcDialogChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbNpcDialog"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -498,7 +619,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.npc_announce}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowNpcAnnounce"
+                                    Command="{Binding ViewModel.ShowNpcAnnounceChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowNpcAnnounceChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbNpcAnnounce"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -507,7 +632,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.boss_quotes}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowBossQuotes"
+                                    Command="{Binding ViewModel.ShowBossQuotesChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowBossQuotesChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbBossQuotes"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -516,7 +645,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.recruitment}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowRecruitment"
+                                    Command="{Binding ViewModel.ShowRecruitmentChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowRecruitmentChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbRecruitment"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -525,7 +658,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.gather}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowgather"
+                                    Command="{Binding ViewModel.ShowGatherChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowGatherChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbGather"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -534,7 +671,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.market_sold}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowMarketSold"
+                                    Command="{Binding ViewModel.ShowMarketSoldChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowMarketSoldChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbMarketSold"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -543,7 +684,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.gil_receive}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
+                                <Button Margin="32,0,0,0" Name="btShowGilReceive"
+                                    Command="{Binding ViewModel.ShowGilReceiveChannelChangedCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Content}">
+                                    <ui:SymbolIcon Symbol="{Binding ViewModel.ShowGilReceiveChannel, Converter={StaticResource BooleanToEyeSymbolConverter}}"/>
+                                </Button>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" Name="cbGilReceive"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"

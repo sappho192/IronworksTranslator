@@ -1,6 +1,7 @@
 ﻿using IronworksTranslator.Models;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
+using System.Windows.Controls;
 using Wpf.Ui.Controls;
 
 namespace IronworksTranslator.ViewModels.Pages
@@ -72,6 +73,159 @@ namespace IronworksTranslator.ViewModels.Pages
         [ObservableProperty]
         private int _emoteCustomLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.EmoteCustom.MajorLanguage;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showSayChannel = IronworksSettings.Instance.ChannelSettings.Say.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showYellChannel = IronworksSettings.Instance.ChannelSettings.Yell.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showShoutChannel = IronworksSettings.Instance.ChannelSettings.Shout.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showTellChannel = IronworksSettings.Instance.ChannelSettings.Tell.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showPartyChannel = IronworksSettings.Instance.ChannelSettings.Party.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showAllianceChannel = IronworksSettings.Instance.ChannelSettings.Alliance.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showEmoteChannel = IronworksSettings.Instance.ChannelSettings.Emote.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showEmoteCustomChannel = IronworksSettings.Instance.ChannelSettings.EmoteCustom.Show;
+
+        #region Commands
+        [RelayCommand]
+        private void OnShowSayChannelChanged(SymbolIcon icon)
+        {
+            if (ShowSayChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowSayChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowSayChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowYellChannelChanged(SymbolIcon icon)
+        {
+            if (ShowYellChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowYellChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowYellChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowShoutChannelChanged(SymbolIcon icon)
+        {
+            if (ShowShoutChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowShoutChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowShoutChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowTellChannelChanged(SymbolIcon icon)
+        {
+            if (ShowTellChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowTellChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowTellChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowPartyChannelChanged(SymbolIcon icon)
+        {
+            if (ShowPartyChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowPartyChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowPartyChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowAllianceChannelChanged(SymbolIcon icon)
+        {
+            if (ShowAllianceChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowAllianceChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowAllianceChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowEmoteChannelChanged(SymbolIcon icon)
+        {
+            if (ShowEmoteChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowEmoteChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowEmoteChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowEmoteCustomChannelChanged(SymbolIcon icon)
+        {
+            if (ShowEmoteCustomChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowEmoteCustomChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowEmoteCustomChannel = true;
+            }
+        }
+        #endregion
         #region Listeners
         partial void OnGroupPartyFieldLanguageChanged(ClientLanguage value)
         {
@@ -187,6 +341,160 @@ namespace IronworksTranslator.ViewModels.Pages
         private ClientLanguage _linkshell8Language = IronworksSettings.Instance.ChannelSettings.Linkshell8.MajorLanguage;
         [ObservableProperty]
         private int _linkshell8LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Linkshell8.MajorLanguage;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showLinkshell1Channel = IronworksSettings.Instance.ChannelSettings.Linkshell1.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showLinkshell2Channel = IronworksSettings.Instance.ChannelSettings.Linkshell2.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showLinkshell3Channel = IronworksSettings.Instance.ChannelSettings.Linkshell3.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showLinkshell4Channel = IronworksSettings.Instance.ChannelSettings.Linkshell4.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showLinkshell5Channel = IronworksSettings.Instance.ChannelSettings.Linkshell5.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showLinkshell6Channel = IronworksSettings.Instance.ChannelSettings.Linkshell6.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showLinkshell7Channel = IronworksSettings.Instance.ChannelSettings.Linkshell7.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showLinkshell8Channel = IronworksSettings.Instance.ChannelSettings.Linkshell8.Show;
+
+        #region Commands
+        [RelayCommand]
+        private void OnShowLinkshell1ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowLinkshell1Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowLinkshell1Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowLinkshell1Channel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowLinkshell2ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowLinkshell2Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowLinkshell2Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowLinkshell2Channel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowLinkshell3ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowLinkshell3Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowLinkshell3Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowLinkshell3Channel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowLinkshell4ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowLinkshell4Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowLinkshell4Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowLinkshell4Channel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowLinkshell5ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowLinkshell5Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowLinkshell5Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowLinkshell5Channel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowLinkshell6ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowLinkshell6Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowLinkshell6Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowLinkshell6Channel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowLinkshell7ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowLinkshell7Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowLinkshell7Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowLinkshell7Channel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowLinkshell8ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowLinkshell8Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowLinkshell8Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowLinkshell8Channel = true;
+            }
+        }
+        #endregion
         #region Listeners
         partial void OnGroupLinkShellLanguageChanged(ClientLanguage value)
         {
@@ -301,6 +609,160 @@ namespace IronworksTranslator.ViewModels.Pages
         private ClientLanguage _cwLinkshell8Language = IronworksSettings.Instance.ChannelSettings.CwLinkshell8.MajorLanguage;
         [ObservableProperty]
         private int _cwLinkshell8LanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.CwLinkshell8.MajorLanguage;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showCwLinkshell1Channel = IronworksSettings.Instance.ChannelSettings.Linkshell1.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showCwLinkshell2Channel = IronworksSettings.Instance.ChannelSettings.Linkshell2.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showCwLinkshell3Channel = IronworksSettings.Instance.ChannelSettings.Linkshell3.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showCwLinkshell4Channel = IronworksSettings.Instance.ChannelSettings.Linkshell4.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showCwLinkshell5Channel = IronworksSettings.Instance.ChannelSettings.Linkshell5.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showCwLinkshell6Channel = IronworksSettings.Instance.ChannelSettings.Linkshell6.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showCwLinkshell7Channel = IronworksSettings.Instance.ChannelSettings.Linkshell7.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showCwLinkshell8Channel = IronworksSettings.Instance.ChannelSettings.Linkshell8.Show;
+
+        #region Commands
+        [RelayCommand]
+        private void OnShowCwLinkshell1ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowCwLinkshell1Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowCwLinkshell1Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowCwLinkshell1Channel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowCwLinkshell2ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowCwLinkshell2Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowCwLinkshell2Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowCwLinkshell2Channel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowCwLinkshell3ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowCwLinkshell3Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowCwLinkshell3Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowCwLinkshell3Channel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowCwLinkshell4ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowCwLinkshell4Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowCwLinkshell4Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowCwLinkshell4Channel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowCwLinkshell5ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowCwLinkshell5Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowCwLinkshell5Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowCwLinkshell5Channel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowCwLinkshell6ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowCwLinkshell6Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowCwLinkshell6Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowCwLinkshell6Channel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowCwLinkshell7ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowCwLinkshell7Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowCwLinkshell7Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowCwLinkshell7Channel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowCwLinkshell8ChannelChanged(SymbolIcon icon)
+        {
+            if (ShowCwLinkshell8Channel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowCwLinkshell8Channel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowCwLinkshell8Channel = true;
+            }
+        }
+        #endregion
         #region Listeners
         partial void OnGroupCwLinkShellLanguageChanged(ClientLanguage value)
         {
@@ -388,6 +850,45 @@ namespace IronworksTranslator.ViewModels.Pages
         private ClientLanguage _noviceLanguage = IronworksSettings.Instance.ChannelSettings.Novice.MajorLanguage;
         [ObservableProperty]
         private int _noviceLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Novice.MajorLanguage;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showFreecompanyChannel = IronworksSettings.Instance.ChannelSettings.Freecompany.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showNoviceChannel = IronworksSettings.Instance.ChannelSettings.Novice.Show;
+        #region Commands
+        [RelayCommand]
+        private void OnShowFreecompanyChannelChanged(SymbolIcon icon)
+        {
+            if (ShowFreecompanyChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowFreecompanyChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowFreecompanyChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowNoviceChannelChanged(SymbolIcon icon)
+        {
+            if (ShowNoviceChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowNoviceChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowNoviceChannel = true;
+            }
+        }
+        #endregion
         #region Listeners
         partial void OnGroupCommunityLanguageChanged(ClientLanguage value)
         {
@@ -436,12 +937,6 @@ namespace IronworksTranslator.ViewModels.Pages
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private ClientLanguage _gatherLanguage = IronworksSettings.Instance.ChannelSettings.Gather.MajorLanguage;
-        [ObservableProperty]
-        private int _gatherLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Gather.MajorLanguage;
-
-        [ObservableProperty]
-        [NotifyPropertyChangedRecipients]
         private ClientLanguage _gameNoticeLanguage = IronworksSettings.Instance.ChannelSettings.Notice.MajorLanguage;
         [ObservableProperty]
         private int _gameNoticeLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Notice.MajorLanguage;
@@ -451,6 +946,12 @@ namespace IronworksTranslator.ViewModels.Pages
         private ClientLanguage _gameErrorLanguage = IronworksSettings.Instance.ChannelSettings.Error.MajorLanguage;
         [ObservableProperty]
         private int _gameErrorLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Error.MajorLanguage;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private ClientLanguage _gatherLanguage = IronworksSettings.Instance.ChannelSettings.Gather.MajorLanguage;
+        [ObservableProperty]
+        private int _gatherLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Gather.MajorLanguage;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
@@ -487,6 +988,197 @@ namespace IronworksTranslator.ViewModels.Pages
         private ClientLanguage _bossQuotesLanguage = IronworksSettings.Instance.ChannelSettings.BossQuotes.MajorLanguage;
         [ObservableProperty]
         private int _bossQuotesLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.BossQuotes.MajorLanguage;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showGameSystemChannel = IronworksSettings.Instance.ChannelSettings.System.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showGameNoticeChannel = IronworksSettings.Instance.ChannelSettings.Notice.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showGameErrorChannel = IronworksSettings.Instance.ChannelSettings.Error.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showGatherChannel = IronworksSettings.Instance.ChannelSettings.Gather.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showGilReceiveChannel = IronworksSettings.Instance.ChannelSettings.GilReceive.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showNpcDialogChannel = IronworksSettings.Instance.ChannelSettings.NpcDialog.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showNpcAnnounceChannel = IronworksSettings.Instance.ChannelSettings.NpcAnnounce.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showMarketSoldChannel = IronworksSettings.Instance.ChannelSettings.MarketSold.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showRecruitmentChannel = IronworksSettings.Instance.ChannelSettings.Recruitment.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showBossQuotesChannel = IronworksSettings.Instance.ChannelSettings.BossQuotes.Show;
+        #region Commands
+        [RelayCommand]
+        private void OnShowGameSystemChannelChanged(SymbolIcon icon)
+        {
+            if (ShowGameSystemChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowGameSystemChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowGameSystemChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowGameNoticeChannelChanged(SymbolIcon icon)
+        {
+            if (ShowGameNoticeChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowGameNoticeChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowGameNoticeChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowGameErrorChannelChanged(SymbolIcon icon)
+        {
+            if (ShowGameErrorChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowGameErrorChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowGameErrorChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowGatherChannelChanged(SymbolIcon icon)
+        {
+            if (ShowGatherChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowGatherChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowGatherChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowGilReceiveChannelChanged(SymbolIcon icon)
+        {
+            if (ShowGilReceiveChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowGilReceiveChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowGilReceiveChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowNpcDialogChannelChanged(SymbolIcon icon)
+        {
+            if (ShowNpcDialogChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowNpcDialogChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowNpcDialogChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowNpcAnnounceChannelChanged(SymbolIcon icon)
+        {
+            if (ShowNpcAnnounceChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowNpcAnnounceChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowNpcAnnounceChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowMarketSoldChannelChanged(SymbolIcon icon)
+        {
+            if (ShowMarketSoldChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowMarketSoldChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowMarketSoldChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowRecruitmentChannelChanged(SymbolIcon icon)
+        {
+            if (ShowRecruitmentChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowRecruitmentChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowRecruitmentChannel = true;
+            }
+        }
+
+        [RelayCommand]
+        private void OnShowBossQuotesChannelChanged(SymbolIcon icon)
+        {
+            if (ShowBossQuotesChannel)
+            {
+                icon.Symbol = SymbolRegular.EyeOff24;
+                ShowBossQuotesChannel = false;
+            }
+            else
+            {
+                icon.Symbol = SymbolRegular.Eye24;
+                ShowBossQuotesChannel = true;
+            }
+        }
+        #endregion
         #region Listeners
         partial void OnGroupSystemLanguageChanged(ClientLanguage value)
         {
