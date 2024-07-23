@@ -1,4 +1,5 @@
 ﻿using IronworksTranslator.ViewModels.Pages;
+using IronworksTranslator.Views.Windows;
 using Wpf.Ui.Controls;
 
 namespace IronworksTranslator.Views.Pages
@@ -13,6 +14,24 @@ namespace IronworksTranslator.Views.Pages
             DataContext = this;
 
             InitializeComponent();
+        }
+
+        private void ShowChatWindowButton_Click(object sender, RoutedEventArgs e)
+        {
+            var chatWindow = App.GetService<ChatWindow>();
+            if (chatWindow.Visibility != Visibility.Visible)
+            {
+                chatWindow.Show();
+            }
+        }
+
+        private void HideChatWindowButton_Click(object sender, RoutedEventArgs e)
+        {
+            var chatWindow = App.GetService<ChatWindow>();
+            if (chatWindow.Visibility == Visibility.Visible)
+            {
+                chatWindow.Hide();
+            }
         }
     }
 }

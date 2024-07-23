@@ -67,6 +67,9 @@ namespace IronworksTranslator
                 services.AddSingleton<DashboardViewModel>();
                 services.AddSingleton<SettingsPage>();
                 services.AddSingleton<SettingsViewModel>();
+
+                // Chat window
+                services.AddSingleton<ChatWindow>();
             }).Build();
 
         /// <summary>
@@ -92,6 +95,8 @@ namespace IronworksTranslator
             try
             {
                 _host.Start();
+                var chatWindow = GetService<ChatWindow>();
+                chatWindow.Show();
             }
             catch (Exception ex)
             {

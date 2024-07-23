@@ -50,6 +50,11 @@
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
                 <ui:Card VerticalAlignment="Top" Margin="16">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:Button Content="Show chat window" Click="ShowChatWindowButton_Click"/>
+                        <Border Width="16"/>
+                        <ui:Button Content="Hide chat window" Click="HideChatWindowButton_Click"/>
+                    </StackPanel>
                 </ui:Card>
             </Grid>
             <Grid Grid.Column="1">
