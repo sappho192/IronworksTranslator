@@ -65,6 +65,10 @@ namespace IronworksTranslator
 
                 services.AddSingleton<DashboardPage>();
                 services.AddSingleton<DashboardViewModel>();
+#if DEBUG
+                services.AddSingleton<DeveloperPage>();
+                services.AddSingleton<DeveloperViewModel>();
+#endif
                 services.AddSingleton<SettingsPage>();
                 services.AddSingleton<SettingsViewModel>();
 

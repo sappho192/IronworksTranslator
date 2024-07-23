@@ -17,6 +17,7 @@ app.settings.font_not_exist: "The selected font ({0}) does not exist. Using defa
 
 main.navigation.home: "Dashboard"
 main.navigation.settings: "Settings"
+main.navigation.developer: "Dev"
 
 main.update.title: "Update available"
 main.update.description: "**A new version of IronworksTranslator is available. Would you like to download?**"

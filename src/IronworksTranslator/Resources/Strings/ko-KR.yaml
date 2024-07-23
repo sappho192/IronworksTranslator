@@ -17,6 +17,7 @@ app.settings.font_not_exist: "설정에 있던 ({0}) 폰트를 찾을 수 없었
 
 main.navigation.home: "대시보드"
 main.navigation.settings: "설정"
+main.navigation.developer: "테스트"
 
 main.update.title: "업데이트 가능"
 main.update.description: "**IronworksTranslator의 새 버전이 있습니다. 다운로드 하시겠습니까?**"

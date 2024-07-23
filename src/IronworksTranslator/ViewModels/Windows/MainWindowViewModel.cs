@@ -16,18 +16,26 @@ namespace IronworksTranslator.ViewModels.Windows
             {
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Home24 },
                 TargetPageType = typeof(Views.Pages.DashboardPage)
-            },
+            }
         ];
 
         [ObservableProperty]
         private ObservableCollection<object> _footerMenuItems =
         [
+#if DEBUG
+            new NavigationViewItem()
+            {
+                Content = Localizer.GetString("main.navigation.developer"),
+                Icon = new SymbolIcon { Symbol = SymbolRegular.Code24 },
+                TargetPageType = typeof(Views.Pages.DeveloperPage)
+            },
+#endif
             new NavigationViewItem()
             {
                 Content = Localizer.GetString("main.navigation.settings"),
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Settings24 },
                 TargetPageType = typeof(Views.Pages.SettingsPage)
-            }
+            },
         ];
 
         [ObservableProperty]
