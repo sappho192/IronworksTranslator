@@ -17,7 +17,7 @@ app.settings.font_not_exist: "설정에 있던 ({0}) 폰트를 찾을 수 없었
 
 main.navigation.home: "대시보드"
 main.navigation.settings: "설정"
-main.navigation.developer: "테스트"
+main.navigation.developer: "개발용"
 
 main.update.title: "업데이트 가능"
 main.update.description: "**IronworksTranslator의 새 버전이 있습니다. 다운로드 하시겠습니까?**"
@@ -28,6 +28,8 @@ dashboard.translator.enabled: "번역기 작동 중"
 dashboard.translator.enabled.description: "게임 내 텍스트를 읽을 준비가 되어있습니다."
 dashboard.translator.disabled: "번역기 작동 중지됨"
 dashboard.translator.disabled.description: "번역기를 활성화하여 게임 내 텍스트를 읽게 해보세요."
+dashboard.chat.show: "채팅창 보이기"
+dashboard.chat.hide: "채팅창 숨기기"
 
 settings.general: "일반"
 settings.general.theme: "테마"

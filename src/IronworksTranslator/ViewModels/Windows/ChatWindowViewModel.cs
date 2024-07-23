@@ -1,4 +1,5 @@
 ﻿using IronworksTranslator.Models.Settings;
+using System;
 using System.Collections.Frozen;
 using System.Text;
 using System.Windows.Controls;
@@ -11,8 +12,12 @@ namespace IronworksTranslator.ViewModels.Windows
     {
         [ObservableProperty]
         private bool _isDraggable = true;
-
         public FlowDocument ChatDocument { get; }
+
+        private readonly Random random = new();
+        private readonly FontWeight[] fontWeights = [
+                FontWeights.Bold, FontWeights.Regular
+            ];
 
         public ChatWindowViewModel()
         {
@@ -23,8 +28,15 @@ namespace IronworksTranslator.ViewModels.Windows
         {
             var paragraph = new Paragraph(new Run(message))
             {
-                Foreground = Brushes.Blue,
-                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(
+                    Color.FromArgb(
+                            (byte)200,
+                            (byte)random.Next(0, 250),
+                            (byte)random.Next(0, 250),
+                            (byte)random.Next(0, 250)
+                        )
+                ),
+                FontWeight = fontWeights[random.Next(0, fontWeights.Length)],
                 FontFamily = new FontFamily(IronworksSettings.Instance.ChatUiSettings.Font),
                 FontSize = IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize
             };

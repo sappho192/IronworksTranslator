@@ -20,7 +20,12 @@
         <utils_ui:DragMoveBehavior IsEnabled="{Binding ViewModel.IsDraggable}" />
     </Behaviors:Interaction.Behaviors>
     <Grid Background="White">
-        <FlowDocumentScrollViewer Name="ChatPanel" 
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1.5*"/>
+            <RowDefinition Height="8.5*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Background="Wheat" Opacity="0.3"/>
+        <FlowDocumentScrollViewer Name="ChatPanel" Grid.Row="1"
                 Height="AUTO"
                 Block.LineHeight="2" VerticalScrollBarVisibility="Visible"/>
     </Grid>

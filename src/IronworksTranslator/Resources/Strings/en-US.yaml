@@ -29,6 +29,9 @@ dashboard.translator.enabled.description: "Ready to read in-game text."
 dashboard.translator.disabled: "Translator is disabled"
 dashboard.translator.disabled.description: "Enable the translator to read in-game text."
 
+dashboard.chat.show: "Show Chat window"
+dashboard.chat.hide: "Hide Chat window"
+
 settings.general: "General"
 settings.general.theme: "Theme"
 settings.general.theme.light: "Light"

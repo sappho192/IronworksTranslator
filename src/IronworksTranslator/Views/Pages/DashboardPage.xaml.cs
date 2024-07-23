@@ -33,29 +33,5 @@ namespace IronworksTranslator.Views.Pages
                 chatWindow.Hide();
             }
         }
-
-        private void DisableChatWindowGripButton_Click(object sender, RoutedEventArgs e)
-        {
-            var chatWindow = App.GetService<ChatWindow>();
-            chatWindow.ResizeMode = ResizeMode.NoResize;
-        }
-
-        private void EnableChatWindowGripButton_Click(object sender, RoutedEventArgs e)
-        {
-            var chatWindow = App.GetService<ChatWindow>();
-            chatWindow.ResizeMode = ResizeMode.CanResizeWithGrip;
-        }
-
-        private void EnableChatWindowDragButton_Click(object sender, RoutedEventArgs e)
-        {
-            var chatWindow = App.GetService<ChatWindow>();
-            chatWindow.ViewModel.IsDraggable = true;
-        }
-
-        private void DisableChatWindowDragButton_Click(object sender, RoutedEventArgs e)
-        {
-            var chatWindow = App.GetService<ChatWindow>();
-            chatWindow.ViewModel.IsDraggable = false;
-        }
     }
 }
