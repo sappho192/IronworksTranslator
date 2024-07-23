@@ -23,7 +23,7 @@
                 <ui:Button Content="Remove one and add chat" Command="{Binding ViewModel.DietChatCommand}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <ui:TextBlock Margin="8,0,0,0" Text="Chat drag: " VerticalAlignment="Center"/>
+                <ui:TextBlock Margin="8,0,0,0" Text="Chat window drag: " VerticalAlignment="Center"/>
                 <ui:Button Margin="16,0,0,0" Content="Enable" Click="EnableChatWindowDragButton_Click"/>
                 <ui:Button Margin="16,0,0,0" Content="Disable" Click="DisableChatWindowDragButton_Click"/>
             </StackPanel>
