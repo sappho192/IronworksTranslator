@@ -142,8 +142,8 @@
                         <ui:CardExpander.Header>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
-                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}" Click="GroupPartyFieldOnButton_Click"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}" Click="GroupPartyFieldOffButton_Click"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language_group}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" 
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -232,8 +232,8 @@
                         <ui:CardExpander.Header>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.community}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
-                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}" Click="GroupCommunityOnButton_Click"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}" Click="GroupCommunityOffButton_Click"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language_group}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" 
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -268,8 +268,8 @@
                         <ui:CardExpander.Header>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
-                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}" Click="GroupLinkshellOnButton_Click"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}" Click="GroupLinkshellOffButton_Click"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language_group}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" 
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -358,8 +358,8 @@
                         <ui:CardExpander.Header>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
-                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}" Click="GroupCWLinkshellOnButton_Click"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}" Click="GroupCWLinkshellOffButton_Click"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language_group}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" 
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
@@ -448,8 +448,8 @@
                         <ui:CardExpander.Header>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}"/>
-                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}" Click="GroupSystemOnButton_Click"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}" Click="GroupSystemOffButton_Click"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language_group}" FontTypography="Body" VerticalAlignment="Center"/>
                                 <ComboBox Margin="16,0,0,0" 
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"

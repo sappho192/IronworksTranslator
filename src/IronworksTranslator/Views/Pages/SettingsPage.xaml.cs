@@ -108,6 +108,118 @@ namespace IronworksTranslator.Views.Pages
             cbMarketSold.SelectedIndex = index;
             cbGilReceive.SelectedIndex = index;
         }
+
+        private void GroupPartyFieldOnButton_Click(object sender, RoutedEventArgs e)
+        {
+            tsShowSay.IsChecked = true;
+            tsShowYell.IsChecked = true;
+            tsShowShout.IsChecked = true;
+            tsShowTell.IsChecked = true;
+            tsShowParty.IsChecked = true;
+            tsShowAlliance.IsChecked = true;
+            tsShowEmote.IsChecked = true;
+            tsShowEmoteCustom.IsChecked = true;
+        }
+
+        private void GroupPartyFieldOffButton_Click(object sender, RoutedEventArgs e)
+        {
+            tsShowSay.IsChecked = false;
+            tsShowYell.IsChecked = false;
+            tsShowShout.IsChecked = false;
+            tsShowTell.IsChecked = false;
+            tsShowParty.IsChecked = false;
+            tsShowAlliance.IsChecked = false;
+            tsShowEmote.IsChecked = false;
+            tsShowEmoteCustom.IsChecked = false;
+        }
+
+        private void GroupCommunityOnButton_Click(object sender, RoutedEventArgs e)
+        {
+            tsShowNovice.IsChecked = true;
+            tsShowFreecompany.IsChecked = true;
+        }
+
+        private void GroupCommunityOffButton_Click(object sender, RoutedEventArgs e)
+        {
+            tsShowNovice.IsChecked = false;
+            tsShowFreecompany.IsChecked = false;
+        }
+
+        private void GroupLinkshellOnButton_Click(object sender, RoutedEventArgs e)
+        {
+            tsShowLinkshell1.IsChecked = true;
+            tsShowLinkshell2.IsChecked = true;
+            tsShowLinkshell3.IsChecked = true;
+            tsShowLinkshell4.IsChecked = true;
+            tsShowLinkshell5.IsChecked = true;
+            tsShowLinkshell6.IsChecked = true;
+            tsShowLinkshell7.IsChecked = true;
+            tsShowLinkshell8.IsChecked = true;
+        }
+
+        private void GroupLinkshellOffButton_Click(object sender, RoutedEventArgs e)
+        {
+            tsShowLinkshell1.IsChecked = false;
+            tsShowLinkshell2.IsChecked = false;
+            tsShowLinkshell3.IsChecked = false;
+            tsShowLinkshell4.IsChecked = false;
+            tsShowLinkshell5.IsChecked = false;
+            tsShowLinkshell6.IsChecked = false;
+            tsShowLinkshell7.IsChecked = false;
+            tsShowLinkshell8.IsChecked = false;
+        }
+
+        private void GroupCWLinkshellOnButton_Click(object sender, RoutedEventArgs e)
+        {
+            tsShowCwLinkshell1.IsChecked = true;
+            tsShowCwLinkshell2.IsChecked = true;
+            tsShowCwLinkshell3.IsChecked = true;
+            tsShowCwLinkshell4.IsChecked = true;
+            tsShowCwLinkshell5.IsChecked = true;
+            tsShowCwLinkshell6.IsChecked = true;
+            tsShowCwLinkshell7.IsChecked = true;
+            tsShowCwLinkshell8.IsChecked = true;
+        }
+
+        private void GroupCWLinkshellOffButton_Click(object sender, RoutedEventArgs e)
+        {
+            tsShowCwLinkshell1.IsChecked = false;
+            tsShowCwLinkshell2.IsChecked = false;
+            tsShowCwLinkshell3.IsChecked = false;
+            tsShowCwLinkshell4.IsChecked = false;
+            tsShowCwLinkshell5.IsChecked = false;
+            tsShowCwLinkshell6.IsChecked = false;
+            tsShowCwLinkshell7.IsChecked = false;
+            tsShowCwLinkshell8.IsChecked = false;
+        }
+
+        private void GroupSystemOnButton_Click(object sender, RoutedEventArgs e)
+        {
+            tsShowGameNotice.IsChecked = true;
+            tsShowGameSystem.IsChecked = true;
+            tsShowGameError.IsChecked = true;
+            tsShowNpcDialog.IsChecked = true;
+            tsShowNpcAnnounce.IsChecked = true;
+            tsShowBossQuotes.IsChecked = true;
+            tsShowRecruitment.IsChecked = true;
+            tsShowGather.IsChecked = true;
+            tsShowMarketSold.IsChecked = true;
+            tsShowGilReceive.IsChecked = true;
+        }
+
+        private void GroupSystemOffButton_Click(object sender, RoutedEventArgs e)
+        {
+            tsShowGameNotice.IsChecked = false;
+            tsShowGameSystem.IsChecked = false;
+            tsShowGameError.IsChecked = false;
+            tsShowNpcDialog.IsChecked = false;
+            tsShowNpcAnnounce.IsChecked = false;
+            tsShowBossQuotes.IsChecked = false;
+            tsShowRecruitment.IsChecked = false;
+            tsShowGather.IsChecked = false;
+            tsShowMarketSold.IsChecked = false;
+            tsShowGilReceive.IsChecked = false;
+        }
     }
 #pragma warning restore CS8602
 }
