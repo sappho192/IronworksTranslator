@@ -16,6 +16,12 @@
       mc:Ignorable="d" >
 
     <Grid>
-        <ui:TextBlock Text="Developer page" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <StackPanel Orientation="Vertical" Margin="16,64,16,16">
+            <StackPanel Orientation="Horizontal">
+                <ui:Button Content="Add chat" Command="{Binding ViewModel.AddChatCommand}"/>
+                <Border Width="8"/>
+                <ui:Button Content="Remove one and add chat" Command="{Binding ViewModel.DietChatCommand}"/>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Page>
