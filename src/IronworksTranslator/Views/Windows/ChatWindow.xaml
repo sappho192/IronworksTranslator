@@ -5,6 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:local="clr-namespace:IronworksTranslator.Views.Windows"
+        xmlns:Behaviors="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:utils_ui="clr-namespace:IronworksTranslator.Utils.UI"
         mc:Ignorable="d"
         Title="ChatWindow" 
         MinWidth="200" MinHeight="100"
@@ -12,6 +14,9 @@
         AllowsTransparency="True" Background="Transparent"
         WindowStyle="None" ResizeMode="CanResizeWithGrip"
         Closing="Window_Closing">
+    <Behaviors:Interaction.Behaviors>
+        <utils_ui:DragMoveBehavior />
+    </Behaviors:Interaction.Behaviors>
     <Grid Background="White">
         <ui:TextBlock Text="Chat window!" HorizontalAlignment="Center" VerticalAlignment="Center"/>
     </Grid>
