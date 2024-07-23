@@ -10,6 +10,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:ChatWindow, IsDesignTimeCreatable=True}"
         Title="ChatWindow" 
+        Style="{StaticResource WindowAll}"
         MinWidth="200" MinHeight="100"
         Width="400" Height="200"
         AllowsTransparency="True" Background="Transparent"
@@ -17,12 +18,10 @@
         Closing="Window_Closing">
     <Behaviors:Interaction.Behaviors>
         <utils_ui:DragMoveBehavior IsEnabled="{Binding ViewModel.IsDraggable}" />
-        <!--<utils_ui:DragMoveBehavior />-->
     </Behaviors:Interaction.Behaviors>
     <Grid Background="White">
-        <StackPanel Orientation="Vertical"  HorizontalAlignment="Center" VerticalAlignment="Center">
-            <ui:TextBlock Text="Chat window!"/>
-            <ui:TextBox Text="Chat textbox!" IsReadOnly="True"/>
+        <StackPanel Orientation="Vertical">
+            <FlowDocumentScrollViewer Name="ChatPanel" Block.LineHeight="2"/>
         </StackPanel>
     </Grid>
 </Window>

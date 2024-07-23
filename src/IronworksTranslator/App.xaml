@@ -17,6 +17,9 @@
             <Style x:Key="PageAll" TargetType="{x:Type Page}">
                 <Setter Property="FontFamily" Value="{StaticResource KoPubWorldDotum}" />
             </Style>
+            <Style x:Key="WindowAll" TargetType="{x:Type Window}">
+                <Setter Property="FontFamily" Value="{StaticResource KoPubWorldDotum}" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

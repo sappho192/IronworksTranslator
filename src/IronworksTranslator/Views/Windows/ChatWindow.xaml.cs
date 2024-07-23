@@ -13,13 +13,23 @@ namespace IronworksTranslator.Views.Windows
         {
             ViewModel = viewModel;
             DataContext = this;
+
             InitializeComponent();
+            
+            ChatPanel.Document = ViewModel.ChatDocument;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
             Hide();
+        }
+
+        protected override void OnContentRendered(EventArgs e)
+        {
+            base.OnContentRendered(e);
+
+            ViewModel.AddMessage("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
         }
     }
 }
