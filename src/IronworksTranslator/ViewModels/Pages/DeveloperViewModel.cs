@@ -8,5 +8,7 @@ namespace IronworksTranslator.ViewModels.Pages
 {
     public partial class DeveloperViewModel : ObservableObject
     {
+        [ObservableProperty]
+        private bool _isDraggable = true;
     }
 }

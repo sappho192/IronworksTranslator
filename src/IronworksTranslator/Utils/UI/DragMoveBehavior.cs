@@ -9,6 +9,15 @@ namespace IronworksTranslator.Utils.UI
     /// </summary>
     public class DragMoveBehavior : Behavior<Window>
     {
+        public static readonly DependencyProperty IsEnabledProperty =
+            DependencyProperty.Register("IsEnabled", typeof(bool), typeof(DragMoveBehavior), new PropertyMetadata(true));
+
+        public bool IsEnabled
+        {
+            get => (bool)GetValue(IsEnabledProperty);
+            set => SetValue(IsEnabledProperty, value);
+        }
+
         protected override void OnAttached()
         {
             AssociatedObject.MouseLeftButtonDown += AssociatedObject_MouseLeftButtonDown;
@@ -34,6 +43,8 @@ namespace IronworksTranslator.Utils.UI
             }
 
             e.Handled = true;
+
+            if (!IsEnabled) return;
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 try

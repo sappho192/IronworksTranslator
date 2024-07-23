@@ -50,10 +50,23 @@
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
                 <ui:Card VerticalAlignment="Top" Margin="16">
-                    <StackPanel Orientation="Horizontal">
-                        <ui:Button Content="Show chat window" Click="ShowChatWindowButton_Click"/>
-                        <Border Width="16"/>
-                        <ui:Button Content="Hide chat window" Click="HideChatWindowButton_Click"/>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:Button Content="Show chat window" Click="ShowChatWindowButton_Click"/>
+                            <Border Width="16"/>
+                            <ui:Button Content="Hide chat window" Click="HideChatWindowButton_Click"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:TextBlock Margin="8,0,0,0" Text="Chat drag: " VerticalAlignment="Center"/>
+                            <ui:Button Margin="16,0,0,0" Content="Enable" Click="EnableChatWindowDragButton_Click"/>
+                            <ui:Button Margin="16,0,0,0" Content="Disable" Click="DisableChatWindowDragButton_Click"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:TextBlock Margin="8,0,0,0" Text="Chat window grip: " VerticalAlignment="Center"/>
+                            <ui:Button Margin="16,0,0,0" Content="Enable" Click="EnableChatWindowGripButton_Click"/>
+                            <ui:Button Margin="16,0,0,0" Content="Disable" Click="DisableChatWindowGripButton_Click"/>
+                        </StackPanel>
+                        
                     </StackPanel>
                 </ui:Card>
             </Grid>

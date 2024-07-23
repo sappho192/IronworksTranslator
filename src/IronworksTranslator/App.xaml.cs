@@ -74,6 +74,7 @@ namespace IronworksTranslator
 
                 // Chat window
                 services.AddSingleton<ChatWindow>();
+                services.AddSingleton<ChatWindowViewModel>();
             }).Build();
 
         /// <summary>

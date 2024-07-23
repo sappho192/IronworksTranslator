@@ -8,6 +8,7 @@
         xmlns:Behaviors="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:utils_ui="clr-namespace:IronworksTranslator.Utils.UI"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance local:ChatWindow, IsDesignTimeCreatable=True}"
         Title="ChatWindow" 
         MinWidth="200" MinHeight="100"
         Width="400" Height="200"
@@ -15,9 +16,13 @@
         WindowStyle="None" ResizeMode="CanResizeWithGrip"
         Closing="Window_Closing">
     <Behaviors:Interaction.Behaviors>
-        <utils_ui:DragMoveBehavior />
+        <utils_ui:DragMoveBehavior IsEnabled="{Binding ViewModel.IsDraggable}" />
+        <!--<utils_ui:DragMoveBehavior />-->
     </Behaviors:Interaction.Behaviors>
     <Grid Background="White">
-        <ui:TextBlock Text="Chat window!" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <StackPanel Orientation="Vertical"  HorizontalAlignment="Center" VerticalAlignment="Center">
+            <ui:TextBlock Text="Chat window!"/>
+            <ui:TextBox Text="Chat textbox!" IsReadOnly="True"/>
+        </StackPanel>
     </Grid>
 </Window>
