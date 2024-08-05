@@ -15,6 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Egorozh.ColorPicker.WPF" Version="5.0.0" />
+    <PackageReference Include="Egorozh.ColorPicker.WPF.Dialog" Version="5.0.0" />
     <PackageReference Include="Lepo.i18n.DependencyInjection" Version="2.0.0" />
     <PackageReference Include="Lepo.i18n.Wpf" Version="2.0.0" />
     <PackageReference Include="MdXaml" Version="1.27.0" />

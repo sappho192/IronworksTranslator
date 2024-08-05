@@ -6,6 +6,8 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:i18n="http://schemas.lepo.co/i18n/2022/xaml"
+      xmlns:dialog="clr-namespace:Egorozh.ColorPicker.Dialog;assembly=Egorozh.ColorPicker.WPF.Dialog"
+      xmlns:utils_ui="clr-namespace:IronworksTranslator.Utils.UI"
       Title="DeveloperPage"
       Style="{StaticResource PageAll}"
       d:DataContext="{d:DesignInstance local:DeveloperPage, IsDesignTimeCreatable=False}"
@@ -32,6 +34,10 @@
                 <ui:Button Margin="16,0,0,0" Content="Enable" Click="EnableChatWindowGripButton_Click"/>
                 <ui:Button Margin="16,0,0,0" Content="Disable" Click="DisableChatWindowGripButton_Click"/>
             </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <utils_ui:FF14ColorPickerButton Cursor="Hand" Width="100" Height="50"
+                    Color="{Binding ViewModel.ExampleColor, Mode=TwoWay}"/>
+             </StackPanel>
         </StackPanel>
     </Grid>
 </Page>
