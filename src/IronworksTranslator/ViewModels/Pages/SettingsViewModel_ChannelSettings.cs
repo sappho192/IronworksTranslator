@@ -2,6 +2,7 @@
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Wpf.Ui.Controls;
 
 namespace IronworksTranslator.ViewModels.Pages
@@ -104,6 +105,38 @@ namespace IronworksTranslator.ViewModels.Pages
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         private bool _showEmoteCustomChannel = IronworksSettings.Instance.ChannelSettings.EmoteCustom.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _sayColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Say.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _yellColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Yell.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _shoutColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Shout.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _tellColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Tell.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _partyColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Party.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _allianceColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Alliance.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _emoteColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Emote.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _emoteCustomColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.EmoteCustom.Color);
 
         #region Listeners
         partial void OnGroupPartyFieldLanguageChanged(ClientLanguage value)
@@ -253,6 +286,38 @@ namespace IronworksTranslator.ViewModels.Pages
         [NotifyPropertyChangedRecipients]
         private bool _showLinkshell8Channel = IronworksSettings.Instance.ChannelSettings.Linkshell8.Show;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _linkshell1Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Linkshell1.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _linkshell2Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Linkshell2.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _linkshell3Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Linkshell3.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _linkshell4Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Linkshell4.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _linkshell5Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Linkshell5.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _linkshell6Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Linkshell6.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _linkshell7Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Linkshell7.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _linkshell8Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Linkshell8.Color);
+
         #region Listeners
         partial void OnGroupLinkShellLanguageChanged(ClientLanguage value)
         {
@@ -400,6 +465,38 @@ namespace IronworksTranslator.ViewModels.Pages
         [NotifyPropertyChangedRecipients]
         private bool _showCwLinkshell8Channel = IronworksSettings.Instance.ChannelSettings.Linkshell8.Show;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _cwLinkshell1Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.CwLinkshell1.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _cwLinkshell2Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.CwLinkshell2.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _cwLinkshell3Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.CwLinkshell3.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _cwLinkshell4Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.CwLinkshell4.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _cwLinkshell5Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.CwLinkshell5.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _cwLinkshell6Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.CwLinkshell6.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _cwLinkshell7Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.CwLinkshell7.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _cwLinkshell8Color = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.CwLinkshell8.Color);
+
         #region Listeners
         partial void OnGroupCwLinkShellLanguageChanged(ClientLanguage value)
         {
@@ -495,6 +592,14 @@ namespace IronworksTranslator.ViewModels.Pages
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         private bool _showNoviceChannel = IronworksSettings.Instance.ChannelSettings.Novice.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _freecompanyColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Freecompany.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _noviceColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Novice.Color);
 
         #region Listeners
         partial void OnGroupCommunityLanguageChanged(ClientLanguage value)
@@ -635,6 +740,46 @@ namespace IronworksTranslator.ViewModels.Pages
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         private bool _showBossQuotesChannel = IronworksSettings.Instance.ChannelSettings.BossQuotes.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _gameSystemColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.System.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _gameNoticeColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Notice.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _gameErrorColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Error.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _gatherColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Gather.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _gilReceiveColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.GilReceive.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _npcDialogColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.NpcDialog.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _npcAnnounceColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.NpcAnnounce.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _marketSoldColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.MarketSold.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _recruitmentColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Recruitment.Color);
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _bossQuotesColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.BossQuotes.Color);
 
         #region Listeners
         partial void OnGroupSystemLanguageChanged(ClientLanguage value)

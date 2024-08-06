@@ -20,51 +20,51 @@ namespace IronworksTranslator.Models.Settings
 
         private void InitChannels()
         {
-            GroupPartyField = new ChatChannel { Code = ChatCode.GroupPartyField, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Say = new ChatChannel { Code = ChatCode.Say, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Yell = new ChatChannel { Code = ChatCode.Yell, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Shout = new ChatChannel { Code = ChatCode.Shout, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Tell = new ChatChannel { Code = ChatCode.Tell, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Party = new ChatChannel { Code = ChatCode.Party, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Alliance = new ChatChannel { Code = ChatCode.Alliance, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Emote = new ChatChannel { Code = ChatCode.Emote, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            EmoteCustom = new ChatChannel { Code = ChatCode.EmoteCustom, Show = true, MajorLanguage = ClientLanguage.Japanese };
+            GroupPartyField = new ChatChannel { Code = ChatCode.GroupPartyField, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#FFFFFF" };
+            Say = new ChatChannel { Code = ChatCode.Say, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#F7F7F7" };
+            Yell = new ChatChannel { Code = ChatCode.Yell, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "Yellow" };
+            Shout = new ChatChannel { Code = ChatCode.Shout, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#FFA666" };
+            Tell = new ChatChannel { Code = ChatCode.Tell, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#FFB8DE" };
+            Party = new ChatChannel { Code = ChatCode.Party, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#66E5FF" };
+            Alliance = new ChatChannel { Code = ChatCode.Alliance, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#FF8000" };
+            Emote = new ChatChannel { Code = ChatCode.Emote, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#BAFFF0" };
+            EmoteCustom = new ChatChannel { Code = ChatCode.EmoteCustom, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#BAFFF0" };
 
-            GroupCommunity = new ChatChannel { Code = ChatCode.GroupCommunity, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Freecompany = new ChatChannel { Code = ChatCode.FreeCompany, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Novice = new ChatChannel { Code = ChatCode.Novice, Show = true, MajorLanguage = ClientLanguage.Japanese };
+            GroupCommunity = new ChatChannel { Code = ChatCode.GroupCommunity, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#FFFFFF" };
+            Freecompany = new ChatChannel { Code = ChatCode.FreeCompany, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#ABDBE5" };
+            Novice = new ChatChannel { Code = ChatCode.Novice, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
 
-            GroupLinkshell = new ChatChannel { Code = ChatCode.GroupLinkShell, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Linkshell1 = new ChatChannel { Code = ChatCode.LinkShell1, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Linkshell2 = new ChatChannel { Code = ChatCode.LinkShell2, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Linkshell3 = new ChatChannel { Code = ChatCode.LinkShell3, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Linkshell4 = new ChatChannel { Code = ChatCode.LinkShell4, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Linkshell5 = new ChatChannel { Code = ChatCode.LinkShell5, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Linkshell6 = new ChatChannel { Code = ChatCode.LinkShell6, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Linkshell7 = new ChatChannel { Code = ChatCode.LinkShell7, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Linkshell8 = new ChatChannel { Code = ChatCode.LinkShell8, Show = true, MajorLanguage = ClientLanguage.Japanese };
+            GroupLinkshell = new ChatChannel { Code = ChatCode.GroupLinkShell, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            Linkshell1 = new ChatChannel { Code = ChatCode.LinkShell1, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            Linkshell2 = new ChatChannel { Code = ChatCode.LinkShell2, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            Linkshell3 = new ChatChannel { Code = ChatCode.LinkShell3, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            Linkshell4 = new ChatChannel { Code = ChatCode.LinkShell4, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            Linkshell5 = new ChatChannel { Code = ChatCode.LinkShell5, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            Linkshell6 = new ChatChannel { Code = ChatCode.LinkShell6, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            Linkshell7 = new ChatChannel { Code = ChatCode.LinkShell7, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            Linkshell8 = new ChatChannel { Code = ChatCode.LinkShell8, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
 
-            GroupCwLinkshell = new ChatChannel { Code = ChatCode.GroupCWLinkShell, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            CwLinkshell1 = new ChatChannel { Code = ChatCode.CWLinkShell1, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            CwLinkshell2 = new ChatChannel { Code = ChatCode.CWLinkShell2, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            CwLinkshell3 = new ChatChannel { Code = ChatCode.CWLinkShell3, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            CwLinkshell4 = new ChatChannel { Code = ChatCode.CWLinkShell4, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            CwLinkshell5 = new ChatChannel { Code = ChatCode.CWLinkShell5, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            CwLinkshell6 = new ChatChannel { Code = ChatCode.CWLinkShell6, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            CwLinkshell7 = new ChatChannel { Code = ChatCode.CWLinkShell7, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            CwLinkshell8 = new ChatChannel { Code = ChatCode.CWLinkShell8, Show = true, MajorLanguage = ClientLanguage.Japanese };
+            GroupCwLinkshell = new ChatChannel { Code = ChatCode.GroupCWLinkShell, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            CwLinkshell1 = new ChatChannel { Code = ChatCode.CWLinkShell1, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            CwLinkshell2 = new ChatChannel { Code = ChatCode.CWLinkShell2, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            CwLinkshell3 = new ChatChannel { Code = ChatCode.CWLinkShell3, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            CwLinkshell4 = new ChatChannel { Code = ChatCode.CWLinkShell4, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            CwLinkshell5 = new ChatChannel { Code = ChatCode.CWLinkShell5, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            CwLinkshell6 = new ChatChannel { Code = ChatCode.CWLinkShell6, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            CwLinkshell7 = new ChatChannel { Code = ChatCode.CWLinkShell7, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            CwLinkshell8 = new ChatChannel { Code = ChatCode.CWLinkShell8, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
 
-            GroupSystem = new ChatChannel { Code = ChatCode.GroupSystem, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Notice = new ChatChannel { Code = ChatCode.Notice, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            System = new ChatChannel { Code = ChatCode.System, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Error = new ChatChannel { Code = ChatCode.Error, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            NpcDialog = new ChatChannel { Code = ChatCode.NPCDialog, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            NpcAnnounce = new ChatChannel { Code = ChatCode.NPCAnnounce, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            BossQuotes = new ChatChannel { Code = ChatCode.BossQuotes, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Recruitment = new ChatChannel { Code = ChatCode.Recruitment, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            Gather = new ChatChannel { Code = ChatCode.Gather, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            MarketSold = new ChatChannel { Code = ChatCode.MarketSold, Show = true, MajorLanguage = ClientLanguage.Japanese };
-            GilReceive = new ChatChannel { Code = ChatCode.GilReceive, Show = true, MajorLanguage = ClientLanguage.Japanese };
+            GroupSystem = new ChatChannel { Code = ChatCode.GroupSystem, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#CCCCCC" };
+            Notice = new ChatChannel { Code = ChatCode.Notice, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#D4FF7D" };
+            System = new ChatChannel { Code = ChatCode.System, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#CCCCCC" };
+            Error = new ChatChannel { Code = ChatCode.Error, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#FFA666" };
+            NpcDialog = new ChatChannel { Code = ChatCode.NPCDialog, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#ABD647" };
+            NpcAnnounce = new ChatChannel { Code = ChatCode.NPCAnnounce, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#ABD647" };
+            BossQuotes = new ChatChannel { Code = ChatCode.BossQuotes, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "Fuchsia" };
+            Recruitment = new ChatChannel { Code = ChatCode.Recruitment, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#CCCCCC" };
+            Gather = new ChatChannel { Code = ChatCode.Gather, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#DEBFF7" };
+            MarketSold = new ChatChannel { Code = ChatCode.MarketSold, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#CCCCCC" };
+            GilReceive = new ChatChannel { Code = ChatCode.GilReceive, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#CCCCCC" };
         }
 
         [ObservableProperty]

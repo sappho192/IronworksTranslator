@@ -11,6 +11,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:i18n="http://schemas.lepo.co/i18n/2022/xaml"
+    xmlns:utils_ui="clr-namespace:IronworksTranslator.Utils.UI"
     Title="SettingsPage"
     Style="{StaticResource PageAll}"
     d:DataContext="{d:DesignInstance local:SettingsPage,
@@ -163,6 +164,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.SayLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.SayLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.SayColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.yell}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -172,6 +175,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.YellLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.YellLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.YellColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.shout}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -181,6 +186,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.ShoutLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.ShoutLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.ShoutColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.tell}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -190,6 +197,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.TellLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.TellLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.TellColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.party}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -199,6 +208,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.PartyLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.PartyLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.PartyColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.alliance}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -208,6 +219,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.AllianceLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.AllianceLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.AllianceColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.emote}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -217,6 +230,8 @@
                                           ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                           SelectedValue="{Binding ViewModel.EmoteLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                           SelectedIndex="{Binding ViewModel.EmoteLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.EmoteColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.emote_custom}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -226,6 +241,8 @@
                                           ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                           SelectedValue="{Binding ViewModel.EmoteCustomLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                           SelectedIndex="{Binding ViewModel.EmoteCustomLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.EmoteCustomColor, Mode=TwoWay}"/>
                             </StackPanel>
                         </StackPanel>
                     </ui:CardExpander>
@@ -253,6 +270,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.FreecompanyLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.FreecompanyLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.FreecompanyColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.community.novice}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -262,6 +281,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.NoviceLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.NoviceLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.NoviceColor, Mode=TwoWay}"/>
                             </StackPanel>
                         </StackPanel>
                     </ui:CardExpander>
@@ -289,6 +310,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell1Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell1LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell1Color, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch2}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -298,6 +321,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell2Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell2LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell2Color, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch3}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -307,6 +332,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell3Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell3LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell3Color, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch4}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -316,6 +343,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell4Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell4LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell4Color, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch5}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -325,6 +354,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell5Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell5LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell5Color, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch6}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -334,6 +365,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell6Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell6LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell6Color, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch7}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -343,6 +376,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell7Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell7LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell7Color, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch8}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -352,6 +387,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.Linkshell8Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.Linkshell8LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell8Color, Mode=TwoWay}"/>
                             </StackPanel>
                         </StackPanel>
                     </ui:CardExpander>
@@ -379,6 +416,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell1Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell1LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell1Color, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch2}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -388,6 +427,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell2Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell2LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell2Color, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch3}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -397,6 +438,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell3Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell3LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell3Color, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch4}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -406,6 +449,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell4Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell4LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell4Color, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch5}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -415,6 +460,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell5Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell5LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell5Color, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch6}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -424,6 +471,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell6Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell6LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell6Color, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch7}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -433,6 +482,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell7Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell7LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell7Color, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch8}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -442,6 +493,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.CwLinkshell8Language, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.CwLinkshell8LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell8Color, Mode=TwoWay}"/>
                             </StackPanel>
                         </StackPanel>
                     </ui:CardExpander>
@@ -469,6 +522,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.GameNoticeLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.GameNoticeLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.GameNoticeColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.system}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -478,6 +533,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.GameSystemLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.GameSystemLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.GameSystemColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.error}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -487,6 +544,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.GameErrorLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.GameErrorLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.GameErrorColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.npc_dialog}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -496,6 +555,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.NpcDialogLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.NpcDialogLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.NpcDialogColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.npc_announce}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -505,6 +566,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.NpcAnnounceLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.NpcAnnounceLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.NpcAnnounceColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.boss_quotes}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -514,6 +577,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.BossQuotesLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.BossQuotesLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.BossQuotesColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.recruitment}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -523,6 +588,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.RecruitmentLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.RecruitmentLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.RecruitmentColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.gather}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -532,6 +599,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.GatherLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.GatherLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.GatherColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.market_sold}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -541,6 +610,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.MarketSoldLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.MarketSoldLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.MarketSoldColor, Mode=TwoWay}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.gil_receive}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
@@ -550,6 +621,8 @@
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
                                     SelectedValue="{Binding ViewModel.GilReceiveLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                     SelectedIndex="{Binding ViewModel.GilReceiveLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.GilReceiveColor, Mode=TwoWay}"/>
                             </StackPanel>
                         </StackPanel>
                     </ui:CardExpander>

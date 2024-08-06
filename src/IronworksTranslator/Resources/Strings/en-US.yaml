@@ -99,6 +99,10 @@ settings.channel.system.gil_receive: "Gil (Received)"
 settings.channel.language: "Channel Language: "
 settings.channel.language_group: "Change each channel's language to: "
 
+settings.channel.color: "Chnnel Color: "
+settings.channel.color_group: "Change each channel's color to: "
+settings.channel.color.dialog.title: "Select color"
+
 settings.game: "In-game information"
 settings.game.chat: "Chat"
 settings.game.chat.ignored_players_list: "Ignore following player's chat (Click to edit)"

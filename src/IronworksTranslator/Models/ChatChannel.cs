@@ -5,6 +5,7 @@ using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Utils;
 using IronworksTranslator.ViewModels.Pages;
 using Serilog;
+using System.Windows.Media;
 using YamlDotNet.Serialization;
 
 namespace IronworksTranslator.Models
@@ -16,6 +17,7 @@ namespace IronworksTranslator.Models
         {
             Messenger.Register<PropertyChangedMessage<bool>>(this, OnBoolMessage);
             Messenger.Register<PropertyChangedMessage<ClientLanguage>>(this, OnClientLanguageMessage);
+            Messenger.Register<PropertyChangedMessage<Color>>(this, OnColorMessage);
         }
 
         [ObservableProperty]
@@ -30,6 +32,10 @@ namespace IronworksTranslator.Models
         [property: YamlMember(Alias = "major_language")]
         private ClientLanguage _majorLanguage;
 
+        [ObservableProperty]
+        [property: YamlMember(Alias = "color")]
+        private string _color;
+
         [SaveSettingsOnChange]
         partial void OnShowChanged(bool value)
         {
@@ -40,6 +46,173 @@ namespace IronworksTranslator.Models
         partial void OnMajorLanguageChanged(ClientLanguage value)
         {
             Log.Information($"{Code}: MajorLanguage changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnColorChanged(string value)
+        {
+            Log.Information($"{Code}: Color changed to {value}");
+        }
+
+        private void OnColorMessage(object recipient, PropertyChangedMessage<Color> message)
+        {
+            if (recipient is not ChatChannel recipientChannel)
+            {
+                string errorMessage = $"ChatChannel: Unknown recipient {recipient}";
+                Log.Error(errorMessage);
+                MessageBox.Show(errorMessage);
+                return;
+            }
+
+            switch (message.PropertyName)
+            {
+                case nameof(SettingsViewModel.SayColor):
+                    if (recipientChannel.Code != ChatCode.Say) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.YellColor):
+                    if (recipientChannel.Code != ChatCode.Yell) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.ShoutColor):
+                    if (recipientChannel.Code != ChatCode.Shout) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.TellColor):
+                    if (recipientChannel.Code != ChatCode.Tell) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.PartyColor):
+                    if (recipientChannel.Code != ChatCode.Party) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.AllianceColor):
+                    if (recipientChannel.Code != ChatCode.Alliance) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.EmoteColor):
+                    if (recipientChannel.Code != ChatCode.Emote) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.EmoteCustomColor):
+                    if (recipientChannel.Code != ChatCode.EmoteCustom) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.FreecompanyColor):
+                    if (recipientChannel.Code != ChatCode.FreeCompany) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.NoviceColor):
+                    if (recipientChannel.Code != ChatCode.Novice) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.Linkshell1Color):
+                    if (recipientChannel.Code != ChatCode.LinkShell1) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.Linkshell2Color):
+                    if (recipientChannel.Code != ChatCode.LinkShell2) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.Linkshell3Color):
+                    if (recipientChannel.Code != ChatCode.LinkShell3) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.Linkshell4Color):
+                    if (recipientChannel.Code != ChatCode.LinkShell4) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.Linkshell5Color):
+                    if (recipientChannel.Code != ChatCode.LinkShell5) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.Linkshell6Color):
+                    if (recipientChannel.Code != ChatCode.LinkShell6) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.Linkshell7Color):
+                    if (recipientChannel.Code != ChatCode.LinkShell7) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.Linkshell8Color):
+                    if (recipientChannel.Code != ChatCode.LinkShell8) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.CwLinkshell1Color):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell1) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.CwLinkshell2Color):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell2) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.CwLinkshell3Color):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell3) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.CwLinkshell4Color):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell4) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.CwLinkshell5Color):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell5) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.CwLinkshell6Color):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell6) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.CwLinkshell7Color):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell7) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.CwLinkshell8Color):
+                    if (recipientChannel.Code != ChatCode.CWLinkShell8) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.GameSystemColor):
+                    if (recipientChannel.Code != ChatCode.System) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.GameNoticeColor):
+                    if (recipientChannel.Code != ChatCode.Notice) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.GameErrorColor):
+                    if (recipientChannel.Code != ChatCode.Error) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.GatherColor):
+                    if (recipientChannel.Code != ChatCode.Gather) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.GilReceiveColor):
+                    if (recipientChannel.Code != ChatCode.GilReceive) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.MarketSoldColor):
+                    if (recipientChannel.Code != ChatCode.MarketSold) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.RecruitmentColor):
+                    if (recipientChannel.Code != ChatCode.Recruitment) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.NpcDialogColor):
+                    if (recipientChannel.Code != ChatCode.NPCDialog) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.NpcAnnounceColor):
+                    if (recipientChannel.Code != ChatCode.NPCAnnounce) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                case nameof(SettingsViewModel.BossQuotesColor):
+                    if (recipientChannel.Code != ChatCode.BossQuotes) break;
+                    Color = message.NewValue.ToString();
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void OnBoolMessage(object recipient, PropertyChangedMessage<bool> message)

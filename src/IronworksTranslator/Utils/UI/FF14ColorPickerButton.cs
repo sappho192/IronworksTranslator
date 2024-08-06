@@ -13,6 +13,7 @@ namespace IronworksTranslator.Utils.UI
                 Owner = Owner,
                 Color = Color,
                 Colors = ColorsList,
+                Title = Localizer.GetString("settings.channel.color.dialog.title"),
             };
 
             var res = dialog.ShowDialog();
