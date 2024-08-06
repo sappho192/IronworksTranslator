@@ -1,5 +1,7 @@
 ﻿using IronworksTranslator.Models.Settings;
 using IronworksTranslator.ViewModels.Pages;
+using IronworksTranslator.ViewModels.Windows;
+using IronworksTranslator.Views.Windows;
 using System.Windows.Controls;
 using Wpf.Ui.Controls;
 
@@ -32,6 +34,19 @@ namespace IronworksTranslator.Views.Pages
             {
                 numberBox.Value = IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize;
             }
+            var chatWindowViewModel = App.GetService<ChatWindowViewModel>();
+            chatWindowViewModel.ChangeChatFontSize((int)numberBox.Value);
+        }
+
+        private void ChatFontFamily_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var comboBox = sender as ComboBox;
+            if (comboBox.SelectedItem == null)
+            {
+                comboBox.SelectedItem = IronworksSettings.Instance.ChatUiSettings.Font;
+            }
+            var chatWindowViewModel = App.GetService<ChatWindowViewModel>();
+            chatWindowViewModel.ChangeChatFontFamily((string)comboBox.SelectedValue);
         }
 
         private void GroupPartyFieldComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)

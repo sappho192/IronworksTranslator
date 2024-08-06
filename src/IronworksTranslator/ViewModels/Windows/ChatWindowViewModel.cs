@@ -60,6 +60,30 @@ namespace IronworksTranslator.ViewModels.Windows
             ChatDocument.Blocks.Add(paragraph);
         }
 
+        public void ChangeChatFontSize(int fontSize)
+        {
+            // Traverse all elements in the FlowDocument
+            foreach (var block in ChatDocument.Blocks)
+            {
+                if (block is Paragraph paragraph)
+                {
+                    paragraph.FontSize = fontSize;
+                }
+            }
+        }
+
+        public void ChangeChatFontFamily(string fontFamily)
+        {
+            // Traverse all elements in the FlowDocument
+            foreach (var block in ChatDocument.Blocks)
+            {
+                if (block is Paragraph paragraph)
+                {
+                    paragraph.FontFamily = new FontFamily(fontFamily);
+                }
+            }
+        }
+
         private static int blockIndex = 0;
         public void Diet()
         {

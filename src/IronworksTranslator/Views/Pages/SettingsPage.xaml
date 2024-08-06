@@ -125,7 +125,8 @@
                         </ui:CardControl.Header>
                         <ComboBox ItemsSource="{Binding ViewModel.FontList}" ScrollViewer.VerticalScrollBarVisibility="Visible"
                             SelectedValue="{Binding ViewModel.CurrentFont}"
-                            SelectedIndex="{Binding ViewModel.CurrentFontIndex}"/>
+                            SelectedIndex="{Binding ViewModel.CurrentFontIndex}"
+                            SelectionChanged="ChatFontFamily_SelectionChanged"/>
                     </ui:CardControl>
                     <ui:TextBox Text="{Binding ViewModel.ExampleChatBox, FallbackValue=Lorem Ipsum}" IsReadOnly="True"
                         FontFamily="{Binding ViewModel.CurrentFont}" FontSize="{Binding ViewModel.ChatBoxFontSize}"/>
