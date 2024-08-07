@@ -1,4 +1,5 @@
 ﻿using IronworksTranslator.Models.Enums;
+using ObservableCollections;
 using YamlDotNet.Serialization;
 
 namespace IronworksTranslator.Models.Settings
@@ -65,7 +66,22 @@ namespace IronworksTranslator.Models.Settings
             Gather = new ChatChannel { Code = ChatCode.Gather, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#DEBFF7" };
             MarketSold = new ChatChannel { Code = ChatCode.MarketSold, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#CCCCCC" };
             GilReceive = new ChatChannel { Code = ChatCode.GilReceive, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#CCCCCC" };
+
+
+            ChatChannels = [
+                Say, Yell, Shout, Tell, Party, Alliance, Emote, EmoteCustom,
+                Linkshell1, Linkshell2, Linkshell3, Linkshell4,
+                Linkshell5, Linkshell6, Linkshell7, Linkshell8,
+                CwLinkshell1, CwLinkshell2, CwLinkshell3, CwLinkshell4,
+                CwLinkshell5, CwLinkshell6, CwLinkshell7, CwLinkshell8,
+                Freecompany, Novice,
+                System, Notice, Error, Gather, GilReceive,
+                NpcDialog, NpcAnnounce, BossQuotes,
+                MarketSold, Recruitment,
+            ];
         }
+
+        public List<ChatChannel> ChatChannels { get; private set; }
 
         [ObservableProperty]
         [property: YamlIgnore]

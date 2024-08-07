@@ -19,7 +19,7 @@
     <Behaviors:Interaction.Behaviors>
         <utils_ui:DragMoveBehavior IsEnabled="{Binding ViewModel.IsDraggable}" />
     </Behaviors:Interaction.Behaviors>
-    <Grid Background="White">
+    <Grid Background="Black">
         <Grid.RowDefinitions>
             <RowDefinition Height="AUTO"/>
             <RowDefinition Height="1*"/>

@@ -15,7 +15,7 @@ namespace IronworksTranslator.ViewModels.Pages
         private void OnAddChat()
         {
             var chatWindow = App.GetService<ChatWindow>();
-            chatWindow.ViewModel.AddMessage("Hello world!");
+            chatWindow.ViewModel.AddRandomMessage("Hello world!");
             var scrollViewer = chatWindow.ChatPanel.Template.FindName("PART_ContentHost", chatWindow.ChatPanel) as ScrollViewer;
             scrollViewer.ScrollToBottom();
         }

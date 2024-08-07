@@ -1,4 +1,5 @@
 ﻿using IronworksTranslator.Services;
+using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
 using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.ViewModels.Windows;
@@ -35,6 +36,7 @@ namespace IronworksTranslator
             .ConfigureServices((context, services) =>
             {
                 services.AddHostedService<ApplicationHostService>();
+                services.AddHostedService<ChatLookupService>();
 
                 // Add i18n
                 services.AddStringLocalizer(b =>

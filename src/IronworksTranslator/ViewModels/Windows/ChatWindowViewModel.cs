@@ -1,6 +1,11 @@
-﻿using IronworksTranslator.Models.Settings;
+﻿using IronworksTranslator.Helpers.Extensions;
+using IronworksTranslator.Models;
+using IronworksTranslator.Models.Enums;
+using IronworksTranslator.Models.Settings;
+using Sharlayan.Core;
 using System;
 using System.Collections.Frozen;
+using System.Collections.Specialized;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -22,9 +27,93 @@ namespace IronworksTranslator.ViewModels.Windows
         public ChatWindowViewModel()
         {
             ChatDocument = new FlowDocument();
+            ChatQueue.ChatLogItems.CollectionChanged += ChatLogItems_CollectionChanged;
         }
 
-        public void AddMessage(string message)
+#pragma warning disable CS8602
+        private void ChatLogItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            ChatQueue.oq.TryDequeue(out ChatLogItem? chat);
+            if (chat == null) return;
+
+            int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var intCode);
+            ChatCode code = (ChatCode)intCode;
+            if (IronworksSettings.Instance.ChannelSettings.ChatChannels.Where(ch => ch.Code == code && ch.Show).Any())
+            {
+                ChatChannel channel = IronworksSettings.Instance.ChannelSettings.ChatChannels.Where(ch => ch.Code == code).First();
+                string line = chat.Line;
+                ChatLogItem decodedChat = chat.Bytes.DecodeAutoTranslate();
+
+                if (code == ChatCode.Recruitment || code == ChatCode.System || code == ChatCode.Error ||
+                    code == ChatCode.Notice || code == ChatCode.Emote || code == ChatCode.MarketSold)
+                {
+                    if (!ContainsNativeLanguage(decodedChat.Line))
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            AddMessage(decodedChat.Line, channel);
+                        });
+                    }
+                }
+                else
+                {
+                    var author = decodedChat.Line.RemoveAfter(":");
+                    var sentence = decodedChat.Line.RemoveBefore(":");
+
+                    if (!(code.Equals(ChatCode.NPCDialog) || code.Equals(ChatCode.NPCAnnounce) || code.Equals(ChatCode.BossQuotes)))
+                    {// Push to ChatWindow
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            AddMessage($"{author}: {sentence}", channel);
+                        });
+                    }
+                    else
+                    {// Push to DialogueWindow
+                        if (IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod == DialogueTranslationMethod.ChatMessage)
+                        {
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                AddMessage($"{author}: {sentence}", channel);
+                            });
+                        }
+                    }
+                }
+            }
+        }
+#pragma warning restore CS8602
+
+        public void AddMessage(string message, ChatChannel channel)
+        {
+            var paragraph = new Paragraph(new Run(message))
+            {
+                Foreground = new SolidColorBrush
+                {
+                    Color = (Color)ColorConverter.ConvertFromString(channel.Color)
+                },
+                FontFamily = new FontFamily(IronworksSettings.Instance.ChatUiSettings.Font),
+                FontSize = IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize
+            };
+
+            // Create and attach a custom context menu to the paragraph
+            var contextMenu = new ContextMenu();
+
+            var menuItem = new MenuItem { Header = "Custom Action" };
+            menuItem.Click += MenuItem_Click;
+            // Store the Paragraph object in the Tag property of the MenuItem
+            menuItem.Tag = paragraph;
+            contextMenu.Items.Add(menuItem);
+
+            var menuItemReplace = new MenuItem { Header = "Replace" };
+            menuItemReplace.Click += MenuItemReplace_Click;
+            menuItemReplace.Tag = paragraph;
+            contextMenu.Items.Add(menuItemReplace);
+
+            paragraph.ContextMenu = contextMenu;
+
+            ChatDocument.Blocks.Add(paragraph);
+        }
+
+        public void AddRandomMessage(string message)
         {
             var paragraph = new Paragraph(new Run(message))
             {
@@ -60,6 +149,23 @@ namespace IronworksTranslator.ViewModels.Windows
             ChatDocument.Blocks.Add(paragraph);
         }
 
+        private bool ContainsNativeLanguage(string sentence)
+        {
+            switch (IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
+            {
+                case ClientLanguage.Japanese:
+                    return sentence.HasJapanese();
+                case ClientLanguage.English:
+                    return sentence.HasEnglish();
+                case ClientLanguage.Korean:
+                    return sentence.HasKorean();
+                case ClientLanguage.German:
+                case ClientLanguage.French:
+                default:
+                    return false;
+            }
+        }
+
         public void ChangeChatFontSize(int fontSize)
         {
             // Traverse all elements in the FlowDocument
@@ -93,7 +199,7 @@ namespace IronworksTranslator.ViewModels.Windows
                 ChatDocument.Blocks.Remove(item);
             }
 
-            AddMessage($"Lorem ipsum dolor sit amet, consectetur adipiscing elit. ({blockIndex++})");
+            AddRandomMessage($"Lorem ipsum dolor sit amet, consectetur adipiscing elit. ({blockIndex++})");
         }
 
         private static int count = 1;
