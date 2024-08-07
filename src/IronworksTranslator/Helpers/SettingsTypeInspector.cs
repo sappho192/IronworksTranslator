@@ -12,6 +12,9 @@ namespace IronworksTranslator.Helpers
             _innerTypeDescriptor = innerTypeDescriptor;
         }
 
+        public override string GetEnumName(Type enumType, string name) => _innerTypeDescriptor.GetEnumName(enumType, name);
+        public override string GetEnumValue(object enumValue) => _innerTypeDescriptor.GetEnumValue(enumValue);
+
         public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
         {
             var props = _innerTypeDescriptor.GetProperties(type, container);
