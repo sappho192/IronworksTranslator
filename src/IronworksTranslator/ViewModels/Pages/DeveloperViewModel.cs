@@ -32,7 +32,7 @@ namespace IronworksTranslator.ViewModels.Pages
 
         partial void OnExampleColorChanged(Color value)
         {
-            var a = 1;
+            // var a = 1;
         }
     }
 }
