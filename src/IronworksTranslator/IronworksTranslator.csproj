@@ -21,6 +21,7 @@
   <ItemGroup>
     <PackageReference Include="Egorozh.ColorPicker.WPF" Version="5.0.0" />
     <PackageReference Include="Egorozh.ColorPicker.WPF.Dialog" Version="5.0.0" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.62" />
     <PackageReference Include="Lepo.i18n.DependencyInjection" Version="2.0.0" />
     <PackageReference Include="Lepo.i18n.Wpf" Version="2.0.0" />
     <PackageReference Include="MdXaml" Version="1.27.0" />
@@ -28,6 +29,7 @@
     <PackageReference Include="MrAdvice" Version="2.15.0" />
     <PackageReference Include="ObservableCollections" Version="2.1.3" />
     <PackageReference Include="Octokit" Version="13.0.1" />
+    <PackageReference Include="PuppeteerSharp" Version="18.0.5" />
     <PackageReference Include="RelaxVersioner" Version="3.4.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
