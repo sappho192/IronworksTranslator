@@ -12,6 +12,10 @@
 
   <ItemGroup>
     <Content Include="icon.ico" />
+    <Content Include="WatchDogMain.exe">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -44,6 +48,7 @@
     <None Remove="Fonts\KoPubWorld Dotum Medium.ttf" />
     <None Remove="Resources\Strings\en-US.yaml" />
     <None Remove="Resources\Strings\ko-KR.yaml" />
+    <None Remove="WatchDogMain.exe" />
   </ItemGroup>
 
   <ItemGroup>
