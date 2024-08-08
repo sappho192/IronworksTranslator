@@ -49,7 +49,7 @@ namespace IronworksTranslator.Models
         }
 
         [SaveSettingsOnChange]
-        partial void OnColorChanged(string value)
+        partial void OnColorChanged(string? value)
         {
             Log.Information($"{Code}: Color changed to {value}");
         }
