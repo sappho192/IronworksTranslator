@@ -29,7 +29,7 @@ namespace IronworksTranslator.Views.Windows
         {
             base.OnContentRendered(e);
 
-            ViewModel.AddRandomMessage("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+            //ViewModel.AddRandomMessage("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
         }
     }
 }

@@ -2,6 +2,7 @@
 using IronworksTranslator.Models;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
+using IronworksTranslator.Utils.Translator;
 using Sharlayan.Core;
 using System;
 using System.Collections.Frozen;
@@ -59,12 +60,13 @@ namespace IronworksTranslator.ViewModels.Windows
                 {
                     var author = decodedChat.Line.RemoveAfter(":");
                     var sentence = decodedChat.Line.RemoveBefore(":");
+                    var translated = translate(sentence, channel.MajorLanguage);
 
                     if (!(code.Equals(ChatCode.NPCDialog) || code.Equals(ChatCode.NPCAnnounce) || code.Equals(ChatCode.BossQuotes)))
                     {// Push to ChatWindow
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            AddMessage($"{author}: {sentence}", channel);
+                            AddMessage($"{author}: {translated}", channel);
                         });
                     }
                     else
@@ -73,7 +75,7 @@ namespace IronworksTranslator.ViewModels.Windows
                         {
                             Application.Current.Dispatcher.Invoke(() =>
                             {
-                                AddMessage($"{author}: {sentence}", channel);
+                                AddMessage($"{author}: {translated}", channel);
                             });
                         }
                     }
@@ -146,6 +148,30 @@ namespace IronworksTranslator.ViewModels.Windows
             paragraph.ContextMenu = contextMenu;
 
             ChatDocument.Blocks.Add(paragraph);
+        }
+
+        private string translate(string input, ClientLanguage channelLanguage)
+        {
+            string result = string.Empty;
+            switch (IronworksSettings.Instance.TranslatorSettings.TranslatorEngine)
+            {
+                case TranslatorEngine.Papago:
+                    result = App.GetService<PapagoTranslator>().Translate(
+                        input,
+                        (TranslationLanguageCode)channelLanguage,
+                        (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
+                        );
+                    break;
+                case TranslatorEngine.DeepL_API:
+                    result = input;
+                    break;
+                case TranslatorEngine.JESC_Ja_Ko:
+                    result = input;
+                    break;
+                default:
+                    break;
+            }
+            return result;
         }
 
         private bool ContainsNativeLanguage(string sentence)

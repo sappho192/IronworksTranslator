@@ -1,6 +1,7 @@
 ﻿using IronworksTranslator.Services;
 using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
+using IronworksTranslator.Utils.Translator;
 using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.ViewModels.Windows;
 using IronworksTranslator.Views.Pages;
@@ -77,6 +78,10 @@ namespace IronworksTranslator
                 // Chat window
                 services.AddSingleton<ChatWindow>();
                 services.AddSingleton<ChatWindowViewModel>();
+
+                // Translator stuff
+                services.AddSingleton<WebBrowser>();
+                services.AddSingleton<PapagoTranslator>();
             }).Build();
 
         /// <summary>
@@ -104,12 +109,27 @@ namespace IronworksTranslator
                 _host.Start();
                 var chatWindow = GetService<ChatWindow>();
                 chatWindow.Show();
+                BootWatchDog();
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to start host.");
                 return;
             }
+        }
+
+        private static void BootWatchDog()
+        {
+            var pid = Environment.ProcessId;
+            var info = new ProcessStartInfo
+            {
+                FileName = "WatchDogMain.exe",
+                Arguments = $"{pid}",
+                WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            _ = Process.Start(info);
         }
 
         private void SetupUnhandledExceptionHandlers()
