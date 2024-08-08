@@ -80,7 +80,6 @@ namespace IronworksTranslator.ViewModels.Windows
                 }
             }
         }
-#pragma warning restore CS8602
 
         public void AddMessage(string message, ChatChannel channel)
         {
@@ -257,4 +256,5 @@ namespace IronworksTranslator.ViewModels.Windows
             return sb.ToString();
         }
     }
+#pragma warning restore CS8602
 }

@@ -10,7 +10,7 @@ namespace IronworksTranslator.ViewModels.Pages
         private bool _isDraggable = true;
         [ObservableProperty]
         private Color _exampleColor = (Color)ColorConverter.ConvertFromString("#990293");
-
+#pragma warning disable CS8602
         [RelayCommand]
         private void OnAddChat()
         {
@@ -28,6 +28,7 @@ namespace IronworksTranslator.ViewModels.Pages
             var scrollViewer = chatWindow.ChatPanel.Template.FindName("PART_ContentHost", chatWindow.ChatPanel) as ScrollViewer;
             scrollViewer.ScrollToBottom();
         }
+#pragma warning restore CS8602
 
         partial void OnExampleColorChanged(Color value)
         {
