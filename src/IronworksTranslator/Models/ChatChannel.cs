@@ -34,7 +34,7 @@ namespace IronworksTranslator.Models
 
         [ObservableProperty]
         [property: YamlMember(Alias = "color")]
-        private string _color;
+        private string? _color;
 
         [SaveSettingsOnChange]
         partial void OnShowChanged(bool value)
