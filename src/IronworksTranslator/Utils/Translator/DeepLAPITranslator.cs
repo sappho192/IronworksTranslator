@@ -113,7 +113,7 @@ namespace IronworksTranslator.Utils.Translator
             }
         }
 
-        private string? GetLanguageCode(TranslationLanguageCode sourceLanguage)
+        private static string? GetLanguageCode(TranslationLanguageCode sourceLanguage)
         {
             foreach (var item in TranslationLanguageList.DeepL)
             {

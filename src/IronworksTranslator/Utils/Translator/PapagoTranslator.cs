@@ -45,7 +45,7 @@ namespace IronworksTranslator.Utils.Translator
             }
         }
 
-        private string? GetLanguageCode(TranslationLanguageCode sourceLanguage)
+        private static string? GetLanguageCode(TranslationLanguageCode sourceLanguage)
         {
             foreach (var item in TranslationLanguageList.Papago)
             {
@@ -57,7 +57,7 @@ namespace IronworksTranslator.Utils.Translator
             return null;
         }
 
-        private async Task<string> RequestTranslate(string url)
+        private static async Task<string> RequestTranslate(string url)
         {
             var browser = App.GetService<WebBrowser>();
             var content = browser.Navigate(url);
