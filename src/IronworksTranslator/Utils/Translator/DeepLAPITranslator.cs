@@ -42,7 +42,9 @@ namespace IronworksTranslator.Utils.Translator
             return translated;
         }
 
-        private async Task<string> RequestTranslate(string input, TranslationLanguageCode sourceLanguage, TranslationLanguageCode targetLanguage)
+#pragma warning disable CS8602, CS8604
+        private async Task<string> RequestTranslate(string input, 
+            TranslationLanguageCode sourceLanguage, TranslationLanguageCode targetLanguage)
         {
             try
             {
@@ -59,12 +61,12 @@ namespace IronworksTranslator.Utils.Translator
                 return string.Empty;
             }
         }
+#pragma warning restore CS8602, CS8604
 
+#pragma warning disable CS8602, CS8604
         public void InitTranslator(bool testApi = false)
         {
-#pragma warning disable CS8602
             var apiKey = IronworksSettings.Instance.TranslatorSettings.DeeplApiKey;
-#pragma warning restore CS8602
             var options = new TranslatorOptions
             {
                 appInfo = new AppInfo
@@ -89,6 +91,7 @@ namespace IronworksTranslator.Utils.Translator
                 TestTranslator();
             }
         }
+#pragma warning restore CS8602, CS8604
 
         private async void TestTranslator()
         {
