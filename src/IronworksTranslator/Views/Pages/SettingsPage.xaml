@@ -87,6 +87,14 @@
                                 SelectedValue="{Binding ViewModel.ClientLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                 SelectedIndex="{Binding ViewModel.ClientLanguageIndex}"/>
                     </ui:CardControl>
+                    <ui:CardControl Icon="{ui:SymbolIcon Search24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.dialogue.translation_method}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ComboBox ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:DialogueTranslationMethod}}"
+                            SelectedValue="{Binding ViewModel.DialogueTranslationMethod, Converter={StaticResource DialogueTranslationMethodToStringConverter}}"
+                            SelectedIndex="{Binding ViewModel.DialogueTranslationMethodIndex}"/>
+                    </ui:CardControl>
                     <ui:CardControl Icon="{ui:SymbolIcon ServerSurface16}">
                         <ui:CardControl.Header>
                             <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine}" FontTypography="BodyStrong"/>
@@ -94,14 +102,6 @@
                         <ComboBox ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:TranslatorEngine}}"
                                   SelectedValue="{Binding ViewModel.TranslatorEngine, Converter={StaticResource TranslatorEngineToStringConverter}}"
                                   SelectedIndex="{Binding ViewModel.TranslatorEngineIndex}"/>
-                    </ui:CardControl>
-                    <ui:CardControl Icon="{ui:SymbolIcon Search24}">
-                        <ui:CardControl.Header>
-                            <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.dialogue.translation_method}" FontTypography="BodyStrong"/>
-                        </ui:CardControl.Header>
-                        <ComboBox ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:DialogueTranslationMethod}}"
-                                  SelectedValue="{Binding ViewModel.DialogueTranslationMethod, Converter={StaticResource DialogueTranslationMethodToStringConverter}}"
-                                  SelectedIndex="{Binding ViewModel.DialogueTranslationMethodIndex}"/>
                     </ui:CardControl>
                 </StackPanel>
             </ui:Card>
