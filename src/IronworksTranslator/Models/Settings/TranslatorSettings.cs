@@ -15,6 +15,7 @@ namespace IronworksTranslator.Models.Settings
             Messenger.Register<PropertyChangedMessage<ClientLanguage>>(this, OnClientLanguageMessage);
             Messenger.Register<PropertyChangedMessage<TranslatorEngine>>(this, OnTranslatorEngineMessage);
             Messenger.Register<PropertyChangedMessage<DialogueTranslationMethod>>(this, OnDialogueTranslationMethodMessage);
+            Messenger.Register<PropertyChangedMessage<string>>(this, OnDeeplApiKeyMessage);
         }
 
         [ObservableProperty]
@@ -28,6 +29,10 @@ namespace IronworksTranslator.Models.Settings
         [ObservableProperty]
         [property: YamlMember(Alias = "dialogue_translation_method")]
         private DialogueTranslationMethod _dialogueTranslationMethod;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "deepl_api_key")]
+        private string _deeplApiKey;
 
         [SaveSettingsOnChange]
         partial void OnClientLanguageChanged(ClientLanguage value)
@@ -76,5 +81,17 @@ namespace IronworksTranslator.Models.Settings
                     break;
             }
         }
+
+        [SaveSettingsOnChange]
+        partial void OnDeeplApiKeyChanged(string value)
+        {
+            Log.Information($"DeeplApiKey changed to {value}");
+        }
+
+        private void OnDeeplApiKeyMessage(object recipient, PropertyChangedMessage<string> message)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

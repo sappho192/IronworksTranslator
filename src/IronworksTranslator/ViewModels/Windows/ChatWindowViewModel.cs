@@ -157,13 +157,17 @@ namespace IronworksTranslator.ViewModels.Windows
             {
                 case TranslatorEngine.Papago:
                     result = App.GetService<PapagoTranslator>().Translate(
-                        input,
-                        (TranslationLanguageCode)channelLanguage,
-                        (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
+                            input,
+                            (TranslationLanguageCode)channelLanguage,
+                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
                         );
                     break;
                 case TranslatorEngine.DeepL_API:
-                    result = input;
+                    result = App.GetService<DeepLAPITranslator>().Translate(
+                            input,
+                            (TranslationLanguageCode)channelLanguage,
+                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
+                        );
                     break;
                 case TranslatorEngine.JESC_Ja_Ko:
                     result = input;

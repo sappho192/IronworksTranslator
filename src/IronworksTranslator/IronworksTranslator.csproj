@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="DeepL.net" Version="1.9.0" />
     <PackageReference Include="Egorozh.ColorPicker.WPF" Version="5.0.0" />
     <PackageReference Include="Egorozh.ColorPicker.WPF.Dialog" Version="5.0.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.62" />
