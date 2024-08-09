@@ -32,7 +32,7 @@ namespace IronworksTranslator.Models.Settings
 
         [ObservableProperty]
         [property: YamlMember(Alias = "deepl_api_key")]
-        private string _deeplApiKey;
+        private string? _deeplApiKey;
 
         [SaveSettingsOnChange]
         partial void OnClientLanguageChanged(ClientLanguage value)
@@ -83,7 +83,7 @@ namespace IronworksTranslator.Models.Settings
         }
 
         [SaveSettingsOnChange]
-        partial void OnDeeplApiKeyChanged(string value)
+        partial void OnDeeplApiKeyChanged(string? value)
         {
             Log.Information($"DeeplApiKey changed to {value}");
         }
