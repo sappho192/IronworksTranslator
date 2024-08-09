@@ -95,14 +95,34 @@
                             SelectedValue="{Binding ViewModel.DialogueTranslationMethod, Converter={StaticResource DialogueTranslationMethodToStringConverter}}"
                             SelectedIndex="{Binding ViewModel.DialogueTranslationMethodIndex}"/>
                     </ui:CardControl>
-                    <ui:CardControl Icon="{ui:SymbolIcon ServerSurface16}">
-                        <ui:CardControl.Header>
+                    <ui:CardExpander Icon="{ui:SymbolIcon ServerSurface16}" IsExpanded="True">
+                        <ui:CardExpander.Header>
                             <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine}" FontTypography="BodyStrong"/>
-                        </ui:CardControl.Header>
-                        <ComboBox ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:TranslatorEngine}}"
-                                  SelectedValue="{Binding ViewModel.TranslatorEngine, Converter={StaticResource TranslatorEngineToStringConverter}}"
-                                  SelectedIndex="{Binding ViewModel.TranslatorEngineIndex}"/>
-                    </ui:CardControl>
+                        </ui:CardExpander.Header>
+                        <StackPanel Orientation="Vertical">
+                            <ui:Card>
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.default}" FontTypography="Body" VerticalAlignment="Center"/>
+                                    <ComboBox Margin="32,0,0,0"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:TranslatorEngine}}"
+                                    SelectedValue="{Binding ViewModel.TranslatorEngine, Converter={StaticResource TranslatorEngineToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.TranslatorEngineIndex}"/>
+                                </StackPanel>
+                            </ui:Card>
+                            <ui:CardExpander IsExpanded="True">
+                                <ui:CardExpander.Header>
+                                    <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.deepl_api}" FontTypography="BodyStrong"/>
+                                </ui:CardExpander.Header>
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.apikey}" FontTypography="Body" VerticalAlignment="Center"/>
+                                        <ui:TextBox Margin="32,0,0,0" Text="{Binding ViewModel.DeeplApiKey}"
+                                            PlaceholderEnabled="True" PlaceholderText="aaaaaaaa-bbbb-1111-2222-cccccccccccc"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </ui:CardExpander>
+                        </StackPanel>
+                    </ui:CardExpander>
                 </StackPanel>
             </ui:Card>
         </TabItem>

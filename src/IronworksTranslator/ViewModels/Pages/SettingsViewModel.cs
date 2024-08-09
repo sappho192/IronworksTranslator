@@ -45,6 +45,10 @@ namespace IronworksTranslator.ViewModels.Pages
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
+        private string _deeplApiKey = IronworksSettings.Instance.TranslatorSettings.DeeplApiKey ?? string.Empty;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
         [NotifyPropertyChangedFor(nameof(DialogueTranslationMethodIndex))]
         private DialogueTranslationMethod _dialogueTranslationMethod = IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod;
         [ObservableProperty]

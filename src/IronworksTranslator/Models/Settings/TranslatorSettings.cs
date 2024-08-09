@@ -5,6 +5,7 @@ using Serilog;
 using YamlDotNet.Serialization;
 using IronworksTranslator.Utils;
 using IronworksTranslator.ViewModels.Pages;
+using IronworksTranslator.Utils.Translator;
 
 namespace IronworksTranslator.Models.Settings
 {
@@ -90,7 +91,13 @@ namespace IronworksTranslator.Models.Settings
 
         private void OnDeeplApiKeyMessage(object recipient, PropertyChangedMessage<string> message)
         {
-            throw new NotImplementedException();
+            switch (message.PropertyName)
+            {
+                case nameof(SettingsViewModel.DeeplApiKey):
+                    DeeplApiKey = message.NewValue;
+                    App.GetService<DeepLAPITranslator>().InitTranslator(testApi: true);
+                    break;
+            }
         }
 
     }
