@@ -4,7 +4,6 @@ using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Utils.Translator;
 using Sharlayan.Core;
-using System;
 using System.Collections.Frozen;
 using System.Collections.Specialized;
 using System.Text;
@@ -50,9 +49,12 @@ namespace IronworksTranslator.ViewModels.Windows
                 {
                     if (!ContainsNativeLanguage(decodedChat.Line))
                     {
+                        TranslationText text = new(line, 
+                            (TranslationLanguageCode)channel.MajorLanguage,
+                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage);
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            AddMessage(decodedChat.Line, channel);
+                            AddMessage(text, channel);
                         });
                     }
                 }
@@ -60,22 +62,35 @@ namespace IronworksTranslator.ViewModels.Windows
                 {
                     var author = decodedChat.Line.RemoveAfter(":");
                     var sentence = decodedChat.Line.RemoveBefore(":");
-                    var translated = translate(sentence, channel.MajorLanguage);
+                    var translated = Translate(sentence, channel.MajorLanguage);
 
                     if (!(code.Equals(ChatCode.NPCDialog) || code.Equals(ChatCode.NPCAnnounce) || code.Equals(ChatCode.BossQuotes)))
                     {// Push to ChatWindow
+                        TranslationText text = new(sentence, 
+                            (TranslationLanguageCode)channel.MajorLanguage, 
+                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
+                        {
+                            TranslatedText = translated
+                        };
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            AddMessage($"{author}: {translated}", channel);
+                            AddMessage(text, channel, author);
                         });
                     }
                     else
                     {// Push to DialogueWindow
-                        if (IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod == DialogueTranslationMethod.ChatMessage)
+                        if (IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod 
+                            == DialogueTranslationMethod.ChatMessage)
                         {
+                            TranslationText text = new(sentence,
+                            (TranslationLanguageCode)channel.MajorLanguage,
+                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
+                            {
+                                TranslatedText = translated
+                            };
                             Application.Current.Dispatcher.Invoke(() =>
                             {
-                                AddMessage($"{author}: {translated}", channel);
+                                AddMessage(text, channel, author);
                             });
                         }
                     }
@@ -83,9 +98,10 @@ namespace IronworksTranslator.ViewModels.Windows
             }
         }
 
-        public void AddMessage(string message, ChatChannel channel)
+        public void AddMessage(TranslationText text, ChatChannel channel, string author = "")
         {
-            var paragraph = new Paragraph(new Run(message))
+            string? translated = author == "" ? text.TranslatedText : $"{author}: {text.TranslatedText}";
+            var paragraph = new Paragraph(new Run(translated))
             {
                 Foreground = new SolidColorBrush
                 {
@@ -94,6 +110,7 @@ namespace IronworksTranslator.ViewModels.Windows
                 FontFamily = new FontFamily(IronworksSettings.Instance.ChatUiSettings.Font),
                 FontSize = IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize
             };
+            TranslationParagraph translationParagraph = new(paragraph, text);
 
             // Create and attach a custom context menu to the paragraph
             var contextMenu = new ContextMenu();
@@ -101,12 +118,12 @@ namespace IronworksTranslator.ViewModels.Windows
             var menuItem = new MenuItem { Header = "Custom Action" };
             menuItem.Click += MenuItem_Click;
             // Store the Paragraph object in the Tag property of the MenuItem
-            menuItem.Tag = paragraph;
+            menuItem.Tag = translationParagraph;
             contextMenu.Items.Add(menuItem);
 
             var menuItemReplace = new MenuItem { Header = "Replace" };
             menuItemReplace.Click += MenuItemReplace_Click;
-            menuItemReplace.Tag = paragraph;
+            menuItemReplace.Tag = translationParagraph;
             contextMenu.Items.Add(menuItemReplace);
 
             paragraph.ContextMenu = contextMenu;
@@ -130,6 +147,12 @@ namespace IronworksTranslator.ViewModels.Windows
                 FontFamily = new FontFamily(IronworksSettings.Instance.ChatUiSettings.Font),
                 FontSize = IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize
             };
+            TranslationParagraph translationParagraph = new(paragraph,
+                new TranslationText(message, TranslationLanguageCode.English, TranslationLanguageCode.Korean)
+                {
+                    TranslatedText = "안녕하세요!",
+                }
+            );
 
             // Create and attach a custom context menu to the paragraph
             var contextMenu = new ContextMenu();
@@ -137,23 +160,62 @@ namespace IronworksTranslator.ViewModels.Windows
             var menuItem = new MenuItem { Header = "Custom Action" };
             menuItem.Click += MenuItem_Click;
             // Store the Paragraph object in the Tag property of the MenuItem
-            menuItem.Tag = paragraph;
+            menuItem.Tag = translationParagraph;
             contextMenu.Items.Add(menuItem);
 
             var menuItemReplace = new MenuItem { Header = "Replace" };
             menuItemReplace.Click += MenuItemReplace_Click;
-            menuItemReplace.Tag = paragraph;
+            menuItemReplace.Tag = translationParagraph;
             contextMenu.Items.Add(menuItemReplace);
+
+            var menuItemReTranslate = new MenuItem { Header = "Re-Translate" };
+            var menuItemPapago = new MenuItem
+            {
+                Header = "Papago",
+                Tag = translationParagraph
+            };
+            menuItemPapago.Click += PapagoRetranslate_Click;
+            var menuItemDeepLAPI = new MenuItem
+            {
+                Header = "DeepL (API)",
+                Tag = translationParagraph
+            };
+            menuItemDeepLAPI.Click += DeepLRetranslate_Click;
+            
+            menuItemReTranslate.Items.Add(menuItemPapago);
+            menuItemReTranslate.Items.Add(menuItemDeepLAPI);
+            contextMenu.Items.Add(menuItemReTranslate);
 
             paragraph.ContextMenu = contextMenu;
 
             ChatDocument.Blocks.Add(paragraph);
         }
 
-        private string translate(string input, ClientLanguage channelLanguage)
+        private void DeepLRetranslate_Click(object sender, RoutedEventArgs e)
+        {
+            if (((MenuItem)sender).Tag is TranslationParagraph tParagraph)
+            {
+                var tText = tParagraph.Text;
+                string newMessage = Translate(tText.OriginalText, (ClientLanguage)tText.SourceLanguage, TranslatorEngine.DeepL_API);
+                ReplaceTextInParagraph(tParagraph.Paragraph, newMessage);
+            }
+        }
+
+        private void PapagoRetranslate_Click(object sender, RoutedEventArgs e)
+        {
+            if (((MenuItem)sender).Tag is TranslationParagraph tParagraph)
+            {
+                var tText = tParagraph.Text;
+                string newMessage = Translate(tText.OriginalText, (ClientLanguage)tText.SourceLanguage, TranslatorEngine.Papago);
+                ReplaceTextInParagraph(tParagraph.Paragraph, newMessage);
+            }
+        }
+
+        private static string Translate(string input, ClientLanguage channelLanguage, TranslatorEngine? translatorEngine = null)
         {
             string result = string.Empty;
-            switch (IronworksSettings.Instance.TranslatorSettings.TranslatorEngine)
+            var switcher = translatorEngine ?? IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
+            switch (switcher)
             {
                 case TranslatorEngine.Papago:
                     result = App.GetService<PapagoTranslator>().Translate(
@@ -235,11 +297,11 @@ namespace IronworksTranslator.ViewModels.Windows
         private void MenuItemReplace_Click(object sender, RoutedEventArgs e)
         {
             // Retrieve the Paragraph object from the Tag property of the MenuItem
-            if (((MenuItem)sender).Tag is Paragraph paragraph)
+            if (((MenuItem)sender).Tag is TranslationParagraph tParagraph)
             {
-                string newMessage = $"replaced! ({count++})";
-                ReplaceTextInParagraph(paragraph, newMessage);
-                System.Windows.MessageBox.Show($"Custom action triggered for paragraph: {newMessage}");
+                string newMessage = $"replaced! ({count++}), raw: {tParagraph.Text.OriginalText}";
+                ReplaceTextInParagraph(tParagraph.Paragraph, newMessage);
+                //MessageBox.Show($"Custom action triggered for paragraph: {newMessage}");
             }
         }
 
@@ -255,10 +317,10 @@ namespace IronworksTranslator.ViewModels.Windows
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
             // Retrieve the Paragraph object from the Tag property of the MenuItem
-            if (((MenuItem)sender).Tag is Paragraph paragraph)
+            if (((MenuItem)sender).Tag is TranslationParagraph tParagraph)
             {
-                string paragraphText = GetTextFromParagraph(paragraph);
-                System.Windows.MessageBox.Show($"Custom action triggered for paragraph: {paragraphText}");
+                string paragraphText = GetTextFromParagraph(tParagraph.Paragraph);
+                MessageBox.Show($"Custom action triggered for paragraph: {paragraphText}");
             }
         }
 
