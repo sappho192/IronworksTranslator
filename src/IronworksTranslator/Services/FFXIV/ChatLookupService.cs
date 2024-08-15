@@ -37,7 +37,15 @@ namespace IronworksTranslator.Services.FFXIV
         {
             Destruct();
             AttachGame();
-            StartAsync(CancellationToken.None);
+            if (Attached)
+            {
+                StartAsync(CancellationToken.None);
+            }
+            else
+            {
+                App.GetService<DashboardViewModel>().IsTranslatorActive = Attached;
+                App.GetService<DashboardViewModel>().InitTranslatorToggle();
+            }
         }
 
         public void Destruct()

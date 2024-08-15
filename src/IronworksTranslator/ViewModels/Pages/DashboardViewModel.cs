@@ -46,6 +46,12 @@ namespace IronworksTranslator.ViewModels.Pages
                 TranslatorToogleStateDescription = Localizer.GetString("dashboard.translator.enabled.description");
                 TranslatorIcon = "DesktopSpeaker20";
             }
+            else
+            {
+                TranslatorToogleState = Localizer.GetString("dashboard.translator.disabled");
+                TranslatorToogleStateDescription = Localizer.GetString("dashboard.translator.disabled.description");
+                TranslatorIcon = "DesktopSpeakerOff20";
+            }
         }
     }
 }
