@@ -6,6 +6,7 @@ namespace IronworksTranslator.Models
     {
         public string OriginalText { get; } = originalText;
         public string? TranslatedText { get; set; }
+        public string? Author { get; set; } 
         public TranslationLanguageCode SourceLanguage { get; } = sourceLanguage;
         public TranslationLanguageCode TargetLanguage { get; } = targetLanguage;
     }

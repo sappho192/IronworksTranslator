@@ -70,7 +70,8 @@ namespace IronworksTranslator.ViewModels.Windows
                             (TranslationLanguageCode)channel.MajorLanguage, 
                             (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
                         {
-                            TranslatedText = translated
+                            TranslatedText = translated,
+                            Author = author,
                         };
                         Application.Current.Dispatcher.Invoke(() =>
                         {
@@ -86,7 +87,8 @@ namespace IronworksTranslator.ViewModels.Windows
                             (TranslationLanguageCode)channel.MajorLanguage,
                             (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
                             {
-                                TranslatedText = translated
+                                TranslatedText = translated,
+                                Author = author,
                             };
                             Application.Current.Dispatcher.Invoke(() =>
                             {
@@ -209,13 +211,20 @@ namespace IronworksTranslator.ViewModels.Windows
             ChatDocument.Blocks.Add(paragraph);
         }
 
+        private static string ReTranslate(TranslationText tText, TranslatorEngine api)
+        {
+            string newMessage = Translate(tText.OriginalText, (ClientLanguage)tText.SourceLanguage, api);
+            string? translated = tText.Author == "" ? newMessage : $"{tText.Author}: {newMessage}";
+            return translated;
+        }
+
         private void DeepLRetranslate_Click(object sender, RoutedEventArgs e)
         {
             if (((MenuItem)sender).Tag is TranslationParagraph tParagraph)
             {
                 var tText = tParagraph.Text;
-                string newMessage = Translate(tText.OriginalText, (ClientLanguage)tText.SourceLanguage, TranslatorEngine.DeepL_API);
-                ReplaceTextInParagraph(tParagraph.Paragraph, newMessage);
+                var api = TranslatorEngine.DeepL_API;
+                ReplaceTextInParagraph(tParagraph.Paragraph, ReTranslate(tText, api));
             }
         }
 
@@ -224,8 +233,8 @@ namespace IronworksTranslator.ViewModels.Windows
             if (((MenuItem)sender).Tag is TranslationParagraph tParagraph)
             {
                 var tText = tParagraph.Text;
-                string newMessage = Translate(tText.OriginalText, (ClientLanguage)tText.SourceLanguage, TranslatorEngine.Papago);
-                ReplaceTextInParagraph(tParagraph.Paragraph, newMessage);
+                var api = TranslatorEngine.Papago;
+                ReplaceTextInParagraph(tParagraph.Paragraph, ReTranslate(tText, api));
             }
         }
 
