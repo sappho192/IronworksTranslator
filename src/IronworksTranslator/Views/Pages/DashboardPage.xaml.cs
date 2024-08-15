@@ -16,21 +16,52 @@ namespace IronworksTranslator.Views.Pages
             InitializeComponent();
         }
 
-        private void ShowChatWindowButton_Click(object sender, RoutedEventArgs e)
+        private void tsShowChatWindow_Click(object sender, RoutedEventArgs e)
         {
-            var chatWindow = App.GetService<ChatWindow>();
-            if (chatWindow.Visibility != Visibility.Visible)
+            if (sender is ToggleSwitch ui)
             {
-                chatWindow.Show();
+                var chatWindow = App.GetService<ChatWindow>();
+                if (ui.IsChecked == true)
+                {
+                    chatWindow.Show();
+                }
+                else
+                {
+                    chatWindow.Hide();
+                }
             }
         }
 
-        private void HideChatWindowButton_Click(object sender, RoutedEventArgs e)
+        private void tsDragChatWindow_Click(object sender, RoutedEventArgs e)
         {
-            var chatWindow = App.GetService<ChatWindow>();
-            if (chatWindow.Visibility == Visibility.Visible)
+            if (sender is ToggleSwitch ui)
             {
-                chatWindow.Hide();
+                var chatWindow = App.GetService<ChatWindow>();
+                if (ui.IsChecked == true)
+                {
+                    chatWindow.ViewModel.IsDraggable = true;
+                    
+                }
+                else
+                {
+                    chatWindow.ViewModel.IsDraggable = false;
+                }
+            }
+        }
+
+        private void tsShowWindowGrip_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is ToggleSwitch ui)
+            {
+                var chatWindow = App.GetService<ChatWindow>();
+                if (ui.IsChecked == true)
+                {
+                    chatWindow.ResizeMode = ResizeMode.CanResizeWithGrip;
+                }
+                else
+                {
+                    chatWindow.ResizeMode = ResizeMode.NoResize;
+                }
             }
         }
     }
