@@ -126,6 +126,24 @@ namespace IronworksTranslator.ViewModels.Windows
             menuItemReplace.Tag = translationParagraph;
             contextMenu.Items.Add(menuItemReplace);
 
+            var menuItemReTranslate = new MenuItem { Header = "Re-Translate" };
+            var menuItemPapago = new MenuItem
+            {
+                Header = "Papago",
+                Tag = translationParagraph
+            };
+            menuItemPapago.Click += PapagoRetranslate_Click;
+            var menuItemDeepLAPI = new MenuItem
+            {
+                Header = "DeepL (API)",
+                Tag = translationParagraph
+            };
+            menuItemDeepLAPI.Click += DeepLRetranslate_Click;
+
+            menuItemReTranslate.Items.Add(menuItemPapago);
+            menuItemReTranslate.Items.Add(menuItemDeepLAPI);
+            contextMenu.Items.Add(menuItemReTranslate);
+
             paragraph.ContextMenu = contextMenu;
 
             ChatDocument.Blocks.Add(paragraph);

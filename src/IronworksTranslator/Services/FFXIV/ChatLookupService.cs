@@ -1,6 +1,7 @@
 ﻿using IronworksTranslator.Models;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Utils;
+using IronworksTranslator.ViewModels.Pages;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Sharlayan;
@@ -13,7 +14,7 @@ namespace IronworksTranslator.Services.FFXIV
 {
     public class ChatLookupService : IHostedService, IDisposable
     {
-        public bool Attached { get; }
+        public bool Attached { get; private set; }
         public static MemoryHandler? CurrentMemoryHandler { get; private set; }
 
         private Timer? chatTimer;
@@ -25,7 +26,26 @@ namespace IronworksTranslator.Services.FFXIV
 
         public ChatLookupService()
         {
-            Attached = AttachGame();
+            AttachGame();
+            App.GetService<DashboardViewModel>().IsTranslatorActive = Attached;
+            App.GetService<DashboardViewModel>().InitTranslatorToggle();
+        }
+
+        public void Initialize()
+        {
+            Destruct();
+            AttachGame();
+            StartAsync(CancellationToken.None);
+        }
+
+        public void Destruct()
+        {
+            if (Attached)
+            {
+                StopAsync(CancellationToken.None);
+                CurrentMemoryHandler?.Dispose();
+                Attached = false;
+            }
         }
 
         public void Dispose()
@@ -39,11 +59,14 @@ namespace IronworksTranslator.Services.FFXIV
             //chatTimer = new Timer(RefreshChat, null, 0, period);
             if (Attached)
             {
-                chatTimer = new Timer(UpdateChat, null, 0, period);
-            }
-            else
-            {
-                MessageBox.Show("Plase attach the FFXIV process first");
+                if (chatTimer == null)
+                {
+                    chatTimer = new Timer(UpdateChat, null, 0, period);
+                }
+                else
+                {// Resume
+                    chatTimer.Change(0, period);
+                }
             }
 
             return Task.CompletedTask;
@@ -71,7 +94,7 @@ namespace IronworksTranslator.Services.FFXIV
         }
 
         [TraceMethod]
-        public static bool AttachGame()
+        public void AttachGame()
         {
             string processName = "ffxiv_dx11";
 
@@ -104,15 +127,14 @@ namespace IronworksTranslator.Services.FFXIV
                 CurrentMemoryHandler = SharlayanMemoryManager.Instance.AddHandler(configuration);
 
                 Log.Information($"Attached {processName}.exe ({gameLanguage})");
-
-                return true;
+                Attached = true;
             }
             else
             {
                 string message = "Couln't find FFXIV process.";
                 Log.Error(message);
+                Attached = false;
                 MessageBox.Show(message);
-                return false;
             }
         }
 

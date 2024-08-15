@@ -96,6 +96,12 @@ namespace IronworksTranslator
             return _host.Services.GetService(typeof(T)) as T;
         }
 
+        public static IEnumerable<T> GetServices<T>()
+            where T : class
+        {
+            return _host.Services.GetServices<T>();
+        }
+
         /// <summary>
         /// Occurs when the application is loading.
         /// </summary>
