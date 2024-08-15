@@ -207,7 +207,7 @@ namespace IronworksTranslator.ViewModels.Windows
         private static string GenerateTranslationText(TranslationText text, string author)
         {
             var result = new StringBuilder();
-            if (author != null)
+            if (author != null || author.Equals(""))
             {
                 result.Append($"{author}: ");
             }
