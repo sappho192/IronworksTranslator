@@ -4,6 +4,7 @@ using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Utils.Translator;
 using IronworksTranslator.Views.Windows;
+using Serilog;
 using Sharlayan.Core;
 using System.Collections.Frozen;
 using System.Collections.Specialized;
@@ -34,81 +35,55 @@ namespace IronworksTranslator.ViewModels.Windows
 #pragma warning disable CS8602
         private void ChatLogItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            ChatQueue.oq.TryDequeue(out ChatLogItem? chat);
-            if (chat == null) return;
-
-            int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var intCode);
-            ChatCode code = (ChatCode)intCode;
-            if (IronworksSettings.Instance.ChannelSettings.ChatChannels.Where(ch => ch.Code == code && ch.Show).Any())
+            lock (ChatQueue.oq)
             {
-                ChatChannel channel = IronworksSettings.Instance.ChannelSettings.ChatChannels.Where(ch => ch.Code == code).First();
-                string line = chat.Line;
-                ChatLogItem decodedChat = chat.Bytes.DecodeAutoTranslate();
+                ChatQueue.oq.TryDequeue(out ChatLogItem? chat);
+                if (chat == null) return;
+                Log.Information($"Dequeued {chat.Line}");
 
-                if (code == ChatCode.Recruitment || code == ChatCode.System || code == ChatCode.Error ||
-                    code == ChatCode.Notice || code == ChatCode.Emote || code == ChatCode.MarketSold)
+                int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var intCode);
+                ChatCode code = (ChatCode)intCode;
+                if (IronworksSettings.Instance.ChannelSettings.ChatChannels.Where(ch => ch.Code == code && ch.Show).Any())
                 {
-                    TranslationText text;
-                    if (ContainsNativeLanguage(decodedChat.Line))
-                    {// Skip translation task
-                        text = new(line, 
-                            (TranslationLanguageCode)channel.MajorLanguage,
-                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage);
-                    }
-                    else
-                    {
-                        var translated = Translate(line, channel.MajorLanguage);
-                        text = new(line,
-                            (TranslationLanguageCode)channel.MajorLanguage,
-                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
-                        {
-                            TranslatedText = translated
-                        };
-                    }
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        AddMessage(text, channel);
-                    });
-                }
-                else
-                {
-                    var author = decodedChat.Line.RemoveAfter(":");
-                    var sentence = decodedChat.Line.RemoveBefore(":");
+                    ChatChannel channel = IronworksSettings.Instance.ChannelSettings.ChatChannels.Where(ch => ch.Code == code).First();
+                    string line = chat.Line;
+                    ChatLogItem decodedChat = chat.Bytes.DecodeAutoTranslate();
 
-                    if (!(code.Equals(ChatCode.NPCDialog) || code.Equals(ChatCode.NPCAnnounce) || code.Equals(ChatCode.BossQuotes)))
-                    {// Push to ChatWindow
+                    if (code == ChatCode.Recruitment || code == ChatCode.System || code == ChatCode.Error ||
+                        code == ChatCode.Notice || code == ChatCode.Emote || code == ChatCode.MarketSold)
+                    {
                         TranslationText text;
-                        if (ContainsNativeLanguage(sentence))
-                        {// Skip translation
-                            text = new(sentence,
+                        if (ContainsNativeLanguage(decodedChat.Line))
+                        {// Skip translation task
+                            text = new(line,
                                 (TranslationLanguageCode)channel.MajorLanguage,
                                 (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage);
                         }
                         else
                         {
-                            var translated = Translate(sentence, channel.MajorLanguage);
-                            text = new(sentence,
+                            var translated = Translate(line, channel.MajorLanguage);
+                            text = new(line,
                                 (TranslationLanguageCode)channel.MajorLanguage,
                                 (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
                             {
-                                TranslatedText = translated,
-                                Author = author,
+                                TranslatedText = translated
                             };
                         }
-
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            AddMessage(text, channel, author);
+                            AddMessage(text, channel);
                         });
                     }
                     else
-                    {// Push to DialogueWindow
-                        if (IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod 
-                            == DialogueTranslationMethod.ChatMessage)
-                        {
+                    {
+                        var author = decodedChat.Line.RemoveAfter(":");
+                        var sentence = decodedChat.Line.RemoveBefore(":");
+
+                        if (!(code.Equals(ChatCode.NPCDialog) || code.Equals(ChatCode.NPCAnnounce) || code.Equals(ChatCode.BossQuotes)))
+                        {// Push to ChatWindow
                             TranslationText text;
                             if (ContainsNativeLanguage(sentence))
-                            {
+                            {// Skip translation
                                 text = new(sentence,
                                     (TranslationLanguageCode)channel.MajorLanguage,
                                     (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage);
@@ -117,17 +92,47 @@ namespace IronworksTranslator.ViewModels.Windows
                             {
                                 var translated = Translate(sentence, channel.MajorLanguage);
                                 text = new(sentence,
-                                (TranslationLanguageCode)channel.MajorLanguage,
-                                (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
+                                    (TranslationLanguageCode)channel.MajorLanguage,
+                                    (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
                                 {
                                     TranslatedText = translated,
                                     Author = author,
                                 };
                             }
+
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 AddMessage(text, channel, author);
                             });
+                        }
+                        else
+                        {// Push to DialogueWindow
+                            if (IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod
+                                == DialogueTranslationMethod.ChatMessage)
+                            {
+                                TranslationText text;
+                                if (ContainsNativeLanguage(sentence))
+                                {
+                                    text = new(sentence,
+                                        (TranslationLanguageCode)channel.MajorLanguage,
+                                        (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage);
+                                }
+                                else
+                                {
+                                    var translated = Translate(sentence, channel.MajorLanguage);
+                                    text = new(sentence,
+                                    (TranslationLanguageCode)channel.MajorLanguage,
+                                    (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
+                                    {
+                                        TranslatedText = translated,
+                                        Author = author,
+                                    };
+                                }
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    AddMessage(text, channel, author);
+                                });
+                            }
                         }
                     }
                 }
@@ -267,7 +272,7 @@ namespace IronworksTranslator.ViewModels.Windows
                 Tag = translationParagraph
             };
             menuItemDeepLAPI.Click += DeepLRetranslate_Click;
-            
+
             menuItemReTranslate.Items.Add(menuItemPapago);
             menuItemReTranslate.Items.Add(menuItemDeepLAPI);
             contextMenu.Items.Add(menuItemReTranslate);
@@ -278,7 +283,7 @@ namespace IronworksTranslator.ViewModels.Windows
             ScrollToEnd();
         }
 
-        private static string ReTranslate(TranslationText tText, TranslatorEngine api)
+        private string ReTranslate(TranslationText tText, TranslatorEngine api)
         {
             string newMessage = Translate(tText.OriginalText, (ClientLanguage)tText.SourceLanguage, api);
             string? translated = tText.Author == "" ? newMessage : $"{tText.Author}: {newMessage}";
@@ -305,8 +310,9 @@ namespace IronworksTranslator.ViewModels.Windows
             }
         }
 
-        private static string Translate(string input, ClientLanguage channelLanguage, TranslatorEngine? translatorEngine = null)
+        private string Translate(string input, ClientLanguage channelLanguage, TranslatorEngine? translatorEngine = null)
         {
+            Log.Information($"Translating {input}");
             string result = string.Empty;
             var switcher = translatorEngine ?? IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
             switch (switcher)
@@ -331,6 +337,7 @@ namespace IronworksTranslator.ViewModels.Windows
                 default:
                     break;
             }
+            Log.Information($"Translated {input}");
             return result;
         }
 

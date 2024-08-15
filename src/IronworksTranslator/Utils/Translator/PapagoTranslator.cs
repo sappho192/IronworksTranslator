@@ -15,6 +15,7 @@ namespace IronworksTranslator.Utils.Translator
         ];
         public override TranslationLanguageCode[] SupportedLanguages => translationLanguages;
 
+        [TraceMethod]
         public override string Translate(string sentence, TranslationLanguageCode sourceLanguage, TranslationLanguageCode targetLanguage)
         {
             if (!SupportedLanguages.Contains(sourceLanguage))

@@ -19,7 +19,8 @@ namespace IronworksTranslator.Services.FFXIV
         public int GameProcessID { get; private set; }
 
         private Timer? chatTimer;
-        private const int period = 250;
+        private const int period = 500;
+        private object lockObj = new();
 
         // For chatlog you must locally store previous array offsets and indexes in order to pull the correct log from the last time you read it.
         private static int _previousArrayIndex = 0;
@@ -76,19 +77,26 @@ namespace IronworksTranslator.Services.FFXIV
 #pragma warning disable CS8602
         private void UpdateChat(object? state)
         {
-            ChatLogResult readResult = CurrentMemoryHandler.Reader.GetChatLog(_previousArrayIndex, _previousOffset);
-            _previousArrayIndex = readResult.PreviousArrayIndex;
-            _previousOffset = readResult.PreviousOffset;
-            if (!readResult.ChatLogItems.IsEmpty)
+            lock (lockObj)
             {
-                foreach (var item in readResult.ChatLogItems)
+                ChatLogResult readResult = CurrentMemoryHandler.Reader.GetChatLog(_previousArrayIndex, _previousOffset);
+                _previousArrayIndex = readResult.PreviousArrayIndex;
+                _previousOffset = readResult.PreviousOffset;
+                if (!readResult.ChatLogItems.IsEmpty)
                 {
-                    ChatCode code = (ChatCode)int.Parse(item.Code, System.Globalization.NumberStyles.HexNumber);
-                    //ProcessChatMsg(readResult.ChatLogItems[i]);
-                    if ((int)code < 0x9F || code == ChatCode.BossQuotes) // Skips battle log except bossquotes
+                    foreach (var item in readResult.ChatLogItems)
                     {
-                        ChatQueue.oq.Enqueue(item);
-                        Log.Information($"Added {item.Message}");
+                        ChatCode code = (ChatCode)int.Parse(item.Code, System.Globalization.NumberStyles.HexNumber);
+                        //ProcessChatMsg(readResult.ChatLogItems[i]);
+                        if ((int)code < 0x9F || code == ChatCode.BossQuotes) // Skips battle log except bossquotes
+                        {
+                            lock (ChatQueue.oq)
+                            {
+                                Log.Information($"Adding {item.Message}");
+                                ChatQueue.oq.Enqueue(item);
+                            }
+                            Log.Information("Enqueue ended");
+                        }
                     }
                 }
             }
