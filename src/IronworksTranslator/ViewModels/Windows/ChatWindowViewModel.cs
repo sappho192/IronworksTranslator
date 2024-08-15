@@ -3,6 +3,7 @@ using IronworksTranslator.Models;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Utils.Translator;
+using IronworksTranslator.Views.Windows;
 using Sharlayan.Core;
 using System.Collections.Frozen;
 using System.Collections.Specialized;
@@ -187,6 +188,15 @@ namespace IronworksTranslator.ViewModels.Windows
             paragraph.ContextMenu = contextMenu;
 
             ChatDocument.Blocks.Add(paragraph);
+            ScrollToEnd();
+        }
+
+        // from https://stackoverflow.com/a/44604957/4183595
+        private static void ScrollToEnd()
+        {
+            var fdsv = App.GetService<ChatWindow>().ChatPanel;
+            ScrollViewer? sv = fdsv.Template.FindName("PART_ContentHost", fdsv) as ScrollViewer;
+            sv?.ScrollToEnd();
         }
 
         private static string GenerateTranslationText(TranslationText text, string author)
@@ -265,6 +275,7 @@ namespace IronworksTranslator.ViewModels.Windows
             paragraph.ContextMenu = contextMenu;
 
             ChatDocument.Blocks.Add(paragraph);
+            ScrollToEnd();
         }
 
         private static string ReTranslate(TranslationText tText, TranslatorEngine api)
