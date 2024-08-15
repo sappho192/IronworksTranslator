@@ -16,6 +16,7 @@ namespace IronworksTranslator.Services.FFXIV
     {
         public bool Attached { get; private set; }
         public static MemoryHandler? CurrentMemoryHandler { get; private set; }
+        public int GameProcessID { get; private set; }
 
         private Timer? chatTimer;
         private const int period = 250;
@@ -103,6 +104,7 @@ namespace IronworksTranslator.Services.FFXIV
 
             if (processes.Length > 0)
             {
+
                 // supported: English, Chinese, Japanese, French, German, Korean
                 GameRegion gameRegion = GameRegion.Global;
                 GameLanguage gameLanguage = GameLanguage.English;
@@ -115,6 +117,7 @@ namespace IronworksTranslator.Services.FFXIV
                 {
                     Process = process
                 };
+                GameProcessID = process.Id;
 
                 var configuration = new SharlayanConfiguration
                 {

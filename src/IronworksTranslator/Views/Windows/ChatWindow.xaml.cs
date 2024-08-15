@@ -13,9 +13,8 @@ namespace IronworksTranslator.Views.Windows
         {
             ViewModel = viewModel;
             DataContext = this;
-
             InitializeComponent();
-            
+
             ChatPanel.Document = ViewModel.ChatDocument;
         }
 

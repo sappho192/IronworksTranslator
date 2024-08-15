@@ -38,6 +38,7 @@ namespace IronworksTranslator
             {
                 services.AddHostedService<ApplicationHostService>();
                 services.AddHostedService<ChatLookupService>();
+                services.AddHostedService<MinimizationLookupService>();
 
                 // Add i18n
                 services.AddStringLocalizer(b =>
