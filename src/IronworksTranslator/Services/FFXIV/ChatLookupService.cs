@@ -19,7 +19,7 @@ namespace IronworksTranslator.Services.FFXIV
         public int GameProcessID { get; private set; }
 
         private Timer? chatTimer;
-        private const int period = 500;
+        private const int period = 1000;
         private object lockObj = new();
 
         // For chatlog you must locally store previous array offsets and indexes in order to pull the correct log from the last time you read it.
