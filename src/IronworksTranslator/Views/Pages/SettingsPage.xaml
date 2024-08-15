@@ -151,6 +151,14 @@
                     </ui:CardControl>
                     <ui:TextBox Text="{Binding ViewModel.ExampleChatBox, FallbackValue=Lorem Ipsum}" IsReadOnly="True"
                         FontFamily="{Binding ViewModel.CurrentFont}" FontSize="{Binding ViewModel.ChatBoxFontSize}"/>
+                    <ui:CardControl Icon="{ui:SymbolIcon ArrowBetweenDown24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.margin}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ui:NumberBox Name="nbChatMargin" Minimum="0" Maximum="10" MaxDecimalPlaces="0"
+                            ValueChanged="ChatMargin_ValueChanged"
+                            Value="{Binding ViewModel.ChatMargin}" PlaceholderEnabled="False" ClearButtonEnabled="False"/>
+                    </ui:CardControl>
                 </StackPanel>
             </ui:Card>
         </TabItem>

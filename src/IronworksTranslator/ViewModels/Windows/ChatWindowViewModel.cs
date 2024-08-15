@@ -103,14 +103,19 @@ namespace IronworksTranslator.ViewModels.Windows
         public void AddMessage(TranslationText text, ChatChannel channel, string author = "")
         {
             string? translated = author == "" ? text.TranslatedText : $"{author}: {text.TranslatedText}";
+            var settings = IronworksSettings.Instance;
             var paragraph = new Paragraph(new Run(translated))
             {
                 Foreground = new SolidColorBrush
                 {
                     Color = (Color)ColorConverter.ConvertFromString(channel.Color)
                 },
-                FontFamily = new FontFamily(IronworksSettings.Instance.ChatUiSettings.Font),
-                FontSize = IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize
+                FontFamily = new FontFamily(settings.ChatUiSettings.Font),
+                FontSize = settings.ChatUiSettings.ChatboxFontSize,
+                Margin = new Thickness
+                {
+                    Bottom = settings.ChatUiSettings.ChatMargin,
+                }
             };
             TranslationParagraph translationParagraph = new(paragraph, text);
 
@@ -292,6 +297,20 @@ namespace IronworksTranslator.ViewModels.Windows
                 if (block is Paragraph paragraph)
                 {
                     paragraph.FontSize = fontSize;
+                }
+            }
+        }
+
+        public void ChangeChatMargin(double margin)
+        {
+            foreach (var block in ChatDocument.Blocks)
+            {
+                if (block is Paragraph paragraph)
+                {
+                    paragraph.Margin = new Thickness
+                    {
+                        Bottom = margin
+                    };
                 }
             }
         }

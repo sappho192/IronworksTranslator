@@ -30,12 +30,17 @@ namespace IronworksTranslator.Views.Pages
         private void ChatFontSize_ValueChanged(object sender, RoutedEventArgs e)
         {
             var numberBox = sender as NumberBox;
-            if (numberBox.Value == null)
-            {
-                numberBox.Value = IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize;
-            }
+            numberBox.Value ??= IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize;
             var chatWindowViewModel = App.GetService<ChatWindowViewModel>();
             chatWindowViewModel.ChangeChatFontSize((int)numberBox.Value);
+        }
+
+        private void ChatMargin_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            var numberBox = sender as NumberBox;
+            numberBox.Value ??= IronworksSettings.Instance.ChatUiSettings.ChatMargin;
+            var chatWindowViewModel = App.GetService<ChatWindowViewModel>();
+            chatWindowViewModel.ChangeChatMargin((int)numberBox.Value);
         }
 
         private void ChatFontFamily_SelectionChanged(object sender, SelectionChangedEventArgs e)

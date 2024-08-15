@@ -4,7 +4,6 @@ using Serilog;
 using YamlDotNet.Serialization;
 using IronworksTranslator.Utils;
 using System.Windows.Media;
-using ObservableCollections;
 using IronworksTranslator.ViewModels.Pages;
 
 namespace IronworksTranslator.Models.Settings
@@ -65,6 +64,10 @@ namespace IronworksTranslator.Models.Settings
         [property: YamlMember(Alias = "font")]
         private string _font;
 
+        [ObservableProperty]
+        [property: YamlMember(Alias = "chat_margin")]
+        private int _chatMargin;
+
         [SaveSettingsOnChange]
         partial void OnChatboxFontSizeChanged(int value)
         {
@@ -77,12 +80,21 @@ namespace IronworksTranslator.Models.Settings
             Log.Information($"Chatbox font changed to {value}");
         }
 
+        [SaveSettingsOnChange]
+        partial void OnChatMarginChanged(int value)
+        {
+            Log.Information($"ChatMargin changed to {value}");
+        }
+
         private void OnIntMessage(object recipient, PropertyChangedMessage<int> message)
         {
             switch (message.PropertyName)
             {
                 case nameof(SettingsViewModel.ChatBoxFontSize):
                     ChatboxFontSize = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.ChatMargin):
+                    ChatMargin = message.NewValue;
                     break;
             }
         }

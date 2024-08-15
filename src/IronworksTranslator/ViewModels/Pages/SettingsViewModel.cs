@@ -28,6 +28,9 @@ namespace IronworksTranslator.ViewModels.Pages
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         private int _chatBoxFontSize = IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize;
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private int _chatMargin = IronworksSettings.Instance.ChatUiSettings.ChatMargin;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
