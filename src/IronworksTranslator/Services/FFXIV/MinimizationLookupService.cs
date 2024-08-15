@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Wpf.Ui;
 
 namespace IronworksTranslator.Services.FFXIV
 {
@@ -29,14 +30,12 @@ namespace IronworksTranslator.Services.FFXIV
             Application.Current.Dispatcher.Invoke(() =>
             {
                 var chatWindow = App.GetService<ChatWindow>();
-                if (ApplicationIsActivated())
+                if (ApplicationIsActivated() || AppWindowIsFocused())
                 {
-
                     if (chatWindow.WindowState != WindowState.Normal)
                     {
                         chatWindow.WindowState = WindowState.Normal;
                     }
-
                 }
                 else
                 {
@@ -46,6 +45,17 @@ namespace IronworksTranslator.Services.FFXIV
                     }
                 }
             });
+        }
+
+        private static bool AppWindowIsFocused()
+        {
+            var chatWindow = App.GetService<ChatWindow>();
+            var mainWindow = App.GetServices<INavigationWindow>().OfType<MainWindow>().Single();
+            if (chatWindow.IsActive || mainWindow.IsActive)
+            {
+                return true;
+            }
+            return false;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
