@@ -161,17 +161,6 @@ namespace IronworksTranslator.ViewModels.Windows
             // Create and attach a custom context menu to the paragraph
             var contextMenu = new ContextMenu();
 
-            var menuItem = new MenuItem { Header = "Custom Action" };
-            menuItem.Click += MenuItem_Click;
-            // Store the Paragraph object in the Tag property of the MenuItem
-            menuItem.Tag = translationParagraph;
-            contextMenu.Items.Add(menuItem);
-
-            var menuItemReplace = new MenuItem { Header = "Replace" };
-            menuItemReplace.Click += MenuItemReplace_Click;
-            menuItemReplace.Tag = translationParagraph;
-            contextMenu.Items.Add(menuItemReplace);
-
             var menuItemReTranslate = new MenuItem { Header = "Re-Translate" };
             var menuItemPapago = new MenuItem
             {
