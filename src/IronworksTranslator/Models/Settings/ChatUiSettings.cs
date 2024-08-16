@@ -16,6 +16,7 @@ namespace IronworksTranslator.Models.Settings
             Messenger.Register<PropertyChangedMessage<int>>(this, OnIntMessage);
             Messenger.Register<PropertyChangedMessage<string>>(this, OnStringMessage);
             Messenger.Register<PropertyChangedMessage<bool>>(this, OnBoolMessage);
+            Messenger.Register<PropertyChangedMessage<double>>(this, OnDoubleMessage);
 
             InitFontList();
         }
@@ -77,6 +78,10 @@ namespace IronworksTranslator.Models.Settings
         [property: YamlMember(Alias = "resizable")]
         private bool _isResizable;
 
+        [ObservableProperty]
+        [property: YamlMember(Alias = "window_opacity")]
+        private double _windowOpacity;
+
         [SaveSettingsOnChange]
         partial void OnChatboxFontSizeChanged(int value)
         {
@@ -105,6 +110,12 @@ namespace IronworksTranslator.Models.Settings
         partial void OnIsResizableChanged(bool value)
         {
             Log.Information($"IsResizable changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnWindowOpacityChanged(double value)
+        {
+            //Log.Information($"WindowOpacity changed to {value}");
         }
 
         private void OnIntMessage(object recipient, PropertyChangedMessage<int> message)
@@ -139,6 +150,16 @@ namespace IronworksTranslator.Models.Settings
                     break;
                 case nameof(DashboardViewModel.IsChildWindowResizable):
                     IsResizable = message.NewValue;
+                    break;
+            }
+        }
+
+        private void OnDoubleMessage(object recipient, PropertyChangedMessage<double> message)
+        {
+            switch (message.PropertyName)
+            {
+                case nameof(SettingsViewModel.ChildWindowOpacity):
+                    WindowOpacity = message.NewValue;
                     break;
             }
         }

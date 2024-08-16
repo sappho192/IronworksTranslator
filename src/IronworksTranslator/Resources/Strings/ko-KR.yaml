@@ -45,6 +45,7 @@ settings.ui.chat: "채팅 UI"
 settings.ui.chat.font.size: "채팅 글자 크기"
 settings.ui.chat.font.family: "채팅 글꼴"
 settings.ui.chat.margin: "채팅 줄 간격"
+settings.ui.chat.opacity: "채팅창 투명도"
 
 settings.translator: "번역기"
 settings.translator.client_language: "모국어"

@@ -40,6 +40,7 @@ namespace IronworksTranslator.Models.Settings
                     ChatMargin = 0,
                     IsDraggable = true,
                     IsResizable = true,
+                    WindowOpacity = 1.0
                 },
                 TranslatorSettings = new TranslatorSettings
                 {

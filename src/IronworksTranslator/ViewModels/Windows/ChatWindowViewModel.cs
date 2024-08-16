@@ -1,8 +1,11 @@
-﻿using IronworksTranslator.Helpers.Extensions;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
+using IronworksTranslator.Helpers.Extensions;
 using IronworksTranslator.Models;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Utils.Translator;
+using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.Views.Windows;
 using Serilog;
 using Sharlayan.Core;
@@ -15,10 +18,14 @@ using System.Windows.Media;
 
 namespace IronworksTranslator.ViewModels.Windows
 {
-    public partial class ChatWindowViewModel : ObservableObject
+    public partial class ChatWindowViewModel : ObservableRecipient
     {
         [ObservableProperty]
         private bool _isDraggable = true;
+#pragma warning disable CS8602
+        [ObservableProperty]
+        private double _chatWindowOpacity = IronworksSettings.Instance.ChatUiSettings.WindowOpacity;
+#pragma warning restore CS8602
         public FlowDocument ChatDocument { get; }
 
         private readonly Random random = new();
@@ -30,6 +37,17 @@ namespace IronworksTranslator.ViewModels.Windows
         {
             ChatDocument = new FlowDocument();
             ChatQueue.ChatLogItems.CollectionChanged += ChatLogItems_CollectionChanged;
+            Messenger.Register<PropertyChangedMessage<double>>(this, OnDoubleMessage);
+        }
+
+        private void OnDoubleMessage(object recipient, PropertyChangedMessage<double> message)
+        {
+            switch (message.PropertyName)
+            {
+                case nameof(SettingsViewModel.ChildWindowOpacity):
+                    ChatWindowOpacity = message.NewValue;
+                    break;
+            }
         }
 
 #pragma warning disable CS8602

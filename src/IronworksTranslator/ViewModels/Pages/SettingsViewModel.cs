@@ -1,4 +1,5 @@
-﻿using IronworksTranslator.Models.Enums;
+﻿using IronworksTranslator.Helpers;
+using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Utils;
 using Wpf.Ui.Appearance;
@@ -31,6 +32,17 @@ namespace IronworksTranslator.ViewModels.Pages
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         private int _chatMargin = IronworksSettings.Instance.ChatUiSettings.ChatMargin;
+
+        private readonly LogScale _logScale = new(0.01, 1.0);
+        [ObservableProperty]
+        private double _childWindowOpacityRaw = IronworksSettings.Instance.ChatUiSettings.WindowOpacity;
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private double _childWindowOpacity = IronworksSettings.Instance.ChatUiSettings.WindowOpacity;
+        partial void OnChildWindowOpacityRawChanged(double value)
+        {
+           ChildWindowOpacity = _logScale.Scale(ChildWindowOpacityRaw);
+        }
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
