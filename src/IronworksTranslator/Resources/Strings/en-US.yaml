@@ -3,9 +3,13 @@ app.name: "IronworksTranslator"
 
 add: "Add"
 remove: "Remove"
+confirm: "Confirm"
+cancel: "Cancel"
+error: "Error"
 
 yes: "Yes"
 no: "No"
+huh: "Huh...?!"
 
 version: "Version"
 
@@ -52,8 +56,12 @@ settings.translator: "Translator"
 settings.translator.client_language: "My language"
 settings.translator.engine: "Translator Engine"
 settings.translator.engine.default: "Default engine"
+settings.translator.engine.default.fallback: "Default engine will be changed."
 settings.translator.engine.deepl_api: "DeepL (API) Settings"
+settings.translator.engine.deepl_api.limit_reached: "DeepL API limit reached"
+settings.translator.engine.deepl_api.not_exists: "Please add the DeepL API key first."
 settings.translator.engine.apikey: "API key"
+settings.translator.engine.apikey.exists: "That API key is already set."
 settings.translator.dialogue.translation_method: "Method of searching NPC dialogue"
 
 settings.channel: "Channels"

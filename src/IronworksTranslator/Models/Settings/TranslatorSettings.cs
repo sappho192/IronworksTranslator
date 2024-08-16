@@ -6,6 +6,7 @@ using YamlDotNet.Serialization;
 using IronworksTranslator.Utils;
 using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.Utils.Translator;
+using ObservableCollections;
 
 namespace IronworksTranslator.Models.Settings
 {
@@ -16,7 +17,19 @@ namespace IronworksTranslator.Models.Settings
             Messenger.Register<PropertyChangedMessage<ClientLanguage>>(this, OnClientLanguageMessage);
             Messenger.Register<PropertyChangedMessage<TranslatorEngine>>(this, OnTranslatorEngineMessage);
             Messenger.Register<PropertyChangedMessage<DialogueTranslationMethod>>(this, OnDialogueTranslationMethodMessage);
-            Messenger.Register<PropertyChangedMessage<string>>(this, OnDeeplApiKeyMessage);
+        }
+
+        public void InitializeCollectionListeners()
+        {
+            DeeplApiKeys.CollectionChanged += DeeplApiKeys_CollectionChanged;
+        }
+
+        private void DeeplApiKeys_CollectionChanged(in NotifyCollectionChangedEventArgs<string> e)
+        {
+            if (IronworksSettings.Instance != null)
+            {
+                IronworksSettings.UpdateSettingsFile(IronworksSettings.Instance);
+            }
         }
 
         [ObservableProperty]
@@ -32,8 +45,8 @@ namespace IronworksTranslator.Models.Settings
         private DialogueTranslationMethod _dialogueTranslationMethod;
 
         [ObservableProperty]
-        [property: YamlMember(Alias = "deepl_api_key")]
-        private string? _deeplApiKey;
+        [property: YamlMember(Alias = "deepl_api_keys")]
+        private ObservableList<string>? _deeplApiKeys;
 
         [SaveSettingsOnChange]
         partial void OnClientLanguageChanged(ClientLanguage value)
@@ -83,22 +96,15 @@ namespace IronworksTranslator.Models.Settings
             }
         }
 
-        [SaveSettingsOnChange]
-        partial void OnDeeplApiKeyChanged(string? value)
-        {
-            Log.Information($"DeeplApiKey changed to {value}");
-        }
-
-        private void OnDeeplApiKeyMessage(object recipient, PropertyChangedMessage<string> message)
-        {
-            switch (message.PropertyName)
-            {
-                case nameof(SettingsViewModel.DeeplApiKey):
-                    DeeplApiKey = message.NewValue;
-                    App.GetService<DeepLAPITranslator>().InitTranslator(testApi: true);
-                    break;
-            }
-        }
-
+        //private void OnDeeplApiKeyMessage(object recipient, PropertyChangedMessage<string> message)
+        //{
+        //    switch (message.PropertyName)
+        //    {
+        //        case nameof(SettingsViewModel.DeeplApiKey):
+        //            DeeplApiKey = message.NewValue;
+        //            App.GetService<DeepLAPITranslator>().InitTranslator(testApi: true);
+        //            break;
+        //    }
+        //}
     }
 }

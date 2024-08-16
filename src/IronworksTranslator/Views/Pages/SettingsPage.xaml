@@ -28,6 +28,11 @@
         <converters:ClientLanguageToStringConverter x:Key="ClientLanguageToStringConverter"/>
         <converters:TranslatorEngineToStringConverter x:Key="TranslatorEngineToStringConverter"/>
         <converters:DialogueTranslationMethodToStringConverter x:Key="DialogueTranslationMethodToStringConverter"/>
+        <StackPanel x:Key="DialogContent">
+            <ui:TextBox Name="tbNewDeeplApiKey" Text="" 
+                TextChanged="tbNewDeeplApiKey_TextChanged"
+                TextWrapping="NoWrap" MinLines="1" MaxLines="1" MaxLength="39" />
+        </StackPanel>
     </Page.Resources>
 
     <TabControl Margin="0,48,0,16">
@@ -105,8 +110,9 @@
                                     <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.default}" FontTypography="Body" VerticalAlignment="Center"/>
                                     <ComboBox Margin="32,0,0,0"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:TranslatorEngine}}"
-                                    SelectedValue="{Binding ViewModel.TranslatorEngine, Converter={StaticResource TranslatorEngineToStringConverter}}"
-                                    SelectedIndex="{Binding ViewModel.TranslatorEngineIndex}"/>
+                                    SelectedValue="{Binding ViewModel.TranslatorEngine, Converter={StaticResource TranslatorEngineToStringConverter}, Mode=TwoWay}"
+                                    SelectedIndex="{Binding ViewModel.TranslatorEngineIndex, Mode=TwoWay}"
+                                    SelectionChanged="cbTranslator_SelectionChanged"/>
                                 </StackPanel>
                             </ui:Card>
                             <ui:CardExpander IsExpanded="True">
@@ -114,10 +120,20 @@
                                     <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.deepl_api}" FontTypography="BodyStrong"/>
                                 </ui:CardExpander.Header>
                                 <StackPanel Orientation="Vertical">
-                                    <StackPanel Orientation="Horizontal">
+                                    <StackPanel Orientation="Vertical">
                                         <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.apikey}" FontTypography="Body" VerticalAlignment="Center"/>
-                                        <ui:TextBox Margin="32,0,0,0" Text="{Binding ViewModel.DeeplApiKey}"
-                                            PlaceholderEnabled="True" PlaceholderText="aaaaaaaa-bbbb-1111-2222-cccccccccccc"/>
+                                        <!--<ui:TextBox Margin="0,16,0,0" Text="{Binding ViewModel.DeeplApiKey}"
+                                            PlaceholderEnabled="True" PlaceholderText="aaaaaaaa-bbbb-1111-2222-cccccccccccc"/>-->
+                                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                                            <Button Content="{i18n:StringLocalizer add}" 
+                                                Command="{Binding ViewModel.AddDeepLApiKeyCommand, IsAsync=True}"
+                                                CommandParameter="{StaticResource DialogContent}"/>
+                                            <Border Width="8"/>
+                                            <Button Content="{i18n:StringLocalizer remove}"
+                                                Command="{Binding ViewModel.RemoveDeepLApiKeyInfoCommand}"/>
+                                        </StackPanel>
+                                        <ui:ListView Margin="0,8,0,0" SelectionChanged="DeepLAPIListView_SelectionChanged"
+                                            ItemsSource="{Binding ViewModel.DeeplApiKeys, Mode=TwoWay}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </ui:CardExpander>

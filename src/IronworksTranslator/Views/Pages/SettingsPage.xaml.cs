@@ -1,4 +1,5 @@
 ﻿using IronworksTranslator.Models.Settings;
+using IronworksTranslator.Utils;
 using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.ViewModels.Windows;
 using IronworksTranslator.Views.Windows;
@@ -239,6 +240,36 @@ namespace IronworksTranslator.Views.Pages
             tsShowGather.IsChecked = false;
             tsShowMarketSold.IsChecked = false;
             tsShowGilReceive.IsChecked = false;
+        }
+
+        private void DeepLAPIListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var listView = sender as Wpf.Ui.Controls.ListView;
+            ViewModel.SelectedDeeplApiKeyIndex = listView.SelectedIndex;
+        }
+
+        private void tbNewDeeplApiKey_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var tbName = sender as System.Windows.Controls.TextBox;
+            if (tbName != null && tbName.Text != string.Empty)
+            {
+                ViewModel.NewDeepLApiKey = tbName.Text;
+            }
+        }
+
+        private void cbTranslator_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var comboBox = sender as ComboBox;
+            var selectedItem = ViewModel.TranslatorEngine;
+            if (selectedItem == Models.Enums.TranslatorEngine.DeepL_API)
+            {
+                if (IronworksSettings.Instance.TranslatorSettings.DeeplApiKeys.Count == 0)
+                {
+                    System.Windows.MessageBox.Show(Localizer.GetString("settings.translator.engine.deepl_api.not_exists"));
+                    comboBox.SelectedIndex = 0;
+                    comboBox.SelectedItem = (Models.Enums.TranslatorEngine)0;
+                }
+            }
         }
     }
 #pragma warning restore CS8602

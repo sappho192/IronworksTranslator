@@ -3,9 +3,13 @@ app.name: "IronworksTranslator"
 
 add: "추가"
 remove: "제거"
+confirm: "확인"
+cancel: "취소"
+error: "오류"
 
 yes: "예"
 no: "아니요"
+huh: "헉...?!"
 
 version: "버전"
 
@@ -51,8 +55,12 @@ settings.translator: "번역기"
 settings.translator.client_language: "모국어"
 settings.translator.engine: "번역 엔진"
 settings.translator.engine.default: "기본 번역 엔진"
+settings.translator.engine.default.fallback: "기본 번역 엔진이 변경됩니다."
 settings.translator.engine.deepl_api: "DeepL (API) 설정"
+settings.translator.engine.deepl_api.limit_reached: "DeepL API키가 소진됨"
+settings.translator.engine.deepl_api.not_exists: "DeepL API키를 먼저 추가해주세요."
 settings.translator.engine.apikey: "API 키"
+settings.translator.engine.apikey.exists: "이미 존재하는 API키 입니다."
 settings.translator.dialogue.translation_method: "NPC 대사 탐색 방식"
 
 settings.channel: "채널별 설정"

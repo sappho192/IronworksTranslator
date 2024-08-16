@@ -47,7 +47,7 @@ namespace IronworksTranslator.Models.Settings
                     ClientLanguage = ClientLanguage.Korean,
                     TranslatorEngine = TranslatorEngine.Papago,
                     DialogueTranslationMethod = DialogueTranslationMethod.MemorySearch,
-                    DeeplApiKey = string.Empty
+                    DeeplApiKeys = []
                 },
                 ChannelSettings = new ChannelSettings()
             };

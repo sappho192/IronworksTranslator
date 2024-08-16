@@ -2,11 +2,8 @@
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Utils.Translators;
 using DeepL;
-using DeepL.Model;
 using IronworksTranslator.Models.Settings;
 using Serilog;
-using Lepo.i18n;
-using System.Security.Policy;
 
 namespace IronworksTranslator.Utils.Translator
 {
@@ -21,11 +18,16 @@ namespace IronworksTranslator.Utils.Translator
 
         private DeepL.Translator? translator;
 
+        private int currentApiKeyIndex = 0;
+
         public override string Translate(string input, TranslationLanguageCode sourceLanguage, TranslationLanguageCode targetLanguage)
         {
             if (translator == null)
             {
-                InitTranslator(testApi: true);
+                if (!InitTranslator(testApi: true))
+                {
+                    return input;
+                }
             }
 
             if (!SupportedLanguages.Contains(sourceLanguage))
@@ -46,6 +48,16 @@ namespace IronworksTranslator.Utils.Translator
         private async Task<string> RequestTranslate(string input, 
             TranslationLanguageCode sourceLanguage, TranslationLanguageCode targetLanguage)
         {
+            /*
+             * Since initialization task should be completed before this method is called,
+             * the only situation where translator is null is when there're no API key available.
+             * So just return the original text.
+             */
+            if ( translator == null )
+            {
+                return input;
+            }
+
             try
             {
                 var translated = translator.TranslateTextAsync(
@@ -58,63 +70,90 @@ namespace IronworksTranslator.Utils.Translator
             catch (Exception ex)
             {
                 Log.Error(ex.Message);
-                return string.Empty;
+                return input;
             }
         }
 #pragma warning restore CS8602, CS8604
 
 #pragma warning disable CS8602, CS8604
-        public void InitTranslator(bool testApi = false)
+        [TraceMethod]
+        public bool InitTranslator(bool testApi = false)
         {
-            var apiKey = IronworksSettings.Instance.TranslatorSettings.DeeplApiKey;
-            var options = new TranslatorOptions
+            if (IronworksSettings.Instance.TranslatorSettings.DeeplApiKeys.Count == 0)
             {
-                appInfo = new AppInfo
+                MessageBox.Show(Localizer.GetString("settings.translator.engine.deepl_api.not_exists"));
+                return false;
+            }
+
+            for (; currentApiKeyIndex < IronworksSettings.Instance.TranslatorSettings.DeeplApiKeys.Count; currentApiKeyIndex++)
+            {
+                var apiKey = IronworksSettings.Instance.TranslatorSettings.DeeplApiKeys[currentApiKeyIndex];
+                var options = new TranslatorOptions
                 {
-                    AppName = "IronworksTranslator",
-                    AppVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0"
+                    appInfo = new AppInfo
+                    {
+                        AppName = "IronworksTranslator",
+                        AppVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0"
+                    }
+                };
+                try
+                {
+                    translator = new DeepL.Translator(apiKey, options);
                 }
-            };
-            try
-            {
-                translator = new DeepL.Translator(apiKey, options);
-            }
-            catch (ArgumentException ex)
-            {
-                Log.Error(ex.Message);
-                translator = null;
-                return;
-            }
+                catch (ArgumentException ex)
+                {
+                    string message = $"API Key: {apiKey}, {ex.Message}";
+                    Log.Error(message);
+                    MessageBox.Show(message);
+                    translator = null;
+                    continue;
+                }
 
-            if (testApi)
-            {
-                TestTranslator();
+                if (testApi)
+                {
+                    if (Task.Run(TestTranslator).GetAwaiter().GetResult())
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        translator = null;
+                        continue;
+                    }
+                }
             }
+            translator = null;
+            return false;
         }
-#pragma warning restore CS8602, CS8604
 
-        private async void TestTranslator()
+        [TraceMethod]
+        private async Task<bool> TestTranslator()
         {
-            if (translator == null) return;
+            if (translator == null) return false;
+            var apiKey = IronworksSettings.Instance.TranslatorSettings.DeeplApiKeys[currentApiKeyIndex];
             try
             {
                 var usage = await translator.GetUsageAsync();
                 if (usage.AnyLimitReached)
                 {
-                    MessageBox.Show("DeepL API limit reached. Please try again later.");
+                    string message = $"{Localizer.GetString("settings.translator.engine.deepl_api.limit_reached")}: {apiKey}";
+                    MessageBox.Show(message);
+                    return false;
                 }
-#pragma warning disable CS8602
                 var capacity = usage.Character.Limit;
-#pragma warning restore CS8602
                 var used = usage.Character.Count;
                 Log.Information("DeepL API usage: {Used}/{Capacity}", used, capacity);
             }
             catch (AuthorizationException ex)
             {
-                Log.Error(ex.Message);
-                MessageBox.Show(ex.Message);
+                string message = $"API Key: {apiKey}, {ex.Message}";
+                Log.Error(message);
+                MessageBox.Show(message);
+                return false;
             }
+            return true;
         }
+#pragma warning restore CS8602, CS8604
 
         private static string? GetLanguageCode(TranslationLanguageCode sourceLanguage)
         {

@@ -2,8 +2,11 @@
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Utils;
+using ObservableCollections;
+using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
+using Wpf.Ui.Extensions;
 
 namespace IronworksTranslator.ViewModels.Pages
 {
@@ -41,7 +44,7 @@ namespace IronworksTranslator.ViewModels.Pages
         private double _childWindowOpacity = IronworksSettings.Instance.ChatUiSettings.WindowOpacity;
         partial void OnChildWindowOpacityRawChanged(double value)
         {
-           ChildWindowOpacity = _logScale.Scale(ChildWindowOpacityRaw);
+            ChildWindowOpacity = _logScale.Scale(ChildWindowOpacityRaw);
         }
 
         [ObservableProperty]
@@ -59,8 +62,12 @@ namespace IronworksTranslator.ViewModels.Pages
         private int _translatorEngineIndex = (int)IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
 
         [ObservableProperty]
-        [NotifyPropertyChangedRecipients]
-        private string _deeplApiKey = IronworksSettings.Instance.TranslatorSettings.DeeplApiKey ?? string.Empty;
+        private INotifyCollectionChangedSynchronizedView<string> _deeplApiKeys = 
+            IronworksSettings.Instance.TranslatorSettings.DeeplApiKeys.CreateView(key => key).ToNotifyCollectionChanged();
+        [ObservableProperty]
+        private int _selectedDeeplApiKeyIndex = 0;
+        [ObservableProperty]
+        private string _newDeepLApiKey = string.Empty;
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
@@ -77,6 +84,12 @@ namespace IronworksTranslator.ViewModels.Pages
         private string _currentFont = IronworksSettings.Instance.ChatUiSettings.Font;
         [ObservableProperty]
         private int _currentFontIndex = ChatUISettings.systemFontList.IndexOf(IronworksSettings.Instance.ChatUiSettings.Font);
+
+        private readonly IContentDialogService _contentDialogService;
+        public SettingsViewModel(IContentDialogService contentDialogService)
+        {
+            _contentDialogService = contentDialogService;
+        }
 
         public void OnNavigatedTo()
         {
@@ -124,6 +137,66 @@ namespace IronworksTranslator.ViewModels.Pages
                     CurrentTheme = ApplicationTheme.Dark;
 
                     break;
+            }
+        }
+
+        [RelayCommand]
+        [TraceMethod]
+        private async Task OnAddDeepLApiKey(object content)
+        {
+            ContentDialogResult dialogResult = await _contentDialogService.ShowSimpleDialogAsync(
+                new SimpleContentDialogCreateOptions()
+                {
+                    Title = Localizer.GetString("settings.translator.engine.apikey"),
+                    Content = content,
+                    PrimaryButtonText = Localizer.GetString("confirm"),
+                    CloseButtonText = Localizer.GetString("cancel"),
+                }
+            );
+
+            var resultBool = dialogResult switch
+            {
+                ContentDialogResult.Primary => true,
+                ContentDialogResult.Secondary => false,
+                _ => false
+            };
+
+            if (!resultBool)
+                return;
+
+            var apiKey = NewDeepLApiKey.Trim();
+
+            if (string.IsNullOrEmpty(apiKey))
+                return;
+            
+            // Check if the API key already exists
+            if (DeeplApiKeys.Any(key => key == apiKey))
+            {
+                var errorDialog = new Wpf.Ui.Controls.MessageBox
+                {
+                    Title = Localizer.GetString("error"),
+                    Content = Localizer.GetString("settings.translator.engine.apikey.exists"),
+                    CloseButtonText = Localizer.GetString("huh")
+                };
+                errorDialog.ShowDialogAsync();
+                return;
+            }
+
+            IronworksSettings.Instance.TranslatorSettings.DeeplApiKeys.Add(apiKey);
+        }
+
+        [RelayCommand]
+        [TraceMethod]
+        private void OnRemoveDeepLApiKeyInfo()
+        {
+            if (SelectedDeeplApiKeyIndex < 0)
+                return;
+            IronworksSettings.Instance.TranslatorSettings.DeeplApiKeys.RemoveAt(SelectedDeeplApiKeyIndex);
+            if (IronworksSettings.Instance.TranslatorSettings.DeeplApiKeys.Count == 0)
+            {
+                System.Windows.MessageBox.Show(Localizer.GetString("settings.translator.engine.default.fallback"));
+                TranslatorEngine = (TranslatorEngine)0;
+                TranslatorEngineIndex = 0;
             }
         }
     }

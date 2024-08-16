@@ -34,6 +34,7 @@ namespace IronworksTranslator.Services
             if (!File.Exists(fileName))
             {
                 var settings = IronworksSettings.CreateDefault();
+                settings.TranslatorSettings.InitializeCollectionListeners();
                 IronworksSettings.Instance = settings;
                 IronworksSettings.UpdateSettingsFile(settings);
             }
@@ -61,6 +62,7 @@ namespace IronworksTranslator.Services
                         return;
                     }
                 }
+                IronworksSettings.Instance.TranslatorSettings.InitializeCollectionListeners();
             }
 
             ApplyAppLanguage();
