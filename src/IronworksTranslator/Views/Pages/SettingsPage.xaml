@@ -210,6 +210,17 @@
                         </ui:CardExpander.Header>
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.echo}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowEcho" IsChecked="{Binding ViewModel.ShowEchoChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbEcho"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.EchoLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.EchoLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.EchoColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.say}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                                 <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowSay" IsChecked="{Binding ViewModel.ShowSayChannel}"/>
                                 <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>

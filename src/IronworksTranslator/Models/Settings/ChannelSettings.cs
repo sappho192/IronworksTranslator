@@ -1,5 +1,4 @@
 ﻿using IronworksTranslator.Models.Enums;
-using ObservableCollections;
 using YamlDotNet.Serialization;
 
 namespace IronworksTranslator.Models.Settings
@@ -8,7 +7,7 @@ namespace IronworksTranslator.Models.Settings
     public partial class ChannelSettings : ObservableRecipient
     {
         /*
-         * Say, Yell, Shout, Tell, Party, Alliance, Emote, EmoteCustom
+         * Echo, Say, Yell, Shout, Tell, Party, Alliance, Emote, EmoteCustom
          * LinkShell1, LinkShell2, LinkShell3, LinkShell4, LinkShell5, LinkShell6, LinkShell7, LinkShell8,
          * CWLinkShell1, CWLinkShell2, CWLinkShell3, CWLinkShell4, CWLinkShell5, CWLinkShell6, CWLinkShell7, CWLinkShell8,
          * FreeCompany, Novice, System, Notice, Error, Gather, GilReceive, NPCDialog, NPCAnnounce, MarketSold, Recruitment,
@@ -22,6 +21,7 @@ namespace IronworksTranslator.Models.Settings
         private void InitChannels()
         {
             GroupPartyField = new ChatChannel { Code = ChatCode.GroupPartyField, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#FFFFFF" };
+            Echo = new ChatChannel { Code = ChatCode.Echo, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "White" };
             Say = new ChatChannel { Code = ChatCode.Say, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#F7F7F7" };
             Yell = new ChatChannel { Code = ChatCode.Yell, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "Yellow" };
             Shout = new ChatChannel { Code = ChatCode.Shout, Show = true, MajorLanguage = ClientLanguage.Japanese, Color = "#FFA666" };
@@ -69,7 +69,7 @@ namespace IronworksTranslator.Models.Settings
 
 
             ChatChannels = [
-                Say, Yell, Shout, Tell, Party, Alliance, Emote, EmoteCustom,
+                Echo, Say, Yell, Shout, Tell, Party, Alliance, Emote, EmoteCustom,
                 Linkshell1, Linkshell2, Linkshell3, Linkshell4,
                 Linkshell5, Linkshell6, Linkshell7, Linkshell8,
                 CwLinkshell1, CwLinkshell2, CwLinkshell3, CwLinkshell4,
@@ -86,6 +86,10 @@ namespace IronworksTranslator.Models.Settings
         [ObservableProperty]
         [property: YamlIgnore]
         private ChatChannel _groupPartyField;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "echo")]
+        private ChatChannel _echo;
 
         [ObservableProperty]
         [property: YamlMember(Alias = "say")]

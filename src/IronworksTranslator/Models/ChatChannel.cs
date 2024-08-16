@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using IronworksTranslator.Models.Enums;
-using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Utils;
 using IronworksTranslator.ViewModels.Pages;
 using Serilog;
@@ -66,6 +65,10 @@ namespace IronworksTranslator.Models
 
             switch (message.PropertyName)
             {
+                case nameof(SettingsViewModel.EchoColor):
+                    if (recipientChannel.Code != ChatCode.Echo) break;
+                    Color = message.NewValue.ToString();
+                    break;
                 case nameof(SettingsViewModel.SayColor):
                     if (recipientChannel.Code != ChatCode.Say) break;
                     Color = message.NewValue.ToString();
@@ -227,6 +230,10 @@ namespace IronworksTranslator.Models
 
             switch (message.PropertyName)
             {
+                case nameof(SettingsViewModel.ShowEchoChannel):
+                    if (recipientChannel.Code != ChatCode.Echo) break;
+                    Show = message.NewValue;
+                    break;
                 case nameof(SettingsViewModel.ShowSayChannel):
                     if (recipientChannel.Code != ChatCode.Say) break;
                     Show = message.NewValue;
@@ -392,6 +399,10 @@ namespace IronworksTranslator.Models
                 //    if (recipientChannel.Code != ChatCode.GroupPartyField) break;
                 //    MajorLanguage = message.NewValue;
                 //    break;
+                case nameof(SettingsViewModel.EchoLanguage):
+                    if (recipientChannel.Code != ChatCode.Echo) break;
+                    MajorLanguage = message.NewValue;
+                    break;
                 case nameof(SettingsViewModel.SayLanguage):
                     if (recipientChannel.Code != ChatCode.Say) break;
                     MajorLanguage = message.NewValue;

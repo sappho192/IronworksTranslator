@@ -60,6 +60,7 @@ namespace IronworksTranslator.Views.Pages
             if (!_isInitialized) return;
             var comboBox = sender as ComboBox;
             var index = comboBox.SelectedIndex;
+            cbEcho.SelectedIndex = index;
             cbSay.SelectedIndex = index;
             cbYell.SelectedIndex = index;
             cbShout.SelectedIndex = index;
@@ -132,6 +133,7 @@ namespace IronworksTranslator.Views.Pages
 
         private void GroupPartyFieldOnButton_Click(object sender, RoutedEventArgs e)
         {
+            tsShowEcho.IsChecked = true;
             tsShowSay.IsChecked = true;
             tsShowYell.IsChecked = true;
             tsShowShout.IsChecked = true;
@@ -144,6 +146,7 @@ namespace IronworksTranslator.Views.Pages
 
         private void GroupPartyFieldOffButton_Click(object sender, RoutedEventArgs e)
         {
+            tsShowEcho.IsChecked = false;
             tsShowSay.IsChecked = false;
             tsShowYell.IsChecked = false;
             tsShowShout.IsChecked = false;

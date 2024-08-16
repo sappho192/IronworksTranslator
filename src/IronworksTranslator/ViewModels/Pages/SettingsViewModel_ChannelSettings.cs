@@ -28,6 +28,12 @@ namespace IronworksTranslator.ViewModels.Pages
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
+        private ClientLanguage _echoLanguage = IronworksSettings.Instance.ChannelSettings.Echo.MajorLanguage;
+        [ObservableProperty]
+        private int _echoLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Echo.MajorLanguage;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
         private ClientLanguage _sayLanguage = IronworksSettings.Instance.ChannelSettings.Say.MajorLanguage;
         [ObservableProperty]
         private int _sayLanguageIndex = (int)IronworksSettings.Instance.ChannelSettings.Say.MajorLanguage;
@@ -76,6 +82,10 @@ namespace IronworksTranslator.ViewModels.Pages
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
+        private bool _showEchoChannel = IronworksSettings.Instance.ChannelSettings.Echo.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
         private bool _showSayChannel = IronworksSettings.Instance.ChannelSettings.Say.Show;
 
         [ObservableProperty]
@@ -105,6 +115,10 @@ namespace IronworksTranslator.ViewModels.Pages
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
         private bool _showEmoteCustomChannel = IronworksSettings.Instance.ChannelSettings.EmoteCustom.Show;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private Color _echoColor = (Color)ColorConverter.ConvertFromString(IronworksSettings.Instance.ChannelSettings.Echo.Color);
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
@@ -143,6 +157,12 @@ namespace IronworksTranslator.ViewModels.Pages
         {
             CheckPartyFieldIntegrity();
         }
+
+        partial void OnEchoLanguageChanged(ClientLanguage value)
+        {
+            CheckPartyFieldIntegrity();
+        }
+
         partial void OnSayLanguageChanged(ClientLanguage value)
         {
             CheckPartyFieldIntegrity();
@@ -177,7 +197,8 @@ namespace IronworksTranslator.ViewModels.Pages
         }
         public void CheckPartyFieldIntegrity()
         {
-            if (SayLanguage == YellLanguage &&
+            if (SayLanguage == EchoLanguage &&
+                SayLanguage == YellLanguage &&
                 SayLanguage == ShoutLanguage &&
                 SayLanguage == TellLanguage &&
                 SayLanguage == PartyLanguage &&

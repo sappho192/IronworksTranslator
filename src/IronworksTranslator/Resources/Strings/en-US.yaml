@@ -67,6 +67,7 @@ settings.translator.dialogue.translation_method: "Method of searching NPC dialog
 settings.channel: "Channels"
 settings.channel.different_languages: "*Different languages are set for each channels*"
 settings.channel.party_field: "Party, Field"
+settings.channel.party_field.echo: "Echo"
 settings.channel.party_field.emote: "Emote"
 settings.channel.party_field.tell: "Emote (Custom)"
 settings.channel.party_field.say: "Say"
