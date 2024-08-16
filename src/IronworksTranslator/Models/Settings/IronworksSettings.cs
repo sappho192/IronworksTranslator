@@ -38,6 +38,8 @@ namespace IronworksTranslator.Models.Settings
                     ChatboxFontSize = 12,
                     Font = "KoPubWorld Dotum",
                     ChatMargin = 0,
+                    IsDraggable = true,
+                    IsResizable = true,
                 },
                 TranslatorSettings = new TranslatorSettings
                 {

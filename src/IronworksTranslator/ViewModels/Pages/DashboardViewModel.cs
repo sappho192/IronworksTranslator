@@ -1,10 +1,12 @@
-﻿using IronworksTranslator.Services.FFXIV;
+﻿using IronworksTranslator.Models.Settings;
+using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
+using IronworksTranslator.Views.Windows;
 using Microsoft.Extensions.Hosting;
 
 namespace IronworksTranslator.ViewModels.Pages
 {
-    public partial class DashboardViewModel : ObservableObject
+    public partial class DashboardViewModel : ObservableRecipient
     {
         [ObservableProperty]
         private bool _isTranslatorActive = false;
@@ -15,6 +17,15 @@ namespace IronworksTranslator.ViewModels.Pages
         private string _translatorToogleStateDescription = Localizer.GetString("dashboard.translator.disabled.description");
         [ObservableProperty]
         private string _translatorIcon = "DesktopSpeakerOff20";
+
+#pragma warning disable CS8602
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _isChildWindowDraggable = IronworksSettings.Instance.ChatUiSettings.IsDraggable;
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _isChildWindowResizable = IronworksSettings.Instance.ChatUiSettings.IsResizable;
+#pragma warning restore CS8602
 
         [TraceMethod]
         [RelayCommand]
@@ -51,6 +62,37 @@ namespace IronworksTranslator.ViewModels.Pages
                 TranslatorToogleState = Localizer.GetString("dashboard.translator.disabled");
                 TranslatorToogleStateDescription = Localizer.GetString("dashboard.translator.disabled.description");
                 TranslatorIcon = "DesktopSpeakerOff20";
+            }
+        }
+
+        [TraceMethod]
+        [RelayCommand]
+        public void OnChildWindowDraggableToggle()
+        {
+            var chatWindow = App.GetService<ChatWindow>();
+            if (IsChildWindowDraggable)
+            {
+                chatWindow.ViewModel.IsDraggable = true;
+
+            }
+            else
+            {
+                chatWindow.ViewModel.IsDraggable = false;
+            }
+        }
+
+        [TraceMethod]
+        [RelayCommand]
+        public void OnChildWindowResizableToggle()
+        {
+            var chatWindow = App.GetService<ChatWindow>();
+            if (IsChildWindowResizable)
+            {
+                chatWindow.ResizeMode = ResizeMode.CanResizeWithGrip;
+            }
+            else
+            {
+                chatWindow.ResizeMode = ResizeMode.NoResize;
             }
         }
     }

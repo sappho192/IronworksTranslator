@@ -15,6 +15,7 @@ namespace IronworksTranslator.Models.Settings
         {
             Messenger.Register<PropertyChangedMessage<int>>(this, OnIntMessage);
             Messenger.Register<PropertyChangedMessage<string>>(this, OnStringMessage);
+            Messenger.Register<PropertyChangedMessage<bool>>(this, OnBoolMessage);
 
             InitFontList();
         }
@@ -68,6 +69,14 @@ namespace IronworksTranslator.Models.Settings
         [property: YamlMember(Alias = "chat_margin")]
         private int _chatMargin;
 
+        [ObservableProperty]
+        [property: YamlMember(Alias = "draggable")]
+        private bool _isDraggable;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "resizable")]
+        private bool _isResizable;
+
         [SaveSettingsOnChange]
         partial void OnChatboxFontSizeChanged(int value)
         {
@@ -84,6 +93,18 @@ namespace IronworksTranslator.Models.Settings
         partial void OnChatMarginChanged(int value)
         {
             Log.Information($"ChatMargin changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnIsDraggableChanged(bool value)
+        {
+            Log.Information($"IsDraggable changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnIsResizableChanged(bool value)
+        {
+            Log.Information($"IsResizable changed to {value}");
         }
 
         private void OnIntMessage(object recipient, PropertyChangedMessage<int> message)
@@ -105,6 +126,19 @@ namespace IronworksTranslator.Models.Settings
             {
                 case nameof(SettingsViewModel.CurrentFont):
                     Font = message.NewValue;
+                    break;
+            }
+        }
+
+        private void OnBoolMessage(object recipient, PropertyChangedMessage<bool> message)
+        {
+            switch (message.PropertyName)
+            {
+                case nameof(DashboardViewModel.IsChildWindowDraggable):
+                    IsDraggable = message.NewValue;
+                    break;
+                case nameof(DashboardViewModel.IsChildWindowResizable):
+                    IsResizable = message.NewValue;
                     break;
             }
         }

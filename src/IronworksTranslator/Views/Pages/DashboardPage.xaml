@@ -57,11 +57,13 @@
                         </StackPanel>
                         <StackPanel Margin="0,16,0,0" Orientation="Horizontal">
                             <ui:TextBlock Text="{i18n:StringLocalizer dashboard.chat.draggable}"/>
-                            <ui:ToggleSwitch IsChecked="True" Margin="16,0,0,0" Name="tsDragChatWindow" Click="tsDragChatWindow_Click"/>
+                            <ui:ToggleSwitch IsChecked="{Binding ViewModel.IsChildWindowDraggable}"
+                                Command="{Binding ViewModel.ChildWindowDraggableToggleCommand}" Margin="16,0,0,0"/>
                         </StackPanel>
                         <StackPanel Margin="0,16,0,0" Orientation="Horizontal">
                             <ui:TextBlock Text="{i18n:StringLocalizer dashboard.chat.resizable}"/>
-                            <ui:ToggleSwitch IsChecked="True" Margin="16,0,0,0" Name="tsShowWindowGrip" Click="tsShowWindowGrip_Click"/>
+                            <ui:ToggleSwitch IsChecked="{Binding ViewModel.IsChildWindowResizable}"
+                                Command="{Binding ViewModel.ChildWindowResizableToggleCommand}" Margin="16,0,0,0"/>
                         </StackPanel>
                     </StackPanel>
                 </ui:Card>

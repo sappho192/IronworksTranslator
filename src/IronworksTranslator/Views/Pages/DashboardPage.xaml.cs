@@ -31,38 +31,5 @@ namespace IronworksTranslator.Views.Pages
                 }
             }
         }
-
-        private void tsDragChatWindow_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is ToggleSwitch ui)
-            {
-                var chatWindow = App.GetService<ChatWindow>();
-                if (ui.IsChecked == true)
-                {
-                    chatWindow.ViewModel.IsDraggable = true;
-                    
-                }
-                else
-                {
-                    chatWindow.ViewModel.IsDraggable = false;
-                }
-            }
-        }
-
-        private void tsShowWindowGrip_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is ToggleSwitch ui)
-            {
-                var chatWindow = App.GetService<ChatWindow>();
-                if (ui.IsChecked == true)
-                {
-                    chatWindow.ResizeMode = ResizeMode.CanResizeWithGrip;
-                }
-                else
-                {
-                    chatWindow.ResizeMode = ResizeMode.NoResize;
-                }
-            }
-        }
     }
 }
