@@ -28,6 +28,7 @@ main.update.description: "**A new version of IronworksTranslator is available. W
 main.update.current_version: "Current version: "
 main.update.latest_version: "New version: "
 
+dashboard.game.not_found: "Please launch the FFXIV game first."
 dashboard.translator.enabled: "Translator is enabled"
 dashboard.translator.enabled.description: "Ready to read in-game text."
 dashboard.translator.disabled: "Translator is disabled"

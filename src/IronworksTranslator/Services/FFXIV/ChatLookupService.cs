@@ -150,10 +150,9 @@ namespace IronworksTranslator.Services.FFXIV
             }
             else
             {
-                string message = "Couln't find FFXIV process.";
-                Log.Error(message);
+                Log.Error("Couln't find FFXIV process.");
                 Attached = false;
-                MessageBox.Show(message);
+                MessageBox.Show(Localizer.GetString("dashboard.game.not_found"));
             }
         }
 

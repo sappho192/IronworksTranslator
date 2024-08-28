@@ -28,6 +28,7 @@ main.update.description: "**IronworksTranslator의 새 버전이 있습니다. �
 main.update.current_version: "현재 버전: "
 main.update.latest_version: "새 버전: "
 
+dashboard.game.not_found: "파판을 먼저 실행해주세요."
 dashboard.translator.enabled: "번역기 작동 중"
 dashboard.translator.enabled.description: "게임 내 텍스트를 읽을 준비가 되어있습니다."
 dashboard.translator.disabled: "번역기 작동 중지됨"
