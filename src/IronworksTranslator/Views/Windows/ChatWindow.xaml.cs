@@ -1,4 +1,5 @@
-﻿using IronworksTranslator.ViewModels.Windows;
+﻿using IronworksTranslator.Models.Settings;
+using IronworksTranslator.ViewModels.Windows;
 
 namespace IronworksTranslator.Views.Windows
 {
@@ -14,8 +15,18 @@ namespace IronworksTranslator.Views.Windows
             ViewModel = viewModel;
             DataContext = this;
             Topmost = true;
-            InitializeComponent();
 
+            InitializeComponent();
+#pragma warning disable CS8602
+            if (IronworksSettings.Instance.ChatUiSettings.IsResizable)
+            {
+                ResizeMode = ResizeMode.CanResizeWithGrip;
+            }
+            else
+            {
+                ResizeMode = ResizeMode.NoResize;
+            }
+#pragma warning restore CS8602
             ChatPanel.Document = ViewModel.ChatDocument;
         }
 

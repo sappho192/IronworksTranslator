@@ -55,6 +55,11 @@
                             <ui:TextBlock Text="{i18n:StringLocalizer dashboard.chat.show}"/>
                             <ui:ToggleSwitch IsChecked="True" Margin="16,0,0,0" Name="tsShowChatWindow" Click="tsShowChatWindow_Click"/>
                         </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                            <ui:TextBlock Text="{i18n:StringLocalizer dashboard.dialogue.show}"/>
+                            <ui:ToggleSwitch IsChecked="{Binding ViewModel.IsDialogueWindowVisible}" Margin="16,0,0,0"
+                                Command="{Binding ViewModel.DialogueWindowVisibilityToggleCommand}"/>
+                        </StackPanel>
                         <StackPanel Margin="0,16,0,0" Orientation="Horizontal">
                             <ui:TextBlock Text="{i18n:StringLocalizer dashboard.chat.draggable}"/>
                             <ui:ToggleSwitch IsChecked="{Binding ViewModel.IsChildWindowDraggable}"

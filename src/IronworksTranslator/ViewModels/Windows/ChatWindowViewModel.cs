@@ -20,9 +20,9 @@ namespace IronworksTranslator.ViewModels.Windows
 {
     public partial class ChatWindowViewModel : ObservableRecipient
     {
-        [ObservableProperty]
-        private bool _isDraggable = true;
 #pragma warning disable CS8602
+        [ObservableProperty]
+        private bool _isDraggable = IronworksSettings.Instance.ChatUiSettings.IsDraggable;
         [ObservableProperty]
         private double _chatWindowOpacity = IronworksSettings.Instance.ChatUiSettings.WindowOpacity;
 #pragma warning restore CS8602

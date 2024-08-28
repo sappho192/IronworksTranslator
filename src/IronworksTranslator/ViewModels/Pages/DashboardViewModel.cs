@@ -21,6 +21,9 @@ namespace IronworksTranslator.ViewModels.Pages
 #pragma warning disable CS8602
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
+        private bool _isDialogueWindowVisible = IronworksSettings.Instance.UiSettings.DialogueWindowVisible;
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
         private bool _isChildWindowDraggable = IronworksSettings.Instance.ChatUiSettings.IsDraggable;
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
@@ -67,17 +70,34 @@ namespace IronworksTranslator.ViewModels.Pages
 
         [TraceMethod]
         [RelayCommand]
+        public void OnDialogueWindowVisibilityToggle()
+        {
+            var dialogueWindow = App.GetService<DialogueWindow>();
+            if (IsDialogueWindowVisible)
+            {
+                dialogueWindow.Show();
+            }
+            else
+            {
+                dialogueWindow.Hide();
+            }
+        }
+
+        [TraceMethod]
+        [RelayCommand]
         public void OnChildWindowDraggableToggle()
         {
             var chatWindow = App.GetService<ChatWindow>();
+            var dialogueWindow = App.GetService<DialogueWindow>();
             if (IsChildWindowDraggable)
             {
                 chatWindow.ViewModel.IsDraggable = true;
-
+                dialogueWindow.ViewModel.IsDraggable = true;
             }
             else
             {
                 chatWindow.ViewModel.IsDraggable = false;
+                dialogueWindow.ViewModel.IsDraggable = false;
             }
         }
 
@@ -86,13 +106,16 @@ namespace IronworksTranslator.ViewModels.Pages
         public void OnChildWindowResizableToggle()
         {
             var chatWindow = App.GetService<ChatWindow>();
+            var dialogueWindow = App.GetService<DialogueWindow>();
             if (IsChildWindowResizable)
             {
                 chatWindow.ResizeMode = ResizeMode.CanResizeWithGrip;
+                dialogueWindow.ResizeMode = ResizeMode.CanResizeWithGrip;
             }
             else
             {
                 chatWindow.ResizeMode = ResizeMode.NoResize;
+                dialogueWindow.ResizeMode = ResizeMode.NoResize;
             }
         }
     }
