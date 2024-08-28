@@ -45,7 +45,7 @@ namespace IronworksTranslator.Utils.Translator
         }
 
 #pragma warning disable CS8602, CS8604
-        private async Task<string> RequestTranslate(string input, 
+        private async Task<string> RequestTranslate(string input,
             TranslationLanguageCode sourceLanguage, TranslationLanguageCode targetLanguage)
         {
             /*
@@ -53,7 +53,7 @@ namespace IronworksTranslator.Utils.Translator
              * the only situation where translator is null is when there're no API key available.
              * So just return the original text.
              */
-            if ( translator == null )
+            if (translator == null)
             {
                 return input;
             }
@@ -62,7 +62,9 @@ namespace IronworksTranslator.Utils.Translator
             {
                 var translated = translator.TranslateTextAsync(
                     text: input,
-                    sourceLanguageCode: GetLanguageCode(sourceLanguage),
+                    sourceLanguageCode:
+                        IronworksSettings.Instance.TranslatorSettings.DeeplAutoSourceLanguage
+                            ? null : GetLanguageCode(sourceLanguage),
                     targetLanguageCode: GetLanguageCode(targetLanguage)
                 );
                 return translated.Result.Text;

@@ -60,6 +60,7 @@ settings.translator.engine.default.fallback: "기본 번역 엔진이 변경됩�
 settings.translator.engine.deepl_api: "DeepL (API) 설정"
 settings.translator.engine.deepl_api.limit_reached: "DeepL API키가 소진됨"
 settings.translator.engine.deepl_api.not_exists: "DeepL API키를 먼저 추가해주세요."
+settings.translator.engine.deepl_api.auto_source_language: "입력 언어를 무조건 자동 감지하기 (채널별 설정을 무시)"
 settings.translator.engine.apikey: "API 키"
 settings.translator.engine.apikey.exists: "이미 존재하는 API키 입니다."
 settings.translator.dialogue.translation_method: "NPC 대사 탐색 방식"

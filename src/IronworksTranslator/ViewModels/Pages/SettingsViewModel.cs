@@ -71,6 +71,10 @@ namespace IronworksTranslator.ViewModels.Pages
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
+        private bool _deeplAutoSourceLanguage = IronworksSettings.Instance.TranslatorSettings.DeeplAutoSourceLanguage;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
         [NotifyPropertyChangedFor(nameof(DialogueTranslationMethodIndex))]
         private DialogueTranslationMethod _dialogueTranslationMethod = IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod;
         [ObservableProperty]

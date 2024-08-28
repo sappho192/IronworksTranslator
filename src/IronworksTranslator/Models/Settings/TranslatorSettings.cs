@@ -17,6 +17,7 @@ namespace IronworksTranslator.Models.Settings
             Messenger.Register<PropertyChangedMessage<ClientLanguage>>(this, OnClientLanguageMessage);
             Messenger.Register<PropertyChangedMessage<TranslatorEngine>>(this, OnTranslatorEngineMessage);
             Messenger.Register<PropertyChangedMessage<DialogueTranslationMethod>>(this, OnDialogueTranslationMethodMessage);
+            Messenger.Register<PropertyChangedMessage<bool>>(this, OnBoolMessage);
         }
 
         public void InitializeCollectionListeners()
@@ -47,6 +48,10 @@ namespace IronworksTranslator.Models.Settings
         [ObservableProperty]
         [property: YamlMember(Alias = "deepl_api_keys")]
         private ObservableList<string>? _deeplApiKeys;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "deepl_auto_source_language")]
+        private bool _deeplAutoSourceLanguage;
 
         [SaveSettingsOnChange]
         partial void OnClientLanguageChanged(ClientLanguage value)
@@ -96,15 +101,20 @@ namespace IronworksTranslator.Models.Settings
             }
         }
 
-        //private void OnDeeplApiKeyMessage(object recipient, PropertyChangedMessage<string> message)
-        //{
-        //    switch (message.PropertyName)
-        //    {
-        //        case nameof(SettingsViewModel.DeeplApiKey):
-        //            DeeplApiKey = message.NewValue;
-        //            App.GetService<DeepLAPITranslator>().InitTranslator(testApi: true);
-        //            break;
-        //    }
-        //}
+        [SaveSettingsOnChange]
+        partial void OnDeeplAutoSourceLanguageChanged(bool value)
+        {
+            Log.Information($"DeeplAutoSourceLanguage changed to {value}");
+        }
+
+        private void OnBoolMessage(object recipient, PropertyChangedMessage<bool> message)
+        {
+            switch (message.PropertyName)
+            {
+                case nameof(SettingsViewModel.DeeplAutoSourceLanguage):
+                    DeeplAutoSourceLanguage = message.NewValue;
+                    break;
+            }
+        }
     }
 }

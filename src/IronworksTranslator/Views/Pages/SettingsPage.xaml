@@ -135,6 +135,10 @@
                                         <ui:ListView Margin="0,8,0,0" SelectionChanged="DeepLAPIListView_SelectionChanged"
                                             ItemsSource="{Binding ViewModel.DeeplApiKeys, Mode=TwoWay}"/>
                                     </StackPanel>
+                                    <StackPanel Margin="0,16,0,0" Orientation="Horizontal">
+                                        <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.deepl_api.auto_source_language}" FontTypography="Body"/>
+                                        <ui:ToggleSwitch IsChecked="{Binding ViewModel.DeeplAutoSourceLanguage, Mode=TwoWay}" Margin="16,0,0,0" />
+                                    </StackPanel>
                                 </StackPanel>
                             </ui:CardExpander>
                         </StackPanel>
