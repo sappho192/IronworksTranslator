@@ -52,9 +52,14 @@ namespace IronworksTranslator.Models.Settings
                     ClientLanguage = ClientLanguage.Korean,
                     TranslatorEngine = TranslatorEngine.Papago,
                     DialogueTranslationMethod = DialogueTranslationMethod.MemorySearch,
-                    DeeplApiKeys = []
+                    DeeplApiKeys = [],
+                    DeeplAutoSourceLanguage = false,
                 },
-                ChannelSettings = new ChannelSettings()
+                ChannelSettings = new ChannelSettings
+                {
+                    PresetName = "Default",
+                    Guid = Guid.NewGuid(),
+                }
             };
         }
 

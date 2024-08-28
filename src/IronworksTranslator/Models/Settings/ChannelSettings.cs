@@ -6,6 +6,14 @@ namespace IronworksTranslator.Models.Settings
 #pragma warning disable CS8618
     public partial class ChannelSettings : ObservableRecipient
     {
+        [ObservableProperty]
+        [property: YamlMember(Alias = "preset_name")]
+        private string _presetName;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "guid")]
+        private Guid _guid;
+
         /*
          * Echo, Say, Yell, Shout, Tell, Party, Alliance, Emote, EmoteCustom
          * LinkShell1, LinkShell2, LinkShell3, LinkShell4, LinkShell5, LinkShell6, LinkShell7, LinkShell8,
