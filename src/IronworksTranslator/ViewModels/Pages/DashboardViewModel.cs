@@ -2,7 +2,15 @@
 using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
 using IronworksTranslator.Views.Windows;
+using MdXaml;
 using Microsoft.Extensions.Hosting;
+using Octokit;
+using Serilog;
+using System.Diagnostics;
+using System.Reflection;
+using System.Text;
+using System.Windows.Controls;
+using System.Windows.Documents;
 
 namespace IronworksTranslator.ViewModels.Pages
 {
@@ -29,6 +37,12 @@ namespace IronworksTranslator.ViewModels.Pages
         [NotifyPropertyChangedRecipients]
         private bool _isChildWindowResizable = IronworksSettings.Instance.ChatUiSettings.IsResizable;
 #pragma warning restore CS8602
+
+        public DashboardViewModel()
+        {
+            // run CheckUpdate() in different thread
+            System.Windows.Application.Current.Dispatcher.InvokeAsync(CheckUpdate);
+        }
 
         [TraceMethod]
         [RelayCommand]
@@ -116,6 +130,70 @@ namespace IronworksTranslator.ViewModels.Pages
             {
                 chatWindow.ResizeMode = ResizeMode.NoResize;
                 dialogueWindow.ResizeMode = ResizeMode.NoResize;
+            }
+        }
+
+        [TraceMethod]
+        private void CheckUpdate()
+        {
+            var currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
+            var githubClient = new GitHubClient(new ProductHeaderValue("IronworksTranslator"));
+            var latestRelease = githubClient.Repository.Release.GetLatest("sappho192", "ironworkstranslator").Result;
+            var latestVersion = new Version(latestRelease.TagName);
+
+            if (currentVersion.CompareTo(latestVersion) >= 0)
+            {
+                Log.Information("IronworksTranslator is up to date");
+            }
+            else
+            {
+                Log.Information("IronworksTranslator is outdated");
+                Log.Information($"Current version: {currentVersion}");
+                Log.Information($"Latest version: {latestVersion}");
+
+                AskToUpdate(currentVersion, latestRelease, latestVersion);
+            }
+        }
+
+        private static void AskToUpdate(Version? currentVersion, Release latestRelease, Version latestVersion)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(Localizer.GetString("main.update.description"));
+            sb.AppendLine();
+            sb.AppendLine($"{Localizer.GetString("main.update.current_version")}{currentVersion.ToString(3)}");
+            sb.AppendLine($"{Localizer.GetString("main.update.latest_version")}**{latestVersion.ToString(3)}**");
+            sb.AppendLine();
+            sb.AppendLine(latestRelease.Body);
+            var updateContent = sb.ToString();
+            var markdownEngine = new Markdown();
+            FlowDocument document = markdownEngine.Transform(updateContent);
+            document.FontFamily = new System.Windows.Media.FontFamily("sans-serif");
+            var scrollViewer = new ScrollViewer
+            {
+                Content = new RichTextBox
+                {
+                    Document = document,
+                    IsReadOnly = true,
+                },
+            };
+            var updateMessageBox = new Wpf.Ui.Controls.MessageBox
+            {
+                Title = Localizer.GetString("main.update.title"),
+                Content = scrollViewer,
+                IsPrimaryButtonEnabled = true,
+                PrimaryButtonText = Localizer.GetString("yes"),
+                CloseButtonText = Localizer.GetString("no")
+            };
+            var result = updateMessageBox.ShowDialogAsync();
+            if (result.Result == Wpf.Ui.Controls.MessageBoxResult.Primary)
+            {
+                Log.Information("User clicked Yes to update PartyYomi");
+                var ps = new ProcessStartInfo(latestRelease.Assets[0].BrowserDownloadUrl)
+                {
+                    UseShellExecute = true,
+                    Verb = "open"
+                };
+                Process.Start(ps);
             }
         }
     }
