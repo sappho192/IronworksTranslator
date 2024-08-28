@@ -82,6 +82,9 @@ namespace IronworksTranslator
                 services.AddSingleton<ChatWindow>();
                 services.AddSingleton<ChatWindowViewModel>();
 
+                services.AddSingleton<DialogueWindow>();
+                services.AddSingleton<DialogueWindowViewModel>();
+
                 // Translator stuff
                 services.AddSingleton<WebBrowser>();
                 services.AddSingleton<PapagoTranslator>();
@@ -119,6 +122,7 @@ namespace IronworksTranslator
                 _host.Start();
                 var chatWindow = GetService<ChatWindow>();
                 chatWindow.Show();
+                var dialogueWindow = GetService<DialogueWindow>();
                 BootWatchDog();
             }
             catch (Exception ex)

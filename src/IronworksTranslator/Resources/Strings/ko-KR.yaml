@@ -33,9 +33,9 @@ dashboard.translator.enabled.description: "게임 내 텍스트를 읽을 준비
 dashboard.translator.disabled: "번역기 작동 중지됨"
 dashboard.translator.disabled.description: "번역기를 활성화하여 게임 내 텍스트를 읽게 해보세요."
 dashboard.chat.show: "채팅창 보이기"
-dashboard.chat.hide: "채팅창 숨기기"
-dashboard.chat.draggable: "채팅창 이동 활성화"
-dashboard.chat.resizable: "채팅창 크기조정 활성화"
+dashboard.dialogue.show: "대사창 보이기"
+dashboard.chat.draggable: "채팅창/대사창 이동 활성화"
+dashboard.chat.resizable: "채팅창/대사창 크기조정 활성화"
 
 settings.general: "일반"
 settings.general.theme: "테마"

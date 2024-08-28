@@ -15,6 +15,7 @@ namespace IronworksTranslator.Models.Settings
         {
             Messenger.Register<PropertyChangedMessage<ApplicationTheme>>(this, OnThemeMessage);
             Messenger.Register<PropertyChangedMessage<AppLanguage>>(this, OnAppLanguageMessage);
+            Messenger.Register<PropertyChangedMessage<bool>>(this, OnBoolMessage);
         }
 
         [ObservableProperty]
@@ -24,6 +25,10 @@ namespace IronworksTranslator.Models.Settings
         [ObservableProperty]
         [property: YamlMember(Alias = "app_language")]
         private AppLanguage _appLanguage;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "dialogue_window_visible")]
+        private bool _dialogueWindowVisible;
 
         [SaveSettingsOnChange]
         partial void OnThemeChanged(ApplicationTheme value)
@@ -56,5 +61,22 @@ namespace IronworksTranslator.Models.Settings
                     break;
             }
         }
+
+        [SaveSettingsOnChange]
+        partial void OnDialogueWindowVisibleChanged(bool value)
+        {
+            Log.Information($"DialogueWindowVisible changed to {value}");
+        }
+
+        private void OnBoolMessage(object recipient, PropertyChangedMessage<bool> m)
+        {
+            switch (m.PropertyName)
+            {
+                case nameof(DashboardViewModel.IsDialogueWindowVisible):
+                    DialogueWindowVisible = m.NewValue;
+                    break;
+            }
+        }
+
     }
 }

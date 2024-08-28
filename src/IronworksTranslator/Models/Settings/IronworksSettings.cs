@@ -31,7 +31,8 @@ namespace IronworksTranslator.Models.Settings
                     {
                         "ko-KR" => AppLanguage.Korean,
                         _ => AppLanguage.English
-                    }
+                    },
+                    DialogueWindowVisible = true,
                 },
                 ChatUiSettings = new ChatUISettings
                 {

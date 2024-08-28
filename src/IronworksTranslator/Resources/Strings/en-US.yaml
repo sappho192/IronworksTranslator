@@ -34,9 +34,9 @@ dashboard.translator.disabled: "Translator is disabled"
 dashboard.translator.disabled.description: "Enable the translator to read in-game text."
 
 dashboard.chat.show: "Show chat window"
-dashboard.chat.hide: "Hide chat window"
-dashboard.chat.draggable: "Enable moving chat window"
-dashboard.chat.resizable: "Enable resizeing chat window"
+dashboard.dialogue.show: "Show dialogue window"
+dashboard.chat.draggable: "Enable moving chat/dialogue window"
+dashboard.chat.resizable: "Enable resizeing chat/dialogue window"
 
 settings.general: "General"
 settings.general.theme: "Theme"
