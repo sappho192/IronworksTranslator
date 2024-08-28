@@ -37,6 +37,12 @@ namespace IronworksTranslator.Models.Settings
                     ChatWindowHeight = 200,
                     DialogueWindowWidth = 400,
                     DialogueWindowHeight = 100,
+                    ChatWindowTop = 100,
+                    ChatWindowLeft = 50,
+                    DialogueWindowTop = 50,
+                    DialogueWindowLeft = 350,
+                    ChatWindowScreen = @"\\.\DISPLAY1",
+                    DialogueWindowScreen = @"\\.\DISPLAY1",
                 },
                 ChatUiSettings = new ChatUISettings
                 {

@@ -9,6 +9,7 @@
         xmlns:utils_ui="clr-namespace:IronworksTranslator.Utils.UI"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:ChatWindow, IsDesignTimeCreatable=True}"
+        Name="mainWindow"
         Title="ChatWindow" 
         Style="{StaticResource WindowAll}"
         MinWidth="200" MinHeight="100"
@@ -17,7 +18,9 @@
         AllowsTransparency="True" Background="Transparent"
         WindowStyle="None" ResizeMode="CanResizeWithGrip"
         Closing="Window_Closing"
-        SizeChanged="Window_SizeChanged">
+        SizeChanged="Window_SizeChanged"
+        LocationChanged="Window_LocationChanged"
+        ContentRendered="Window_ContentRendered">
     <Behaviors:Interaction.Behaviors>
         <utils_ui:DragMoveBehavior IsEnabled="{Binding ViewModel.IsDraggable}" />
     </Behaviors:Interaction.Behaviors>

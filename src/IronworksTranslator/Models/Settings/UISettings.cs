@@ -46,6 +46,30 @@ namespace IronworksTranslator.Models.Settings
         [property: YamlMember(Alias = "dialogue_window_height")]
         private double _dialogueWindowHeight;
 
+        [ObservableProperty]
+        [property: YamlMember(Alias = "chat_window_top")]
+        private double _chatWindowTop;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "chat_window_left")]
+        private double _chatWindowLeft;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "dialogue_window_top")]
+        private double _dialogueWindowTop;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "dialogue_window_left")]
+        private double _dialogueWindowLeft;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "chat_window_screen")]
+        private string? _chatWindowScreen;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "dialogue_window_screen")]
+        private string? _dialogueWindowScreen;
+
         [SaveSettingsOnChange]
         partial void OnThemeChanged(ApplicationTheme value)
         {
@@ -116,6 +140,42 @@ namespace IronworksTranslator.Models.Settings
         partial void OnDialogueWindowHeightChanged(double value)
         {
             Log.Information($"DialogueWindowHeight changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnChatWindowTopChanged(double value)
+        {
+            Log.Information($"ChatWindowTop changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnChatWindowLeftChanged(double value)
+        {
+            Log.Information($"ChatWindowLeft changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnDialogueWindowTopChanged(double value)
+        {
+            Log.Information($"DialogueWindowTop changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnDialogueWindowLeftChanged(double value)
+        {
+            Log.Information($"DialogueWindowLeft changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnChatWindowScreenChanged(string? value)
+        {
+            Log.Information($"ChatWindowScreen changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnDialogueWindowScreenChanged(string? value)
+        {
+            Log.Information($"DialogueWindowScreen changed to {value}");
         }
     }
 }

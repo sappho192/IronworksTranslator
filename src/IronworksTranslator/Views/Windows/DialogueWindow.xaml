@@ -12,8 +12,11 @@
         d:DataContext="{d:DesignInstance local:DialogueWindow, IsDesignTimeCreatable=True}"
         mc:Ignorable="d"
         Topmost="True"
+        Name="mainWindow"
         Closing="Window_Closing"
         SizeChanged="Window_SizeChanged"
+        LocationChanged="Window_LocationChanged"
+        ContentRendered="Window_ContentRendered"
         d:Width="400" d:Height="100"
         MinWidth="200" MinHeight="50"
         Title="DialogueWindow" Width="{Binding ViewModel.Width}" Height="{Binding ViewModel.Height}">
