@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using WpfScreenHelper;
 
 namespace IronworksTranslator.ViewModels.Pages
 {
@@ -131,6 +132,22 @@ namespace IronworksTranslator.ViewModels.Pages
                 chatWindow.ResizeMode = ResizeMode.NoResize;
                 dialogueWindow.ResizeMode = ResizeMode.NoResize;
             }
+        }
+
+        [TraceMethod]
+        [RelayCommand]
+        public void OnResetChatWindowPosition()
+        {
+            var chatWindow = App.GetService<ChatWindow>();
+            WindowHelper.SetWindowPosition(chatWindow, WpfScreenHelper.Enum.WindowPositions.Center, Screen.PrimaryScreen);
+        }
+
+        [TraceMethod]
+        [RelayCommand]
+        public void OnResetDialogueWindowPosition()
+        {
+            var dialogueWindow = App.GetService<DialogueWindow>();
+            WindowHelper.SetWindowPosition(dialogueWindow, WpfScreenHelper.Enum.WindowPositions.Center, Screen.PrimaryScreen);
         }
 
         [TraceMethod]

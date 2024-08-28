@@ -75,6 +75,13 @@
             </Grid>
             <Grid Grid.Column="1">
                 <ui:Card VerticalAlignment="Top" Margin="16">
+                    <StackPanel Orientation="Vertical">
+                        <ui:Button Content="{i18n:StringLocalizer dashboard.chat.position.reset}"
+                            Command="{Binding ViewModel.ResetChatWindowPositionCommand}"/>
+                        <Border Height="16"/>
+                        <ui:Button Content="{i18n:StringLocalizer dashboard.dialogue.position.reset}"
+                            Command="{Binding ViewModel.ResetDialogueWindowPositionCommand}"/>
+                    </StackPanel>
                 </ui:Card>
             </Grid>
         </Grid>
