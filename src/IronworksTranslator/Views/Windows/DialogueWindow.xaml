@@ -13,7 +13,10 @@
         mc:Ignorable="d"
         Topmost="True"
         Closing="Window_Closing"
-        Title="DialogueWindow" Width="400" Height="100">
+        SizeChanged="Window_SizeChanged"
+        d:Width="400" d:Height="100"
+        MinWidth="200" MinHeight="50"
+        Title="DialogueWindow" Width="{Binding ViewModel.Width}" Height="{Binding ViewModel.Height}">
     <Behaviors:Interaction.Behaviors>
         <utils_ui:DragMoveBehavior IsEnabled="{Binding ViewModel.IsDraggable}" />
     </Behaviors:Interaction.Behaviors>

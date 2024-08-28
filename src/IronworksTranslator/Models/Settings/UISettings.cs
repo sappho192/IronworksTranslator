@@ -30,6 +30,22 @@ namespace IronworksTranslator.Models.Settings
         [property: YamlMember(Alias = "dialogue_window_visible")]
         private bool _dialogueWindowVisible;
 
+        [ObservableProperty]
+        [property: YamlMember(Alias = "chat_window_width")]
+        private double _chatWindowWidth;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "chat_window_height")]
+        private double _chatWindowHeight;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "dialogue_window_width")]
+        private double _dialogueWindowWidth;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "dialogue_window_height")]
+        private double _dialogueWindowHeight;
+
         [SaveSettingsOnChange]
         partial void OnThemeChanged(ApplicationTheme value)
         {
@@ -78,5 +94,28 @@ namespace IronworksTranslator.Models.Settings
             }
         }
 
+        [SaveSettingsOnChange]
+        partial void OnChatWindowWidthChanged(double value)
+        {
+            Log.Information($"ChatWindowWidth changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnChatWindowHeightChanged(double value)
+        {
+            Log.Information($"ChatWindowHeight changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnDialogueWindowWidthChanged(double value)
+        {
+            Log.Information($"DialogueWindowWidth changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnDialogueWindowHeightChanged(double value)
+        {
+            Log.Information($"DialogueWindowHeight changed to {value}");
+        }
     }
 }

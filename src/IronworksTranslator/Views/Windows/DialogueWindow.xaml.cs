@@ -1,18 +1,6 @@
 ﻿using IronworksTranslator.Models.Settings;
 using IronworksTranslator.ViewModels.Windows;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace IronworksTranslator.Views.Windows
 {
@@ -22,6 +10,8 @@ namespace IronworksTranslator.Views.Windows
     public partial class DialogueWindow : Window
     {
         public DialogueWindowViewModel ViewModel { get; }
+
+        private readonly DispatcherTimer _resizeEndTimer = new();
 
         public DialogueWindow(DialogueWindowViewModel viewModel)
         {
@@ -46,13 +36,30 @@ namespace IronworksTranslator.Views.Windows
             {
                 ResizeMode = ResizeMode.NoResize;
             }
-#pragma warning restore CS8602
+
+            _resizeEndTimer.Interval = TimeSpan.FromMilliseconds(3000);
+            _resizeEndTimer.Tick += ResizeEndTimer_Tick;
         }
+
+        private void ResizeEndTimer_Tick(object? sender, EventArgs e)
+        {
+            _resizeEndTimer.Stop();
+
+            IronworksSettings.Instance.UiSettings.DialogueWindowWidth = Width;
+            IronworksSettings.Instance.UiSettings.DialogueWindowHeight = Height;
+        }
+#pragma warning restore CS8602
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
             Hide();
+        }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            _resizeEndTimer.Stop();
+            _resizeEndTimer.Start();
         }
     }
 }

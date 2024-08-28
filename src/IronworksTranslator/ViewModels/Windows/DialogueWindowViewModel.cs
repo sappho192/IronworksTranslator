@@ -19,6 +19,10 @@ namespace IronworksTranslator.ViewModels.Windows
         private bool _isResizable = IronworksSettings.Instance.ChatUiSettings.IsResizable;
         [ObservableProperty]
         private double _windowOpacity = IronworksSettings.Instance.ChatUiSettings.WindowOpacity;
+        [ObservableProperty]
+        private double _width = IronworksSettings.Instance.UiSettings.DialogueWindowWidth;
+        [ObservableProperty]
+        private double _height = IronworksSettings.Instance.UiSettings.DialogueWindowHeight;
 #pragma warning restore CS8602
 
         private void OnDoubleMessage(object recipient, PropertyChangedMessage<double> message)

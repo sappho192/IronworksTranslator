@@ -33,6 +33,10 @@ namespace IronworksTranslator.Models.Settings
                         _ => AppLanguage.English
                     },
                     DialogueWindowVisible = true,
+                    ChatWindowWidth = 400,
+                    ChatWindowHeight = 200,
+                    DialogueWindowWidth = 400,
+                    DialogueWindowHeight = 100,
                 },
                 ChatUiSettings = new ChatUISettings
                 {

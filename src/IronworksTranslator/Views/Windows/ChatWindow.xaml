@@ -12,10 +12,12 @@
         Title="ChatWindow" 
         Style="{StaticResource WindowAll}"
         MinWidth="200" MinHeight="100"
-        Width="400" Height="200"
+        d:Width="400" d:Height="200"
+        Width="{Binding ViewModel.Width}" Height="{Binding ViewModel.Height}"
         AllowsTransparency="True" Background="Transparent"
         WindowStyle="None" ResizeMode="CanResizeWithGrip"
-        Closing="Window_Closing">
+        Closing="Window_Closing"
+        SizeChanged="Window_SizeChanged">
     <Behaviors:Interaction.Behaviors>
         <utils_ui:DragMoveBehavior IsEnabled="{Binding ViewModel.IsDraggable}" />
     </Behaviors:Interaction.Behaviors>

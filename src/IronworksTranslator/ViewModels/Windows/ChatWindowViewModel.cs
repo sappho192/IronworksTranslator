@@ -25,6 +25,10 @@ namespace IronworksTranslator.ViewModels.Windows
         private bool _isDraggable = IronworksSettings.Instance.ChatUiSettings.IsDraggable;
         [ObservableProperty]
         private double _chatWindowOpacity = IronworksSettings.Instance.ChatUiSettings.WindowOpacity;
+        [ObservableProperty]
+        private double _width = IronworksSettings.Instance.UiSettings.ChatWindowWidth;
+        [ObservableProperty]
+        private double _height = IronworksSettings.Instance.UiSettings.ChatWindowHeight;
 #pragma warning restore CS8602
         public FlowDocument ChatDocument { get; }
 

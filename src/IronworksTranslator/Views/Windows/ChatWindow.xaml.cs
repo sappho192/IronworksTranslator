@@ -1,5 +1,6 @@
 ﻿using IronworksTranslator.Models.Settings;
 using IronworksTranslator.ViewModels.Windows;
+using System.Windows.Threading;
 
 namespace IronworksTranslator.Views.Windows
 {
@@ -9,7 +10,9 @@ namespace IronworksTranslator.Views.Windows
     public partial class ChatWindow : Window
     {
         public ChatWindowViewModel ViewModel { get; }
+        private readonly DispatcherTimer _resizeEndTimer = new ();
 
+#pragma warning disable CS8602
         public ChatWindow(ChatWindowViewModel viewModel)
         {
             ViewModel = viewModel;
@@ -17,7 +20,6 @@ namespace IronworksTranslator.Views.Windows
             Topmost = true;
 
             InitializeComponent();
-#pragma warning disable CS8602
             if (IronworksSettings.Instance.ChatUiSettings.IsResizable)
             {
                 ResizeMode = ResizeMode.CanResizeWithGrip;
@@ -26,8 +28,27 @@ namespace IronworksTranslator.Views.Windows
             {
                 ResizeMode = ResizeMode.NoResize;
             }
-#pragma warning restore CS8602
             ChatPanel.Document = ViewModel.ChatDocument;
+
+            _resizeEndTimer.Interval = TimeSpan.FromMilliseconds(3000);
+            _resizeEndTimer.Tick += ResizeEndTimer_Tick;
+        }
+#pragma warning restore CS8602
+
+#pragma warning disable CS8602
+        private void ResizeEndTimer_Tick(object? sender, EventArgs e)
+        {
+            _resizeEndTimer.Stop();
+
+            IronworksSettings.Instance.UiSettings.ChatWindowWidth = Width;
+            IronworksSettings.Instance.UiSettings.ChatWindowHeight = Height;
+        }
+#pragma warning restore CS8602
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            _resizeEndTimer.Stop();
+            _resizeEndTimer.Start();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
