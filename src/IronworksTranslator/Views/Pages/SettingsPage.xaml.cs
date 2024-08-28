@@ -272,6 +272,9 @@ namespace IronworksTranslator.Views.Pages
                     comboBox.SelectedIndex = 0;
                     comboBox.SelectedItem = (Models.Enums.TranslatorEngine)0;
                 }
+            } else if (selectedItem == Models.Enums.TranslatorEngine.JESC_Ja_Ko)
+            {
+                System.Windows.MessageBox.Show(Localizer.GetString("settings.translator.engine.not_implemented"));
             }
         }
     }
