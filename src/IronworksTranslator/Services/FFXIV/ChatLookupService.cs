@@ -19,7 +19,7 @@ namespace IronworksTranslator.Services.FFXIV
         public int GameProcessID { get; private set; }
 
         private Timer? chatTimer;
-        private const int period = 1000;
+        private const int period = 250;
         private object lockObj = new();
 
         // For chatlog you must locally store previous array offsets and indexes in order to pull the correct log from the last time you read it.
@@ -85,26 +85,20 @@ namespace IronworksTranslator.Services.FFXIV
 #pragma warning disable CS8602
         private void UpdateChat(object? state)
         {
-            lock (lockObj)
+            ChatLogResult readResult = CurrentMemoryHandler.Reader.GetChatLog(_previousArrayIndex, _previousOffset);
+            _previousArrayIndex = readResult.PreviousArrayIndex;
+            _previousOffset = readResult.PreviousOffset;
+            if (!readResult.ChatLogItems.IsEmpty)
             {
-                ChatLogResult readResult = CurrentMemoryHandler.Reader.GetChatLog(_previousArrayIndex, _previousOffset);
-                _previousArrayIndex = readResult.PreviousArrayIndex;
-                _previousOffset = readResult.PreviousOffset;
-                if (!readResult.ChatLogItems.IsEmpty)
+                foreach (var item in readResult.ChatLogItems)
                 {
-                    foreach (var item in readResult.ChatLogItems)
+                    ChatCode code = (ChatCode)int.Parse(item.Code, System.Globalization.NumberStyles.HexNumber);
+                    //ProcessChatMsg(readResult.ChatLogItems[i]);
+                    if ((int)code < 0x9F || code == ChatCode.BossQuotes) // Skips battle log except bossquotes
                     {
-                        ChatCode code = (ChatCode)int.Parse(item.Code, System.Globalization.NumberStyles.HexNumber);
-                        //ProcessChatMsg(readResult.ChatLogItems[i]);
-                        if ((int)code < 0x9F || code == ChatCode.BossQuotes) // Skips battle log except bossquotes
-                        {
-                            lock (ChatQueue.oq)
-                            {
-                                Log.Information($"Adding {item.Message}");
-                                ChatQueue.oq.Enqueue(item);
-                            }
-                            Log.Information("Enqueue ended");
-                        }
+                        Log.Information($"Adding {item.Message}");
+                        ChatQueue.q.Add(item);
+                        Log.Information("Enqueue ended");
                     }
                 }
             }

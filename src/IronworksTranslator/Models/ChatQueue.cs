@@ -1,19 +1,12 @@
-﻿using ObservableCollections;
-using Sharlayan.Core;
+﻿using Sharlayan.Core;
+using System.Collections.Concurrent;
 
 namespace IronworksTranslator.Models
 {
     public class ChatQueue
     {
-        public static readonly ObservableQueue<ChatLogItem> oq = new();
-
-        private static readonly INotifyCollectionChangedSynchronizedView<ChatLogItem> chatLogItems = oq.CreateView(x => x).ToNotifyCollectionChanged();
-        public static INotifyCollectionChangedSynchronizedView<ChatLogItem> ChatLogItems
-        {
-            get
-            {
-                return chatLogItems;
-            }
-        }
+        public static BlockingCollection<ChatLogItem> q = new (new ConcurrentQueue<ChatLogItem>());
+        public static ConcurrentQueue<string> rq = new() { };
+        public static string lastMsg = "";
     }
 }

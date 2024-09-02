@@ -6,7 +6,7 @@ namespace IronworksTranslator.Utils
     {
         private Browser? browser;
         private Page? webPage;
-        
+        private readonly object lockObj = new();
         public WebBrowser()
         {
             InitWebBrowser();
@@ -23,14 +23,17 @@ namespace IronworksTranslator.Utils
         public string Navigate(string url)
         {
             string content = string.Empty;
-            try
+            lock (lockObj)
             {
-                var navigateTask = Task.Run(async () => await RequestNavigate(url));
-                content = navigateTask.GetAwaiter().GetResult();
-            }
-            catch (Exception ex)
-            {
-                content = ex.Message;
+                try
+                {
+                    var navigateTask = Task.Run(async () => await RequestNavigate(url));
+                    content = navigateTask.GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    content = ex.Message;
+                }
             }
             return content;
         }
