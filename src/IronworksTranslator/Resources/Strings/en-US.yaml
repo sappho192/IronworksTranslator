@@ -130,4 +130,10 @@ settings.game.chat.ignored_players_list: "Ignore following player's chat (Click 
 settings.game.chat.enabled_channels_list: "Read chat from following channel (Click to edit)"
 
 chat.report: "Report"
+chat.report.description: "By suggesting translation improvements, you agree to share the content of the chat with developers."
+chat.report.original: "Original chat:"
+chat.report.translated: "Current translation:"
+chat.report.comment: "Additional comments (please include the correct translation, the context of the chat, etc.)"
+chat.report.comment.placeholder: "You can leave here blank."
+chat.report.primary: "Send"
 chat.retranslate: "Re-translate"

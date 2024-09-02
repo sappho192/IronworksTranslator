@@ -4,7 +4,9 @@ using IronworksTranslator.Helpers.Extensions;
 using IronworksTranslator.Models;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
+using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
+using IronworksTranslator.Utils.Cloudflare;
 using IronworksTranslator.Utils.Translator;
 using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.Views.Windows;
@@ -16,6 +18,12 @@ using System.Text;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using Wpf.Ui;
+using Wpf.Ui.Controls;
+using Wpf.Ui.Extensions;
+using MenuItem = Wpf.Ui.Controls.MenuItem;
+using TextBlock = Wpf.Ui.Controls.TextBlock;
+using TextBox = Wpf.Ui.Controls.TextBox;
 
 namespace IronworksTranslator.ViewModels.Windows
 {
@@ -38,8 +46,10 @@ namespace IronworksTranslator.ViewModels.Windows
                 FontWeights.Bold, FontWeights.Regular
             ];
 
-        public ChatWindowViewModel()
+        private readonly IContentDialogService _contentDialogService;
+        public ChatWindowViewModel(IContentDialogService contentDialogService)
         {
+            _contentDialogService = contentDialogService;
             ChatDocument = new FlowDocument();
             ChatQueue.ChatLogItems.CollectionChanged += ChatLogItems_CollectionChanged;
             Messenger.Register<PropertyChangedMessage<double>>(this, OnDoubleMessage);
@@ -430,13 +440,118 @@ namespace IronworksTranslator.ViewModels.Windows
             paragraph.Inlines.Add(new Run(newText));
         }
 
-        private void Report_Click(object sender, RoutedEventArgs e)
+        [TraceMethod]
+        private async void Report_Click(object sender, RoutedEventArgs e)
         {
             // Retrieve the Paragraph object from the Tag property of the MenuItem
             if (((MenuItem)sender).Tag is TranslationParagraph tParagraph)
             {
-                string paragraphText = GetTextFromParagraph(tParagraph.Paragraph);
-                MessageBox.Show($"Custom action triggered for paragraph: {paragraphText}");
+                //string paragraphText = GetTextFromParagraph(tParagraph.Paragraph);
+                //MessageBox.Show($"Custom action triggered for paragraph: {paragraphText}");
+                
+                var mainWindow = App.GetServices<INavigationWindow>().OfType<MainWindow>().Single();
+                // If the main window is minimized or hidden, show it
+                if (mainWindow.WindowState == WindowState.Minimized || mainWindow.Visibility != Visibility.Visible)
+                {
+                    mainWindow.WindowState = WindowState.Normal;
+                    mainWindow.Show();
+                }
+
+                StackPanel stackPanel = new()
+                {
+                    Orientation = Orientation.Vertical
+                };
+                stackPanel.Children.Add(new TextBlock
+                {
+                    Text = Localizer.GetString("chat.report.description"),
+                    FontTypography = FontTypography.Body,
+                    VerticalAlignment = VerticalAlignment.Center,
+                });
+                StackPanel chatPanel = new()
+                {
+                    Orientation = Orientation.Horizontal,
+                    Margin = new Thickness(0, 8, 0, 0)
+                };
+                chatPanel.Children.Add(new TextBlock
+                {
+                    Text = Localizer.GetString("chat.report.original"),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FontTypography = FontTypography.BodyStrong
+                });
+                chatPanel.Children.Add(new TextBlock
+                {
+                    Text = tParagraph.Text.OriginalText,
+                    VerticalAlignment = VerticalAlignment.Center,
+                });
+                StackPanel translatedPanel = new()
+                {
+                    Orientation = Orientation.Horizontal
+                };
+                translatedPanel.Children.Add(new TextBlock
+                {
+                    Text = Localizer.GetString("chat.report.translated"),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FontTypography = FontTypography.BodyStrong
+                });
+                translatedPanel.Children.Add(new TextBlock
+                {
+                    Text = tParagraph.Text.TranslatedText,
+                    VerticalAlignment = VerticalAlignment.Center,
+                });
+                stackPanel.Children.Add(chatPanel);
+                stackPanel.Children.Add(translatedPanel);
+                stackPanel.Children.Add(new TextBlock
+                {
+                    Text = Localizer.GetString("chat.report.comment"),
+                    FontTypography = FontTypography.BodyStrong,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(0, 8, 0, 0),
+                });
+                var tbComment = new TextBox
+                {
+                    Text = "",
+                    TextWrapping = TextWrapping.Wrap,
+                    MinLines = 2,
+                    MaxLength = 300,
+                    Margin = new Thickness(0, 8, 0, 0),
+                    PlaceholderEnabled = true,
+                    PlaceholderText = Localizer.GetString("chat.report.comment.placeholder"),
+                };
+                stackPanel.Children.Add(tbComment);
+
+                ContentDialogResult dialogResult = await _contentDialogService.ShowSimpleDialogAsync(
+                    new SimpleContentDialogCreateOptions()
+                    {
+                        Title = Localizer.GetString("chat.report"),
+                        Content = stackPanel,
+                        PrimaryButtonText = Localizer.GetString("chat.report.primary"),
+                        CloseButtonText = Localizer.GetString("cancel"),
+                    }
+                );
+
+                var resultBool = dialogResult switch
+                {
+                    ContentDialogResult.Primary => true,
+                    ContentDialogResult.Secondary => false,
+                    _ => false
+                };
+
+                if (!resultBool)
+                    return;
+
+                string comment = tbComment.Text;
+
+                BiggsBody body = new()
+                {
+                    input_sentence = tParagraph.Text.OriginalText,
+                    input_language = tParagraph.Text.SourceLanguage.ToString(),
+                    output_sentence = tParagraph.Text.TranslatedText ?? "",
+                    output_language = tParagraph.Text.TargetLanguage.ToString(),
+                    timestamp = DateTime.UtcNow,
+                    comment = comment
+                };
+                BiggsWorker worker = new ();
+                await worker.Insert(body);
             }
         }
 

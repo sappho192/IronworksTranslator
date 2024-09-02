@@ -130,4 +130,12 @@ settings.game.chat.ignored_players_list: "채팅을 번역하지 않을 플레�
 settings.game.chat.enabled_channels_list: "TTS로 읽을 채널 목록 (클릭하여 편집)"
 
 chat.report: "번역 개선 제안하기"
+chat.report.description: "번역 개선을 제안하는 것은 곧 해당 채팅의 내용을 개발자에게 공유하는 것에 동의한 것으로 간주합니다."
+chat.report.original: "채팅 원문:"
+chat.report.translated: "현재 번역:"
+chat.report.comment: "부연 설명(올바른 번역, 해당 채팅의 맥락 등을 적어주세요)"
+chat.report.comment.placeholder: "빈 칸으로 보내주셔도 괜찮아요."
+chat.report.primary: "제안 전송"
+chat.report.send.success: "전송 완료"
+chat.report.send.fail: "전송에 실패했습니다."
 chat.retranslate: "다시 번역하기"
