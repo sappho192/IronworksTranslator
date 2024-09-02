@@ -156,9 +156,10 @@ namespace IronworksTranslator.ViewModels.Windows
                                         Author = author,
                                     };
                                 }
+                                var dialogueWindow = App.GetService<DialogueWindow>();
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
-                                    AddMessage(text, channel, author);
+                                    dialogueWindow.PushDialogueTextBox(text.TranslatedText);
                                 });
                             }
                         }
@@ -322,7 +323,7 @@ namespace IronworksTranslator.ViewModels.Windows
             }
         }
 
-        private string Translate(string input, ClientLanguage channelLanguage, TranslatorEngine? translatorEngine = null)
+        private static string Translate(string input, ClientLanguage channelLanguage, TranslatorEngine? translatorEngine = null)
         {
             Log.Information($"Translating {input}");
             string result = string.Empty;

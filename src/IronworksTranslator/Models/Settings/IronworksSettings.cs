@@ -60,6 +60,7 @@ namespace IronworksTranslator.Models.Settings
                     DialogueTranslationMethod = DialogueTranslationMethod.MemorySearch,
                     DeeplApiKeys = [],
                     DeeplAutoSourceLanguage = false,
+                    UseInternalAddress = false
                 },
                 ChannelSettings = new ChannelSettings
                 {

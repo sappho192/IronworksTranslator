@@ -19,12 +19,16 @@ namespace IronworksTranslator.Services.FFXIV
         public int GameProcessID { get; private set; }
 
         private Timer? chatTimer;
+        private Timer? dialogueTimer;
         private const int period = 250;
+        private const int dPeriod = 200;
         private object lockObj = new();
 
         // For chatlog you must locally store previous array offsets and indexes in order to pull the correct log from the last time you read it.
         private static int _previousArrayIndex = 0;
         private static int _previousOffset = 0;
+
+        private string lastMessage = "";
 
         public ChatLookupService()
         {
@@ -66,7 +70,6 @@ namespace IronworksTranslator.Services.FFXIV
 
         public Task StartAsync(CancellationToken stoppingToken)
         {
-            //chatTimer = new Timer(RefreshChat, null, 0, period);
             if (Attached)
             {
                 if (chatTimer == null)
@@ -76,6 +79,14 @@ namespace IronworksTranslator.Services.FFXIV
                 else
                 {// Resume
                     chatTimer.Change(0, period);
+                }
+                if (dialogueTimer == null)
+                {
+                    dialogueTimer = new Timer(UpdateDialogue, null, 0, dPeriod);
+                }
+                else
+                {
+                    dialogueTimer.Change(0, dPeriod);
                 }
             }
 
@@ -102,6 +113,62 @@ namespace IronworksTranslator.Services.FFXIV
                     }
                 }
             }
+        }
+
+        private void UpdateDialogue(object? state)
+        {
+            var raw = GetDialogueMessage();
+            if (raw.Equals(""))
+            {
+                return;
+            }
+            lock (ChatQueue.rq)
+            {
+                if (ChatQueue.rq.TryPeek(out string? lastMsg))
+                {
+                    if (!lastMsg.Equals(raw))
+                    {
+                        Log.Debug("Enqueue new message: {@message}", raw);
+                        ChatQueue.rq.Enqueue(raw);
+                        lock (ChatQueue.lastMsg)
+                        {
+                            ChatQueue.lastMsg = raw;
+                        }
+                    }
+                }
+                else
+                {
+                    if (!ChatQueue.lastMsg.Equals(raw))
+                    {
+                        Log.Debug("Enqueue new message: {@message}", raw);
+                        ChatQueue.rq.Enqueue(raw);
+                        lock (ChatQueue.lastMsg)
+                        {
+                            ChatQueue.lastMsg = raw;
+                        }
+                    }
+                }
+            }
+        }
+
+        private string GetDialogueMessage()
+        {
+            try
+            {
+                var handler = CurrentMemoryHandler;
+                var message = handler.GetString(handler.Scanner.Locations["ALLMESSAGES"], 0, 2048);
+                if (message != lastMessage)
+                {
+                    lastMessage = message;
+                    return message;
+                }
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                MessageBox.Show(Localizer.GetString("app.exception.process.lost"));
+                Destruct();
+            }
+            return "";
         }
 
         [TraceMethod]
@@ -138,6 +205,15 @@ namespace IronworksTranslator.Services.FFXIV
                     UseLocalCache = useLocalCache
                 };
                 CurrentMemoryHandler = SharlayanMemoryManager.Instance.AddHandler(configuration);
+                var signatures = new List<Signature>();
+                signatures.Add(new Signature
+                {
+                    Key = "ALLMESSAGES",
+                    PointerPath = HermesAddress.GetLatestAddress().Address
+                });
+                CurrentMemoryHandler.Scanner.LoadOffsets([.. signatures]);
+                ChatQueue.rq.Enqueue("Dialogue window");
+                ChatQueue.lastMsg = "Dialogue window";
 
                 Log.Information($"Attached {processName}.exe ({gameLanguage})");
                 Attached = true;
