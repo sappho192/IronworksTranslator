@@ -128,3 +128,6 @@ settings.game: "In-game information"
 settings.game.chat: "Chat"
 settings.game.chat.ignored_players_list: "Ignore following player's chat (Click to edit)"
 settings.game.chat.enabled_channels_list: "Read chat from following channel (Click to edit)"
+
+chat.report: "Report"
+chat.retranslate: "Re-translate"

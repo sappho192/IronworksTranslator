@@ -4,6 +4,7 @@ using IronworksTranslator.Helpers.Extensions;
 using IronworksTranslator.Models;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
+using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Translator;
 using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.Views.Windows;
@@ -259,18 +260,13 @@ namespace IronworksTranslator.ViewModels.Windows
             // Create and attach a custom context menu to the paragraph
             var contextMenu = new ContextMenu();
 
-            var menuItem = new MenuItem { Header = "Custom Action" };
-            menuItem.Click += MenuItem_Click;
+            var menuItem = new MenuItem { Header = Localizer.GetString("chat.report") };
+            menuItem.Click += Report_Click;
             // Store the Paragraph object in the Tag property of the MenuItem
             menuItem.Tag = translationParagraph;
             contextMenu.Items.Add(menuItem);
 
-            var menuItemReplace = new MenuItem { Header = "Replace" };
-            menuItemReplace.Click += MenuItemReplace_Click;
-            menuItemReplace.Tag = translationParagraph;
-            contextMenu.Items.Add(menuItemReplace);
-
-            var menuItemReTranslate = new MenuItem { Header = "Re-Translate" };
+            var menuItemReTranslate = new MenuItem { Header = Localizer.GetString("chat.retranslate") };
             var menuItemPapago = new MenuItem
             {
                 Header = "Papago",
@@ -434,7 +430,7 @@ namespace IronworksTranslator.ViewModels.Windows
             paragraph.Inlines.Add(new Run(newText));
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        private void Report_Click(object sender, RoutedEventArgs e)
         {
             // Retrieve the Paragraph object from the Tag property of the MenuItem
             if (((MenuItem)sender).Tag is TranslationParagraph tParagraph)

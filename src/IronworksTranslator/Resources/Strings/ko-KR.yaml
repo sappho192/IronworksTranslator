@@ -129,3 +129,5 @@ settings.game.chat: "채팅"
 settings.game.chat.ignored_players_list: "채팅을 번역하지 않을 플레이어 목록 (클릭하여 편집)"
 settings.game.chat.enabled_channels_list: "TTS로 읽을 채널 목록 (클릭하여 편집)"
 
+chat.report: "번역 개선 제안하기"
+chat.retranslate: "다시 번역하기"
