@@ -46,13 +46,17 @@ namespace IronworksTranslator.ViewModels.Windows
                 FontWeights.Bold, FontWeights.Regular
             ];
 
+        private readonly Timer chatboxTimer;
         private readonly IContentDialogService _contentDialogService;
         public ChatWindowViewModel(IContentDialogService contentDialogService)
         {
             _contentDialogService = contentDialogService;
             ChatDocument = new FlowDocument();
-            ChatQueue.ChatLogItems.CollectionChanged += ChatLogItems_CollectionChanged;
             Messenger.Register<PropertyChangedMessage<double>>(this, OnDoubleMessage);
+
+            const int period = 250;
+            chatboxTimer = new Timer(UpdateChatbox, null, 0, period);
+            Log.Debug($"New RefreshChatbox timer with period {period}ms");
         }
 
         private void OnDoubleMessage(object recipient, PropertyChangedMessage<double> message)
@@ -66,11 +70,11 @@ namespace IronworksTranslator.ViewModels.Windows
         }
 
 #pragma warning disable CS8602
-        private void ChatLogItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void UpdateChatbox(object? state)
         {
-            lock (ChatQueue.oq)
+            if (ChatQueue.q.Count != 0)
             {
-                ChatQueue.oq.TryDequeue(out ChatLogItem? chat);
+                var chat = ChatQueue.q.Take();
                 if (chat == null) return;
                 Log.Information($"Dequeued {chat.Line}");
 
@@ -161,9 +165,10 @@ namespace IronworksTranslator.ViewModels.Windows
                                         Author = author,
                                     };
                                 }
+                                var dialogueWindow = App.GetService<DialogueWindow>();
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
-                                    AddMessage(text, channel, author);
+                                    dialogueWindow.PushDialogueTextBox(text.TranslatedText);
                                 });
                             }
                         }
@@ -327,7 +332,7 @@ namespace IronworksTranslator.ViewModels.Windows
             }
         }
 
-        private string Translate(string input, ClientLanguage channelLanguage, TranslatorEngine? translatorEngine = null)
+        private static string Translate(string input, ClientLanguage channelLanguage, TranslatorEngine? translatorEngine = null)
         {
             Log.Information($"Translating {input}");
             string result = string.Empty;

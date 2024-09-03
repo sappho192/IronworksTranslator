@@ -53,6 +53,10 @@ namespace IronworksTranslator.Models.Settings
         [property: YamlMember(Alias = "deepl_auto_source_language")]
         private bool _deeplAutoSourceLanguage;
 
+        [ObservableProperty]
+        [property: YamlMember(Alias = "use_internal_address")]
+        private bool _useInternalAddress;
+
         [SaveSettingsOnChange]
         partial void OnClientLanguageChanged(ClientLanguage value)
         {

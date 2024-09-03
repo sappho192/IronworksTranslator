@@ -15,6 +15,8 @@ version: "버전"
 
 app.exception.title: "프로그램 오류"
 app.exception.description: "예상치 못한 상황으로 프로그램이 종료됩니다. logs 폴더에 있는 최근 로그와 함께 개발자에게 보고해주세요."
+app.exception.process.lost: "파판 프로세스를 잃어버렸습니다. 번역기를 비활성화합니다."
+app.exception.address.not_exist: "address.json이 없습니다. 자체주소 설정을 무시하겠습니다."
 
 app.settings.failed_to_load: "설정 파일이 잘못되어 열 수 없었습니다. 설정 파일을 새로 만들까요? 기존의 설정 파일은 없어집니다."
 app.settings.font_not_exist: "설정에 있던 ({0}) 폰트를 찾을 수 없었습니다. 기본 폰트를 적용합니다."

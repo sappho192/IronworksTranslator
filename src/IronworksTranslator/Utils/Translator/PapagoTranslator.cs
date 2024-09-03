@@ -14,6 +14,7 @@ namespace IronworksTranslator.Utils.Translator
             TranslationLanguageCode.Korean
         ];
         public override TranslationLanguageCode[] SupportedLanguages => translationLanguages;
+        private readonly object lockObj = new();
 
         [TraceMethod]
         public override string Translate(string sentence, TranslationLanguageCode sourceLanguage, TranslationLanguageCode targetLanguage)
@@ -32,17 +33,20 @@ namespace IronworksTranslator.Utils.Translator
             string? tk = GetLanguageCode(targetLanguage);
             tk ??= "en";
             string url = $"https://papago.naver.com/?sk={sk}&tk={tk}&st={Uri.EscapeDataString(sentence)}";
-            try
+            //lock (lockObj)
             {
-                var translateTask = Task.Run(async () => await RequestTranslate(url));
-                string translated = translateTask.GetAwaiter().GetResult();
-                return translated;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.Message);
-                MessageBox.Show(ex.Message);
-                return sentence;
+                try
+                {
+                    var translateTask = Task.Run(async () => await RequestTranslate(url));
+                    string translated = translateTask.GetAwaiter().GetResult();
+                    return translated;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.Message);
+                    MessageBox.Show(ex.Message);
+                    return sentence;
+                }
             }
         }
 
