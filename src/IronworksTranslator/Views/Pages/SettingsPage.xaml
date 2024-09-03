@@ -1,0 +1,701 @@
+﻿<Page
+    x:Class="IronworksTranslator.Views.Pages.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:converters="clr-namespace:IronworksTranslator.Helpers.Converters"
+    xmlns:extensions="clr-namespace:IronworksTranslator.Helpers.Extensions"
+    xmlns:models="clr-namespace:IronworksTranslator.Models"
+    xmlns:enums="clr-namespace:IronworksTranslator.Models.Enums"
+    xmlns:local="clr-namespace:IronworksTranslator.Views.Pages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:i18n="http://schemas.lepo.co/i18n/2022/xaml"
+    xmlns:utils_ui="clr-namespace:IronworksTranslator.Utils.UI"
+    Title="SettingsPage"
+    Style="{StaticResource PageAll}"
+    d:DataContext="{d:DesignInstance local:SettingsPage,
+                                     IsDesignTimeCreatable=False}"
+    d:DesignHeight="550"
+    d:DesignWidth="900"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+        <converters:AppLanguageToStringConverter x:Key="AppLanguageToStringConverter"/>
+        <converters:ClientLanguageToStringConverter x:Key="ClientLanguageToStringConverter"/>
+        <converters:TranslatorEngineToStringConverter x:Key="TranslatorEngineToStringConverter"/>
+        <converters:DialogueTranslationMethodToStringConverter x:Key="DialogueTranslationMethodToStringConverter"/>
+        <StackPanel x:Key="DialogContent">
+            <ui:TextBox Name="tbNewDeeplApiKey" Text="" 
+                TextChanged="tbNewDeeplApiKey_TextChanged"
+                TextWrapping="NoWrap" MinLines="1" MaxLines="1" MaxLength="39" />
+        </StackPanel>
+    </Page.Resources>
+
+    <TabControl Margin="0,48,0,16">
+        <TabItem Name="General">
+            <TabItem.Header>
+                <ui:TextBlock Text="{i18n:StringLocalizer settings.general}" FontWeight="Bold" FontTypography="Caption"/>
+            </TabItem.Header>
+            <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Margin="0,0,8,0" Symbol="Color24" FontSize="24"/>
+                        <ui:TextBlock FontTypography="Subtitle" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.theme}"/>
+                    </StackPanel>
+                    <RadioButton
+                        Margin="0,12,0,0"
+                        Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
+                        CommandParameter="theme_light"
+                        Content="{i18n:StringLocalizer settings.general.theme.light}"
+                        GroupName="themeSelect"
+                        IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}" />
+                    <RadioButton
+                        Margin="0,8,0,0"
+                        Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
+                        CommandParameter="theme_dark"
+                        Content="{i18n:StringLocalizer settings.general.theme.dark}"
+                        GroupName="themeSelect"
+                        IsChecked="{Binding ViewModel.CurrentTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}" />
+
+                    <StackPanel Margin="0,24,0,0" Orientation="Horizontal">
+                        <ui:SymbolIcon Margin="0,0,8,0" Symbol="LocalLanguage24" FontSize="24"/>
+                        <ui:TextBlock FontTypography="Subtitle" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.ui.language}" />
+                    </StackPanel>
+                    <ui:TextBlock FontTypography="Caption" Text="{i18n:StringLocalizer settings.general.ui.language.comment}"/>
+                    <ComboBox Margin="0,8,0,0" HorizontalAlignment="Left"
+                        ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:AppLanguage}}"
+                        SelectedValue="{Binding ViewModel.AppLanguage, Converter={StaticResource AppLanguageToStringConverter}}"
+                        SelectedIndex="{Binding ViewModel.AppLanguageIndex}"/>
+                    <StackPanel Margin="0,24,0,0" Orientation="Horizontal">
+                        <ui:SymbolIcon Margin="0,0,8,0" Symbol="AppGeneric24" FontSize="24"/>
+                        <ui:TextBlock FontTypography="Subtitle" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.app_info}" />
+                    </StackPanel>
+                    <ui:TextBlock Margin="0,12,0,0" Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
+                </StackPanel>
+            </ui:Card>
+        </TabItem>
+        <TabItem Name="Translator">
+            <TabItem.Header>
+                <ui:TextBlock Text="{i18n:StringLocalizer settings.translator}" FontWeight="Bold" FontTypography="Caption"/>
+            </TabItem.Header>
+            <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
+                <StackPanel Orientation="Vertical">
+                    <ui:CardControl Icon="{ui:SymbolIcon LocalLanguage24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.client_language}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ComboBox ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                SelectedValue="{Binding ViewModel.ClientLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                SelectedIndex="{Binding ViewModel.ClientLanguageIndex}"/>
+                    </ui:CardControl>
+                    <ui:CardControl Icon="{ui:SymbolIcon Search24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.dialogue.translation_method}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ComboBox ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:DialogueTranslationMethod}}"
+                            SelectedValue="{Binding ViewModel.DialogueTranslationMethod, Converter={StaticResource DialogueTranslationMethodToStringConverter}}"
+                            SelectedIndex="{Binding ViewModel.DialogueTranslationMethodIndex}"/>
+                    </ui:CardControl>
+                    <ui:CardExpander Icon="{ui:SymbolIcon ServerSurface16}" IsExpanded="True">
+                        <ui:CardExpander.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine}" FontTypography="BodyStrong"/>
+                        </ui:CardExpander.Header>
+                        <StackPanel Orientation="Vertical">
+                            <ui:Card>
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.default}" FontTypography="Body" VerticalAlignment="Center"/>
+                                    <ComboBox Margin="32,0,0,0"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:TranslatorEngine}}"
+                                    SelectedValue="{Binding ViewModel.TranslatorEngine, Converter={StaticResource TranslatorEngineToStringConverter}, Mode=TwoWay}"
+                                    SelectedIndex="{Binding ViewModel.TranslatorEngineIndex, Mode=TwoWay}"
+                                    SelectionChanged="cbTranslator_SelectionChanged"/>
+                                </StackPanel>
+                            </ui:Card>
+                            <ui:CardExpander IsExpanded="True">
+                                <ui:CardExpander.Header>
+                                    <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.deepl_api}" FontTypography="BodyStrong"/>
+                                </ui:CardExpander.Header>
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Vertical">
+                                        <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.apikey}" FontTypography="Body" VerticalAlignment="Center"/>
+                                        <!--<ui:TextBox Margin="0,16,0,0" Text="{Binding ViewModel.DeeplApiKey}"
+                                            PlaceholderEnabled="True" PlaceholderText="aaaaaaaa-bbbb-1111-2222-cccccccccccc"/>-->
+                                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                                            <Button Content="{i18n:StringLocalizer add}" 
+                                                Command="{Binding ViewModel.AddDeepLApiKeyCommand, IsAsync=True}"
+                                                CommandParameter="{StaticResource DialogContent}"/>
+                                            <Border Width="8"/>
+                                            <Button Content="{i18n:StringLocalizer remove}"
+                                                Command="{Binding ViewModel.RemoveDeepLApiKeyInfoCommand}"/>
+                                        </StackPanel>
+                                        <ui:ListView Margin="0,8,0,0" SelectionChanged="DeepLAPIListView_SelectionChanged"
+                                            ItemsSource="{Binding ViewModel.DeeplApiKeys, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="0,16,0,0" Orientation="Horizontal">
+                                        <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.deepl_api.auto_source_language}" FontTypography="Body"/>
+                                        <ui:ToggleSwitch IsChecked="{Binding ViewModel.DeeplAutoSourceLanguage, Mode=TwoWay}" Margin="16,0,0,0" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </ui:CardExpander>
+                        </StackPanel>
+                    </ui:CardExpander>
+                </StackPanel>
+            </ui:Card>
+        </TabItem>
+        <TabItem Name="ChatAppearance">
+            <TabItem.Header>
+                <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat}" FontWeight="Bold" FontTypography="Caption"/>
+            </TabItem.Header>
+            <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
+                <StackPanel Orientation="Vertical">
+                    <ui:CardControl Icon="{ui:SymbolIcon TextFont24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.font.size}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ui:NumberBox Name="nbChatFontSize" Minimum="8" Maximum="32" MaxDecimalPlaces="0"
+                            ValueChanged="ChatFontSize_ValueChanged"
+                            Value="{Binding ViewModel.ChatBoxFontSize}" PlaceholderEnabled="False" ClearButtonEnabled="False"/>
+                    </ui:CardControl>
+                    <ui:CardControl Icon="{ui:SymbolIcon TextEffects24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.font.family}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ComboBox ItemsSource="{Binding ViewModel.FontList}" ScrollViewer.VerticalScrollBarVisibility="Visible"
+                            SelectedValue="{Binding ViewModel.CurrentFont}"
+                            SelectedIndex="{Binding ViewModel.CurrentFontIndex}"
+                            SelectionChanged="ChatFontFamily_SelectionChanged"/>
+                    </ui:CardControl>
+                    <ui:TextBox Text="{Binding ViewModel.ExampleChatBox, FallbackValue=Lorem Ipsum}" IsReadOnly="True"
+                        FontFamily="{Binding ViewModel.CurrentFont}" FontSize="{Binding ViewModel.ChatBoxFontSize}"/>
+                    <ui:CardControl Icon="{ui:SymbolIcon ArrowBetweenDown24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.margin}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ui:NumberBox Name="nbChatMargin" Minimum="0" Maximum="10" MaxDecimalPlaces="0"
+                            ValueChanged="ChatMargin_ValueChanged"
+                            Value="{Binding ViewModel.ChatMargin}" PlaceholderEnabled="False" ClearButtonEnabled="False"/>
+                    </ui:CardControl>
+                    <ui:CardControl Icon="{ui:SymbolIcon PositionForward24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.opacity}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:TextBlock Text="{Binding ViewModel.ChildWindowOpacity, StringFormat={}{0:N2}}" VerticalAlignment="Center"/>
+                            <Slider Margin="8,0,0,0" Minimum="0.01" Maximum="1.0" Value="{Binding ViewModel.ChildWindowOpacityRaw}"/>
+                        </StackPanel>
+                    </ui:CardControl>
+                </StackPanel>
+            </ui:Card>
+        </TabItem>
+        <TabItem Name="Channel">
+            <TabItem.Header>
+                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel}" FontWeight="Bold" FontTypography="Caption"/>
+            </TabItem.Header>
+            <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
+                <StackPanel Orientation="Vertical">
+                    <ui:CardExpander>
+                        <ui:CardExpander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}" Click="GroupPartyFieldOnButton_Click"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}" Click="GroupPartyFieldOffButton_Click"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language_group}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" 
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.GroupPartyFieldLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.GroupPartyFieldLanguageIndex}"
+                                    SelectionChanged="GroupPartyFieldComboBox_SelectionChanged"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.different_languages}" Visibility="{Binding ViewModel.GroupPartyFieldHintVisibility}" FontTypography="Caption" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </ui:CardExpander.Header>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.echo}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowEcho" IsChecked="{Binding ViewModel.ShowEchoChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbEcho"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.EchoLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.EchoLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.EchoColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.say}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowSay" IsChecked="{Binding ViewModel.ShowSayChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbSay"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.SayLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.SayLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.SayColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.yell}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowYell" IsChecked="{Binding ViewModel.ShowYellChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbYell"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.YellLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.YellLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.YellColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.shout}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowShout" IsChecked="{Binding ViewModel.ShowShoutChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbShout"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.ShoutLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.ShoutLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.ShoutColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.tell}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowTell" IsChecked="{Binding ViewModel.ShowTellChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbTell"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.TellLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.TellLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.TellColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.party}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowParty" IsChecked="{Binding ViewModel.ShowPartyChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbParty"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.PartyLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.PartyLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.PartyColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.alliance}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowAlliance" IsChecked="{Binding ViewModel.ShowAllianceChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbAlliance"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.AllianceLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.AllianceLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.AllianceColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.emote}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowEmote" IsChecked="{Binding ViewModel.ShowEmoteChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbEmote"
+                                          ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                          SelectedValue="{Binding ViewModel.EmoteLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                          SelectedIndex="{Binding ViewModel.EmoteLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.EmoteColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.party_field.emote_custom}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowEmoteCustom" IsChecked="{Binding ViewModel.ShowEmoteCustomChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbEmoteCustom"
+                                          ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                          SelectedValue="{Binding ViewModel.EmoteCustomLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                          SelectedIndex="{Binding ViewModel.EmoteCustomLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.EmoteCustomColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ui:CardExpander>
+                    <ui:CardExpander>
+                        <ui:CardExpander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.community}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}" Click="GroupCommunityOnButton_Click"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}" Click="GroupCommunityOffButton_Click"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language_group}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" 
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.GroupCommunityLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.GroupCommunityLanguageIndex}"
+                                    SelectionChanged="GroupCommunityComboBox_SelectionChanged"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.different_languages}" Visibility="{Binding ViewModel.GroupCommunityHintVisibility}" FontTypography="Caption" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </ui:CardExpander.Header>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.community.freecompany}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowFreecompany" IsChecked="{Binding ViewModel.ShowFreecompanyChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbFreecompany"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.FreecompanyLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.FreecompanyLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.FreecompanyColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.community.novice}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowNovice" IsChecked="{Binding ViewModel.ShowNoviceChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbNovice"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.NoviceLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.NoviceLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.NoviceColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ui:CardExpander>
+                    <ui:CardExpander>
+                        <ui:CardExpander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}" Click="GroupLinkshellOnButton_Click"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}" Click="GroupLinkshellOffButton_Click"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language_group}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" 
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.GroupLinkShellLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.GroupLinkShellLanguageIndex}"
+                                    SelectionChanged="GroupLinkShellComboBox_SelectionChanged"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.different_languages}" Visibility="{Binding ViewModel.GroupLinkShellHintVisibility}" FontTypography="Caption" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </ui:CardExpander.Header>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch1}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowLinkshell1" IsChecked="{Binding ViewModel.ShowLinkshell1Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell1"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.Linkshell1Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.Linkshell1LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell1Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch2}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowLinkshell2" IsChecked="{Binding ViewModel.ShowLinkshell2Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell2"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.Linkshell2Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.Linkshell2LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell2Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch3}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowLinkshell3" IsChecked="{Binding ViewModel.ShowLinkshell3Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell3"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.Linkshell3Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.Linkshell3LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell3Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch4}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowLinkshell4" IsChecked="{Binding ViewModel.ShowLinkshell4Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell4"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.Linkshell4Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.Linkshell4LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell4Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch5}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowLinkshell5" IsChecked="{Binding ViewModel.ShowLinkshell5Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell5"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.Linkshell5Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.Linkshell5LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell5Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch6}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowLinkshell6" IsChecked="{Binding ViewModel.ShowLinkshell6Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell6"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.Linkshell6Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.Linkshell6LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell6Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch7}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowLinkshell7" IsChecked="{Binding ViewModel.ShowLinkshell7Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell7"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.Linkshell7Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.Linkshell7LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell7Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.linkshell.ch8}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowLinkshell8" IsChecked="{Binding ViewModel.ShowLinkshell8Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbLinkshell8"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.Linkshell8Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.Linkshell8LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.Linkshell8Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ui:CardExpander>
+                    <ui:CardExpander>
+                        <ui:CardExpander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}" Click="GroupCWLinkshellOnButton_Click"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}" Click="GroupCWLinkshellOffButton_Click"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language_group}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" 
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.GroupCwLinkShellLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.GroupCwLinkShellLanguageIndex}"
+                                    SelectionChanged="GroupCwLinkShellComboBox_SelectionChanged"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.different_languages}" Visibility="{Binding ViewModel.GroupCwLinkShellHintVisibility}" FontTypography="Caption" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </ui:CardExpander.Header>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch1}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowCwLinkshell1" IsChecked="{Binding ViewModel.ShowCwLinkshell1Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell1"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.CwLinkshell1Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.CwLinkshell1LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell1Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch2}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowCwLinkshell2" IsChecked="{Binding ViewModel.ShowCwLinkshell2Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell2"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.CwLinkshell2Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.CwLinkshell2LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell2Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch3}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowCwLinkshell3" IsChecked="{Binding ViewModel.ShowCwLinkshell3Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell3"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.CwLinkshell3Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.CwLinkshell3LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell3Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch4}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowCwLinkshell4" IsChecked="{Binding ViewModel.ShowCwLinkshell4Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell4"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.CwLinkshell4Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.CwLinkshell4LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell4Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch5}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowCwLinkshell5" IsChecked="{Binding ViewModel.ShowCwLinkshell5Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell5"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.CwLinkshell5Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.CwLinkshell5LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell5Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch6}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowCwLinkshell6" IsChecked="{Binding ViewModel.ShowCwLinkshell6Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell6"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.CwLinkshell6Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.CwLinkshell6LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell6Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch7}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowCwLinkshell7" IsChecked="{Binding ViewModel.ShowCwLinkshell7Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell7"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.CwLinkshell7Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.CwLinkshell7LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell7Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.cw_linkshell.ch8}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowCwLinkshell8" IsChecked="{Binding ViewModel.ShowCwLinkshell8Channel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbCwLinkshell8"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.CwLinkshell8Language, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.CwLinkshell8LanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.CwLinkshell8Color, Mode=TwoWay}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ui:CardExpander>
+                    <ui:CardExpander>
+                        <ui:CardExpander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <Button Margin="32,0,0,0" Content="{ui:SymbolIcon Eye24}" Click="GroupSystemOnButton_Click"/>
+                                <Button Margin="16,0,0,0" Content="{ui:SymbolIcon EyeOff24}" Click="GroupSystemOffButton_Click"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language_group}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" 
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.GroupSystemLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.GroupSystemLanguageIndex}"
+                                    SelectionChanged="GroupSystemComboBox_SelectionChanged"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.different_languages}" Visibility="{Binding ViewModel.GroupSystemHintVisibility}" FontTypography="Caption" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </ui:CardExpander.Header>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.notice}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowGameNotice" IsChecked="{Binding ViewModel.ShowGameNoticeChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbGameNotice"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.GameNoticeLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.GameNoticeLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.GameNoticeColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.system}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowGameSystem" IsChecked="{Binding ViewModel.ShowGameSystemChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbGameSystem"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.GameSystemLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.GameSystemLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.GameSystemColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.error}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowGameError" IsChecked="{Binding ViewModel.ShowGameErrorChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbGameError"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.GameErrorLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.GameErrorLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.GameErrorColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.npc_dialog}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowNpcDialog" IsChecked="{Binding ViewModel.ShowNpcDialogChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbNpcDialog"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.NpcDialogLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.NpcDialogLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.NpcDialogColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.npc_announce}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowNpcAnnounce" IsChecked="{Binding ViewModel.ShowNpcAnnounceChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbNpcAnnounce"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.NpcAnnounceLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.NpcAnnounceLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.NpcAnnounceColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.boss_quotes}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowBossQuotes" IsChecked="{Binding ViewModel.ShowBossQuotesChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbBossQuotes"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.BossQuotesLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.BossQuotesLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.BossQuotesColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.recruitment}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowRecruitment" IsChecked="{Binding ViewModel.ShowRecruitmentChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbRecruitment"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.RecruitmentLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.RecruitmentLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.RecruitmentColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.gather}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowGather" IsChecked="{Binding ViewModel.ShowGatherChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbGather"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.GatherLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.GatherLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.GatherColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.market_sold}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowMarketSold" IsChecked="{Binding ViewModel.ShowMarketSoldChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbMarketSold"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.MarketSoldLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.MarketSoldLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.MarketSoldColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock Text="{i18n:StringLocalizer settings.channel.system.gil_receive}" FontTypography="BodyStrong" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch Margin="32,0,0,0" Name="tsShowGilReceive" IsChecked="{Binding ViewModel.ShowGilReceiveChannel}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.language}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <ComboBox Margin="16,0,0,0" Name="cbGilReceive"
+                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:ClientLanguage}}"
+                                    SelectedValue="{Binding ViewModel.GilReceiveLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
+                                    SelectedIndex="{Binding ViewModel.GilReceiveLanguageIndex}"/>
+                                <ui:TextBlock Margin="16,0,0,0" Text="{i18n:StringLocalizer settings.channel.color}" FontTypography="Body" VerticalAlignment="Center"/>
+                                <utils_ui:FF14ColorPickerButton Margin="16,0,0,0" Cursor="Hand" Width="20" Height="20" Color="{Binding ViewModel.GilReceiveColor, Mode=TwoWay}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ui:CardExpander>
+                </StackPanel>
+            </ui:Card>
+        </TabItem>
+    </TabControl>
+</Page>

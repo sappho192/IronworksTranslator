@@ -1,0 +1,25 @@
+﻿<Application
+    x:Class="IronworksTranslator.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Exit="OnExit"
+    Startup="OnStartup">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemesDictionary Theme="Light" />
+                <ui:ControlsDictionary />
+            </ResourceDictionary.MergedDictionaries>
+            <FontFamily x:Key="KoPubWorldDotumLight">Fonts/KoPubWorld Dotum Light.ttf#KoPubWorld Dotum</FontFamily>
+            <FontFamily x:Key="KoPubWorldDotumBold">Fonts/KoPubWorld Dotum Bold.ttf#KoPubWorld Dotum</FontFamily>
+            <FontFamily x:Key="KoPubWorldDotum">Fonts/KoPubWorld Dotum Medium.ttf#KoPubWorld Dotum</FontFamily>
+            <Style x:Key="PageAll" TargetType="{x:Type Page}">
+                <Setter Property="FontFamily" Value="{StaticResource KoPubWorldDotum}" />
+            </Style>
+            <Style x:Key="WindowAll" TargetType="{x:Type Window}">
+                <Setter Property="FontFamily" Value="{StaticResource KoPubWorldDotum}" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

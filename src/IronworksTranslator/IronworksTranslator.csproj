@@ -1,0 +1,81 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="icon.ico" />
+    <Content Include="WatchDogMain.exe">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DeepL.net" Version="1.9.0" />
+    <PackageReference Include="Egorozh.ColorPicker.WPF" Version="5.0.0" />
+    <PackageReference Include="Egorozh.ColorPicker.WPF.Dialog" Version="5.0.0" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.64" />
+    <PackageReference Include="Lepo.i18n.DependencyInjection" Version="2.0.0" />
+    <PackageReference Include="Lepo.i18n.Wpf" Version="2.0.0" />
+    <PackageReference Include="MdXaml" Version="1.27.0" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.122" />
+    <PackageReference Include="MrAdvice" Version="2.16.0" />
+    <PackageReference Include="ObservableCollections" Version="2.2.2" />
+    <PackageReference Include="Octokit" Version="13.0.1" />
+    <PackageReference Include="PuppeteerSharp" Version="19.0.1" />
+    <PackageReference Include="RelaxVersioner" Version="3.4.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Serilog" Version="4.0.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="Sharlayan.Lite" Version="8.0.1" />
+    <PackageReference Include="System.Text.Json" Version="8.0.4" />
+    <PackageReference Include="WPF-UI" Version="3.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.0" />
+    <PackageReference Include="WpfScreenHelper" Version="2.1.1" />
+    <PackageReference Include="YamlDotNet" Version="16.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\app-icon.png" />
+    <None Remove="Fonts\KoPubWorld Dotum Bold.ttf" />
+    <None Remove="Fonts\KoPubWorld Dotum Light.ttf" />
+    <None Remove="Fonts\KoPubWorld Dotum Medium.ttf" />
+    <None Remove="Resources\Strings\en-US.yaml" />
+    <None Remove="Resources\Strings\ko-KR.yaml" />
+    <None Remove="WatchDogMain.exe" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Strings\en-US.yaml">
+      <CopyToOutputDirectory></CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Strings\ko-KR.yaml">
+      <CopyToOutputDirectory></CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\app-icon.png" />
+    <Resource Include="Fonts\KoPubWorld Dotum Bold.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Fonts\KoPubWorld Dotum Light.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Fonts\KoPubWorld Dotum Medium.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+</Project>
