@@ -30,6 +30,7 @@ main.update.current_version: "Current version: "
 main.update.latest_version: "New version: "
 
 dashboard.game.not_found: "Please launch the FFXIV game first."
+dashboard.tos.title: "Terms of service & Privacy policy"
 dashboard.tos.file.notfound: "Couldn't find the TOS file. Please report it to the developer."
 dashboard.tos.file.notfound.title: "No file?!"
 dashboard.translator.enabled: "Translator is enabled"
