@@ -92,8 +92,8 @@ namespace IronworksTranslator.ViewModels.Pages
                 Title = Localizer.GetString("dashboard.tos.title"),
                 Content = scrollViewer,
                 IsPrimaryButtonEnabled = true,
-                PrimaryButtonText = Localizer.GetString("yes"),
-                CloseButtonText = Localizer.GetString("no")
+                PrimaryButtonText = Localizer.GetString("accept"),
+                CloseButtonText = Localizer.GetString("decline")
             };
             var tosResult = tosMessageBox.ShowDialogAsync();
             if (tosResult.Result == Wpf.Ui.Controls.MessageBoxResult.Primary)
@@ -270,7 +270,7 @@ namespace IronworksTranslator.ViewModels.Pages
                 Content = scrollViewer,
                 IsPrimaryButtonEnabled = true,
                 PrimaryButtonText = Localizer.GetString("yes"),
-                CloseButtonText = Localizer.GetString("no")
+                CloseButtonText = Localizer.GetString("no"),
             };
             var result = updateMessageBox.ShowDialogAsync();
             if (result.Result == Wpf.Ui.Controls.MessageBoxResult.Primary)

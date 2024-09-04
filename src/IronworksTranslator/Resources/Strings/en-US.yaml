@@ -9,6 +9,8 @@ error: "Error"
 
 yes: "Yes"
 no: "No"
+accept: "accept"
+decline: "decline"
 huh: "Huh...?!"
 
 version: "Version"
