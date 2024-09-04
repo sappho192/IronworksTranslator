@@ -62,7 +62,7 @@ This Privacy Policy sets forth the collection and use of personal information in
 
 3.3. Shared log files are deleted immediately after the issue is resolved.
 
-3.4. The chat data collected in Section 1.3 will be kept private on a semi-permanent basis unless you request deletion.
+3.4. The chat data collected in Section 1.3 will be kept private in developer's data server on a semi-permanent basis unless you request deletion.
 
 ## **4. Procedures and Methods for Destroying Personal Information**
 
