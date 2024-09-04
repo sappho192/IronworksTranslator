@@ -87,7 +87,8 @@ namespace IronworksTranslator.ViewModels.Windows
                     ChatLogItem decodedChat = chat.Bytes.DecodeAutoTranslate();
 
                     if (code == ChatCode.Recruitment || code == ChatCode.System || code == ChatCode.Error ||
-                        code == ChatCode.Notice || code == ChatCode.Emote || code == ChatCode.MarketSold)
+                        code == ChatCode.Notice || code == ChatCode.Emote || code == ChatCode.MarketSold ||
+                        code == ChatCode.Echo)
                     {
                         TranslationText text;
                         if (ContainsNativeLanguage(decodedChat.Line))
@@ -234,7 +235,7 @@ namespace IronworksTranslator.ViewModels.Windows
         private static string GenerateTranslationText(TranslationText text, string author)
         {
             var result = new StringBuilder();
-            if (author != null || author.Equals(""))
+            if (author != null && !author.Equals(""))
             {
                 result.Append($"{author}: ");
             }
