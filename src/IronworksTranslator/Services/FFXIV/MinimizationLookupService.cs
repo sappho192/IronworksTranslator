@@ -1,5 +1,6 @@
 ﻿using IronworksTranslator.Views.Windows;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Wpf.Ui;
@@ -30,11 +31,16 @@ namespace IronworksTranslator.Services.FFXIV
             Application.Current.Dispatcher.Invoke(() =>
             {
                 var chatWindow = App.GetService<ChatWindow>();
+                var dialogueWindow = App.GetService<DialogueWindow>();
                 if (ApplicationIsActivated() || AppWindowIsFocused())
                 {
                     if (chatWindow.WindowState != WindowState.Normal)
                     {
                         chatWindow.WindowState = WindowState.Normal;
+                    }
+                    if (dialogueWindow.WindowState != WindowState.Normal)
+                    {
+                        dialogueWindow.WindowState = WindowState.Normal;
                     }
                 }
                 else
@@ -43,6 +49,10 @@ namespace IronworksTranslator.Services.FFXIV
                     {
                         chatWindow.WindowState = WindowState.Minimized;
                     }
+                    if (dialogueWindow.WindowState != WindowState.Minimized)
+                    {
+                        dialogueWindow.WindowState = WindowState.Minimized;
+                    }
                 }
             });
         }
@@ -50,8 +60,9 @@ namespace IronworksTranslator.Services.FFXIV
         private static bool AppWindowIsFocused()
         {
             var chatWindow = App.GetService<ChatWindow>();
+            var dialogueWindow = App.GetService<DialogueWindow>();
             var mainWindow = App.GetServices<INavigationWindow>().OfType<MainWindow>().Single();
-            if (chatWindow.IsActive || mainWindow.IsActive)
+            if (chatWindow.IsActive || mainWindow.IsActive || dialogueWindow.IsActive)
             {
                 return true;
             }
@@ -81,9 +92,16 @@ namespace IronworksTranslator.Services.FFXIV
 
             var chatLookupService = App.GetServices<IHostedService>().OfType<ChatLookupService>().Single();
             var procId = chatLookupService.GameProcessID;
-            GetWindowThreadProcessId(activatedHandle, out int activeProcId);
-
-            return activeProcId == procId;
+            var result = GetWindowThreadProcessId(activatedHandle, out int activeProcId);
+            if (result == 0)
+            {
+                return activeProcId == procId;
+            }
+            else
+            {
+                Log.Error("GetWindowThreadProcessId failed");
+                return false;
+            }
         }
 
 
