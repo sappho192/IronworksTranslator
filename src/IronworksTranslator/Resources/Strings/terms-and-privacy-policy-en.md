@@ -42,25 +42,37 @@ This Privacy Policy sets forth the collection and use of personal information in
 
 1.1. This Program stores detailed operational records in log files for performance and quality improvement purposes.
 
-1.2. Examples of collected information include interactions with UI (buttons, tabs, etc.), changes in settings, and chat history.
+1.2. Examples of information collected in clause 1.1 include interactions with the UI (buttons, tabs, etc.), changes in settings, chat history, etc.
+
+1.3. If you wish, you may select and send certain chat history to developers to improve the quality of translations.
+
+1.4. While there is no explicit personal information (e.g., IP address, username, etc.) collected in Section 1.3, if the chat content to be transmitted contains your personal information, you consent to its inclusion.
 
 ## **2. Purpose of Personal Information Collection and Use**
 
-2.1. The collected information is used to improve the Program's performance, fix errors, and enhance user experience.
+2.1. The information collected in clause 1.1 is used to improve the performance of the Program, fix errors, and enhance the user experience.
+
+2.2. Chat data collected in clause 1.3 may be used to improve the quality of translation models we develop in-house.
 
 ## **3. Retention and Use Period of Personal Information**
 
-3.1. Log files are stored on the user's device and are NEVER automatically transmitted to the developer.
+3.1. The log files specified in Section 1.1 are always stored on your device and are never automatically sent to the developer.
 
 3.2. Only when a user reports Program errors or malfunctions to the developer, the developer may request sharing of log files for reference. Users can refuse to share log files.
 
 3.3. Shared log files are deleted immediately after the issue is resolved.
+
+3.4. The chat data collected in Section 1.3 will be kept private on a semi-permanent basis unless you request deletion.
 
 ## **4. Procedures and Methods for Destroying Personal Information**
 
 4.1. Users can delete log files at any time in the Program settings.
 
 4.2. Log files shared with the developer are permanently deleted immediately after the issue is resolved.
+
+4.3. If you wish to have the Chat Data transmitted under Section 1.3 deleted, you may request that Developer delete it, outlining the date and content of the chat in question.
+
+4.4. Developer may review the Chat Data transmitted under Section 1.3 from time to time and de-identify and store any potentially sensitive personal information contained in the Chat Data.
 
 ## **5. Changes to the Privacy Policy**
 
