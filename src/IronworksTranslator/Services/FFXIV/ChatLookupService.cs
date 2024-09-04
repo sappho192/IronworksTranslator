@@ -59,6 +59,8 @@ namespace IronworksTranslator.Services.FFXIV
                 StopAsync(CancellationToken.None);
                 CurrentMemoryHandler?.Dispose();
                 Attached = false;
+                App.GetService<DashboardViewModel>().IsTranslatorActive = Attached;
+                App.GetService<DashboardViewModel>().InitTranslatorToggle();
             }
         }
 
@@ -66,6 +68,7 @@ namespace IronworksTranslator.Services.FFXIV
         {
             GC.SuppressFinalize(this);
             chatTimer?.Dispose();
+            dialogueTimer?.Dispose();
         }
 
         public Task StartAsync(CancellationToken stoppingToken)
@@ -165,7 +168,8 @@ namespace IronworksTranslator.Services.FFXIV
             }
             catch (System.ComponentModel.Win32Exception)
             {
-                MessageBox.Show(Localizer.GetString("app.exception.process.lost"));
+                //MessageBox.Show(Localizer.GetString("app.exception.process.lost"));
+                Log.Information("Process lost");
                 Destruct();
             }
             return "";
@@ -229,6 +233,7 @@ namespace IronworksTranslator.Services.FFXIV
         public Task StopAsync(CancellationToken cancellationToken)
         {
             chatTimer?.Change(Timeout.Infinite, 0);
+            dialogueTimer?.Change(Timeout.Infinite, 0);
             return Task.CompletedTask;
         }
 #pragma warning restore CS8602
