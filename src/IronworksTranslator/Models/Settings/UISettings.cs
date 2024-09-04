@@ -19,6 +19,10 @@ namespace IronworksTranslator.Models.Settings
         }
 
         [ObservableProperty]
+        [property: YamlMember(Alias = "is_tos_displayed")]
+        private bool _isTosDisplayed;
+
+        [ObservableProperty]
         [property: YamlMember(Alias = "theme")]
         private ApplicationTheme _theme;
 
@@ -69,6 +73,12 @@ namespace IronworksTranslator.Models.Settings
         [ObservableProperty]
         [property: YamlMember(Alias = "dialogue_window_screen")]
         private string? _dialogueWindowScreen;
+
+        [SaveSettingsOnChange]
+        partial void OnIsTosDisplayedChanged(bool value)
+        {
+            Log.Information($"User have agreed to the terms of service.");
+        }
 
         [SaveSettingsOnChange]
         partial void OnThemeChanged(ApplicationTheme value)

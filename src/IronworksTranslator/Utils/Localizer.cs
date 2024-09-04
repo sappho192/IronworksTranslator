@@ -1,4 +1,5 @@
 ﻿using Lepo.i18n;
+using System.Globalization;
 
 namespace IronworksTranslator.Utils
 {
@@ -17,6 +18,12 @@ namespace IronworksTranslator.Utils
         {
             var localizationProvider = LocalizationProviderFactory.GetInstance();
             localizationProvider.SetCulture(new(languageCode));
+        }
+
+        public static CultureInfo GetCulture()
+        {
+            var localizationProvider = LocalizationProviderFactory.GetInstance();
+            return localizationProvider.GetCulture();
         }
 
         public static string GetSpecificString(string key, string languageCode)

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Octokit;
 using Serilog;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Windows.Controls;
@@ -43,6 +44,64 @@ namespace IronworksTranslator.ViewModels.Pages
         {
             // run CheckUpdate() in different thread
             System.Windows.Application.Current.Dispatcher.InvokeAsync(CheckUpdate);
+            if (!IronworksSettings.Instance.UiSettings.IsTosDisplayed)
+            {
+                System.Windows.Application.Current.Dispatcher.InvokeAsync(ShowTosDialog);
+            }
+        }
+
+        [TraceMethod]
+        private void ShowTosDialog()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var cultureInfo = Localizer.GetCulture();
+            string ns = "IronworksTranslator.Resources.Strings";
+            string tosFilename = cultureInfo.Name switch
+            {
+                "ko-KR" => $"{ns}.terms-and-privacy-policy-ko.md",
+                _ => $"{ns}.terms-and-privacy-policy-en.md",
+            };
+            using var stream = assembly.GetManifestResourceStream(tosFilename);
+            if (stream == null)
+            {
+                Log.Fatal("Failed to load TOS file: {TOSFilename}", tosFilename);
+                MessageBox.Show(Localizer.GetString("dashboard.tos.file.notfound"),
+                    Localizer.GetString("dashboard.tos.file.notfound.title"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                App.RequestShutdown();
+            }
+            using var reader = new StreamReader(stream);
+            string tos = reader.ReadToEnd();
+
+            var markdownEngine = new Markdown();
+            FlowDocument document = markdownEngine.Transform(tos);
+            document.FontFamily = new System.Windows.Media.FontFamily("sans-serif");
+            var scrollViewer = new ScrollViewer
+            {
+                Content = new RichTextBox
+                {
+                    Document = document,
+                    IsReadOnly = true,
+                },
+            };
+            var tosMessageBox = new Wpf.Ui.Controls.MessageBox
+            {
+                Title = Localizer.GetString("dashboard.tos.title"),
+                Content = scrollViewer,
+                IsPrimaryButtonEnabled = true,
+                PrimaryButtonText = Localizer.GetString("yes"),
+                CloseButtonText = Localizer.GetString("no")
+            };
+            var tosResult = tosMessageBox.ShowDialogAsync();
+            if (tosResult.Result == Wpf.Ui.Controls.MessageBoxResult.Primary)
+            {
+                IronworksSettings.Instance.UiSettings.IsTosDisplayed = true;
+            }
+            else
+            {
+                App.RequestShutdown();
+            }
         }
 
         [TraceMethod]

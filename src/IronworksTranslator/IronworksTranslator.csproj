@@ -53,6 +53,8 @@
     <None Remove="Fonts\KoPubWorld Dotum Medium.ttf" />
     <None Remove="Resources\Strings\en-US.yaml" />
     <None Remove="Resources\Strings\ko-KR.yaml" />
+    <None Remove="Resources\Strings\terms-and-privacy-policy-en.md" />
+    <None Remove="Resources\Strings\terms-and-privacy-policy-ko.md" />
     <None Remove="WatchDogMain.exe" />
   </ItemGroup>
 
@@ -63,6 +65,8 @@
     <EmbeddedResource Include="Resources\Strings\ko-KR.yaml">
       <CopyToOutputDirectory></CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Strings\terms-and-privacy-policy-en.md" />
+    <EmbeddedResource Include="Resources\Strings\terms-and-privacy-policy-ko.md" />
   </ItemGroup>
 
   <ItemGroup>

@@ -26,6 +26,7 @@ namespace IronworksTranslator.Models.Settings
             {
                 UiSettings = new UISettings
                 {
+                    IsTosDisplayed = false,
                     Theme = ApplicationTheme.Light,
                     AppLanguage = currentLocale switch
                     {
