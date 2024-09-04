@@ -182,7 +182,9 @@ namespace IronworksTranslator.ViewModels.Pages
                     Content = Localizer.GetString("settings.translator.engine.apikey.exists"),
                     CloseButtonText = Localizer.GetString("huh")
                 };
+#pragma warning disable CS4014
                 errorDialog.ShowDialogAsync();
+#pragma warning restore CS4014
                 return;
             }
 

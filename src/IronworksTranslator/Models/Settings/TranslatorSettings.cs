@@ -5,7 +5,6 @@ using Serilog;
 using YamlDotNet.Serialization;
 using IronworksTranslator.Utils;
 using IronworksTranslator.ViewModels.Pages;
-using IronworksTranslator.Utils.Translator;
 using ObservableCollections;
 
 namespace IronworksTranslator.Models.Settings
@@ -20,8 +19,15 @@ namespace IronworksTranslator.Models.Settings
             Messenger.Register<PropertyChangedMessage<bool>>(this, OnBoolMessage);
         }
 
+        [TraceMethod]
         public void InitializeCollectionListeners()
         {
+            if (DeeplApiKeys == null)
+            {
+                Log.Fatal("DeeplApiKeys is null");
+                MessageBox.Show(Localizer.GetString("app.exception.description"));
+                return;
+            }
             DeeplApiKeys.CollectionChanged += DeeplApiKeys_CollectionChanged;
         }
 

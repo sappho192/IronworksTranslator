@@ -25,12 +25,14 @@ namespace IronworksTranslator.Utils.Cloudflare
             return response;
         }
 
+#pragma warning disable CS8602
         private bool IsCloudflareWorkerError(HttpResponseMessage response)
         {
             // Check if the response contains Cloudflare-specific headers
             return response.Headers.Contains("CF-RAY") &&
                    response.Content.Headers.ContentType.MediaType == "text/html";
         }
+#pragma warning restore CS8602
 
         private async Task<int> GetErrorCodeFromResponse(HttpResponseMessage response)
         {

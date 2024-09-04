@@ -445,15 +445,20 @@ namespace IronworksTranslator.ViewModels.Windows
             paragraph.Inlines.Add(new Run(newText));
         }
 
-        [TraceMethod]
         private async void Report_Click(object sender, RoutedEventArgs e)
+        {
+            await DoReport(sender);
+        }
+
+        [TraceMethod]
+        private async Task DoReport(object sender)
         {
             // Retrieve the Paragraph object from the Tag property of the MenuItem
             if (((MenuItem)sender).Tag is TranslationParagraph tParagraph)
             {
                 //string paragraphText = GetTextFromParagraph(tParagraph.Paragraph);
                 //MessageBox.Show($"Custom action triggered for paragraph: {paragraphText}");
-                
+
                 var mainWindow = App.GetServices<INavigationWindow>().OfType<MainWindow>().Single();
                 // If the main window is minimized or hidden, show it
                 if (mainWindow.WindowState == WindowState.Minimized || mainWindow.Visibility != Visibility.Visible)
@@ -555,7 +560,7 @@ namespace IronworksTranslator.ViewModels.Windows
                     timestamp = DateTime.UtcNow,
                     comment = comment
                 };
-                BiggsWorker worker = new ();
+                BiggsWorker worker = new();
                 await worker.Insert(body);
             }
         }

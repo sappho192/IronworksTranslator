@@ -102,6 +102,7 @@ namespace IronworksTranslator.Views.Windows
             //ViewModel.AddRandomMessage("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
         }
 
+#pragma warning disable CS8602
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             double windowTop = IronworksSettings.Instance.UiSettings.ChatWindowTop;
@@ -117,5 +118,6 @@ namespace IronworksTranslator.Views.Windows
                 mainWindow.Top = windowTop;
             }
         }
+#pragma warning restore CS8602
     }
 }

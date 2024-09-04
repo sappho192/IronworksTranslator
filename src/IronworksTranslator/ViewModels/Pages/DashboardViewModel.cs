@@ -6,6 +6,7 @@ using MdXaml;
 using Microsoft.Extensions.Hosting;
 using Octokit;
 using Serilog;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -70,6 +71,7 @@ namespace IronworksTranslator.ViewModels.Pages
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 App.RequestShutdown();
+                return;
             }
             using var reader = new StreamReader(stream);
             string tos = reader.ReadToEnd();
@@ -96,7 +98,9 @@ namespace IronworksTranslator.ViewModels.Pages
             var tosResult = tosMessageBox.ShowDialogAsync();
             if (tosResult.Result == Wpf.Ui.Controls.MessageBoxResult.Primary)
             {
+#pragma warning disable CS8602
                 IronworksSettings.Instance.UiSettings.IsTosDisplayed = true;
+#pragma warning restore CS8602
             }
             else
             {
@@ -217,6 +221,13 @@ namespace IronworksTranslator.ViewModels.Pages
             var latestRelease = githubClient.Repository.Release.GetLatest("sappho192", "ironworkstranslator").Result;
             var latestVersion = new Version(latestRelease.TagName);
 
+            if (currentVersion == null)
+            {
+                Log.Fatal("Failed to get latest version");
+                MessageBox.Show("app.exception.description");
+                App.RequestShutdown();
+                return;
+            }
             if (currentVersion.CompareTo(latestVersion) >= 0)
             {
                 Log.Information("IronworksTranslator is up to date");
@@ -231,6 +242,7 @@ namespace IronworksTranslator.ViewModels.Pages
             }
         }
 
+#pragma warning disable CS8602
         private static void AskToUpdate(Version? currentVersion, Release latestRelease, Version latestVersion)
         {
             var sb = new StringBuilder();
@@ -272,5 +284,6 @@ namespace IronworksTranslator.ViewModels.Pages
                 Process.Start(ps);
             }
         }
+#pragma warning restore CS8602
     }
 }

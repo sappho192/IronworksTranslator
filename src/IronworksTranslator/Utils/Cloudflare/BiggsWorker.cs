@@ -10,7 +10,7 @@ namespace IronworksTranslator.Utils.Cloudflare
         private readonly HttpClient _httpClient;
         private readonly CloudflareWorkerHttpClient _cloudflareClient;
         private const string _pointer = "https://hermes.sapphosound.com/database.json";
-        private readonly BiggsEndPoint _endpoint;
+        private readonly BiggsEndPoint? _endpoint;
 
         public BiggsWorker()
         {
@@ -21,14 +21,24 @@ namespace IronworksTranslator.Utils.Cloudflare
             var response = _httpClient.GetAsync(_pointer).GetAwaiter().GetResult();
             var responstStr = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
             var endpointList = JsonSerializer.Deserialize<BiggsEndPointList>(responstStr);
+            if (endpointList == null)
+            {
+                Log.Fatal("Failed to get endpoint list from the hermes.");
+                MessageBox.Show(Localizer.GetString("app.exception.description"));
+                App.RequestShutdown();
+                return;
+            }
             _endpoint = endpointList.endpoints.First(endpoint => endpoint.name.Equals("current"));
         }
 
+        [TraceMethod]
         public async Task Insert(BiggsBody body)
         {
             try
             {
+#pragma warning disable CS8602
                 var response = await _cloudflareClient.SendAsync(new HttpRequestMessage(HttpMethod.Post, $"{_endpoint.url}/insert")
+#pragma warning restore CS8602
                 {
                     Content = new StringContent(JsonSerializer.Serialize(body), System.Text.Encoding.UTF8, "application/json")
                 });
