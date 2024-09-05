@@ -1,9 +1,9 @@
-﻿using IronworksTranslator.Models;
-using IronworksTranslator.Models.Enums;
+﻿using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Utils.Translators;
 using DeepL;
 using IronworksTranslator.Models.Settings;
 using Serilog;
+using IronworksTranslator.Models.Translator;
 
 namespace IronworksTranslator.Utils.Translator
 {

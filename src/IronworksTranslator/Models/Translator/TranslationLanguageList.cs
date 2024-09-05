@@ -1,4 +1,4 @@
-﻿namespace IronworksTranslator.Models
+﻿namespace IronworksTranslator.Models.Translator
 {
     public static class TranslationLanguageList
     {

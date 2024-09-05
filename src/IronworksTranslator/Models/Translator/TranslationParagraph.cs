@@ -1,6 +1,6 @@
 ﻿using System.Windows.Documents;
 
-namespace IronworksTranslator.Models
+namespace IronworksTranslator.Models.Translator
 {
     public class TranslationParagraph(Paragraph paragraph, TranslationText text)
     {

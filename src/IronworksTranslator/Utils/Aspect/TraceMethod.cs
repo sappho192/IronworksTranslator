@@ -1,7 +1,7 @@
 ﻿using ArxOne.MrAdvice.Advice;
 using Serilog;
 
-namespace IronworksTranslator.Utils
+namespace IronworksTranslator.Utils.Aspect
 {
     [AttributeUsage(AttributeTargets.Method)]
     internal class TraceMethod : Attribute, IMethodAdvice

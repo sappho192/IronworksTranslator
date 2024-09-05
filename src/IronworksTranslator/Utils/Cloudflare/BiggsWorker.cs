@@ -1,4 +1,4 @@
-﻿using IronworksTranslator.Models;
+﻿using IronworksTranslator.Models.Cloudflare;
 using Serilog;
 using System.Net.Http;
 using System.Text.Json;

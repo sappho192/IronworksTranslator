@@ -1,13 +1,13 @@
 ﻿using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models;
 using IronworksTranslator.Models.Settings;
-using IronworksTranslator.Utils;
 using IronworksTranslator.ViewModels.Windows;
 using Serilog;
 using System.Text.RegularExpressions;
 using System.Windows.Threading;
 using WpfScreenHelper;
 using IronworksTranslator.Utils.Translator;
+using IronworksTranslator.Utils.UI;
 
 namespace IronworksTranslator.Views.Windows
 {

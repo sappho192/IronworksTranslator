@@ -1,5 +1,5 @@
 ﻿using IronworksTranslator.Models.Settings;
-using IronworksTranslator.Utils;
+using IronworksTranslator.Utils.UI;
 using IronworksTranslator.ViewModels.Windows;
 using System.Windows.Threading;
 using WpfScreenHelper;

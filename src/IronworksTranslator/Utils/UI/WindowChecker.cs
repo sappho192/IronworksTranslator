@@ -1,4 +1,4 @@
-﻿namespace IronworksTranslator.Utils
+﻿namespace IronworksTranslator.Utils.UI
 {
     public static class WindowChecker
     {

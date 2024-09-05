@@ -1,6 +1,6 @@
 ﻿using IronworksTranslator.Models.Enums;
 
-namespace IronworksTranslator.Models
+namespace IronworksTranslator.Models.Translator
 {
     public class TranslationLanguage
     {

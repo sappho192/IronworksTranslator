@@ -2,7 +2,7 @@
 using IronworksTranslator.Utils.Translators;
 using Serilog;
 using HtmlAgilityPack;
-using IronworksTranslator.Models;
+using IronworksTranslator.Models.Translator;
 
 namespace IronworksTranslator.Utils.Translator
 {
