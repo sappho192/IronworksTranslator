@@ -4,7 +4,6 @@ using IronworksTranslator.Helpers.Extensions;
 using IronworksTranslator.Models;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
-using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Cloudflare;
 using IronworksTranslator.Utils.Translator;
@@ -13,7 +12,6 @@ using IronworksTranslator.Views.Windows;
 using Serilog;
 using Sharlayan.Core;
 using System.Collections.Frozen;
-using System.Collections.Specialized;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -111,6 +109,7 @@ namespace IronworksTranslator.ViewModels.Windows
                         {
                             AddMessage(text, channel);
                         });
+                        Diet();
                     }
                     else
                     {
@@ -142,6 +141,7 @@ namespace IronworksTranslator.ViewModels.Windows
                             {
                                 AddMessage(text, channel, author);
                             });
+                            Diet();
                         }
                         else
                         {// Push to DialogueWindow
@@ -413,27 +413,13 @@ namespace IronworksTranslator.ViewModels.Windows
             }
         }
 
-        private static int blockIndex = 0;
         public void Diet()
         {
-            var blocks = ChatDocument.Blocks.Take(1).ToFrozenSet();
+            if (ChatDocument.Blocks.Count < 500) return;
+            var blocks = ChatDocument.Blocks.Take(50).ToFrozenSet();
             foreach (var item in blocks)
             {
                 ChatDocument.Blocks.Remove(item);
-            }
-
-            AddRandomMessage($"Lorem ipsum dolor sit amet, consectetur adipiscing elit. ({blockIndex++})");
-        }
-
-        private static int count = 1;
-        private void MenuItemReplace_Click(object sender, RoutedEventArgs e)
-        {
-            // Retrieve the Paragraph object from the Tag property of the MenuItem
-            if (((MenuItem)sender).Tag is TranslationParagraph tParagraph)
-            {
-                string newMessage = $"replaced! ({count++}), raw: {tParagraph.Text.OriginalText}";
-                ReplaceTextInParagraph(tParagraph.Paragraph, newMessage);
-                //MessageBox.Show($"Custom action triggered for paragraph: {newMessage}");
             }
         }
 
