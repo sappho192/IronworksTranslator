@@ -25,7 +25,11 @@ namespace IronworksTranslator.Views.Pages
             ViewModel.CheckCommunityIntegrity();
             ViewModel.CheckLinkShellIntegrity();
             ViewModel.CheckCwLinkShellIntegrity();
-            viewModel.CheckSystemIntegrity();
+            ViewModel.CheckSystemIntegrity();
+            if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.Papago)
+            {
+                ibPapagoTooltip.Visibility = Visibility.Visible;
+            }
         }
 
         private void ChatFontSize_ValueChanged(object sender, RoutedEventArgs e)
@@ -272,9 +276,20 @@ namespace IronworksTranslator.Views.Pages
                     comboBox.SelectedIndex = 0;
                     comboBox.SelectedItem = (Models.Enums.TranslatorEngine)0;
                 }
-            } else if (selectedItem == Models.Enums.TranslatorEngine.JESC_Ja_Ko)
+            } 
+            else if (selectedItem == Models.Enums.TranslatorEngine.JESC_Ja_Ko)
             {
                 System.Windows.MessageBox.Show(Localizer.GetString("settings.translator.engine.not_implemented"));
+            }
+
+            if (ibPapagoTooltip == null) return;
+            if (selectedItem == Models.Enums.TranslatorEngine.Papago)
+            {
+                ibPapagoTooltip.Visibility = Visibility.Visible;
+            } 
+            else
+            {
+                ibPapagoTooltip.Visibility = Visibility.Hidden;
             }
         }
     }
