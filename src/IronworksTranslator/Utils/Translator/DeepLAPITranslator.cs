@@ -15,7 +15,8 @@ namespace IronworksTranslator.Utils.Translator
             TranslationLanguageCode.German, TranslationLanguageCode.French,
             TranslationLanguageCode.Korean
         ];
-        public override TranslationLanguageCode[] SupportedLanguages => translationLanguages;
+        public override TranslationLanguageCode[] SupportedSourceLanguages => translationLanguages;
+        public override TranslationLanguageCode[] SupportedTargetLanguages => translationLanguages;
 
         private DeepL.Translator? translator;
 
@@ -31,13 +32,15 @@ namespace IronworksTranslator.Utils.Translator
                 }
             }
 
-            if (!SupportedLanguages.Contains(sourceLanguage))
+            if (!SupportedSourceLanguages.Contains(sourceLanguage))
             {
-                throw new TranslatorException("Unsupported sourceLanguage");
+                Log.Error("Unsupported sourceLanguage");
+                return input;
             }
-            if (!SupportedLanguages.Contains(targetLanguage))
+            if (!SupportedTargetLanguages.Contains(targetLanguage))
             {
-                throw new TranslatorException("Unsupported targetLanguage");
+                Log.Error("Unsupported targetLanguage");
+                return input;
             }
 
             var translateTask = Task.Run(async () => await RequestTranslate(input, sourceLanguage, targetLanguage));

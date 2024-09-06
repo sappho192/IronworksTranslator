@@ -14,19 +14,22 @@ namespace IronworksTranslator.Utils.Translator
             TranslationLanguageCode.German, TranslationLanguageCode.French,
             TranslationLanguageCode.Korean
         ];
-        public override TranslationLanguageCode[] SupportedLanguages => translationLanguages;
+        public override TranslationLanguageCode[] SupportedSourceLanguages => translationLanguages;
+        public override TranslationLanguageCode[] SupportedTargetLanguages => translationLanguages;
         private readonly object lockObj = new();
 
         [TraceMethod]
         public override string Translate(string sentence, TranslationLanguageCode sourceLanguage, TranslationLanguageCode targetLanguage)
         {
-            if (!SupportedLanguages.Contains(sourceLanguage))
+            if (!SupportedSourceLanguages.Contains(sourceLanguage))
             {
-                throw new TranslatorException("Unsupported sourceLanguage");
+                Log.Error("Unsupported sourceLanguage");
+                return sentence;
             }
-            if (!SupportedLanguages.Contains(targetLanguage))
+            if (!SupportedTargetLanguages.Contains(targetLanguage))
             {
-                throw new TranslatorException("Unsupported targetLanguage");
+                Log.Error("Unsupported targetLanguage");
+                return sentence;
             }
 
             string? sk = GetLanguageCode(sourceLanguage);

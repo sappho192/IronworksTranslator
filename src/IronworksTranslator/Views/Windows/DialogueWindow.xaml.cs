@@ -128,7 +128,7 @@ namespace IronworksTranslator.Views.Windows
                             (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
                         );
                     break;
-                case TranslatorEngine.JESC_Ja_Ko:
+                case TranslatorEngine.Ironworks_Ja_Ko:
                     result = input;
                     break;
                 default:

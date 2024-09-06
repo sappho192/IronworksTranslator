@@ -11,6 +11,34 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="data\unidic-mecab-2.1.2_bin\AUTHORS">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\unidic-mecab-2.1.2_bin\BSD">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\unidic-mecab-2.1.2_bin\char.bin">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\unidic-mecab-2.1.2_bin\dicrc">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\unidic-mecab-2.1.2_bin\matrix.bin">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\unidic-mecab-2.1.2_bin\sys.dic">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\unidic-mecab-2.1.2_bin\unk.dic">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="icon.ico" />
     <Content Include="WatchDogMain.exe">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -20,6 +48,7 @@
 
   <ItemGroup>
     <PackageReference Include="DeepL.net" Version="1.9.0" />
+    <PackageReference Include="EDMTranslator" Version="1.2.1" />
     <PackageReference Include="Egorozh.ColorPicker.WPF" Version="5.0.0" />
     <PackageReference Include="Egorozh.ColorPicker.WPF.Dialog" Version="5.0.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.64" />
@@ -39,6 +68,7 @@
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
     <PackageReference Include="Sharlayan.Lite" Version="8.0.1" />
     <PackageReference Include="System.Text.Json" Version="8.0.4" />
+    <PackageReference Include="Tokenizers.DotNet.runtime.win" Version="1.0.5" />
     <PackageReference Include="WPF-UI" Version="3.0.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.0" />
@@ -48,6 +78,13 @@
 
   <ItemGroup>
     <None Remove="Assets\app-icon.png" />
+    <None Remove="data\unidic-mecab-2.1.2_bin\AUTHORS" />
+    <None Remove="data\unidic-mecab-2.1.2_bin\BSD" />
+    <None Remove="data\unidic-mecab-2.1.2_bin\char.bin" />
+    <None Remove="data\unidic-mecab-2.1.2_bin\dicrc" />
+    <None Remove="data\unidic-mecab-2.1.2_bin\matrix.bin" />
+    <None Remove="data\unidic-mecab-2.1.2_bin\sys.dic" />
+    <None Remove="data\unidic-mecab-2.1.2_bin\unk.dic" />
     <None Remove="Fonts\KoPubWorld Dotum Bold.ttf" />
     <None Remove="Fonts\KoPubWorld Dotum Light.ttf" />
     <None Remove="Fonts\KoPubWorld Dotum Medium.ttf" />

@@ -9,6 +9,6 @@ namespace IronworksTranslator.Models.Enums
         [Description("DeepL (API)")]
         DeepL_API,
         [Description("Ironworks Ja→Ko (Beta)")]
-        JESC_Ja_Ko,
+        Ironworks_Ja_Ko,
     }
 }

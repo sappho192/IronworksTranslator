@@ -276,10 +276,12 @@ namespace IronworksTranslator.Views.Pages
                     comboBox.SelectedIndex = 0;
                     comboBox.SelectedItem = (Models.Enums.TranslatorEngine)0;
                 }
-            } 
-            else if (selectedItem == Models.Enums.TranslatorEngine.JESC_Ja_Ko)
+            }
+            else if (selectedItem == Models.Enums.TranslatorEngine.Ironworks_Ja_Ko)
             {
-                System.Windows.MessageBox.Show(Localizer.GetString("settings.translator.engine.not_implemented"));
+                System.Windows.MessageBox.Show(Localizer.GetString("settings.translator.engine.download_model"));
+                comboBox.SelectedIndex = 0;
+                comboBox.SelectedItem = (Models.Enums.TranslatorEngine)0;
             }
 
             if (ibPapagoTooltip == null) return;
