@@ -5,6 +5,7 @@ using YamlDotNet.Serialization;
 using IronworksTranslator.Utils;
 using System.Windows.Media;
 using IronworksTranslator.ViewModels.Pages;
+using IronworksTranslator.Utils.Aspect;
 
 namespace IronworksTranslator.Models.Settings
 {

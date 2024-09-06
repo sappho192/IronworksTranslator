@@ -1,6 +1,7 @@
 ﻿using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
+using IronworksTranslator.Utils.Aspect;
 using IronworksTranslator.Views.Windows;
 using MdXaml;
 using Microsoft.Extensions.Hosting;

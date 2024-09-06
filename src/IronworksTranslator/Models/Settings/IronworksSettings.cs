@@ -1,6 +1,7 @@
 ﻿using IronworksTranslator.Helpers;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Utils;
+using IronworksTranslator.Utils.Aspect;
 using System.IO;
 using Wpf.Ui.Appearance;
 using YamlDotNet.Serialization;

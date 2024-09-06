@@ -1,6 +1,7 @@
 ﻿using IronworksTranslator.Models;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Utils;
+using IronworksTranslator.Utils.Aspect;
 using IronworksTranslator.ViewModels.Pages;
 using Microsoft.Extensions.Hosting;
 using Serilog;

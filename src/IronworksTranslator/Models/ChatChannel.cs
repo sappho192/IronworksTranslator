@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Utils;
+using IronworksTranslator.Utils.Aspect;
 using IronworksTranslator.ViewModels.Pages;
 using Serilog;
 using System.Windows.Media;

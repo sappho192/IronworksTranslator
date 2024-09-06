@@ -6,6 +6,7 @@ using YamlDotNet.Serialization;
 using IronworksTranslator.Utils;
 using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.Models.Enums;
+using IronworksTranslator.Utils.Aspect;
 
 namespace IronworksTranslator.Models.Settings
 {

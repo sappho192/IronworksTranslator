@@ -4,6 +4,7 @@ using DeepL;
 using IronworksTranslator.Models.Settings;
 using Serilog;
 using IronworksTranslator.Models.Translator;
+using IronworksTranslator.Utils.Aspect;
 
 namespace IronworksTranslator.Utils.Translator
 {

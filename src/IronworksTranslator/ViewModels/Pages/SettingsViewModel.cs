@@ -2,6 +2,7 @@
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Utils;
+using IronworksTranslator.Utils.Aspect;
 using ObservableCollections;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;

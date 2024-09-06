@@ -8,6 +8,7 @@ using YamlDotNet.Serialization;
 using System.IO;
 using Serilog;
 using IronworksTranslator.Models.Enums;
+using IronworksTranslator.Utils.Aspect;
 
 namespace IronworksTranslator.Services
 {
