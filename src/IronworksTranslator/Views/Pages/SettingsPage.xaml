@@ -106,19 +106,18 @@
                         </ui:CardExpander.Header>
                         <StackPanel Orientation="Vertical">
                             <ui:Card>
-                                <StackPanel Orientation="Horizontal">
-                                    <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.default}" FontTypography="Body" VerticalAlignment="Center"/>
-                                    <ComboBox Margin="32,0,0,0" Name="cbTranslator"
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.default}" FontTypography="Body" VerticalAlignment="Center"/>
+                                        <ComboBox Margin="32,0,0,0" Name="cbTranslator"
                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:TranslatorEngine}}"
                                     SelectedValue="{Binding ViewModel.TranslatorEngine, Converter={StaticResource TranslatorEngineToStringConverter}, Mode=TwoWay}"
                                     SelectedIndex="{Binding ViewModel.TranslatorEngineIndex, Mode=TwoWay}"
                                     SelectionChanged="cbTranslator_SelectionChanged"/>
-                                    <ui:InfoBadge Name="ibPapagoTooltip" Visibility="Hidden"
-                                    Margin="8" CornerRadius="30"
-                                    Icon="{ui:SymbolIcon Symbol=Question16}"
-                                    Severity="Critical"
-                                    Style="{DynamicResource IconInfoBadgeStyle}"
-                                    ToolTipService.ToolTip="{i18n:StringLocalizer settings.translator.engine.tooltip.papago}"/>
+                                    </StackPanel>
+                                    <Border Height="8"/>
+                                    <ui:TextBlock Name="txtPapagoTooltip" FontTypography="BodyStrong" FontSize="12"
+                                        Text="{i18n:StringLocalizer settings.translator.engine.tooltip.papago}"/>
                                 </StackPanel>
                             </ui:Card>
                             <ui:CardExpander IsExpanded="True">

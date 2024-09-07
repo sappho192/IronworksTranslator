@@ -2,7 +2,6 @@
 using IronworksTranslator.Utils;
 using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.ViewModels.Windows;
-using IronworksTranslator.Views.Windows;
 using System.Windows.Controls;
 using Wpf.Ui.Controls;
 
@@ -28,7 +27,7 @@ namespace IronworksTranslator.Views.Pages
             ViewModel.CheckSystemIntegrity();
             if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.Papago)
             {
-                ibPapagoTooltip.Visibility = Visibility.Visible;
+                txtPapagoTooltip.Visibility = Visibility.Visible;
             }
         }
 
@@ -273,25 +272,24 @@ namespace IronworksTranslator.Views.Pages
                 if (IronworksSettings.Instance.TranslatorSettings.DeeplApiKeys.Count == 0)
                 {
                     System.Windows.MessageBox.Show(Localizer.GetString("settings.translator.engine.deepl_api.not_exists"));
-                    comboBox.SelectedIndex = 0;
                     comboBox.SelectedItem = (Models.Enums.TranslatorEngine)0;
+                    comboBox.SelectedIndex = 0;
+                }
+                else
+                {
+                    if (txtPapagoTooltip == null) return;
+                    txtPapagoTooltip.Visibility = Visibility.Hidden;
                 }
             }
-            //else if (selectedItem == Models.Enums.TranslatorEngine.Ironworks_Ja_Ko)
-            //{
-            //    System.Windows.MessageBox.Show(Localizer.GetString("settings.translator.engine.download_model"));
-            //    comboBox.SelectedIndex = 0;
-            //    comboBox.SelectedItem = (Models.Enums.TranslatorEngine)0;
-            //}
-
-            if (ibPapagoTooltip == null) return;
-            if (selectedItem == Models.Enums.TranslatorEngine.Papago)
+            else if (selectedItem == Models.Enums.TranslatorEngine.Papago)
             {
-                ibPapagoTooltip.Visibility = Visibility.Visible;
-            } 
-            else
+                if (txtPapagoTooltip == null) return;
+                txtPapagoTooltip.Visibility = Visibility.Visible;
+            }
+            else if (selectedItem == Models.Enums.TranslatorEngine.Ironworks_Ja_Ko)
             {
-                ibPapagoTooltip.Visibility = Visibility.Hidden;
+                if (txtPapagoTooltip == null) return;
+                txtPapagoTooltip.Visibility = Visibility.Hidden;
             }
         }
     }
