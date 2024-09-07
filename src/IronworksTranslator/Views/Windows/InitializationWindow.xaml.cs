@@ -120,7 +120,7 @@ namespace IronworksTranslator.Views.Windows
             });
             // Check translation model exists
             (var encoderExists, var decoderExists) = IsModelExists();
-            worker.ReportProgress(20);
+            worker.ReportProgress(30);
             if (!encoderExists)
             {
                 Application.Current.Dispatcher.Invoke(() =>
@@ -128,7 +128,12 @@ namespace IronworksTranslator.Views.Windows
                     txtProgress.Text = "Ironworks (Ja→Ko) Encoder 다운로드";
                 });
                 DownloadEncoderModel().Wait();
-                worker.ReportProgress(40);
+                worker.ReportProgress(60);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    txtProgress.Text = "인코더 모델 파일 검사";
+                });
+                CheckEncoderModelIntegrity();
             }
             if (!decoderExists)
             {
@@ -137,14 +142,14 @@ namespace IronworksTranslator.Views.Windows
                     txtProgress.Text = "Ironworks (Ja→Ko) Decoder 다운로드";
                 });
                 DownloadDecoderModel().Wait();
-                worker.ReportProgress(60);
+                worker.ReportProgress(90);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    txtProgress.Text = "인코더 모델 파일 검사";
+                });
+                CheckEncoderModelIntegrity();
             }
-            worker.ReportProgress(80);
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                txtProgress.Text = "모델 파일 검사";
-            });
-            CheckModelIntegrity();
+
             worker.ReportProgress(100);
         }
 
@@ -155,12 +160,10 @@ namespace IronworksTranslator.Views.Windows
         private const string MODEL_ENCODER_FILENAME = "encoder_model.onnx";
         private const string MODEL_DECODER_FILENAME = "decoder_model_merged.onnx";
 
-        private void CheckModelIntegrity()
+        private void CheckEncoderModelIntegrity()
         {
             string encoderPath = Path.Combine(modelDir, "encoder_model.onnx");
-            string decoderPath = Path.Combine(modelDir, "decoder_model_merged.onnx");
             bool encoderIntegrity = false;
-            bool decoderIntegrity = false;
             // Check encoder file
             if (File.Exists(encoderPath))
             {
@@ -169,6 +172,21 @@ namespace IronworksTranslator.Views.Windows
                     encoderIntegrity = true;
                 }
             }
+
+            if (!encoderIntegrity)
+            {
+                MessageBox.Show("인코더 모델 다운로드에 실패했습니다. 프로그램을 다시 실행해주세요.");
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    App.RequestShutdown();
+                });
+            }
+        }
+
+        private void CheckDecoderModelIntegrity()
+        {
+            string decoderPath = Path.Combine(modelDir, "decoder_model_merged.onnx");
+            bool decoderIntegrity = false;
             if (File.Exists(decoderPath))
             {
                 if (CheckHash(decoderPath, MODEL_DECODER_HASH))
@@ -176,9 +194,9 @@ namespace IronworksTranslator.Views.Windows
                     decoderIntegrity = true;
                 }
             }
-            if (!encoderIntegrity || !decoderIntegrity)
+            if (!decoderIntegrity)
             {
-                MessageBox.Show("모델 다운로드에 실패했습니다. 프로그램을 다시 실행해주세요.");
+                MessageBox.Show("디코더 모델 다운로드에 실패했습니다. 프로그램을 다시 실행해주세요.");
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     App.RequestShutdown();
