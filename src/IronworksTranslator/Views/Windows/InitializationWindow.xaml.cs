@@ -1,4 +1,6 @@
 ﻿using Downloader;
+using IronworksTranslator.Utils;
+using IronworksTranslator.Utils.Aspect;
 using Serilog;
 using System.ComponentModel;
 using System.IO;
@@ -40,6 +42,7 @@ namespace IronworksTranslator.Views.Windows
             worker.RunWorkerAsync();
         }
 
+        [TraceMethod]
         private void InitDownloader()
         {
             downloader.DownloadStarted += Downloader_DownloadStarted;
@@ -95,7 +98,7 @@ namespace IronworksTranslator.Views.Windows
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                txtProgress.Text = "준비 완료";
+                txtProgress.Text = Localizer.GetString("downloader.worker.progress.ready.complete");
                 prWorker.Visibility = Visibility.Collapsed;
             });
             Task.Delay(2000).ContinueWith(_ =>
@@ -116,7 +119,7 @@ namespace IronworksTranslator.Views.Windows
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                txtProgress.Text = "번역 모델 준비";
+                txtProgress.Text = Localizer.GetString("downloader.worker.progress.ready.model");
             });
             // Check translation model exists
             (var encoderExists, var decoderExists) = IsModelExists();
@@ -125,13 +128,13 @@ namespace IronworksTranslator.Views.Windows
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    txtProgress.Text = "Ironworks (Ja→Ko) Encoder 다운로드";
+                    txtProgress.Text = Localizer.GetString("downloader.worker.progress.download.ironworks.jako.encoder");
                 });
                 DownloadEncoderModel().Wait();
                 worker.ReportProgress(60);
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    txtProgress.Text = "인코더 모델 파일 검사";
+                    txtProgress.Text = Localizer.GetString("downloader.worker.progress.hash.model.encoder");
                 });
                 CheckEncoderModelIntegrity();
             }
@@ -139,15 +142,15 @@ namespace IronworksTranslator.Views.Windows
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    txtProgress.Text = "Ironworks (Ja→Ko) Decoder 다운로드";
+                    txtProgress.Text = Localizer.GetString("downloader.worker.progress.download.ironworks.jako.decoder");
                 });
                 DownloadDecoderModel().Wait();
                 worker.ReportProgress(90);
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    txtProgress.Text = "인코더 모델 파일 검사";
+                    txtProgress.Text = Localizer.GetString("downloader.worker.progress.hash.model.decoder");
                 });
-                CheckEncoderModelIntegrity();
+                CheckDecoderModelIntegrity();
             }
 
             worker.ReportProgress(100);
@@ -160,6 +163,7 @@ namespace IronworksTranslator.Views.Windows
         private const string MODEL_ENCODER_FILENAME = "encoder_model.onnx";
         private const string MODEL_DECODER_FILENAME = "decoder_model_merged.onnx";
 
+        [TraceMethod]
         private void CheckEncoderModelIntegrity()
         {
             string encoderPath = Path.Combine(modelDir, "encoder_model.onnx");
@@ -175,7 +179,7 @@ namespace IronworksTranslator.Views.Windows
 
             if (!encoderIntegrity)
             {
-                MessageBox.Show("인코더 모델 다운로드에 실패했습니다. 프로그램을 다시 실행해주세요.");
+                MessageBox.Show(Localizer.GetString("downloader.error.encoder.hash"));
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     App.RequestShutdown();
@@ -183,6 +187,7 @@ namespace IronworksTranslator.Views.Windows
             }
         }
 
+        [TraceMethod]
         private void CheckDecoderModelIntegrity()
         {
             string decoderPath = Path.Combine(modelDir, "decoder_model_merged.onnx");
@@ -196,7 +201,7 @@ namespace IronworksTranslator.Views.Windows
             }
             if (!decoderIntegrity)
             {
-                MessageBox.Show("디코더 모델 다운로드에 실패했습니다. 프로그램을 다시 실행해주세요.");
+                MessageBox.Show(Localizer.GetString("downloader.error.decoder.hash"));
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     App.RequestShutdown();
@@ -204,6 +209,7 @@ namespace IronworksTranslator.Views.Windows
             }
         }
 
+        [TraceMethod]
         private async Task DownloadEncoderModel()
         {
             var modelArchivePath = Path.Combine(modelDir, MODEL_ENCODER_FILENAME);
@@ -216,6 +222,8 @@ namespace IronworksTranslator.Views.Windows
             var directoryInfo = new DirectoryInfo(modelDir);
             downloader.DownloadFileTaskAsync(MODEL_ENCODER_URL, directoryInfo).Wait();
         }
+
+        [TraceMethod]
         private async Task DownloadDecoderModel()
         {
             var modelArchivePath = Path.Combine(modelDir, MODEL_DECODER_FILENAME);
@@ -229,6 +237,7 @@ namespace IronworksTranslator.Views.Windows
             downloader.DownloadFileTaskAsync(MODEL_DECODER_URL, directoryInfo).Wait();
         }
 
+        [TraceMethod]
         private (bool, bool) IsModelExists()
         {
             string encoderPath = Path.Combine(modelDir, "encoder_model.onnx");
@@ -255,14 +264,7 @@ namespace IronworksTranslator.Views.Windows
             return (encoderExists, decoderExists);
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (!isInitialized)
-            {
-                e.Cancel = true;
-            }
-        }
-
+        [TraceMethod]
         private static bool CheckHash(string filePath, string hash)
         {
             using var md5 = MD5.Create();
@@ -270,6 +272,14 @@ namespace IronworksTranslator.Views.Windows
             var hashBytes = md5.ComputeHash(stream);
             var hashStr = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
             return hashStr == hash;
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!isInitialized)
+            {
+                e.Cancel = true;
+            }
         }
     }
 }

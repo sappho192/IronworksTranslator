@@ -23,6 +23,15 @@ app.exception.address.not_exist: "address.json이 없습니다. 자체주소 설
 app.settings.failed_to_load: "설정 파일이 잘못되어 열 수 없었습니다. 설정 파일을 새로 만들까요? 기존의 설정 파일은 없어집니다."
 app.settings.font_not_exist: "설정에 있던 ({0}) 폰트를 찾을 수 없었습니다. 기본 폰트를 적용합니다."
 
+downloader.worker.progress.ready.complete: "준비 완료"
+downloader.worker.progress.ready.model: "번역 모델 준비"
+downloader.worker.progress.download.ironworks.jako.encoder: "Ironworks (Ja→Ko) Encoder 다운로드"
+downloader.worker.progress.download.ironworks.jako.decoder: "Ironworks (Ja→Ko) Decoder 다운로드"
+downloader.worker.progress.hash.model.encoder: "인코더 모델 파일 검사"
+downloader.worker.progress.hash.model.decoder: "디코더 모델 파일 검사"
+downloader.error.encoder.hash: "인코더 모델 다운로드에 실패했습니다. 프로그램을 다시 실행해주세요."
+downloader.error.decoder.hash: "디코더 모델 다운로드에 실패했습니다. 프로그램을 다시 실행해주세요."
+
 main.navigation.home: "대시보드"
 main.navigation.settings: "설정"
 main.navigation.developer: "개발용"
