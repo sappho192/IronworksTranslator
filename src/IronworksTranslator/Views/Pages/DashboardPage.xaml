@@ -74,15 +74,27 @@
                 </ui:Card>
             </Grid>
             <Grid Grid.Column="1">
-                <ui:Card VerticalAlignment="Top" Margin="16">
-                    <StackPanel Orientation="Vertical">
-                        <ui:Button Content="{i18n:StringLocalizer dashboard.chat.position.reset}"
-                            Command="{Binding ViewModel.ResetChatWindowPositionCommand}"/>
-                        <Border Height="16"/>
-                        <ui:Button Content="{i18n:StringLocalizer dashboard.dialogue.position.reset}"
-                            Command="{Binding ViewModel.ResetDialogueWindowPositionCommand}"/>
-                    </StackPanel>
-                </ui:Card>
+                <StackPanel Orientation="Vertical">
+                    <ui:Card VerticalAlignment="Top" Margin="16">
+                        <StackPanel Orientation="Vertical">
+                            <ui:Button Content="{i18n:StringLocalizer dashboard.chat.position.reset}"
+                                Command="{Binding ViewModel.ResetChatWindowPositionCommand}"/>
+                            <Border Height="16"/>
+                            <ui:Button Content="{i18n:StringLocalizer dashboard.dialogue.position.reset}"
+                                Command="{Binding ViewModel.ResetDialogueWindowPositionCommand}"/>
+                        </StackPanel>
+                    </ui:Card>
+                    <ui:Card VerticalAlignment="Top" Margin="16">
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:TextBlock FontTypography="Body" Text="{i18n:StringLocalizer dashboard.log.size}"/>
+                                <ui:TextBlock FontTypography="Body" Text="{Binding ViewModel.LogDirectorySize}"/>
+                            </StackPanel>
+                            <Border Height="8"/>
+                            <ui:Button Content="{i18n:StringLocalizer dashboard.log.clear}" Command="{Binding ViewModel.ClearLogDirectoryCommand}"/>
+                        </StackPanel>
+                    </ui:Card>                    
+                </StackPanel>
             </Grid>
         </Grid>
     </Grid>

@@ -56,6 +56,8 @@ dashboard.chat.draggable: "채팅창/대사창 이동 활성화"
 dashboard.chat.resizable: "채팅창/대사창 크기조정 활성화"
 dashboard.chat.position.reset: "채팅창 위치 초기화"
 dashboard.dialogue.position.reset: "대사창 위치 초기화"
+dashboard.log.size: "로그 폴더 크기: "
+dashboard.log.clear: "비우기"
 
 settings.general: "일반"
 settings.general.theme: "테마"

@@ -55,6 +55,8 @@ dashboard.chat.draggable: "Enable moving chat/dialogue window"
 dashboard.chat.resizable: "Enable resizeing chat/dialogue window"
 dashboard.chat.position.reset: "Reset chat window position"
 dashboard.dialogue.position.reset: "Reset dialogue window position"
+dashboard.log.size: "Log folder size: "
+dashboard.log.clear: "Clear"
 
 settings.general: "General"
 settings.general.theme: "Theme"

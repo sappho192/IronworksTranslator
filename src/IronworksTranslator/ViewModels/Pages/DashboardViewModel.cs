@@ -42,6 +42,9 @@ namespace IronworksTranslator.ViewModels.Pages
         private bool _isChildWindowResizable = IronworksSettings.Instance.ChatUiSettings.IsResizable;
 #pragma warning restore CS8602
 
+        [ObservableProperty]
+        private string _logDirectorySize = "0B";
+
         public DashboardViewModel()
         {
             // run CheckUpdate() in different thread
@@ -50,6 +53,7 @@ namespace IronworksTranslator.ViewModels.Pages
             {
                 System.Windows.Application.Current.Dispatcher.InvokeAsync(ShowTosDialog);
             }
+            UpdateLogFolderSize();
         }
 
         [TraceMethod]
@@ -286,5 +290,59 @@ namespace IronworksTranslator.ViewModels.Pages
             }
         }
 #pragma warning restore CS8602
+
+        [TraceMethod]
+        [RelayCommand]
+        private void OnClearLogDirectory()
+        {
+            string[] filePaths = Directory.GetFiles("./logs", "*.txt");
+            foreach (string filePath in filePaths)
+            {
+                try
+                {
+                    File.Delete(filePath);
+                }
+                catch (IOException ex)
+                {
+                    Log.Error($"{ex.Message}");
+                }
+            }
+
+            UpdateLogFolderSize();
+        }
+
+        private void UpdateLogFolderSize()
+        {
+            LogDirectorySize = FormatBytes(GetDirectorySize("./logs"));
+        }
+
+        private static long GetDirectorySize(string path)
+        {
+            long size = 0;
+            DirectoryInfo dirInfo = new(path);
+
+            foreach (FileInfo fi in dirInfo.GetFiles("*", SearchOption.AllDirectories))
+            {
+                size += fi.Length;
+            }
+
+            return size;
+        }
+
+        private static string FormatBytes(long bytes)
+        {
+            const int scale = 1024;
+            string[] orders = ["GB", "MB", "KB", "Bytes"];
+            long max = (long)Math.Pow(scale, orders.Length - 1);
+
+            foreach (string order in orders)
+            {
+                if (bytes > max)
+                    return string.Format("{0:##.##}{1}", decimal.Divide(bytes, max), order);
+
+                max /= scale;
+            }
+            return "0B";
+        }
     }
 }
