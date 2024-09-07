@@ -26,6 +26,10 @@ namespace IronworksTranslator.Utils.Translator
         private AIhubJaKoTranslator? translator;
         private static readonly object lockObj = new();
 
+        private readonly string modelDir = Path.Combine("data", "model", "aihub-ja-ko-translator");
+        private readonly string encoderDictDir = Path.Combine("data", "unidic-mecab-2.1.2_bin");
+        private readonly string tokenizerDirectory = Path.Combine("data", "tokenizers");
+
         public IronworksJaKoTranslator()
         {
             Task.Run(InitTranslator).GetAwaiter().GetResult();
@@ -55,7 +59,6 @@ namespace IronworksTranslator.Utils.Translator
         public async Task<bool> InitTranslator()
         {
             // Prepare the tokenizer
-            var tokenizerDirectory = Path.Combine("data", "tokenizers");
             var encoderVocabPath = await BertJapaneseTokenizer.HuggingFace.GetVocabFromHub(
                 "tohoku-nlp/bert-base-japanese-v2", tokenizerDirectory);
             var hubName = "skt/kogpt2-base-v2";
@@ -64,12 +67,10 @@ namespace IronworksTranslator.Utils.Translator
                 await Tokenizers.DotNet.HuggingFace.GetFileFromHub(
                     hubName, decoderVocabFilename, tokenizerDirectory);
 
-            string encoderDictDir = Path.Combine("data", "unidic-mecab-2.1.2_bin");
             tokenizer = new BertJa2GPTTokenizer(
                 encoderDictDir: encoderDictDir, encoderVocabPath: encoderVocabPath,
                 decoderVocabPath: decoderVocabPath);
 
-            string modelDir = Path.Combine("data", "model", "aihub-ja-ko-translator");
             translator = new AIhubJaKoTranslator(tokenizer, modelDir);
 
             return true;

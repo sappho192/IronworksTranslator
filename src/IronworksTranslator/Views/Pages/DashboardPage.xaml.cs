@@ -14,6 +14,15 @@ namespace IronworksTranslator.Views.Pages
             DataContext = this;
 
             InitializeComponent();
+
+            // Check translation model exists
+            CheckModelIntegrity();
+        }
+
+        private void CheckModelIntegrity()
+        {
+            var window = new InitializationWindow();
+            window.ShowDialog();
         }
 
         private void tsShowChatWindow_Click(object sender, RoutedEventArgs e)

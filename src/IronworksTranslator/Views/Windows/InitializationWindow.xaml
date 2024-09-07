@@ -1,0 +1,29 @@
+﻿<Window x:Class="IronworksTranslator.Views.Windows.InitializationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:IronworksTranslator.Views.Windows"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        mc:Ignorable="d"
+        WindowStyle="None"
+        Closing="Window_Closing"
+        Topmost="True"
+        ResizeMode="NoResize"
+        Style="{StaticResource WindowAll}"
+        Title="InitializationWindow" Height="220" Width="300">
+    <Grid>
+        <StackPanel Orientation="Vertical" Margin="16">
+            <ui:ProgressRing Width="30" Height="30" Name="prWorker" IsIndeterminate="True"/>
+            <Border Height="8"/>
+            <ProgressBar Name="pbWorker" Width="200" Height="30"/>
+            <Border Height="16"/>
+            <ui:TextBlock Name="txtProgress" HorizontalAlignment="Center"
+                FontTypography="Body" FontSize="16"/>
+            <Border Height="16"/>
+            <ProgressBar Name="pbDownloader" Width="150" Height="15"/>
+            <Border Height="8"/>
+            <ui:TextBlock TextWrapping="Wrap" Name="txtDownloaderFilename" FontSize="12"/>
+        </StackPanel>
+    </Grid>
+</Window>

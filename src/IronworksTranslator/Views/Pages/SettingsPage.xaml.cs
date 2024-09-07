@@ -277,12 +277,12 @@ namespace IronworksTranslator.Views.Pages
                     comboBox.SelectedItem = (Models.Enums.TranslatorEngine)0;
                 }
             }
-            else if (selectedItem == Models.Enums.TranslatorEngine.Ironworks_Ja_Ko)
-            {
-                System.Windows.MessageBox.Show(Localizer.GetString("settings.translator.engine.download_model"));
-                comboBox.SelectedIndex = 0;
-                comboBox.SelectedItem = (Models.Enums.TranslatorEngine)0;
-            }
+            //else if (selectedItem == Models.Enums.TranslatorEngine.Ironworks_Ja_Ko)
+            //{
+            //    System.Windows.MessageBox.Show(Localizer.GetString("settings.translator.engine.download_model"));
+            //    comboBox.SelectedIndex = 0;
+            //    comboBox.SelectedItem = (Models.Enums.TranslatorEngine)0;
+            //}
 
             if (ibPapagoTooltip == null) return;
             if (selectedItem == Models.Enums.TranslatorEngine.Papago)
