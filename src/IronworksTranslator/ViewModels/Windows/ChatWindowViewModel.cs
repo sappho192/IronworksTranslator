@@ -89,7 +89,8 @@ namespace IronworksTranslator.ViewModels.Windows
 
                     if (code == ChatCode.Recruitment || code == ChatCode.System || code == ChatCode.Error ||
                         code == ChatCode.Notice || code == ChatCode.Emote || code == ChatCode.MarketSold ||
-                        code == ChatCode.Echo)
+                        code == ChatCode.Echo || code == ChatCode.GilReceive || code == ChatCode.Gather ||
+                        code == ChatCode.FieldAttack)
                     {
                         TranslationText text;
                         if (ContainsNativeLanguage(decodedChat.Line))
