@@ -129,7 +129,11 @@ namespace IronworksTranslator.Views.Windows
                         );
                     break;
                 case TranslatorEngine.Ironworks_Ja_Ko:
-                    result = input;
+                    result = App.GetService<IronworksJaKoTranslator>().Translate(
+                            input,
+                            (TranslationLanguageCode)channelLanguage,
+                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
+                        );
                     break;
                 default:
                     break;
