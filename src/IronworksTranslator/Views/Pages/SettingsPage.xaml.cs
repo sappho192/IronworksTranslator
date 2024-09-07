@@ -29,6 +29,10 @@ namespace IronworksTranslator.Views.Pages
             {
                 txtPapagoTooltip.Visibility = Visibility.Visible;
             }
+            else if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.Ironworks_Ja_Ko)
+            {
+                txtJaKoTooltip.Visibility = Visibility.Visible;
+            }
         }
 
         private void ChatFontSize_ValueChanged(object sender, RoutedEventArgs e)
@@ -278,18 +282,24 @@ namespace IronworksTranslator.Views.Pages
                 else
                 {
                     if (txtPapagoTooltip == null) return;
-                    txtPapagoTooltip.Visibility = Visibility.Hidden;
+                    txtPapagoTooltip.Visibility = Visibility.Collapsed;
+                    if (txtJaKoTooltip == null) return;
+                    txtJaKoTooltip.Visibility = Visibility.Collapsed;
                 }
             }
             else if (selectedItem == Models.Enums.TranslatorEngine.Papago)
             {
                 if (txtPapagoTooltip == null) return;
                 txtPapagoTooltip.Visibility = Visibility.Visible;
+                if (txtJaKoTooltip == null) return;
+                txtJaKoTooltip.Visibility = Visibility.Collapsed;
             }
             else if (selectedItem == Models.Enums.TranslatorEngine.Ironworks_Ja_Ko)
             {
                 if (txtPapagoTooltip == null) return;
-                txtPapagoTooltip.Visibility = Visibility.Hidden;
+                txtPapagoTooltip.Visibility = Visibility.Collapsed;
+                if (txtJaKoTooltip == null) return;
+                txtJaKoTooltip.Visibility = Visibility.Visible;
             }
         }
     }

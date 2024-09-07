@@ -116,8 +116,10 @@
                                     SelectionChanged="cbTranslator_SelectionChanged"/>
                                     </StackPanel>
                                     <Border Height="8"/>
-                                    <ui:TextBlock Name="txtPapagoTooltip" FontTypography="BodyStrong" FontSize="12"
+                                    <ui:TextBlock Name="txtPapagoTooltip" FontTypography="BodyStrong" FontSize="12" Visibility="Collapsed"
                                         Text="{i18n:StringLocalizer settings.translator.engine.tooltip.papago}"/>
+                                    <ui:TextBlock Name="txtJaKoTooltip" FontTypography="BodyStrong" FontSize="12" Visibility="Collapsed"
+                                        Text="{i18n:StringLocalizer settings.translator.engine.tooltip.jako}"/>
                                 </StackPanel>
                             </ui:Card>
                             <ui:CardExpander IsExpanded="True">
