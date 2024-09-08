@@ -69,6 +69,7 @@ settings.general.app_info: "앱 정보"
 
 settings.ui.chat: "채팅 UI"
 settings.ui.chat.font.size: "채팅 글자 크기"
+settings.ui.dialogue.font.size: "NPC 대사 글자 크기"
 settings.ui.chat.font.family: "채팅 글꼴"
 settings.ui.chat.margin: "채팅 줄 간격"
 settings.ui.chat.opacity: "채팅창 투명도"

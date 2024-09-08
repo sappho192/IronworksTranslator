@@ -2,7 +2,9 @@
 using IronworksTranslator.Utils;
 using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.ViewModels.Windows;
+using IronworksTranslator.Views.Windows;
 using System.Windows.Controls;
+using Wpf.Ui;
 using Wpf.Ui.Controls;
 
 namespace IronworksTranslator.Views.Pages
@@ -41,6 +43,15 @@ namespace IronworksTranslator.Views.Pages
             numberBox.Value ??= IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize;
             var chatWindowViewModel = App.GetService<ChatWindowViewModel>();
             chatWindowViewModel.ChangeChatFontSize((int)numberBox.Value);
+        }
+
+        private void nbDialogueFontSize_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            var numberBox = sender as NumberBox;
+            numberBox.Value ??= IronworksSettings.Instance.ChatUiSettings.DialogueFontSize;
+            var dialogueWindow = App.GetService<DialogueWindow>();
+            dialogueWindow.ChangeDialogueFontSize((int)numberBox.Value);
+            //dialogueWindowViewModel.ChangeChatFontSize((int)numberBox.Value);
         }
 
         private void ChatMargin_ValueChanged(object sender, RoutedEventArgs e)

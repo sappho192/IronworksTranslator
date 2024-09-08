@@ -38,8 +38,7 @@
             <Grid Background="Black" Opacity="0.01" Grid.Row="0" Panel.ZIndex="1"/>
             <TextBox Panel.ZIndex="0" Grid.Row="0" 
                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
-                 TextWrapping="Wrap"
-                 x:Name="DialogueTextBox" x:FieldModifier="public"
+                 TextWrapping="Wrap" Name="tbDialogueTextBox" x:FieldModifier="public"
                  IsReadOnly="True"
                  Foreground="White"
                  Background="Transparent"

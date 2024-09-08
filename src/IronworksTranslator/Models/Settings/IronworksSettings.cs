@@ -49,6 +49,7 @@ namespace IronworksTranslator.Models.Settings
                 ChatUiSettings = new ChatUISettings
                 {
                     ChatboxFontSize = 12,
+                    DialogueFontSize = 12,
                     Font = "KoPubWorld Dotum",
                     ChatMargin = 0,
                     IsDraggable = true,

@@ -64,6 +64,10 @@ namespace IronworksTranslator.Models.Settings
         private int _chatboxFontSize;
 
         [ObservableProperty]
+        [property: YamlMember(Alias = "dialogue_font_size")]
+        private int _dialogueFontSize;
+
+        [ObservableProperty]
         [property: YamlMember(Alias = "font")]
         private string _font;
 
@@ -87,6 +91,12 @@ namespace IronworksTranslator.Models.Settings
         partial void OnChatboxFontSizeChanged(int value)
         {
             Log.Information($"Chatbox font size changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnDialogueFontSizeChanged(int value)
+        {
+            Log.Information($"Dialogue font size changed to {value}");
         }
 
         [SaveSettingsOnChange]
@@ -125,6 +135,9 @@ namespace IronworksTranslator.Models.Settings
             {
                 case nameof(SettingsViewModel.ChatBoxFontSize):
                     ChatboxFontSize = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.DialogueFontSize):
+                    DialogueFontSize = message.NewValue;
                     break;
                 case nameof(SettingsViewModel.ChatMargin):
                     ChatMargin = message.NewValue;

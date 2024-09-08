@@ -60,6 +60,11 @@ namespace IronworksTranslator.Views.Windows
             Log.Debug($"New RefreshChatbox timer with period {period}ms");
         }
 
+        public void ChangeDialogueFontSize(int fontSize)
+        {
+            tbDialogueTextBox.FontSize = fontSize;
+        }
+
         private void RefreshDialogueTextBox(object? state)
         {
             if (!ChatQueue.rq.IsEmpty)
@@ -88,8 +93,8 @@ namespace IronworksTranslator.Views.Windows
 
                             Application.Current.Dispatcher.Invoke(() =>
                             {
-                                DialogueTextBox.Text += $"{Environment.NewLine}{Environment.NewLine}{translated}";
-                                DialogueTextBox.ScrollToEnd();
+                                tbDialogueTextBox.Text += $"{Environment.NewLine}{Environment.NewLine}{translated}";
+                                tbDialogueTextBox.ScrollToEnd();
                             });
                         }
                     }
@@ -102,8 +107,8 @@ namespace IronworksTranslator.Views.Windows
             if (dialogue == null) return;
             Application.Current.Dispatcher.Invoke(() =>
             {
-                DialogueTextBox.Text += $"{Environment.NewLine}{Environment.NewLine}{dialogue}";
-                DialogueTextBox.ScrollToEnd();
+                tbDialogueTextBox.Text += $"{Environment.NewLine}{Environment.NewLine}{dialogue}";
+                tbDialogueTextBox.ScrollToEnd();
             });
         }
 

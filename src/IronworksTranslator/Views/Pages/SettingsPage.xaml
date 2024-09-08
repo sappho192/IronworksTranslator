@@ -167,6 +167,14 @@
                             ValueChanged="ChatFontSize_ValueChanged"
                             Value="{Binding ViewModel.ChatBoxFontSize}" PlaceholderEnabled="False" ClearButtonEnabled="False"/>
                     </ui:CardControl>
+                    <ui:CardControl Icon="{ui:SymbolIcon TextFont24}">
+                        <ui:CardControl.Header>
+                            <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.dialogue.font.size}" FontTypography="BodyStrong"/>
+                        </ui:CardControl.Header>
+                        <ui:NumberBox Name="nbDialogueFontSize" Minimum="8" Maximum="32" MaxDecimalPlaces="0"
+                            ValueChanged="nbDialogueFontSize_ValueChanged"
+                            Value="{Binding ViewModel.DialogueFontSize}" PlaceholderEnabled="False" ClearButtonEnabled="False"/>
+                    </ui:CardControl>
                     <ui:CardControl Icon="{ui:SymbolIcon TextEffects24}">
                         <ui:CardControl.Header>
                             <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat.font.family}" FontTypography="BodyStrong"/>

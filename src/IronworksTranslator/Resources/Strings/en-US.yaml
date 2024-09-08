@@ -68,6 +68,7 @@ settings.general.app_info: "About IronworksTranslator"
 
 settings.ui.chat: "Chat UI"
 settings.ui.chat.font.size: "Font size"
+settings.ui.dialogue.font.size: "Font size of NPC dialogue"
 settings.ui.chat.font.family: "Font family"
 settings.ui.chat.margin: "Chat line space"
 settings.ui.chat.opacity: "Chat window opacity"

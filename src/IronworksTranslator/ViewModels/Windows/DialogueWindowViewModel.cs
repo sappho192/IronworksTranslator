@@ -34,5 +34,10 @@ namespace IronworksTranslator.ViewModels.Windows
                     break;
             }
         }
+
+        internal void ChangeChatFontSize(int value)
+        {
+            return;
+        }
     }
 }
