@@ -88,7 +88,7 @@ namespace IronworksTranslator.Views.Windows
 
                             Application.Current.Dispatcher.Invoke(() =>
                             {
-                                DialogueTextBox.Text += $"{Environment.NewLine}{translated}";
+                                DialogueTextBox.Text += $"{Environment.NewLine}{Environment.NewLine}{translated}";
                                 DialogueTextBox.ScrollToEnd();
                             });
                         }
@@ -102,7 +102,7 @@ namespace IronworksTranslator.Views.Windows
             if (dialogue == null) return;
             Application.Current.Dispatcher.Invoke(() =>
             {
-                DialogueTextBox.Text += $"{Environment.NewLine}{dialogue}";
+                DialogueTextBox.Text += $"{Environment.NewLine}{Environment.NewLine}{dialogue}";
                 DialogueTextBox.ScrollToEnd();
             });
         }
