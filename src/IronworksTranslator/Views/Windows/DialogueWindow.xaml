@@ -32,7 +32,11 @@
         <Grid Grid.Row="0" Background="RosyBrown" Opacity="0.7" Height="20"/>
         <Grid Grid.Row="1" Background="Black" Opacity="{Binding ViewModel.WindowOpacity}">
             <!-- Chatlog textbox -->
-            <TextBox Grid.Column="0"
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <Grid Background="Black" Opacity="0.01" Grid.Row="0" Panel.ZIndex="1"/>
+            <TextBox Panel.ZIndex="0" Grid.Row="0" 
                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                  TextWrapping="Wrap"
                  x:Name="DialogueTextBox" x:FieldModifier="public"
