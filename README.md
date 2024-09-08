@@ -55,8 +55,11 @@ Windows 10 64bit 이상
 
 프로그램 왼쪽 상단의 메뉴 아이콘을 클릭한 후, 세번째 메뉴(말풍선 모양)을 클릭하면 채널별 언어 설정이 가능합니다.
 아래 그림과 같이 시스템 그룹의 언어를 클라이언트의 언어로 설정해두면 기본적인 시스템 메시지들이 본인의 언어로 번역됩니다.
+
 ![image](images/chat-lang-group.png)
+
 채널 별로 설정을 다르게 하고 싶으면 아래 그림과 같이 메뉴를 확장하여 언어를 변경할 수 있습니다.
+
 ![image](images/chat-lang-chan.png)
 
 ### NPC 대사 번역
@@ -76,23 +79,37 @@ Windows 10 64bit 이상
 채팅 로그 방식은 실시간 번역이 아니며, 구조적 한계 때문에 다음 대사로 넘어가야 이전 대사의 내용이 번역됩니다.
 
 1. 아래 그림처럼 NPC 대사 번역 방식을 `Chat Message`로, 대사 언어를 본인의 클라이언트 언어에 맞게 바꿔주세요.
-   ![chatnpc-settings-01](images/chatnpc-settings-01.png)
+
+![chatnpc-settings-01](images/chatnpc-settings-01.png)
+
 2. 채팅 설정으로 갑니다.
-   ![image](https://user-images.githubusercontent.com/7788738/144707292-614ae1a7-3981-4ce4-966a-deeea6690125.png)
+
+![image](https://user-images.githubusercontent.com/7788738/144707292-614ae1a7-3981-4ce4-966a-deeea6690125.png)
+
 3. 로그 필터 중 General (맨 위에 있는 것)으로 들어갑니다.
-   ![image](https://user-images.githubusercontent.com/7788738/144707307-1b688c4e-76fd-48be-b12c-0b59f99f98cd.png)
+
+![image](https://user-images.githubusercontent.com/7788738/144707307-1b688c4e-76fd-48be-b12c-0b59f99f98cd.png)
+
 4. Announcements 탭 (3번째 탭)에서 NPC Dialogue에 체크가 되어있도록 합니다.
-   ![image](images/npc-settings-03.png)
+
+![image](images/npc-settings-03.png)
 
 만약 게임 내 채팅창에 NPC 대사가 보이는게 싫은 분들은 아래와 같이 설정해주시면 됩니다.
 
 1. 로그 필터 중 General (맨 위에 있는 것)으로 들어갑니다.
-   ![image](images/npc-settings-04.png)
+
+![image](images/npc-settings-04.png)
+
 2. Announcements 탭 (3번째 탭)에서 NPC Dialogue에 **체크를 해제**합니다.
-   ![image](images/npc-settings-05.png)
+
+![image](images/npc-settings-05.png)
+
 3. 로그 필터 중 Battle (두 번째)로 들어갑니다.
-   ![image](images/npc-settings-06.png)
+
+![image](images/npc-settings-06.png)
+
 4. Announcements 탭 (3번째 탭)에서 NPC Dialogue에 체크가 되어있도록 합니다.
-   ![image](images/npc-settings-07.png)
+
+![image](images/npc-settings-07.png)
 
 중요한 점은 4가지 로그 필터 중에 단 한 곳에만 NPC Dialogue가 체크되어있도록 하는 것이니 참고해주세요.
