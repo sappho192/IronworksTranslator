@@ -5,18 +5,25 @@ Translates chat log in FFXIV into Korean in realtime.
 
 ## 동작 화면
 
+### 1. 번역 과정
+
 ![Image01](images/demo01.gif)
-번역 과정
 
-![Image02](images/demo02.gif)
-외관 설정, 채널별 세부 설정
+### 2. NPC 대사 번역
 
-![Image03](images/demo03.gif)
-NPC 대사 번역
+![Image02](images/demo03.gif)
+
+### 3. 외관 설정, 채널별 세부 설정
+
+![Image03](images/demo02.gif)
+
+### 4. 언어 설정
+
+![Image03](images/languages.png)
 
 ## 권장 실행환경
 
-Windows 10 64bit
+Windows 10 64bit 이상
 
 ## 요구 환경
 
@@ -35,7 +42,7 @@ Windows 10 64bit
 
 최신 버전(1.0.0): [다운로드(풀버전)](https://github.com/sappho192/IronworksTranslator/releases/download/1.0.0/IronworksTranslator.1.0.0.zip)
 
-[다운로드(경량버전)](https://github.com/sappho192/IronworksTranslator/releases/download/1.0.0/IronworksTranslator.1.0.0.zip)
+[다운로드(경량버전)](https://github.com/sappho192/IronworksTranslator/releases/download/1.0.0/IronworksTranslator.1.0.0.minimal.zip)
 
 풀버전은 자체 번역모델 파일(약 1GB)이 이미 포함되어있는 버전이며, 경량 버전은 제외되어 있습니다.
 경량버전을 받아도 최초 실행 시에 자체 번역모델 파일을 다운로드하는 과정을 거치게 되니 참고해주세요.
