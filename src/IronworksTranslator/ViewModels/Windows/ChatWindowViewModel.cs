@@ -231,9 +231,12 @@ namespace IronworksTranslator.ViewModels.Windows
         // from https://stackoverflow.com/a/44604957/4183595
         private static void ScrollToEnd()
         {
-            var fdsv = App.GetService<ChatWindow>().ChatPanel;
-            ScrollViewer? sv = fdsv.Template.FindName("PART_ContentHost", fdsv) as ScrollViewer;
-            sv?.ScrollToEnd();
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var fdsv = App.GetService<ChatWindow>().ChatPanel;
+                ScrollViewer? sv = fdsv.Template.FindName("PART_ContentHost", fdsv) as ScrollViewer;
+                sv?.ScrollToEnd();
+            });
         }
 
         private static string GenerateTranslationText(TranslationText text, string author)
