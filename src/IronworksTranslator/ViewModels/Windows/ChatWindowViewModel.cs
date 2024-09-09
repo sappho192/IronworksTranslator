@@ -427,6 +427,7 @@ namespace IronworksTranslator.ViewModels.Windows
         public void Diet()
         {
             if (ChatDocument.Blocks.Count < 500) return;
+            Log.Information("Executing diet");
             var blocks = ChatDocument.Blocks.Take(50).ToFrozenSet();
             foreach (var item in blocks)
             {
