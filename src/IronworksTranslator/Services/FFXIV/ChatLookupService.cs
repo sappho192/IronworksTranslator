@@ -21,9 +21,10 @@ namespace IronworksTranslator.Services.FFXIV
 
         private Timer? chatTimer;
         private Timer? dialogueTimer;
+        // Chat polling interval: 250ms provides good responsiveness without excessive CPU usage
         private const int period = 250;
+        // Dialogue polling interval: 200ms for faster dialogue detection
         private const int dPeriod = 200;
-        private object lockObj = new();
 
         // For chatlog you must locally store previous array offsets and indexes in order to pull the correct log from the last time you read it.
         private static int _previousArrayIndex = 0;
@@ -100,58 +101,60 @@ namespace IronworksTranslator.Services.FFXIV
 #pragma warning disable CS8602
         private void UpdateChat(object? state)
         {
-            ChatLogResult readResult = CurrentMemoryHandler.Reader.GetChatLog(_previousArrayIndex, _previousOffset);
-            _previousArrayIndex = readResult.PreviousArrayIndex;
-            _previousOffset = readResult.PreviousOffset;
-            if (!readResult.ChatLogItems.IsEmpty)
+            try
             {
-                foreach (var item in readResult.ChatLogItems)
+                ChatLogResult readResult = CurrentMemoryHandler.Reader.GetChatLog(_previousArrayIndex, _previousOffset);
+                _previousArrayIndex = readResult.PreviousArrayIndex;
+                _previousOffset = readResult.PreviousOffset;
+                if (!readResult.ChatLogItems.IsEmpty)
                 {
-                    ChatCode code = (ChatCode)int.Parse(item.Code, System.Globalization.NumberStyles.HexNumber);
-                    //ProcessChatMsg(readResult.ChatLogItems[i]);
-                    if ((int)code < 0x9F || code == ChatCode.BossQuotes) // Skips battle log except bossquotes
+                    foreach (var item in readResult.ChatLogItems)
                     {
-                        Log.Information($"Adding {item.Message}");
-                        ChatQueue.q.Add(item);
-                        Log.Information("Enqueue ended");
+                        ChatCode code = (ChatCode)int.Parse(item.Code, System.Globalization.NumberStyles.HexNumber);
+                        //ProcessChatMsg(readResult.ChatLogItems[i]);
+                        if ((int)code < 0x9F || code == ChatCode.BossQuotes) // Skips battle log except bossquotes
+                        {
+                            Log.Information($"Adding {item.Message}");
+                            // TryAdd with timeout to prevent blocking if queue is full
+                            if (!ChatQueue.q.TryAdd(item, 100))
+                            {
+                                Log.Warning("Chat queue is full, dropping message: {Message}", item.Message);
+                            }
+                            Log.Information("Enqueue ended");
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in UpdateChat timer callback");
             }
         }
 
         private void UpdateDialogue(object? state)
         {
-            var raw = GetDialogueMessage();
-            if (raw.Equals(""))
+            try
             {
-                return;
+                var raw = GetDialogueMessage();
+                if (string.IsNullOrEmpty(raw))
+                {
+                    return;
+                }
+
+                // Simplified logic: only enqueue if different from last message
+                lock (ChatQueue.rq)
+                {
+                    if (!ChatQueue.LastMsg.Equals(raw))
+                    {
+                        Log.Debug("Enqueue new message: {@message}", raw);
+                        ChatQueue.rq.Enqueue(raw);
+                        ChatQueue.LastMsg = raw;
+                    }
+                }
             }
-            lock (ChatQueue.rq)
+            catch (Exception ex)
             {
-                if (ChatQueue.rq.TryPeek(out string? lastMsg))
-                {
-                    if (!lastMsg.Equals(raw))
-                    {
-                        Log.Debug("Enqueue new message: {@message}", raw);
-                        ChatQueue.rq.Enqueue(raw);
-                        lock (ChatQueue.lastMsg)
-                        {
-                            ChatQueue.lastMsg = raw;
-                        }
-                    }
-                }
-                else
-                {
-                    if (!ChatQueue.lastMsg.Equals(raw))
-                    {
-                        Log.Debug("Enqueue new message: {@message}", raw);
-                        ChatQueue.rq.Enqueue(raw);
-                        lock (ChatQueue.lastMsg)
-                        {
-                            ChatQueue.lastMsg = raw;
-                        }
-                    }
-                }
+                Log.Error(ex, "Error in UpdateDialogue timer callback");
             }
         }
 
@@ -218,7 +221,7 @@ namespace IronworksTranslator.Services.FFXIV
                 });
                 CurrentMemoryHandler.Scanner.LoadOffsets([.. signatures]);
                 ChatQueue.rq.Enqueue("Dialogue window");
-                ChatQueue.lastMsg = "Dialogue window";
+                ChatQueue.LastMsg = "Dialogue window";
 
                 Log.Information($"Attached {processName}.exe ({gameLanguage})");
                 Attached = true;
