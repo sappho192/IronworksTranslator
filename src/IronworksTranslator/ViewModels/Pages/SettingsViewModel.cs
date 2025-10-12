@@ -66,7 +66,7 @@ namespace IronworksTranslator.ViewModels.Pages
         private int _translatorEngineIndex = (int)IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
 
         [ObservableProperty]
-        private INotifyCollectionChangedSynchronizedView<string> _deeplApiKeys = 
+        private INotifyCollectionChangedSynchronizedViewList<string> _deeplApiKeys = 
             IronworksSettings.Instance.TranslatorSettings.DeeplApiKeys.CreateView(key => key).ToNotifyCollectionChanged();
         [ObservableProperty]
         private int _selectedDeeplApiKeyIndex = 0;
