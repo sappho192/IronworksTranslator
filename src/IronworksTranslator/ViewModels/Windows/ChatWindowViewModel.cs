@@ -340,20 +340,6 @@ namespace IronworksTranslator.ViewModels.Windows
         {
             for (int i = 0; i < 10; i++)
             {
-                //TranslationText text;
-                //string line = $"これはテストメッセージ{i}です。";
-                //var translated = Translate(line, ClientLanguage.Japanese);
-                //text = new(line,
-                //    (TranslationLanguageCode)ClientLanguage.Japanese,
-                //    (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
-                //{
-                //    TranslatedText = translated
-                //};
-                //Application.Current.Dispatcher.Invoke(() =>
-                //{
-                //    AddMessage(text, IronworksSettings.Instance.ChannelSettings.ChatChannels[0]);
-                //});
-                //Diet();
                 string line = $"これはテストメッセージ{i}です。";
                 string playerName = "Python Volca";
                 string code = "000A";
