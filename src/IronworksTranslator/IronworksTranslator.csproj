@@ -61,7 +61,7 @@
     <PackageReference Include="ObservableCollections" Version="2.2.2" />
     <PackageReference Include="Octokit" Version="13.0.1" />
     <PackageReference Include="PuppeteerSharp" Version="19.0.1" />
-    <PackageReference Include="RelaxVersioner" Version="3.4.0">
+    <PackageReference Include="RelaxVersioner" Version="3.20.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
