@@ -16,10 +16,15 @@ namespace IronworksTranslator.Utils.Translator
         ];
         public override TranslationLanguageCode[] SupportedSourceLanguages => translationLanguages;
         public override TranslationLanguageCode[] SupportedTargetLanguages => translationLanguages;
-        private readonly object lockObj = new();
 
         [TraceMethod]
         public override string Translate(string sentence, TranslationLanguageCode sourceLanguage, TranslationLanguageCode targetLanguage)
+        {
+            // Synchronous wrapper for backward compatibility
+            return TranslateAsync(sentence, sourceLanguage, targetLanguage).GetAwaiter().GetResult();
+        }
+
+        public override async Task<string> TranslateAsync(string sentence, TranslationLanguageCode sourceLanguage, TranslationLanguageCode targetLanguage)
         {
             if (!SupportedSourceLanguages.Contains(sourceLanguage))
             {
@@ -37,20 +42,16 @@ namespace IronworksTranslator.Utils.Translator
             string? tk = GetLanguageCode(targetLanguage);
             tk ??= "en";
             string url = $"https://papago.naver.com/?sk={sk}&tk={tk}&st={Uri.EscapeDataString(sentence)}";
-            //lock (lockObj)
+
+            try
             {
-                try
-                {
-                    var translateTask = Task.Run(async () => await RequestTranslate(url));
-                    string translated = translateTask.GetAwaiter().GetResult();
-                    return translated;
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.Message);
-                    MessageBox.Show(ex.Message);
-                    return sentence;
-                }
+                string translated = await RequestTranslate(url);
+                return translated;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error translating with Papago");
+                return sentence;
             }
         }
 
