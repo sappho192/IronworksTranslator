@@ -47,7 +47,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DeepL.net" Version="1.9.0" />
+    <PackageReference Include="DeepL.net" Version="1.15.0" />
     <PackageReference Include="Downloader" Version="3.1.2" />
     <PackageReference Include="EDMTranslator" Version="1.2.1" />
     <PackageReference Include="Egorozh.ColorPicker.WPF" Version="5.0.0" />
