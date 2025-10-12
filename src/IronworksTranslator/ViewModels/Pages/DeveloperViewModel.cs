@@ -28,6 +28,13 @@ namespace IronworksTranslator.ViewModels.Pages
             var scrollViewer = chatWindow.ChatPanel.Template.FindName("PART_ContentHost", chatWindow.ChatPanel) as ScrollViewer;
             scrollViewer.ScrollToBottom();
         }
+
+        [RelayCommand]
+        private void AddBatchTranslateChat()
+        {
+            var chatWindow = App.GetService<ChatWindow>();
+            chatWindow.ViewModel.AddBatchTranslationMessage();
+        }
 #pragma warning restore CS8602
 
         partial void OnExampleColorChanged(Color value)

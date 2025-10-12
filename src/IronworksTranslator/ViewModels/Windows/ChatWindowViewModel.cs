@@ -313,6 +313,44 @@ namespace IronworksTranslator.ViewModels.Windows
             ScrollToEnd();
         }
 
+        public void AddBatchTranslationMessage()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                //TranslationText text;
+                //string line = $"これはテストメッセージ{i}です。";
+                //var translated = Translate(line, ClientLanguage.Japanese);
+                //text = new(line,
+                //    (TranslationLanguageCode)ClientLanguage.Japanese,
+                //    (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
+                //{
+                //    TranslatedText = translated
+                //};
+                //Application.Current.Dispatcher.Invoke(() =>
+                //{
+                //    AddMessage(text, IronworksSettings.Instance.ChannelSettings.ChatChannels[0]);
+                //});
+                //Diet();
+                string line = $"これはテストメッセージ{i}です。";
+                string playerName = "Python Volca";
+                string code = "000A";
+                var item = new ChatLogItem
+                {
+                    TimeStamp = DateTime.Now,
+                    PlayerName = playerName,
+                    Code = code,
+                    Bytes = Encoding.UTF8.GetBytes(line),
+                    IsInternational = true,
+                    Line = $"{playerName}:{line}",
+                    PlayerCharacterName = "UNRESOLVED",
+                    Message = line,
+                    Combined = $"{code}:{playerName}:{line}",
+                    Raw = line
+                };
+                ChatQueue.q.Add(item);
+            }
+        }
+
         private string ReTranslate(TranslationText tText, TranslatorEngine api)
         {
             string newMessage = Translate(tText.OriginalText, (ClientLanguage)tText.SourceLanguage, api);
