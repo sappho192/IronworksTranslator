@@ -27,7 +27,7 @@ Windows 10 64bit 이상
 
 ## 요구 환경
 
-.NET 8 (다운로드: https://dotnet.microsoft.com/ko-kr/download/dotnet/thank-you/runtime-desktop-8.0.8-windows-x64-installer )
+.NET 8 (다운로드: https://dotnet.microsoft.com/ko-kr/download/dotnet/thank-you/runtime-desktop-8.0.20-windows-x64-installer )
 
 1. 파판14를 실행한다.
 2. IronworksTranslator.exe를 실행한다.
@@ -40,9 +40,9 @@ Windows 10 64bit 이상
 
 ## 다운로드
 
-최신 버전(1.0.0): [다운로드(풀버전)](https://github.com/sappho192/IronworksTranslator/releases/download/1.0.0/IronworksTranslator.1.0.0.zip)
+최신 버전(1.0.0): [다운로드(풀버전)](https://github.com/sappho192/IronworksTranslator/releases/download/1.1.0/IronworksTranslator.1.1.1.zip)
 
-[다운로드(경량버전)](https://github.com/sappho192/IronworksTranslator/releases/download/1.0.0/IronworksTranslator.1.0.0.minimal.zip)
+[다운로드(경량버전)](https://github.com/sappho192/IronworksTranslator/releases/download/1.1.0/IronworksTranslator.1.1.1.minimal.zip)
 
 풀버전은 자체 번역모델 파일(약 1GB)이 이미 포함되어있는 버전이며, 경량 버전은 제외되어 있습니다.
 경량버전을 받아도 최초 실행 시에 자체 번역모델 파일을 다운로드하는 과정을 거치게 되니 참고해주세요.
