@@ -49,6 +49,10 @@ namespace IronworksTranslator.ViewModels.Windows
 
         private readonly Timer chatboxTimer;
         private readonly IContentDialogService _contentDialogService;
+
+        // Semaphore to ensure messages are processed sequentially
+        private readonly SemaphoreSlim _translationSemaphore = new(1, 1);
+
         public ChatWindowViewModel(IContentDialogService contentDialogService)
         {
             _contentDialogService = contentDialogService;
@@ -73,11 +77,20 @@ namespace IronworksTranslator.ViewModels.Windows
 #pragma warning disable CS8602
         private void UpdateChatbox(object? state)
         {
-            if (ChatQueue.q.Count != 0)
+            // Skip if previous message is still being processed
+            // This ensures messages are displayed in the order they were received
+            if (!_translationSemaphore.Wait(0))
             {
-                var chat = ChatQueue.q.Take();
-                if (chat == null) return;
-                Log.Information($"Dequeued {chat.Line}");
+                return; // Another translation is in progress, skip this cycle
+            }
+
+            try
+            {
+                if (ChatQueue.q.Count != 0)
+                {
+                    var chat = ChatQueue.q.Take();
+                    if (chat == null) return;
+                    Log.Information($"Dequeued {chat.Line}");
 
                 int.TryParse(chat.Code, System.Globalization.NumberStyles.HexNumber, null, out var intCode);
                 ChatCode code = (ChatCode)intCode;
@@ -179,6 +192,16 @@ namespace IronworksTranslator.ViewModels.Windows
                         }
                     }
                 }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in UpdateChatbox timer callback");
+            }
+            finally
+            {
+                // Always release the semaphore so next message can be processed
+                _translationSemaphore.Release();
             }
         }
 
@@ -311,6 +334,30 @@ namespace IronworksTranslator.ViewModels.Windows
 
             ChatDocument.Blocks.Add(paragraph);
             ScrollToEnd();
+        }
+
+        public void AddBatchTranslationMessage()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                string line = $"これはテストメッセージ{i}です。";
+                string playerName = "Python Volca";
+                string code = "000A";
+                var item = new ChatLogItem
+                {
+                    TimeStamp = DateTime.Now,
+                    PlayerName = playerName,
+                    Code = code,
+                    Bytes = Encoding.UTF8.GetBytes(line),
+                    IsInternational = true,
+                    Line = $"{playerName}:{line}",
+                    PlayerCharacterName = "UNRESOLVED",
+                    Message = line,
+                    Combined = $"{code}:{playerName}:{line}",
+                    Raw = line
+                };
+                ChatQueue.q.Add(item);
+            }
         }
 
         private string ReTranslate(TranslationText tText, TranslatorEngine api)

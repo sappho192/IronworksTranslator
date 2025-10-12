@@ -24,6 +24,12 @@ namespace IronworksTranslator.Utils.Translator
 
         public override string Translate(string input, TranslationLanguageCode sourceLanguage, TranslationLanguageCode targetLanguage)
         {
+            // Synchronous wrapper for backward compatibility
+            return TranslateAsync(input, sourceLanguage, targetLanguage).GetAwaiter().GetResult();
+        }
+
+        public override async Task<string> TranslateAsync(string input, TranslationLanguageCode sourceLanguage, TranslationLanguageCode targetLanguage)
+        {
             if (translator == null)
             {
                 if (!InitTranslator(testApi: true))
@@ -43,8 +49,7 @@ namespace IronworksTranslator.Utils.Translator
                 return input;
             }
 
-            var translateTask = Task.Run(async () => await RequestTranslate(input, sourceLanguage, targetLanguage));
-            string translated = translateTask.GetAwaiter().GetResult();
+            string translated = await RequestTranslate(input, sourceLanguage, targetLanguage);
             return translated;
         }
 

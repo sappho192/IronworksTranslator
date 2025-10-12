@@ -26,6 +26,9 @@ namespace IronworksTranslator.Views.Windows
         private static readonly Regex regexItem = MyRegex();
         private readonly bool _isUiInitialized = false;
 
+        // Semaphore to ensure dialogue messages are processed sequentially
+        private readonly SemaphoreSlim _translationSemaphore = new(1, 1);
+
         public DialogueWindow(DialogueWindowViewModel viewModel)
         {
             ViewModel = viewModel;
@@ -67,38 +70,57 @@ namespace IronworksTranslator.Views.Windows
 
         private void RefreshDialogueTextBox(object? state)
         {
-            if (!ChatQueue.rq.IsEmpty)
+            // Skip if previous dialogue is still being processed
+            // This ensures dialogues are displayed in the order they were received
+            if (!_translationSemaphore.Wait(0))
             {
-                var result = ChatQueue.rq.TryDequeue(out string? msg);
-                if (msg == null) return;
-                if (IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod == DialogueTranslationMethod.MemorySearch)
-                {
-                    if (result)
-                    {
-                        msg = MyRegex1().Replace(msg, "[HQ]");
-                        msg = MyRegex2().Replace(msg, "⇒");
-                        msg = MyRegex3().Replace(msg, string.Empty);
-                        msg = MyRegex4().Replace(msg, string.Empty);
-                        if (msg.StartsWith('\u0002'))
-                        {
-                            var filter = regexItem.Match(msg);
-                            if (filter.Success)
-                            {
-                                msg = filter.Groups[1].Value;
-                            }
-                        }
-                        if (!msg.Equals(string.Empty))
-                        {
-                            var translated = Translate(msg, IronworksSettings.Instance.ChannelSettings.NpcDialog.MajorLanguage);
+                return; // Another translation is in progress, skip this cycle
+            }
 
-                            Application.Current.Dispatcher.Invoke(() =>
+            try
+            {
+                if (!ChatQueue.rq.IsEmpty)
+                {
+                    var result = ChatQueue.rq.TryDequeue(out string? msg);
+                    if (msg == null) return;
+                    if (IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod == DialogueTranslationMethod.MemorySearch)
+                    {
+                        if (result)
+                        {
+                            msg = MyRegex1().Replace(msg, "[HQ]");
+                            msg = MyRegex2().Replace(msg, "⇒");
+                            msg = MyRegex3().Replace(msg, string.Empty);
+                            msg = MyRegex4().Replace(msg, string.Empty);
+                            if (msg.StartsWith('\u0002'))
                             {
-                                tbDialogueTextBox.Text += $"{Environment.NewLine}{Environment.NewLine}{translated}";
-                                tbDialogueTextBox.ScrollToEnd();
-                            });
+                                var filter = regexItem.Match(msg);
+                                if (filter.Success)
+                                {
+                                    msg = filter.Groups[1].Value;
+                                }
+                            }
+                            if (!msg.Equals(string.Empty))
+                            {
+                                var translated = Translate(msg, IronworksSettings.Instance.ChannelSettings.NpcDialog.MajorLanguage);
+
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    tbDialogueTextBox.Text += $"{Environment.NewLine}{Environment.NewLine}{translated}";
+                                    tbDialogueTextBox.ScrollToEnd();
+                                });
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error in RefreshDialogueTextBox timer callback");
+            }
+            finally
+            {
+                // Always release the semaphore so next dialogue can be processed
+                _translationSemaphore.Release();
             }
         }
 

@@ -37,6 +37,12 @@ namespace IronworksTranslator.Utils.Translator
 
         public override string Translate(string input, TranslationLanguageCode sourceLanguage, TranslationLanguageCode targetLanguage)
         {
+            // Synchronous wrapper for backward compatibility
+            return TranslateAsync(input, sourceLanguage, targetLanguage).GetAwaiter().GetResult();
+        }
+
+        public override async Task<string> TranslateAsync(string input, TranslationLanguageCode sourceLanguage, TranslationLanguageCode targetLanguage)
+        {
             if (!SupportedSourceLanguages.Contains(sourceLanguage))
             {
                 Log.Error("Unsupported sourceLanguage");
@@ -48,11 +54,15 @@ namespace IronworksTranslator.Utils.Translator
                 return input;
             }
 
-            lock (lockObj)
+            // Run translation on thread pool to avoid blocking
+            return await Task.Run(() =>
             {
-                string result = translator.Translate(input);
-                return result;
-            }
+                lock (lockObj)
+                {
+                    string result = translator.Translate(input);
+                    return result;
+                }
+            });
         }
 
         [TraceMethod]
