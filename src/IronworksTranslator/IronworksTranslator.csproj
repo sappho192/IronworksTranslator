@@ -71,7 +71,7 @@
     <PackageReference Include="System.Text.Json" Version="9.0.9" />
     <PackageReference Include="Tokenizers.DotNet.runtime.win" Version="1.0.5" />
     <PackageReference Include="WPF-UI" Version="3.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.9" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="WpfScreenHelper" Version="2.1.1" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
