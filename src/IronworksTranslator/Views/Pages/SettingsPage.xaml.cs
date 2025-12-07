@@ -41,6 +41,10 @@ namespace IronworksTranslator.Views.Pages
         {
             var numberBox = sender as NumberBox;
             numberBox.Value ??= IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize;
+
+            // Immediately update the settings to prevent race condition with new messages
+            IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize = (int)numberBox.Value;
+
             var chatWindowViewModel = App.GetService<ChatWindowViewModel>();
             chatWindowViewModel.ChangeChatFontSize((int)numberBox.Value);
         }
@@ -49,6 +53,10 @@ namespace IronworksTranslator.Views.Pages
         {
             var numberBox = sender as NumberBox;
             numberBox.Value ??= IronworksSettings.Instance.ChatUiSettings.DialogueFontSize;
+
+            // Immediately update the settings to prevent race condition with new messages
+            IronworksSettings.Instance.ChatUiSettings.DialogueFontSize = (int)numberBox.Value;
+
             var dialogueWindow = App.GetService<DialogueWindow>();
             dialogueWindow.ChangeDialogueFontSize((int)numberBox.Value);
             //dialogueWindowViewModel.ChangeChatFontSize((int)numberBox.Value);
@@ -58,6 +66,10 @@ namespace IronworksTranslator.Views.Pages
         {
             var numberBox = sender as NumberBox;
             numberBox.Value ??= IronworksSettings.Instance.ChatUiSettings.ChatMargin;
+
+            // Immediately update the settings to prevent race condition with new messages
+            IronworksSettings.Instance.ChatUiSettings.ChatMargin = (int)numberBox.Value;
+
             var chatWindowViewModel = App.GetService<ChatWindowViewModel>();
             chatWindowViewModel.ChangeChatMargin((int)numberBox.Value);
         }
@@ -69,6 +81,10 @@ namespace IronworksTranslator.Views.Pages
             {
                 comboBox.SelectedItem = IronworksSettings.Instance.ChatUiSettings.Font;
             }
+
+            // Immediately update the settings to prevent race condition with new messages
+            IronworksSettings.Instance.ChatUiSettings.Font = (string)comboBox.SelectedValue;
+
             var chatWindowViewModel = App.GetService<ChatWindowViewModel>();
             chatWindowViewModel.ChangeChatFontFamily((string)comboBox.SelectedValue);
         }
