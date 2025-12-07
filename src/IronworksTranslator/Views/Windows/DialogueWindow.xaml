@@ -7,6 +7,7 @@
         xmlns:local="clr-namespace:IronworksTranslator.Views.Windows"
         xmlns:Behaviors="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:utils_ui="clr-namespace:IronworksTranslator.Utils.UI"
+        xmlns:converters="clr-namespace:IronworksTranslator.Helpers.Converters"
         AllowsTransparency="True" Background="Transparent"
         WindowStyle="None" ResizeMode="CanResizeWithGrip"
         Style="{StaticResource WindowAll}"
@@ -21,6 +22,9 @@
         d:Width="400" d:Height="100"
         MinWidth="200" MinHeight="50"
         Title="DialogueWindow" Width="{Binding ViewModel.Width}" Height="{Binding ViewModel.Height}">
+    <Window.Resources>
+        <converters:OpacityToBackgroundBrushConverter x:Key="OpacityToBrushConverter"/>
+    </Window.Resources>
     <Behaviors:Interaction.Behaviors>
         <utils_ui:DragMoveBehavior IsEnabled="{Binding ViewModel.IsDraggable}" />
     </Behaviors:Interaction.Behaviors>
@@ -29,15 +33,15 @@
             <RowDefinition Height="AUTO"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Background="RosyBrown" Opacity="0.7" Height="20"/>
-        <Grid Grid.Row="1" Background="Black" Opacity="{Binding ViewModel.WindowOpacity}">
-            <!-- Chatlog textbox -->
-            <Grid.RowDefinitions>
-                <RowDefinition Height="1*"/>
-            </Grid.RowDefinitions>
-            <Grid Background="Black" Opacity="0.01" Grid.Row="0" Panel.ZIndex="1"/>
-            <TextBox Panel.ZIndex="0" Grid.Row="0" 
-                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+        <!-- Title bar - transparent RosyBrown background based on opacity slider -->
+        <Grid Grid.Row="0"
+              Background="{Binding ViewModel.WindowOpacity, Converter={StaticResource OpacityToBrushConverter}, ConverterParameter=RosyBrown}"
+              Height="20"/>
+        <!-- Content area - transparent Black background based on opacity slider -->
+        <Grid Grid.Row="1"
+              Background="{Binding ViewModel.WindowOpacity, Converter={StaticResource OpacityToBrushConverter}, ConverterParameter=Black}">
+            <!-- Dialogue textbox - stays opaque -->
+            <TextBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                  TextWrapping="Wrap" Name="tbDialogueTextBox" x:FieldModifier="public"
                  IsReadOnly="True"
                  Foreground="White"

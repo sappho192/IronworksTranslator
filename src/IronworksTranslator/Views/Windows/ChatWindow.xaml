@@ -7,10 +7,11 @@
         xmlns:local="clr-namespace:IronworksTranslator.Views.Windows"
         xmlns:Behaviors="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:utils_ui="clr-namespace:IronworksTranslator.Utils.UI"
+        xmlns:converters="clr-namespace:IronworksTranslator.Helpers.Converters"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:ChatWindow, IsDesignTimeCreatable=True}"
         Name="mainWindow"
-        Title="ChatWindow" 
+        Title="ChatWindow"
         Style="{StaticResource WindowAll}"
         MinWidth="200" MinHeight="100"
         d:Width="400" d:Height="200"
@@ -21,6 +22,9 @@
         SizeChanged="Window_SizeChanged"
         LocationChanged="Window_LocationChanged"
         ContentRendered="Window_ContentRendered">
+    <Window.Resources>
+        <converters:OpacityToBackgroundBrushConverter x:Key="OpacityToBrushConverter"/>
+    </Window.Resources>
     <Behaviors:Interaction.Behaviors>
         <utils_ui:DragMoveBehavior IsEnabled="{Binding ViewModel.IsDraggable}" />
     </Behaviors:Interaction.Behaviors>
@@ -29,10 +33,16 @@
             <RowDefinition Height="AUTO"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Background="RosyBrown" Opacity="0.7" Height="20"/>
-        <Grid Grid.Row="1" Background="Black" Opacity="{Binding ViewModel.ChatWindowOpacity}">
-            <FlowDocumentScrollViewer Name="ChatPanel" Grid.Row="1"
+        <!-- Title bar - transparent RosyBrown background based on opacity slider -->
+        <Grid Grid.Row="0"
+              Background="{Binding ViewModel.ChatWindowOpacity, Converter={StaticResource OpacityToBrushConverter}, ConverterParameter=RosyBrown}"
+              Height="20"/>
+        <!-- Content area - transparent Black background based on opacity slider -->
+        <Grid Grid.Row="1"
+              Background="{Binding ViewModel.ChatWindowOpacity, Converter={StaticResource OpacityToBrushConverter}, ConverterParameter=Black}">
+            <FlowDocumentScrollViewer Name="ChatPanel"
                 Height="AUTO"
+                Background="Transparent"
                 Block.LineHeight="2" VerticalScrollBarVisibility="Visible"/>
         </Grid>
     </Grid>
