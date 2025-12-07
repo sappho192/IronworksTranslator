@@ -8,7 +8,7 @@
         xmlns:Behaviors="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:utils_ui="clr-namespace:IronworksTranslator.Utils.UI"
         xmlns:converters="clr-namespace:IronworksTranslator.Helpers.Converters"
-        AllowsTransparency="True" Background="Transparent"
+        AllowsTransparency="True"
         WindowStyle="None" ResizeMode="CanResizeWithGrip"
         Style="{StaticResource WindowAll}"
         d:DataContext="{d:DesignInstance local:DialogueWindow, IsDesignTimeCreatable=True}"
@@ -22,8 +22,46 @@
         d:Width="400" d:Height="100"
         MinWidth="200" MinHeight="50"
         Title="DialogueWindow" Width="{Binding ViewModel.Width}" Height="{Binding ViewModel.Height}">
+    <Window.Background>
+        <SolidColorBrush Opacity="0.01" Color="Black"/>
+    </Window.Background>
     <Window.Resources>
         <converters:OpacityToBackgroundBrushConverter x:Key="OpacityToBrushConverter"/>
+        <!-- Hide ResizeGrip completely to prevent white border -->
+        <Style TargetType="{x:Type ResizeGrip}">
+            <Setter Property="Visibility" Value="Collapsed"/>
+        </Style>
+        <!-- Remove Window chrome effects -->
+        <Style TargetType="{x:Type Window}" BasedOn="{StaticResource WindowAll}">
+            <Setter Property="WindowChrome.WindowChrome">
+                <Setter.Value>
+                    <WindowChrome
+                        CaptionHeight="0"
+                        ResizeBorderThickness="5"
+                        GlassFrameThickness="0"
+                        CornerRadius="0"
+                        UseAeroCaptionButtons="False"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- Custom TextBox style to remove all borders and backgrounds -->
+        <Style x:Key="TransparentTextBoxStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBox}">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                    Background="Transparent"
+                                    Foreground="{TemplateBinding Foreground}"
+                                    VerticalScrollBarVisibility="Hidden"
+                                    HorizontalScrollBarVisibility="Hidden"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
     <Behaviors:Interaction.Behaviors>
         <utils_ui:DragMoveBehavior IsEnabled="{Binding ViewModel.IsDraggable}" />
@@ -44,10 +82,7 @@
             <TextBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                  TextWrapping="Wrap" Name="tbDialogueTextBox" x:FieldModifier="public"
                  IsReadOnly="True"
-                 Foreground="White"
-                 Background="Transparent"
-                 VerticalScrollBarVisibility="Hidden"
-                 BorderBrush="Transparent"
+                 Style="{StaticResource TransparentTextBoxStyle}"
                  Text=""/>
         </Grid>
     </Grid>

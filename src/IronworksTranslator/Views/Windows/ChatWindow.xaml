@@ -16,14 +16,34 @@
         MinWidth="200" MinHeight="100"
         d:Width="400" d:Height="200"
         Width="{Binding ViewModel.Width}" Height="{Binding ViewModel.Height}"
-        AllowsTransparency="True" Background="Transparent"
+        AllowsTransparency="True"
         WindowStyle="None" ResizeMode="CanResizeWithGrip"
         Closing="Window_Closing"
         SizeChanged="Window_SizeChanged"
         LocationChanged="Window_LocationChanged"
         ContentRendered="Window_ContentRendered">
+    <Window.Background>
+        <SolidColorBrush Opacity="0.01" Color="Black"/>
+    </Window.Background>
     <Window.Resources>
         <converters:OpacityToBackgroundBrushConverter x:Key="OpacityToBrushConverter"/>
+        <!-- Hide ResizeGrip completely to prevent white border -->
+        <Style TargetType="{x:Type ResizeGrip}">
+            <Setter Property="Visibility" Value="Collapsed"/>
+        </Style>
+        <!-- Remove Window chrome effects -->
+        <Style TargetType="{x:Type Window}" BasedOn="{StaticResource WindowAll}">
+            <Setter Property="WindowChrome.WindowChrome">
+                <Setter.Value>
+                    <WindowChrome
+                        CaptionHeight="0"
+                        ResizeBorderThickness="5"
+                        GlassFrameThickness="0"
+                        CornerRadius="0"
+                        UseAeroCaptionButtons="False"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
     <Behaviors:Interaction.Behaviors>
         <utils_ui:DragMoveBehavior IsEnabled="{Binding ViewModel.IsDraggable}" />
