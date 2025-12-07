@@ -1,5 +1,6 @@
 ﻿using Egorozh.ColorPicker;
 using Egorozh.ColorPicker.Dialog;
+using System.Windows.Data;
 using System.Windows.Media;
 
 namespace IronworksTranslator.Utils.UI
@@ -8,6 +9,8 @@ namespace IronworksTranslator.Utils.UI
     {
         protected override void ChangeColor()
         {
+            Serilog.Log.Information($"FF14ColorPickerButton: ChangeColor called. Current Color = {Color}");
+
             ColorPickerDialog dialog = new()
             {
                 Owner = Owner,
@@ -16,10 +19,34 @@ namespace IronworksTranslator.Utils.UI
                 Title = Localizer.GetString("settings.channel.color.dialog.title"),
             };
 
+            Serilog.Log.Information($"FF14ColorPickerButton: Showing dialog. Owner = {Owner}");
             var res = dialog.ShowDialog();
+            Serilog.Log.Information($"FF14ColorPickerButton: Dialog closed. Result = {res}, Selected color = {dialog.Color}");
 
-            if (res == true)
+            // Apply the color regardless of dialog result (no confirm button in this ColorPicker)
+            // Only skip if the user didn't change the color at all
+            if (dialog.Color != Color)
+            {
+                Serilog.Log.Information($"FF14ColorPickerButton: Setting Color from {Color} to {dialog.Color}");
                 Color = dialog.Color;
+                Serilog.Log.Information($"FF14ColorPickerButton: Color is now {Color}");
+
+                // Force update the binding source
+                var bindingExpression = GetBindingExpression(ColorProperty);
+                if (bindingExpression != null)
+                {
+                    Serilog.Log.Information($"FF14ColorPickerButton: Updating binding source");
+                    bindingExpression.UpdateSource();
+                }
+                else
+                {
+                    Serilog.Log.Warning($"FF14ColorPickerButton: No binding expression found for ColorProperty");
+                }
+            }
+            else
+            {
+                Serilog.Log.Information($"FF14ColorPickerButton: Color unchanged, skipping update");
+            }
         }
 
         private static readonly string[] colors = [
