@@ -125,8 +125,8 @@ namespace IronworksTranslator.ViewModels.Windows
                         Application.Current.Dispatcher.Invoke(() =>
                         {
                             AddMessage(text, channel);
+                            Diet();
                         });
-                        Diet();
                     }
                     else
                     {
@@ -471,6 +471,7 @@ namespace IronworksTranslator.ViewModels.Windows
             }
         }
 
+        // THIS METHOD SHOULD BE CALLED INSIDE `Application.Current.Dispatcher.Invoke()`!!!
         public void Diet()
         {
             if (ChatDocument.Blocks.Count < 500) return;
