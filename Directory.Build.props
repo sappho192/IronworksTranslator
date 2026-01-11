@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <!-- Force GitVersion to run on every build -->
+    <GetVersion>true</GetVersion>
+    <!-- Ensure GitVersion integration works in all scenarios -->
+    <GitVersionTaskForceRun>true</GitVersionTaskForceRun>
+    <UseGitVersionTask>true</UseGitVersionTask>
+  </PropertyGroup>
+</Project>
