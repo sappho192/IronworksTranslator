@@ -60,34 +60,34 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DeepL.net" Version="1.15.0" />
+    <PackageReference Include="DeepL.net" Version="1.21.0" />
     <PackageReference Include="EDMTranslator" Version="1.3.1" />
     <PackageReference Include="Egorozh.ColorPicker.WPF" Version="5.0.0" />
     <PackageReference Include="Egorozh.ColorPicker.WPF.Dialog" Version="5.0.0" />
-    <PackageReference Include="GitVersion.MsBuild" Version="6.5.1">
+    <PackageReference Include="GitVersion.MsBuild" Version="6.8.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
-    <PackageReference Include="Lepo.i18n.DependencyInjection" Version="2.0.0" />
-    <PackageReference Include="Lepo.i18n.Wpf" Version="2.0.0" />
+    <PackageReference Include="Lepo.i18n.DependencyInjection" Version="2.1.0" />
+    <PackageReference Include="Lepo.i18n.Wpf" Version="2.1.0" />
     <PackageReference Include="MdXaml" Version="1.27.0" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
-    <PackageReference Include="MrAdvice" Version="2.19.1" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
+    <PackageReference Include="MrAdvice" Version="2.20.5" />
     <PackageReference Include="ObservableCollections" Version="3.3.4" />
     <PackageReference Include="Octokit" Version="14.0.0" />
-    <PackageReference Include="PuppeteerSharp" Version="20.2.4" />
-    <PackageReference Include="Serilog" Version="4.3.0" />
+    <PackageReference Include="PuppeteerSharp" Version="20.2.6" />
+    <PackageReference Include="Serilog" Version="4.3.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="Sharlayan.Lite" Version="8.0.1" />
-    <PackageReference Include="System.Text.Json" Version="9.0.9" />
-    <PackageReference Include="Tokenizers.DotNet" Version="1.3.0" />
-    <PackageReference Include="Tokenizers.DotNet.runtime.win-x64" Version="1.3.0" />
+    <PackageReference Include="System.Text.Json" Version="10.0.9" />
+    <PackageReference Include="Tokenizers.DotNet" Version="1.4.1" />
+    <PackageReference Include="Tokenizers.DotNet.runtime.win-x64" Version="1.4.1" />
     <PackageReference Include="WPF-UI" Version="3.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.9" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="WpfScreenHelper" Version="2.1.1" />
-    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+    <PackageReference Include="YamlDotNet" Version="17.1.0" />
   </ItemGroup>
 
   <ItemGroup>
