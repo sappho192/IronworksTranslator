@@ -26,9 +26,9 @@ namespace IronworksTranslator.Utils.Translator
         private AIhubJaKoTranslator? translator;
         private static readonly object lockObj = new();
 
-        private readonly string modelDir = Path.Combine("data", "model", "aihub-ja-ko-translator");
-        private readonly string encoderDictDir = Path.Combine("data", "unidic-mecab-2.1.2_bin");
-        private readonly string tokenizerDirectory = Path.Combine("data", "tokenizers");
+        private readonly string modelDir = Path.Combine(AppContext.BaseDirectory, "data", "model", "aihub-ja-ko-translator");
+        private readonly string encoderDictDir = Path.Combine(AppContext.BaseDirectory, "data", "unidic-mecab-2.1.2_bin");
+        private readonly string tokenizerDirectory = Path.Combine(AppContext.BaseDirectory, "data", "tokenizers");
 
         public IronworksJaKoTranslator()
         {

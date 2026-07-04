@@ -1,10 +1,10 @@
-﻿using Downloader;
 using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Aspect;
 using Serilog;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Security.Cryptography;
 
 namespace IronworksTranslator.Views.Windows
@@ -16,14 +16,8 @@ namespace IronworksTranslator.Views.Windows
     {
         private readonly bool isInitialized = false;
         private BackgroundWorker worker;
-        private readonly DownloadService downloader = new(new DownloadConfiguration
-        {
-            RequestConfiguration =
-            {
-                Proxy = WebRequest.GetSystemWebProxy()
-            }
-        });
-        private readonly string modelDir = Path.Combine("data", "model", "aihub-ja-ko-translator");
+        private readonly HttpClient httpClient = CreateHttpClient();
+        private readonly string modelDir = Path.Combine(AppContext.BaseDirectory, "data", "model", "aihub-ja-ko-translator");
 
         public InitializationWindow()
         {
@@ -36,66 +30,48 @@ namespace IronworksTranslator.Views.Windows
             worker.ProgressChanged += Worker_ProgressChanged;
             worker.RunWorkerCompleted += Worker_RunWorkerCompleted;
 
-            InitDownloader();
             isInitialized = true;
 
             worker.RunWorkerAsync();
         }
 
         [TraceMethod]
-        private void InitDownloader()
+        private static HttpClient CreateHttpClient()
         {
-            downloader.DownloadStarted += Downloader_DownloadStarted;
-            downloader.DownloadProgressChanged += Downloader_DownloadProgressChanged;
-            downloader.DownloadFileCompleted += Downloader_DownloadFileCompleted;
-        }
+            var proxy = WebRequest.GetSystemWebProxy();
+            proxy.Credentials = CredentialCache.DefaultCredentials;
 
-        private void Downloader_DownloadFileCompleted(object? sender, AsyncCompletedEventArgs e)
-        {
-            if (e.Cancelled)
+            var handler = new HttpClientHandler
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    txtDownloaderFilename.Text = $"Cancelled!";
-                    Log.Fatal("Download cancelled");
-                    App.RequestShutdown();
-                });
-            }
-            else if (e.Error != null)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    Log.Error(e.Error.Message);
-                    App.RequestShutdown();
-                });
-            }
-            else
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    txtDownloaderFilename.Text = $"Downloaded!";
-                });
-            }
-        }
+                Proxy = proxy,
+                UseProxy = true,
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
 
-        private void Downloader_DownloadProgressChanged(object? sender, Downloader.DownloadProgressChangedEventArgs e)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
+            var client = new HttpClient(handler)
             {
-                pbDownloader.Value = e.ProgressPercentage;
-            });
-        }
-
-        private void Downloader_DownloadStarted(object? sender, DownloadStartedEventArgs e)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                txtDownloaderFilename.Text = $"Downloading {e.FileName}";
-            });
+                Timeout = Timeout.InfiniteTimeSpan
+            };
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("IronworksTranslator/1.0");
+            return client;
         }
 
         private void Worker_RunWorkerCompleted(object? sender, RunWorkerCompletedEventArgs e)
         {
+            if (e.Error != null)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Log.Error(e.Error, "Initialization failed.");
+                    txtProgress.Text = Localizer.GetString("downloader.error.initialization");
+                    txtDownloaderFilename.Text = e.Error.Message;
+                    prWorker.Visibility = Visibility.Collapsed;
+                    MessageBox.Show(Localizer.GetString("downloader.error.initialization"));
+                    App.RequestShutdown();
+                });
+                return;
+            }
+
             Application.Current.Dispatcher.Invoke(() =>
             {
                 txtProgress.Text = Localizer.GetString("downloader.worker.progress.ready.complete");
@@ -130,7 +106,7 @@ namespace IronworksTranslator.Views.Windows
                 {
                     txtProgress.Text = Localizer.GetString("downloader.worker.progress.download.ironworks.jako.encoder");
                 });
-                DownloadEncoderModel().Wait();
+                DownloadEncoderModel().GetAwaiter().GetResult();
                 worker.ReportProgress(60);
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -144,7 +120,7 @@ namespace IronworksTranslator.Views.Windows
                 {
                     txtProgress.Text = Localizer.GetString("downloader.worker.progress.download.ironworks.jako.decoder");
                 });
-                DownloadDecoderModel().Wait();
+                DownloadDecoderModel().GetAwaiter().GetResult();
                 worker.ReportProgress(90);
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -212,29 +188,84 @@ namespace IronworksTranslator.Views.Windows
         [TraceMethod]
         private async Task DownloadEncoderModel()
         {
-            var modelArchivePath = Path.Combine(modelDir, MODEL_ENCODER_FILENAME);
-            if (File.Exists(modelArchivePath))
-            {
-                File.Delete(modelArchivePath);
-            }
-
-            // Get current directoryinfo
-            var directoryInfo = new DirectoryInfo(modelDir);
-            downloader.DownloadFileTaskAsync(MODEL_ENCODER_URL, directoryInfo).Wait();
+            await DownloadModelAsync(MODEL_ENCODER_URL, MODEL_ENCODER_FILENAME);
         }
 
         [TraceMethod]
         private async Task DownloadDecoderModel()
         {
-            var modelArchivePath = Path.Combine(modelDir, MODEL_DECODER_FILENAME);
-            if (File.Exists(modelArchivePath))
+            await DownloadModelAsync(MODEL_DECODER_URL, MODEL_DECODER_FILENAME);
+        }
+
+        [TraceMethod]
+        private async Task DownloadModelAsync(string url, string fileName)
+        {
+            Directory.CreateDirectory(modelDir);
+
+            var modelPath = Path.Combine(modelDir, fileName);
+            var tempPath = $"{modelPath}.download";
+
+            if (File.Exists(tempPath))
             {
-                File.Delete(modelArchivePath);
+                File.Delete(tempPath);
             }
 
-            // Get current directoryinfo
-            var directoryInfo = new DirectoryInfo(modelDir);
-            downloader.DownloadFileTaskAsync(MODEL_DECODER_URL, directoryInfo).Wait();
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                pbDownloader.Value = 0;
+                txtDownloaderFilename.Text = $"Downloading {fileName}";
+            });
+
+            try
+            {
+                using var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+
+                var totalBytes = response.Content.Headers.ContentLength;
+                await using (var source = await response.Content.ReadAsStreamAsync())
+                await using (var destination = File.Create(tempPath))
+                {
+                    var buffer = new byte[1024 * 128];
+                    long downloadedBytes = 0;
+                    int bytesRead;
+
+                    while ((bytesRead = await source.ReadAsync(buffer)) > 0)
+                    {
+                        await destination.WriteAsync(buffer.AsMemory(0, bytesRead));
+                        downloadedBytes += bytesRead;
+
+                        if (totalBytes is > 0)
+                        {
+                            var progress = Math.Min(100, downloadedBytes * 100d / totalBytes.Value);
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                pbDownloader.Value = progress;
+                            });
+                        }
+                    }
+                }
+
+                if (File.Exists(modelPath))
+                {
+                    File.Delete(modelPath);
+                }
+
+                File.Move(tempPath, modelPath);
+            }
+            catch
+            {
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
+                }
+                throw;
+            }
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                pbDownloader.Value = 100;
+                txtDownloaderFilename.Text = $"Downloaded {fileName}";
+            });
         }
 
         [TraceMethod]

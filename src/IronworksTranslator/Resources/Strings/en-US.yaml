@@ -28,6 +28,7 @@ downloader.worker.progress.download.ironworks.jako.encoder: "Downloading Ironwor
 downloader.worker.progress.download.ironworks.jako.decoder: "Downloading Ironworks (Ja→Ko) Decoder"
 downloader.worker.progress.hash.model.encoder: "Checking encoder model file..."
 downloader.worker.progress.hash.model.decoder: "Checking decoder model file..."
+downloader.error.initialization: "Initialization failed. Please check the log."
 downloader.error.encoder.hash: "Failed to download the encoder model. Please launch this program again."
 downloader.error.decoder.hash: "Failed to download the decoder model. Please launch this program again."
 
