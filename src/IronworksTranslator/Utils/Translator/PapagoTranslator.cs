@@ -4,6 +4,7 @@ using Serilog;
 using HtmlAgilityPack;
 using IronworksTranslator.Models.Translator;
 using IronworksTranslator.Utils.Aspect;
+using System.Net;
 
 namespace IronworksTranslator.Utils.Translator
 {
@@ -46,11 +47,27 @@ namespace IronworksTranslator.Utils.Translator
             try
             {
                 string translated = await RequestTranslate(url);
+
+                if (string.IsNullOrWhiteSpace(translated))
+                {
+                    Log.Warning(
+                        "Papago returned empty translation. SourceLanguage: {SourceLanguage}, TargetLanguage: {TargetLanguage}",
+                        sourceLanguage,
+                        targetLanguage);
+
+                    return sentence;
+                }
+
                 return translated;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error translating with Papago");
+                Log.Error(
+                    ex,
+                    "Error translating with Papago. SourceLanguage: {SourceLanguage}, TargetLanguage: {TargetLanguage}",
+                    sourceLanguage,
+                    targetLanguage);
+
                 return sentence;
             }
         }
@@ -72,19 +89,74 @@ namespace IronworksTranslator.Utils.Translator
             var browser = App.GetService<WebBrowser>();
             var content = browser.Navigate(url);
 
+            var translated = ExtractPapagoTargetText(content);
+            if (!string.IsNullOrWhiteSpace(translated))
+            {
+                return translated;
+            }
+
+            return await WaitForRenderedTranslationAsync(
+                browser,
+                timeout: TimeSpan.FromSeconds(10),
+                interval: TimeSpan.FromMilliseconds(300));
+        }
+
+        internal static string ExtractPapagoTargetText(string html)
+        {
             var doc = new HtmlDocument();
-            doc.LoadHtml(content);
-            string translated = string.Empty;
-            try
+            doc.LoadHtml(html);
+
+            var targetEditor =
+                doc.DocumentNode.SelectSingleNode("//*[@data-testid='target-editor']")
+                ?? doc.DocumentNode.SelectSingleNode(
+                    "//*[@role='textbox' and @aria-readonly='true' and @contenteditable='false' and @data-lexical-editor='true']");
+
+            if (targetEditor is null)
             {
-                var pathElement = doc.GetElementbyId("txtTarget");
-                translated = pathElement.InnerText.Trim();
+                return string.Empty;
             }
-            catch (Exception e)
+
+            var lexicalTextNodes = targetEditor.SelectNodes(".//*[@data-lexical-text='true']");
+
+            string rawText = lexicalTextNodes is { Count: > 0 }
+                ? string.Concat(lexicalTextNodes.Select(node => node.InnerText))
+                : targetEditor.InnerText;
+
+            return WebUtility.HtmlDecode(rawText).Trim();
+        }
+
+        private static async Task<string> WaitForRenderedTranslationAsync(
+            WebBrowser browser,
+            TimeSpan timeout,
+            TimeSpan interval)
+        {
+            var startedAt = DateTime.UtcNow;
+
+            while (DateTime.UtcNow - startedAt < timeout)
             {
-                Console.Error.WriteLine(e);
+                var translated = browser.EvaluateExpression("""
+                    (() => {
+                        const editor = document.querySelector('[data-testid="target-editor"]');
+                        if (!editor) return '';
+
+                        const lexicalNodes = editor.querySelectorAll('[data-lexical-text="true"]');
+                        if (lexicalNodes.length > 0) {
+                            return Array.from(lexicalNodes).map(x => x.textContent ?? '').join('').trim();
+                        }
+
+                        return (editor.innerText ?? '').trim();
+                    })()
+                    """);
+
+                if (!string.IsNullOrWhiteSpace(translated))
+                {
+                    return translated.Trim();
+                }
+
+                await Task.Delay(interval);
             }
-            return translated;
+
+            return string.Empty;
         }
     }
 }

@@ -38,6 +38,24 @@ namespace IronworksTranslator.Utils
             return content;
         }
 
+        public string EvaluateExpression(string expression)
+        {
+            string result = string.Empty;
+            lock (lockObj)
+            {
+                try
+                {
+                    var evaluateTask = Task.Run(async () => await RequestEvaluateExpression(expression));
+                    result = evaluateTask.GetAwaiter().GetResult() ?? string.Empty;
+                }
+                catch
+                {
+                    result = string.Empty;
+                }
+            }
+            return result;
+        }
+
         private async Task<Browser> InitBrowser()
         {
             // DefaultBuildId will be updated when upgrading the PuppeteerSharp.
@@ -67,6 +85,11 @@ namespace IronworksTranslator.Utils
             var content = await webPage.GetContentAsync();
 
             return content;
+        }
+
+        private async Task<string?> RequestEvaluateExpression(string expression)
+        {
+            return await webPage.EvaluateExpressionAsync<string?>(expression);
         }
 #pragma warning restore CS8602
     }
