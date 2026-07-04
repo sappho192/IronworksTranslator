@@ -17,6 +17,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Threading;
+using Velopack;
 using Wpf.Ui;
 
 namespace IronworksTranslator
@@ -32,7 +33,11 @@ namespace IronworksTranslator
         // https://docs.microsoft.com/dotnet/core/extensions/dependency-injection
         // https://docs.microsoft.com/dotnet/core/extensions/configuration
         // https://docs.microsoft.com/dotnet/core/extensions/logging
-        private static readonly IHost _host = Host
+        private static readonly Lazy<IHost> _host = new(BuildHost);
+
+        private static IHost BuildHost()
+        {
+            return Host
             .CreateDefaultBuilder()
             .ConfigureAppConfiguration(c => { c.SetBasePath(Path.GetDirectoryName(AppContext.BaseDirectory)); })
             .ConfigureServices((context, services) =>
@@ -62,6 +67,7 @@ namespace IronworksTranslator
 
                 // Service containing navigation, same as INavigationWindow... but without window
                 services.AddSingleton<INavigationService, NavigationService>();
+                services.AddSingleton<AppUpdateService>();
 
                 // Dialog manipulation
                 services.AddSingleton<IContentDialogService, ContentDialogService>();
@@ -92,9 +98,20 @@ namespace IronworksTranslator
                 services.AddSingleton<DeepLAPITranslator>();
                 services.AddSingleton<IronworksJaKoTranslator>();
             }).Build();
+        }
 
         private static int _hostStopStarted;
         private static int _shutdownRequested;
+
+        [STAThread]
+        private static void Main(string[] args)
+        {
+            VelopackApp.Build().Run();
+
+            var app = new App();
+            app.InitializeComponent();
+            app.Run();
+        }
 
         /// <summary>
         /// Gets registered service.
@@ -104,13 +121,13 @@ namespace IronworksTranslator
         public static T GetService<T>()
             where T : class
         {
-            return _host.Services.GetService(typeof(T)) as T;
+            return _host.Value.Services.GetService(typeof(T)) as T;
         }
 
         public static IEnumerable<T> GetServices<T>()
             where T : class
         {
-            return _host.Services.GetServices<T>();
+            return _host.Value.Services.GetServices<T>();
         }
 
         /// <summary>
@@ -124,7 +141,7 @@ namespace IronworksTranslator
             // Check if the _host is disposed
             try
             {
-                _host.Start();
+                _host.Value.Start();
                 var chatWindow = GetService<ChatWindow>();
                 chatWindow.Show();
                 var dialogueWindow = GetService<DialogueWindow>();
@@ -260,7 +277,10 @@ namespace IronworksTranslator
             try
             {
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                await _host.StopAsync(cts.Token);
+                if (_host.IsValueCreated)
+                {
+                    await _host.Value.StopAsync(cts.Token);
+                }
             }
             catch (OperationCanceledException ex)
             {
@@ -277,7 +297,10 @@ namespace IronworksTranslator
 
             try
             {
-                _host.Dispose();
+                if (_host.IsValueCreated)
+                {
+                    _host.Value.Dispose();
+                }
             }
             catch (ObjectDisposedException)
             {
@@ -296,10 +319,11 @@ namespace IronworksTranslator
              */
 
             // Logging
+            AppPaths.EnsureDirectories();
             var date = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .WriteTo.File($"logs/{date}.txt")
+                .WriteTo.File(Path.Combine(AppPaths.LogsDirectory, $"{date}.txt"))
                 .CreateLogger();
             Log.Information($"IronworksTranslator {Assembly.GetExecutingAssembly().GetName().Version.ToString(3)} started.");
         }

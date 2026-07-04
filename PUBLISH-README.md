@@ -1,146 +1,79 @@
-# Publishing IronworksTranslator with Correct Version
+# Publishing IronworksTranslator
 
-## Problem Summary
+IronworksTranslator releases are built with the .NET CLI so GitVersion can stamp the executable correctly, then packaged with Velopack for installable releases and in-app updates.
 
-Visual Studio builds don't properly integrate with GitVersion, causing the assembly version to show as `1.0.0.0` instead of the correct version (e.g., `1.1.3.0`).
+## Prerequisites
 
-**Root Cause**: Visual Studio's MSBuild sets `$(GetVersion)` to `false`, preventing GitVersion from running. This is a known limitation of GitVersion.MsBuild with Visual Studio for WPF projects.
+Install the Velopack CLI version used by the app:
 
-## Solution
+```powershell
+dotnet tool install --global vpk --version 1.2.0
+```
 
-Use the provided PowerShell script `publish-release.ps1` which uses `dotnet CLI` to build and publish. The CLI build system works correctly with GitVersion.
+If it is already installed, keep it aligned with the `Velopack` NuGet package:
 
-## Usage
+```powershell
+dotnet tool update --global vpk --version 1.2.0
+```
 
-### Basic Publishing
+## Build A Release
+
 ```powershell
 .\publish-release.ps1
 ```
 
-This will:
-1. Clean build artifacts (`bin`, `obj` folders)
-2. Restore NuGet packages
-3. Build in Release configuration
-4. Read version from GitVersion
-5. Publish to `publish\IronworksTranslator-v{VERSION}\`
-6. Verify the EXE has correct version
+The script:
 
-### Create Distribution ZIP
-```powershell
-.\publish-release.ps1 -CreateZip
-```
+1. Cleans `bin` and `obj` unless `-SkipClean` is used.
+2. Restores packages.
+3. Builds Release with GitVersion.
+4. Reads `src\IronworksTranslator\obj\gitversion.json`.
+5. Publishes a framework-dependent `win-x64` app to `publish\IronworksTranslator ({VERSION})`.
+6. Runs `vpk pack` and writes Velopack assets to `Releases`.
 
-Creates a ZIP file: `publish\IronworksTranslator-v{VERSION}.zip`
+Velopack settings used by the script:
 
-### Skip Clean Step
+- `packId`: `Sappho192.IronworksTranslator`
+- `packTitle`: `IronworksTranslator`
+- `mainExe`: `IronworksTranslator.exe`
+- `channel`: `win`
+- `runtime`: `win-x64`
+- `framework`: `net8.0-x64-desktop`
+
+## Release Assets
+
+Upload these Velopack files from `Releases` to the GitHub release:
+
+- `Sappho192.IronworksTranslator-win-Setup.exe`
+- `Sappho192.IronworksTranslator-{VERSION}-full.nupkg`
+- `Sappho192.IronworksTranslator-{VERSION}-delta.nupkg` when generated
+- `releases.win.json`
+
+Optional generated files such as `Sappho192.IronworksTranslator-win-Portable.zip`, `assets.win.json`, and `RELEASES` are not required for the in-app updater.
+
+The model files are not part of the default app update package. The app stores downloaded model/tokenizer data under `%LocalAppData%\IronworksTranslator\data`.
+
+## Useful Options
+
 ```powershell
 .\publish-release.ps1 -SkipClean
-```
-
-Useful for faster rebuilds when you know the build state is clean.
-
-### Custom Output Directory
-```powershell
-.\publish-release.ps1 -OutputDir "releases"
-```
-
-Publishes to `releases\IronworksTranslator-v{VERSION}\` instead of the default `publish\` directory.
-
-## Examples
-
-```powershell
-# Standard release build with ZIP
 .\publish-release.ps1 -CreateZip
-
-# Quick rebuild without cleaning
-.\publish-release.ps1 -SkipClean -CreateZip
-
-# Publish to custom directory
-.\publish-release.ps1 -OutputDir "D:\Releases" -CreateZip
+.\publish-release.ps1 -SkipVelopack
+.\publish-release.ps1 -OutputDir "publish" -VelopackOutputDir "Releases"
 ```
 
-## Expected Output
-
-When the script runs successfully, you should see:
-
-```
-========================================
-IronworksTranslator Release Publisher
-========================================
-
-[1/5] Cleaning previous build artifacts...
-  Clean completed.
-
-[2/5] Restoring NuGet packages...
-  Restore completed.
-
-[3/5] Building in Release configuration...
-  MrAdvice 2.19.1... weaved module 'IronworksTranslator, Version=1.1.3.0, ...'
-  Build completed.
-
-[4/5] Checking version information...
-  Version: 1.1.3
-  Assembly Version: 1.1.3.0
-  Full Version: 1.1.3+Branch.master.Sha.8b48d699...
-
-[5/5] Publishing application...
-  Published to: publish\IronworksTranslator-v1.1.3
-
-Verification:
-  EXE File Version: 1.1.3.0
-  EXE Product Version: 1.1.3+Branch.master.Sha...
-  ✓ Version is correct!
-
-========================================
-✓ Publishing completed successfully!
-========================================
-```
+`-CreateZip` is only for a legacy zip artifact. The installer and in-app updater use Velopack assets.
 
 ## Verification
 
-After publishing, verify the version is correct:
+After publishing, verify the executable version:
 
 ```powershell
-# Check the published EXE
-(Get-Item "publish\IronworksTranslator-v1.1.3\IronworksTranslator.exe").VersionInfo.FileVersion
+(Get-Item "publish\IronworksTranslator (1.1.5)\IronworksTranslator.exe").VersionInfo.FileVersion
 ```
 
-Should output: `1.1.3.0`
+For local update testing, build two different versions into the same `Releases` folder, install the older `Setup.exe`, then launch it and confirm it updates to the newer release.
 
-## Alternative: Command Line Build
+## Why Not Visual Studio Publish?
 
-You can also build manually using dotnet CLI:
-
-```powershell
-# Clean
-Remove-Item src\IronworksTranslator\bin -Recurse -Force
-Remove-Item src\IronworksTranslator\obj -Recurse -Force
-
-# Build in Release
-dotnet build src\IronworksTranslator\IronworksTranslator.csproj -c Release
-
-# Publish
-dotnet publish src\IronworksTranslator\IronworksTranslator.csproj -c Release -o publish\Release
-```
-
-## Why Not Use Visual Studio?
-
-Visual Studio's MSBuild has a fundamental incompatibility with GitVersion.MsBuild for WPF projects:
-
-- Visual Studio uses Framework-based MSBuild from `C:\Program Files\Microsoft Visual Studio\2022\...\MSBuild\`
-- .NET CLI uses SDK-based MSBuild from `C:\Program Files\dotnet\sdk\...\`
-- GitVersion.MsBuild only works correctly with SDK-based MSBuild
-
-The build log shows: `$(GetVersion)="false"(이전 값: "true")` - GitVersion is actively disabled in Visual Studio builds.
-
-## For CI/CD
-
-In your CI/CD pipeline, use the dotnet CLI commands:
-
-```yaml
-- dotnet restore
-- dotnet build -c Release
-- dotnet publish -c Release -o output/
-```
-
-GitVersion will work correctly in these environments.
+Visual Studio builds may not run GitVersion correctly for this WPF project. Use `publish-release.ps1` or equivalent `dotnet restore`, `dotnet build -c Release`, and `dotnet publish` commands for release builds.

@@ -17,7 +17,7 @@ namespace IronworksTranslator.Views.Windows
         private readonly bool isInitialized = false;
         private BackgroundWorker worker;
         private readonly HttpClient httpClient = CreateHttpClient();
-        private readonly string modelDir = Path.Combine(AppContext.BaseDirectory, "data", "model", "aihub-ja-ko-translator");
+        private readonly string modelDir = AppPaths.AihubJaKoModelDirectory;
 
         public InitializationWindow()
         {

@@ -31,8 +31,10 @@ namespace IronworksTranslator.Services
         [TraceMethod]
         private static void LoadSettings()
         {
-            var fileName = "settings.yaml";
-            if (!File.Exists(fileName))
+            AppPaths.MigrateLegacyUserData();
+
+            var settingsPath = AppPaths.SettingsFilePath;
+            if (!File.Exists(settingsPath))
             {
                 var settings = IronworksSettings.CreateDefault();
                 settings.TranslatorSettings.InitializeCollectionListeners();
@@ -45,7 +47,7 @@ namespace IronworksTranslator.Services
                                     .WithNamingConvention(UnderscoredNamingConvention.Instance)
                                     .Build();
                 var settings = deserializer.Deserialize<IronworksSettings>(
-                    File.ReadAllText("settings.yaml")
+                    File.ReadAllText(settingsPath)
                 );
                 IronworksSettings.Instance = settings;
                 if (IronworksSettings.IsSettingsFileInValid(settings))

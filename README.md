@@ -27,10 +27,10 @@ Windows 10 64bit 이상
 
 ## 요구 환경
 
-.NET 8 (다운로드: https://dotnet.microsoft.com/ko-kr/download/dotnet/thank-you/runtime-desktop-8.0.20-windows-x64-installer )
+설치 프로그램이 필요한 경우 .NET 8 Desktop Runtime을 함께 설치합니다.
 
 1. 파판14를 실행한다.
-2. IronworksTranslator.exe를 실행한다.
+2. IronworksTranslator를 실행한다.
 3. (최초 실행 시) 이용 약관이 나오면 내용을 읽고 동의해주세요.
 4. 번역 모델 준비 창이 없어질때까지 기다린다.
 5. (최초 실행 시) 설정에서 모국어 설정과 채널별 언어 설정을 진행한다.
@@ -40,12 +40,11 @@ Windows 10 64bit 이상
 
 ## 다운로드
 
-최신 버전(1.0.0): [다운로드(풀버전)](https://github.com/sappho192/IronworksTranslator/releases/download/1.1.0/IronworksTranslator.1.1.1.zip)
+[최신 릴리스](https://github.com/sappho192/IronworksTranslator/releases/latest)에서 `Sappho192.IronworksTranslator-win-Setup.exe` 설치 파일을 다운로드하세요.
 
-[다운로드(경량버전)](https://github.com/sappho192/IronworksTranslator/releases/download/1.1.0/IronworksTranslator.1.1.1.minimal.zip)
+설치 후 새 버전이 공개되면 앱 시작 시 업데이트 안내가 표시됩니다. 동의하면 앱이 업데이트 파일을 다운로드하고 자동으로 재시작합니다.
 
-풀버전은 자체 번역모델 파일(약 1GB)이 이미 포함되어있는 버전이며, 경량 버전은 제외되어 있습니다.
-경량버전을 받아도 최초 실행 시에 자체 번역모델 파일을 다운로드하는 과정을 거치게 되니 참고해주세요.
+자체 번역 모델 파일은 앱 업데이트와 분리되어 있으며, 처음 필요할 때 다운로드됩니다. 기존 zip 배포판을 사용하던 경우 `settings.yaml`과 `data/model`이 실행 폴더에서 발견되면 사용자 데이터 폴더로 자동 복사됩니다.
 
 [변경 내역](https://github.com/sappho192/IronworksTranslator/releases/latest)
 

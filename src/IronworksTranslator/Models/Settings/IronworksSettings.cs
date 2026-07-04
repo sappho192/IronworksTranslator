@@ -79,7 +79,8 @@ namespace IronworksTranslator.Models.Settings
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .WithTypeInspector(inspector => new SettingsTypeInspector(inspector))
                 .Build();
-            File.WriteAllText("settings.yaml", serializer.Serialize(settings));
+            Directory.CreateDirectory(Path.GetDirectoryName(AppPaths.SettingsFilePath)!);
+            File.WriteAllText(AppPaths.SettingsFilePath, serializer.Serialize(settings));
         }
 
         public static bool IsSettingsFileInValid(IronworksSettings settings)

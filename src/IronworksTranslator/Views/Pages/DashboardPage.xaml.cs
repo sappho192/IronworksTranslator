@@ -17,6 +17,7 @@ namespace IronworksTranslator.Views.Pages
 
             // Check translation model exists
             CheckModelIntegrity();
+            Dispatcher.InvokeAsync(ViewModel.RunStartupPromptsAsync);
         }
 
         private void CheckModelIntegrity()

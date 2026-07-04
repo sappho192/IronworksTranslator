@@ -1,17 +1,15 @@
 ﻿using IronworksTranslator.Models.Settings;
+using IronworksTranslator.Services;
 using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Aspect;
 using IronworksTranslator.Views.Windows;
 using MdXaml;
 using Microsoft.Extensions.Hosting;
-using Octokit;
 using Serilog;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using WpfScreenHelper;
@@ -20,6 +18,8 @@ namespace IronworksTranslator.ViewModels.Pages
 {
     public partial class DashboardViewModel : ObservableRecipient
     {
+        private readonly AppUpdateService _appUpdateService;
+
         [ObservableProperty]
         private bool _isTranslatorActive = false;
 
@@ -45,19 +45,36 @@ namespace IronworksTranslator.ViewModels.Pages
         [ObservableProperty]
         private string _logDirectorySize = "0B";
 
-        public DashboardViewModel()
+        public DashboardViewModel(AppUpdateService appUpdateService)
         {
-            // run CheckUpdate() in different thread
-            System.Windows.Application.Current.Dispatcher.InvokeAsync(CheckUpdate);
-            if (!IronworksSettings.Instance.UiSettings.IsTosDisplayed)
-            {
-                System.Windows.Application.Current.Dispatcher.InvokeAsync(ShowTosDialog);
-            }
+            _appUpdateService = appUpdateService;
             UpdateLogFolderSize();
         }
 
         [TraceMethod]
-        private void ShowTosDialog()
+        public async Task RunStartupPromptsAsync()
+        {
+            var uiSettings = IronworksSettings.Instance?.UiSettings;
+            if (uiSettings == null)
+            {
+                Log.Error("Startup prompts skipped because UI settings are not loaded.");
+                return;
+            }
+
+            if (!uiSettings.IsTosDisplayed)
+            {
+                var acceptedTos = await ShowTosDialogAsync();
+                if (!acceptedTos)
+                {
+                    return;
+                }
+            }
+
+            await _appUpdateService.CheckForUpdatesWithPromptAsync();
+        }
+
+        [TraceMethod]
+        private async Task<bool> ShowTosDialogAsync()
         {
             var assembly = Assembly.GetExecutingAssembly();
             var cultureInfo = Localizer.GetCulture();
@@ -73,10 +90,10 @@ namespace IronworksTranslator.ViewModels.Pages
                 Log.Fatal("Failed to load TOS file: {TOSFilename}", tosFilename);
                 MessageBox.Show(Localizer.GetString("dashboard.tos.file.notfound"),
                     Localizer.GetString("dashboard.tos.file.notfound.title"),
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
                 App.RequestShutdown();
-                return;
+                return false;
             }
             using var reader = new StreamReader(stream);
             string tos = reader.ReadToEnd();
@@ -100,17 +117,17 @@ namespace IronworksTranslator.ViewModels.Pages
                 PrimaryButtonText = Localizer.GetString("accept"),
                 CloseButtonText = Localizer.GetString("decline")
             };
-            var tosResult = tosMessageBox.ShowDialogAsync();
-            if (tosResult.Result == Wpf.Ui.Controls.MessageBoxResult.Primary)
+            var tosResult = await tosMessageBox.ShowDialogAsync();
+            if (tosResult == Wpf.Ui.Controls.MessageBoxResult.Primary)
             {
 #pragma warning disable CS8602
                 IronworksSettings.Instance.UiSettings.IsTosDisplayed = true;
 #pragma warning restore CS8602
+                return true;
             }
-            else
-            {
-                App.RequestShutdown();
-            }
+
+            App.RequestShutdown();
+            return false;
         }
 
         [TraceMethod]
@@ -219,83 +236,15 @@ namespace IronworksTranslator.ViewModels.Pages
         }
 
         [TraceMethod]
-        private void CheckUpdate()
-        {
-            var currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
-            var githubClient = new GitHubClient(new ProductHeaderValue("IronworksTranslator"));
-            var latestRelease = githubClient.Repository.Release.GetLatest("sappho192", "ironworkstranslator").Result;
-            var latestVersion = new Version(latestRelease.TagName);
-
-            if (currentVersion == null)
-            {
-                Log.Fatal("Failed to get latest version");
-                MessageBox.Show("app.exception.description");
-                App.RequestShutdown();
-                return;
-            }
-            if (currentVersion.CompareTo(latestVersion) >= 0)
-            {
-                Log.Information("IronworksTranslator is up to date");
-            }
-            else
-            {
-                Log.Information("IronworksTranslator is outdated");
-                Log.Information($"Current version: {currentVersion}");
-                Log.Information($"Latest version: {latestVersion}");
-
-                AskToUpdate(currentVersion, latestRelease, latestVersion);
-            }
-        }
-
-#pragma warning disable CS8602
-        private static void AskToUpdate(Version? currentVersion, Release latestRelease, Version latestVersion)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine(Localizer.GetString("main.update.description"));
-            sb.AppendLine();
-            sb.AppendLine($"{Localizer.GetString("main.update.current_version")}{currentVersion.ToString(3)}");
-            sb.AppendLine($"{Localizer.GetString("main.update.latest_version")}**{latestVersion.ToString(3)}**");
-            sb.AppendLine();
-            sb.AppendLine(latestRelease.Body);
-            var updateContent = sb.ToString();
-            var markdownEngine = new Markdown();
-            FlowDocument document = markdownEngine.Transform(updateContent);
-            document.FontFamily = new System.Windows.Media.FontFamily("sans-serif");
-            var scrollViewer = new ScrollViewer
-            {
-                Content = new RichTextBox
-                {
-                    Document = document,
-                    IsReadOnly = true,
-                },
-            };
-            var updateMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = Localizer.GetString("main.update.title"),
-                Content = scrollViewer,
-                IsPrimaryButtonEnabled = true,
-                PrimaryButtonText = Localizer.GetString("yes"),
-                CloseButtonText = Localizer.GetString("no"),
-            };
-            var result = updateMessageBox.ShowDialogAsync();
-            if (result.Result == Wpf.Ui.Controls.MessageBoxResult.Primary)
-            {
-                Log.Information("User clicked Yes to update PartyYomi");
-                var ps = new ProcessStartInfo(latestRelease.Assets[0].BrowserDownloadUrl)
-                {
-                    UseShellExecute = true,
-                    Verb = "open"
-                };
-                Process.Start(ps);
-            }
-        }
-#pragma warning restore CS8602
-
-        [TraceMethod]
         [RelayCommand]
         private void OnClearLogDirectory()
         {
-            string[] filePaths = Directory.GetFiles("./logs", "*.txt");
+            if (!Directory.Exists(AppPaths.LogsDirectory))
+            {
+                return;
+            }
+
+            string[] filePaths = Directory.GetFiles(AppPaths.LogsDirectory, "*.txt");
             foreach (string filePath in filePaths)
             {
                 try
@@ -313,11 +262,16 @@ namespace IronworksTranslator.ViewModels.Pages
 
         private void UpdateLogFolderSize()
         {
-            LogDirectorySize = FormatBytes(GetDirectorySize("./logs"));
+            LogDirectorySize = FormatBytes(GetDirectorySize(AppPaths.LogsDirectory));
         }
 
         private static long GetDirectorySize(string path)
         {
+            if (!Directory.Exists(path))
+            {
+                return 0;
+            }
+
             long size = 0;
             DirectoryInfo dirInfo = new(path);
 

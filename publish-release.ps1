@@ -1,23 +1,39 @@
 # IronworksTranslator Release Publishing Script
-# This script builds and publishes the application with proper GitVersion versioning
+# Builds the app with GitVersion and creates Velopack release assets.
 
 param(
     [switch]$SkipClean,
     [switch]$CreateZip,
-    [string]$OutputDir = "publish"
+    [switch]$SkipVelopack,
+    [string]$OutputDir = "publish",
+    [string]$VelopackOutputDir = "Releases"
 )
 
 $ErrorActionPreference = "Stop"
 $projectPath = "src\IronworksTranslator\IronworksTranslator.csproj"
+$iconPath = "src\IronworksTranslator\icon.ico"
+$velopackVersion = "1.2.0"
+$packId = "Sappho192.IronworksTranslator"
+$packTitle = "IronworksTranslator"
+$mainExe = "IronworksTranslator.exe"
+$channel = "win"
+$runtime = "win-x64"
+$framework = "net8.0-x64-desktop"
+
+function Assert-Success($message) {
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error $message
+        exit 1
+    }
+}
 
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "IronworksTranslator Release Publisher" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Clean build artifacts
 if (-not $SkipClean) {
-    Write-Host "[1/5] Cleaning previous build artifacts..." -ForegroundColor Yellow
+    Write-Host "[1/6] Cleaning previous build artifacts..." -ForegroundColor Yellow
 
     if (Test-Path "src\IronworksTranslator\bin") {
         Remove-Item "src\IronworksTranslator\bin" -Recurse -Force
@@ -31,32 +47,23 @@ if (-not $SkipClean) {
 
     Write-Host "  Clean completed." -ForegroundColor Green
 } else {
-    Write-Host "[1/5] Skipping clean (--SkipClean specified)" -ForegroundColor Gray
+    Write-Host "[1/6] Skipping clean (--SkipClean specified)" -ForegroundColor Gray
 }
 Write-Host ""
 
-# Restore packages
-Write-Host "[2/5] Restoring NuGet packages..." -ForegroundColor Yellow
+Write-Host "[2/6] Restoring NuGet packages..." -ForegroundColor Yellow
 dotnet restore $projectPath
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Package restore failed!"
-    exit 1
-}
+Assert-Success "Package restore failed!"
 Write-Host "  Restore completed." -ForegroundColor Green
 Write-Host ""
 
-# Build in Release configuration
-Write-Host "[3/5] Building in Release configuration..." -ForegroundColor Yellow
+Write-Host "[3/6] Building in Release configuration..." -ForegroundColor Yellow
 dotnet build $projectPath -c Release --no-restore
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Build failed!"
-    exit 1
-}
+Assert-Success "Build failed!"
 Write-Host "  Build completed." -ForegroundColor Green
 Write-Host ""
 
-# Get version from gitversion.json
-Write-Host "[4/5] Checking version information..." -ForegroundColor Yellow
+Write-Host "[4/6] Checking version information..." -ForegroundColor Yellow
 $gitversionPath = "src\IronworksTranslator\obj\gitversion.json"
 if (Test-Path $gitversionPath) {
     $gitversion = Get-Content $gitversionPath | ConvertFrom-Json
@@ -68,53 +75,71 @@ if (Test-Path $gitversionPath) {
     Write-Host "  Assembly Version: $assemblyVersion" -ForegroundColor Green
     Write-Host "  Full Version: $fullVersion" -ForegroundColor Green
 } else {
-    Write-Warning "  gitversion.json not found. Version information unavailable."
-    $version = "unknown"
+    Write-Error "gitversion.json not found. Cannot create a versioned Velopack release."
+    exit 1
 }
 Write-Host ""
 
-# Publish
-Write-Host "[5/5] Publishing application (single-file)..." -ForegroundColor Yellow
+Write-Host "[5/6] Publishing application (single-file, framework-dependent)..." -ForegroundColor Yellow
 $publishPath = Join-Path $OutputDir "IronworksTranslator ($version)"
 dotnet publish $projectPath -c Release -o $publishPath `
     /p:PublishSingleFile=true `
-    /p:RuntimeIdentifier=win-x64 `
+    /p:RuntimeIdentifier=$runtime `
     /p:SelfContained=false
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Publish failed!"
-    exit 1
-}
+Assert-Success "Publish failed!"
 Write-Host "  Published to: $publishPath" -ForegroundColor Green
 Write-Host ""
 
-# Verify published exe version
-$exePath = Join-Path $publishPath "IronworksTranslator.exe"
+$exePath = Join-Path $publishPath $mainExe
 if (Test-Path $exePath) {
     $fileVersion = (Get-Item $exePath).VersionInfo.FileVersion
     $productVersion = (Get-Item $exePath).VersionInfo.ProductVersion
+    $fileSize = [math]::Round((Get-Item $exePath).Length / 1MB, 2)
 
     Write-Host "Verification:" -ForegroundColor Cyan
     Write-Host "  EXE File Version: $fileVersion" -ForegroundColor Green
     Write-Host "  EXE Product Version: $productVersion" -ForegroundColor Green
-    $fileSize = [math]::Round((Get-Item $exePath).Length / 1MB, 2)
-    Write-Host "  EXE Size: $fileSize MB (single-file, framework-dependent)" -ForegroundColor Green
+    Write-Host "  EXE Size: $fileSize MB" -ForegroundColor Green
 
-    # Check if version matches
     if ($fileVersion -like "$version.*") {
-        Write-Host "  ✓ Version is correct!" -ForegroundColor Green
+        Write-Host "  Version is correct." -ForegroundColor Green
     } else {
-        Write-Warning "  ⚠ Version mismatch detected!"
-        Write-Warning "    Expected: $version.*"
-        Write-Warning "    Got: $fileVersion"
+        Write-Warning "Version mismatch detected. Expected $version.*, got $fileVersion"
     }
 } else {
-    Write-Warning "Could not find published EXE for verification."
+    Write-Error "Could not find published EXE for verification: $exePath"
+    exit 1
 }
 Write-Host ""
 
-# Create zip if requested
+if (-not $SkipVelopack) {
+    Write-Host "[6/6] Creating Velopack release assets..." -ForegroundColor Yellow
+    $vpkCommand = Get-Command "vpk" -ErrorAction SilentlyContinue
+    if ($null -eq $vpkCommand) {
+        Write-Error "Velopack CLI 'vpk' was not found. Install it with: dotnet tool install --global vpk --version $velopackVersion"
+        exit 1
+    }
+
+    vpk pack `
+        --packId $packId `
+        --packVersion $version `
+        --packDir $publishPath `
+        --mainExe $mainExe `
+        --packTitle $packTitle `
+        --outputDir $VelopackOutputDir `
+        --channel $channel `
+        --runtime $runtime `
+        --framework $framework `
+        --icon $iconPath
+    Assert-Success "Velopack packaging failed!"
+    Write-Host "  Velopack output: $VelopackOutputDir" -ForegroundColor Green
+} else {
+    Write-Host "[6/6] Skipping Velopack packaging (--SkipVelopack specified)" -ForegroundColor Gray
+}
+Write-Host ""
+
 if ($CreateZip) {
-    Write-Host "Creating distribution ZIP..." -ForegroundColor Yellow
+    Write-Host "Creating legacy distribution ZIP..." -ForegroundColor Yellow
     $zipPath = Join-Path $OutputDir "IronworksTranslator-v$version.zip"
 
     if (Test-Path $zipPath) {
@@ -127,15 +152,19 @@ if ($CreateZip) {
 }
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "✓ Publishing completed successfully!" -ForegroundColor Green
+Write-Host "Publishing completed successfully!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Output location: $publishPath" -ForegroundColor White
+Write-Host "Publish output: $publishPath" -ForegroundColor White
+if (-not $SkipVelopack) {
+    Write-Host "Velopack assets: $VelopackOutputDir" -ForegroundColor White
+}
 if ($CreateZip) {
-    Write-Host "ZIP file: $zipPath" -ForegroundColor White
+    Write-Host "Legacy ZIP file: $zipPath" -ForegroundColor White
 }
 Write-Host ""
 Write-Host "Usage examples:" -ForegroundColor Gray
-Write-Host "  .\publish-release.ps1                 # Standard publish" -ForegroundColor Gray
-Write-Host "  .\publish-release.ps1 -CreateZip      # Publish and create ZIP" -ForegroundColor Gray
-Write-Host "  .\publish-release.ps1 -SkipClean      # Skip cleaning step" -ForegroundColor Gray
+Write-Host "  .\publish-release.ps1" -ForegroundColor Gray
+Write-Host "  .\publish-release.ps1 -SkipClean" -ForegroundColor Gray
+Write-Host "  .\publish-release.ps1 -CreateZip" -ForegroundColor Gray
+Write-Host "  .\publish-release.ps1 -SkipVelopack" -ForegroundColor Gray
