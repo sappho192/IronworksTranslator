@@ -22,7 +22,7 @@ namespace IronworksTranslator.Core
         public Browser webBrowser = null;
         private async Task<Browser> initBrowser()
         {
-            await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
+            await new BrowserFetcher().DownloadAsync(PuppeteerSharp.BrowserData.Chrome.DefaultBuildId);
             var _browser = await Puppeteer.LaunchAsync(new LaunchOptions
             {
                 Headless = true,
@@ -30,7 +30,7 @@ namespace IronworksTranslator.Core
                     "--js-flags=\"--max-old-space-size=128\""
                 },
             });
-            return _browser;
+            return (Browser)_browser;
         }
         private Page webPage = null;
 
@@ -99,7 +99,7 @@ namespace IronworksTranslator.Core
             var browserTask = Task.Run(async () => await initBrowser());
             webBrowser = browserTask.GetAwaiter().GetResult();
             var pageTask = Task.Run(async () => await webBrowser.NewPageAsync());
-            webPage = pageTask.GetAwaiter().GetResult();
+            webPage = (Page)pageTask.GetAwaiter().GetResult();
             webPage.DefaultTimeout = waitFor;
 
             Log.Debug($"PhantomJS created, page load wait time: {waitFor}s");
@@ -252,21 +252,86 @@ namespace IronworksTranslator.Core
         private async Task<string> RequestTranslate(string url)
         {
             await webPage.GoToAsync(url, WaitUntilNavigation.Networkidle2);
-            var content = await webPage.GetContentAsync();
 
-            var doc = new HtmlDocument();
-            doc.LoadHtml(content);
-            string translated = string.Empty;
-            try
+            string translated = await WaitForRenderedTranslationAsync(
+                timeout: TimeSpan.FromSeconds(10),
+                interval: TimeSpan.FromMilliseconds(300));
+
+            if (!string.IsNullOrWhiteSpace(translated))
             {
-                var pathElement = doc.GetElementbyId("txtTarget");
-                translated = pathElement.InnerText.Trim();
+                return translated;
             }
-            catch (Exception e)
+
+            var content = await webPage.GetContentAsync();
+            translated = ExtractPapagoTargetText(content);
+
+            if (string.IsNullOrWhiteSpace(translated))
             {
-                Log.Error($"Exception {e.Message} when translating the sentence.");
+                Log.Warning("Papago translation result was empty after DOM polling and HTML parsing.");
             }
+
             return translated;
+        }
+
+        private async Task<string> WaitForRenderedTranslationAsync(TimeSpan timeout, TimeSpan interval)
+        {
+            var startedAt = DateTime.UtcNow;
+            const string script = @"(() => {
+                const editor =
+                    document.querySelector('[data-testid=""target-editor""]') ??
+                    document.querySelector('[role=""textbox""][aria-readonly=""true""][contenteditable=""false""][data-lexical-editor=""true""]');
+
+                if (!editor) {
+                    return '';
+                }
+
+                const lexicalNodes = editor.querySelectorAll('[data-lexical-text=""true""]');
+                if (lexicalNodes.length > 0) {
+                    return Array.from(lexicalNodes)
+                        .map(node => node.textContent ?? '')
+                        .join('')
+                        .trim();
+                }
+
+                return (editor.innerText ?? '').trim();
+            })()";
+
+            while (DateTime.UtcNow - startedAt < timeout)
+            {
+                string translated = await webPage.EvaluateExpressionAsync<string>(script);
+                if (!string.IsNullOrWhiteSpace(translated))
+                {
+                    return translated.Trim();
+                }
+
+                await Task.Delay(interval);
+            }
+
+            return string.Empty;
+        }
+
+        private static string ExtractPapagoTargetText(string html)
+        {
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
+
+            var targetEditor =
+                doc.DocumentNode.SelectSingleNode("//*[@data-testid='target-editor']")
+                ?? doc.DocumentNode.SelectSingleNode(
+                    "//*[@role='textbox' and @aria-readonly='true' and @contenteditable='false' and @data-lexical-editor='true']");
+
+            if (targetEditor == null)
+            {
+                Log.Warning("Papago target editor element was not found.");
+                return string.Empty;
+            }
+
+            var lexicalTextNodes = targetEditor.SelectNodes(".//*[@data-lexical-text='true']");
+            string rawText = lexicalTextNodes is { Count: > 0 }
+                ? string.Concat(lexicalTextNodes.Select(node => node.InnerText))
+                : targetEditor.InnerText;
+
+            return System.Net.WebUtility.HtmlDecode(rawText).Trim();
         }
 
         public string TranslateChat(string sentence, ClientLanguage from)
@@ -295,7 +360,7 @@ namespace IronworksTranslator.Core
             lock (webPage)
             {
                 //Log.Debug($"Translate URL: {testUrl}");
-                Log.Debug($"Locked web browser for {sentence}");
+                Log.Debug("Locked web browser for Papago translation. SourceLanguage: {SourceLanguage}, TargetLanguage: {TargetLanguage}", sk, tk);
                 string translated = sentence;
                 try
                 {
@@ -304,15 +369,16 @@ namespace IronworksTranslator.Core
                 }
                 catch (Exception e)
                 {
-                    Log.Error($"Exception {e.Message} when translating {sentence}");
-                    MessageBox.Show($"번역엔진이 예기치 않게 종료되었습니다.");
-                    Application.Current.Shutdown();
+                    Log.Error(e, "Exception when translating with Papago. SourceLanguage: {SourceLanguage}, TargetLanguage: {TargetLanguage}", sk, tk);
+                    return sentence;
                 }
 
-                if (translated == null)
+                if (string.IsNullOrWhiteSpace(translated))
                 {
-                    translated = translated.Insert(0, "[원문]");
+                    Log.Warning("Papago returned empty translation. SourceLanguage: {SourceLanguage}, TargetLanguage: {TargetLanguage}", sk, tk);
+                    return sentence;
                 }
+
                 return translated;
             }
         }
