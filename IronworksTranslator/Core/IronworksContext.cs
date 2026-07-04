@@ -20,6 +20,9 @@ namespace IronworksTranslator.Core
     {
         /* Web stuff */
         public Browser webBrowser = null;
+        private readonly Dictionary<string, PapagoBrowserSession> papagoBrowserSessions = new();
+        private readonly object papagoBrowserLock = new();
+        private readonly object papagoTranslationLock = new();
         private async Task<Browser> initBrowser()
         {
             await new BrowserFetcher().DownloadAsync(PuppeteerSharp.BrowserData.Chrome.DefaultBuildId);
@@ -33,6 +36,12 @@ namespace IronworksTranslator.Core
             return (Browser)_browser;
         }
         private Page webPage = null;
+
+        private sealed class PapagoBrowserSession
+        {
+            public Browser Browser { get; init; }
+            public Page Page { get; init; }
+        }
 
         /* FFXIV stuff */
         public bool Attached { get; }
@@ -94,15 +103,7 @@ namespace IronworksTranslator.Core
 
         private void InitWebBrowser()
         {
-            const int waitFor = 0;
-
-            var browserTask = Task.Run(async () => await initBrowser());
-            webBrowser = browserTask.GetAwaiter().GetResult();
-            var pageTask = Task.Run(async () => await webBrowser.NewPageAsync());
-            webPage = (Page)pageTask.GetAwaiter().GetResult();
-            webPage.DefaultTimeout = waitFor;
-
-            Log.Debug($"PhantomJS created, page load wait time: {waitFor}s");
+            GetPapagoBrowserSession("ja->ko");
         }
 
         private void RefreshMessages(object state)
@@ -249,11 +250,80 @@ namespace IronworksTranslator.Core
             return false;
         }
 
-        private async Task<string> RequestTranslate(string url)
+        public void DisposeWebBrowsers()
         {
-            await webPage.GoToAsync(url, WaitUntilNavigation.Networkidle2);
+            lock (papagoTranslationLock)
+            {
+                lock (papagoBrowserLock)
+                {
+                    foreach (var session in papagoBrowserSessions.Values)
+                    {
+                        try
+                        {
+                            session.Page?.CloseAsync().GetAwaiter().GetResult();
+                            session.Browser?.CloseAsync().GetAwaiter().GetResult();
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Warning(e, "Exception when closing Papago browser.");
+                        }
+
+                        session.Page?.Dispose();
+                        session.Browser?.Dispose();
+                    }
+
+                    papagoBrowserSessions.Clear();
+                    webPage = null;
+                    webBrowser = null;
+                }
+            }
+        }
+
+        private PapagoBrowserSession GetPapagoBrowserSession(string languagePair)
+        {
+            lock (papagoBrowserLock)
+            {
+                if (papagoBrowserSessions.TryGetValue(languagePair, out var session))
+                {
+                    return session;
+                }
+
+                const int waitFor = 0;
+
+                Log.Debug("Creating Papago browser session. LanguagePair: {LanguagePair}", languagePair);
+                var browserTask = Task.Run(async () => await initBrowser());
+                Browser browser = browserTask.GetAwaiter().GetResult();
+                var pageTask = Task.Run(async () => await browser.NewPageAsync());
+                Page page = (Page)pageTask.GetAwaiter().GetResult();
+                page.DefaultTimeout = waitFor;
+
+                session = new PapagoBrowserSession
+                {
+                    Browser = browser,
+                    Page = page
+                };
+
+                papagoBrowserSessions.Add(languagePair, session);
+
+                if (webBrowser == null)
+                {
+                    webBrowser = browser;
+                    webPage = page;
+                }
+
+                Log.Debug("Papago browser session created. LanguagePair: {LanguagePair}, page load wait time: {WaitFor}s", languagePair, waitFor);
+                return session;
+            }
+        }
+
+        private async Task<string> RequestTranslate(string url, string sourceText, string languagePair)
+        {
+            var session = GetPapagoBrowserSession(languagePair);
+            await session.Page.GoToAsync(url, WaitUntilNavigation.Networkidle2);
 
             string translated = await WaitForRenderedTranslationAsync(
+                session.Page,
+                sourceText,
                 timeout: TimeSpan.FromSeconds(10),
                 interval: TimeSpan.FromMilliseconds(300));
 
@@ -262,8 +332,14 @@ namespace IronworksTranslator.Core
                 return translated;
             }
 
-            var content = await webPage.GetContentAsync();
+            var content = await session.Page.GetContentAsync();
             translated = ExtractPapagoTargetText(content);
+
+            if (IsSameText(translated, sourceText))
+            {
+                Log.Warning("Papago HTML parsing returned the original source text.");
+                return string.Empty;
+            }
 
             if (string.IsNullOrWhiteSpace(translated))
             {
@@ -273,7 +349,7 @@ namespace IronworksTranslator.Core
             return translated;
         }
 
-        private async Task<string> WaitForRenderedTranslationAsync(TimeSpan timeout, TimeSpan interval)
+        private async Task<string> WaitForRenderedTranslationAsync(Page page, string sourceText, TimeSpan timeout, TimeSpan interval)
         {
             var startedAt = DateTime.UtcNow;
             const string script = @"(() => {
@@ -298,10 +374,14 @@ namespace IronworksTranslator.Core
 
             while (DateTime.UtcNow - startedAt < timeout)
             {
-                string translated = await webPage.EvaluateExpressionAsync<string>(script);
+                string translated = await page.EvaluateExpressionAsync<string>(script);
                 if (!string.IsNullOrWhiteSpace(translated))
                 {
-                    return translated.Trim();
+                    translated = translated.Trim();
+                    if (!IsSameText(translated, sourceText))
+                    {
+                        return translated;
+                    }
                 }
 
                 await Task.Delay(interval);
@@ -334,6 +414,21 @@ namespace IronworksTranslator.Core
             return System.Net.WebUtility.HtmlDecode(rawText).Trim();
         }
 
+        private static bool IsSameText(string left, string right)
+        {
+            return string.Equals(
+                NormalizeForComparison(left),
+                NormalizeForComparison(right),
+                StringComparison.Ordinal);
+        }
+
+        private static string NormalizeForComparison(string value)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? string.Empty
+                : string.Concat(value.Where(ch => !char.IsWhiteSpace(ch)));
+        }
+
         public string TranslateChat(string sentence, ClientLanguage from)
         {
             if (IronworksSettings.Instance == null)
@@ -356,15 +451,16 @@ namespace IronworksTranslator.Core
                     sk = item.Code;
                 }
             }
+            string languagePair = $"{sk}->{tk}";
             string testUrl = $"https://papago.naver.com/?sk={sk}&tk={tk}&st={Uri.EscapeDataString(sentence)}";
-            lock (webPage)
+            lock (papagoTranslationLock)
             {
                 //Log.Debug($"Translate URL: {testUrl}");
                 Log.Debug("Locked web browser for Papago translation. SourceLanguage: {SourceLanguage}, TargetLanguage: {TargetLanguage}", sk, tk);
                 string translated = sentence;
                 try
                 {
-                    var translateTask = Task.Run(async () => await RequestTranslate(testUrl));
+                    var translateTask = Task.Run(async () => await RequestTranslate(testUrl, sentence, languagePair));
                     translated = translateTask.GetAwaiter().GetResult();
                 }
                 catch (Exception e)

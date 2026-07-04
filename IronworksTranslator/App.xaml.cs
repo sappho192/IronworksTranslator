@@ -23,7 +23,7 @@ namespace IronworksTranslator
         {
             if(IronworksContext.Instance().Attached)
             {
-                IronworksContext.Instance().webBrowser.Dispose();
+                IronworksContext.Instance().DisposeWebBrowsers();
             }
             Log.Debug("Closing program");
         }
