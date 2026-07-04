@@ -141,15 +141,9 @@ namespace IronworksTranslator.Services.FFXIV
                     return;
                 }
 
-                // Simplified logic: only enqueue if different from last message
-                lock (ChatQueue.rq)
+                if (ChatQueue.EnqueueDialogueIfNew(raw))
                 {
-                    if (!ChatQueue.LastMsg.Equals(raw))
-                    {
-                        Log.Debug("Enqueue new message: {@message}", raw);
-                        ChatQueue.rq.Enqueue(raw);
-                        ChatQueue.LastMsg = raw;
-                    }
+                    Log.Debug("Enqueue new message: {@message}", raw);
                 }
             }
             catch (Exception ex)
@@ -220,8 +214,7 @@ namespace IronworksTranslator.Services.FFXIV
                     PointerPath = HermesAddress.GetLatestAddress().Address
                 });
                 CurrentMemoryHandler.Scanner.LoadOffsets([.. signatures]);
-                ChatQueue.rq.Enqueue("Dialogue window");
-                ChatQueue.LastMsg = "Dialogue window";
+                ChatQueue.EnqueueDialogue("Dialogue window");
 
                 Log.Information($"Attached {processName}.exe ({gameLanguage})");
                 Attached = true;

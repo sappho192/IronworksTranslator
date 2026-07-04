@@ -8,8 +8,12 @@ using System.Net;
 
 namespace IronworksTranslator.Utils.Translator
 {
-    public sealed class PapagoTranslator : TranslatorBase
+    public sealed class PapagoTranslator : TranslatorBase, IDisposable
     {
+        private readonly SemaphoreSlim browserSemaphore = new(1, 1);
+        private readonly Dictionary<string, WebBrowser> browsersByLanguagePair = [];
+        private bool disposed;
+
         private readonly TranslationLanguageCode[] translationLanguages = [
             TranslationLanguageCode.Japanese, TranslationLanguageCode.English,
             TranslationLanguageCode.German, TranslationLanguageCode.French,
@@ -42,11 +46,21 @@ namespace IronworksTranslator.Utils.Translator
             sk ??= "ja";
             string? tk = GetLanguageCode(targetLanguage);
             tk ??= "en";
+            string languagePair = $"{sk}->{tk}";
             string url = $"https://papago.naver.com/?sk={sk}&tk={tk}&st={Uri.EscapeDataString(sentence)}";
 
             try
             {
-                string translated = await RequestTranslate(url);
+                await browserSemaphore.WaitAsync();
+                string translated;
+                try
+                {
+                    translated = await RequestTranslate(url, sentence, languagePair);
+                }
+                finally
+                {
+                    browserSemaphore.Release();
+                }
 
                 if (string.IsNullOrWhiteSpace(translated))
                 {
@@ -57,6 +71,13 @@ namespace IronworksTranslator.Utils.Translator
 
                     return sentence;
                 }
+
+                Log.Debug(
+                    "Papago translated. SourceLanguage: {SourceLanguage}, TargetLanguage: {TargetLanguage}, Source: {Source}, Result: {Result}",
+                    sourceLanguage,
+                    targetLanguage,
+                    sentence,
+                    translated);
 
                 return translated;
             }
@@ -72,6 +93,32 @@ namespace IronworksTranslator.Utils.Translator
             }
         }
 
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+
+            browserSemaphore.Wait();
+            try
+            {
+                foreach (var browser in browsersByLanguagePair.Values)
+                {
+                    browser.Dispose();
+                }
+
+                browsersByLanguagePair.Clear();
+            }
+            finally
+            {
+                browserSemaphore.Release();
+                browserSemaphore.Dispose();
+            }
+        }
+
         private static string? GetLanguageCode(TranslationLanguageCode sourceLanguage)
         {
             foreach (var item in TranslationLanguageList.Papago)
@@ -84,21 +131,48 @@ namespace IronworksTranslator.Utils.Translator
             return null;
         }
 
-        private static async Task<string> RequestTranslate(string url)
+        private async Task<string> RequestTranslate(string url, string sourceText, string languagePair)
         {
-            var browser = App.GetService<WebBrowser>();
+            var browser = GetBrowser(languagePair);
             var content = browser.Navigate(url);
 
-            var translated = ExtractPapagoTargetText(content);
+            var translated = await WaitForRenderedTranslationAsync(
+                browser,
+                sourceText,
+                timeout: TimeSpan.FromSeconds(10),
+                interval: TimeSpan.FromMilliseconds(300));
             if (!string.IsNullOrWhiteSpace(translated))
             {
                 return translated;
             }
 
-            return await WaitForRenderedTranslationAsync(
-                browser,
-                timeout: TimeSpan.FromSeconds(10),
-                interval: TimeSpan.FromMilliseconds(300));
+            translated = ExtractPapagoTargetText(content);
+            if (IsSameText(translated, sourceText))
+            {
+                Log.Warning("Papago HTML parsing returned the original source text.");
+                return string.Empty;
+            }
+
+            if (string.IsNullOrWhiteSpace(translated))
+            {
+                Log.Warning("Papago translation result was empty after DOM polling and HTML parsing.");
+            }
+
+            return translated;
+        }
+
+        private WebBrowser GetBrowser(string languagePair)
+        {
+            if (browsersByLanguagePair.TryGetValue(languagePair, out var browser))
+            {
+                return browser;
+            }
+
+            Log.Debug("Creating Papago browser for language pair {LanguagePair}", languagePair);
+
+            browser = new WebBrowser();
+            browsersByLanguagePair[languagePair] = browser;
+            return browser;
         }
 
         internal static string ExtractPapagoTargetText(string html)
@@ -127,6 +201,7 @@ namespace IronworksTranslator.Utils.Translator
 
         private static async Task<string> WaitForRenderedTranslationAsync(
             WebBrowser browser,
+            string sourceText,
             TimeSpan timeout,
             TimeSpan interval)
         {
@@ -136,7 +211,9 @@ namespace IronworksTranslator.Utils.Translator
             {
                 var translated = browser.EvaluateExpression("""
                     (() => {
-                        const editor = document.querySelector('[data-testid="target-editor"]');
+                        const editor =
+                            document.querySelector('[data-testid="target-editor"]') ??
+                            document.querySelector('[role="textbox"][aria-readonly="true"][contenteditable="false"][data-lexical-editor="true"]');
                         if (!editor) return '';
 
                         const lexicalNodes = editor.querySelectorAll('[data-lexical-text="true"]');
@@ -150,13 +227,32 @@ namespace IronworksTranslator.Utils.Translator
 
                 if (!string.IsNullOrWhiteSpace(translated))
                 {
-                    return translated.Trim();
+                    translated = translated.Trim();
+                    if (!IsSameText(translated, sourceText))
+                    {
+                        return translated;
+                    }
                 }
 
                 await Task.Delay(interval);
             }
 
             return string.Empty;
+        }
+
+        private static bool IsSameText(string? left, string? right)
+        {
+            return string.Equals(
+                NormalizeForComparison(left),
+                NormalizeForComparison(right),
+                StringComparison.Ordinal);
+        }
+
+        private static string NormalizeForComparison(string? value)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? string.Empty
+                : string.Concat(value.Where(ch => !char.IsWhiteSpace(ch)));
         }
     }
 }

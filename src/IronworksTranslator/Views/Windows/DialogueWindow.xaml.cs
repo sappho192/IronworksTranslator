@@ -23,6 +23,7 @@ namespace IronworksTranslator.Views.Windows
 
         private readonly Timer chatboxTimer;
         private const int period = 500;
+        private const int MaxDialogueTextLength = 30000;
         private static readonly Regex regexItem = MyRegex();
         private readonly bool _isUiInitialized = false;
 
@@ -105,8 +106,7 @@ namespace IronworksTranslator.Views.Windows
 
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
-                                    tbDialogueTextBox.Text += $"{Environment.NewLine}{Environment.NewLine}{translated}";
-                                    tbDialogueTextBox.ScrollToEnd();
+                                    AppendDialogueText(translated);
                                 });
                             }
                         }
@@ -127,11 +127,37 @@ namespace IronworksTranslator.Views.Windows
         public void PushDialogueTextBox(string? dialogue)
         {
             if (dialogue == null) return;
-            Application.Current.Dispatcher.Invoke(() =>
+            if (!Dispatcher.CheckAccess())
             {
-                tbDialogueTextBox.Text += $"{Environment.NewLine}{Environment.NewLine}{dialogue}";
-                tbDialogueTextBox.ScrollToEnd();
-            });
+                Dispatcher.Invoke(() => PushDialogueTextBox(dialogue));
+                return;
+            }
+
+            AppendDialogueText(dialogue);
+        }
+
+        private void AppendDialogueText(string dialogue)
+        {
+            tbDialogueTextBox.AppendText($"{Environment.NewLine}{Environment.NewLine}{dialogue}");
+            TrimDialogueTextBox();
+            tbDialogueTextBox.ScrollToEnd();
+        }
+
+        private void TrimDialogueTextBox()
+        {
+            var text = tbDialogueTextBox.Text;
+            if (text.Length <= MaxDialogueTextLength)
+            {
+                return;
+            }
+
+            var trimStart = text.Length - MaxDialogueTextLength;
+            var separator = $"{Environment.NewLine}{Environment.NewLine}";
+            var nextSeparator = text.IndexOf(separator, trimStart, StringComparison.Ordinal);
+            tbDialogueTextBox.Text = nextSeparator >= 0
+                ? text[(nextSeparator + separator.Length)..]
+                : text[^MaxDialogueTextLength..];
+            tbDialogueTextBox.CaretIndex = tbDialogueTextBox.Text.Length;
         }
 
         private string Translate(string input, ClientLanguage channelLanguage, TranslatorEngine? translatorEngine = null)

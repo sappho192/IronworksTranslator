@@ -1,5 +1,6 @@
 ﻿using IronworksTranslator.Models.Settings;
 using IronworksTranslator.ViewModels.Windows;
+using Serilog;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
@@ -55,6 +56,7 @@ namespace IronworksTranslator.Views.Windows
             base.OnClosed(e);
 
             // Make sure that closing this window will begin the process of closing the application.
+            Log.Information("MainWindow closed; shutting down application.");
             Application.Current.Shutdown();
         }
 

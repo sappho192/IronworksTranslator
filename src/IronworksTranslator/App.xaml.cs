@@ -15,6 +15,7 @@ using Serilog;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Windows.Threading;
 using Wpf.Ui;
 
@@ -92,6 +93,9 @@ namespace IronworksTranslator
                 services.AddSingleton<IronworksJaKoTranslator>();
             }).Build();
 
+        private static int _hostStopStarted;
+        private static int _shutdownRequested;
+
         /// <summary>
         /// Gets registered service.
         /// </summary>
@@ -151,11 +155,17 @@ namespace IronworksTranslator
         {
             // Catch exceptions from all threads in the AppDomain.
             AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
-                ShowUnhandledException(args.ExceptionObject as Exception, "AppDomain.CurrentDomain.UnhandledException");
+                ShowUnhandledException(
+                    args.ExceptionObject as Exception,
+                    "AppDomain.CurrentDomain.UnhandledException",
+                    args.IsTerminating);
 
             // Catch exceptions from each AppDomain that uses a task scheduler for async operations.
             TaskScheduler.UnobservedTaskException += (sender, args) =>
+            {
                 ShowUnhandledException(args.Exception, "TaskScheduler.UnobservedTaskException");
+                args.SetObserved();
+            };
 
             // Catch exceptions from a single specific UI dispatcher thread.
             Dispatcher.UnhandledException += (sender, args) =>
@@ -168,7 +178,10 @@ namespace IronworksTranslator
             };
         }
 
-        private static void ShowUnhandledException(Exception e, string unhandledExceptionType)
+        private static void ShowUnhandledException(
+            Exception? e,
+            string unhandledExceptionType,
+            bool isTerminating = false)
         {
             var messageBoxTitle = Localizer.GetString("app.exception.title"); 
             var messageBoxMessage = Localizer.GetString("app.exception.description");
@@ -182,6 +195,11 @@ namespace IronworksTranslator
             });
             t.SetApartmentState(ApartmentState.STA);
             t.Start();
+
+            if (isTerminating)
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         /// <summary>
@@ -189,20 +207,85 @@ namespace IronworksTranslator
         /// </summary>
         private async void OnExit(object sender, ExitEventArgs e)
         {
-            Log.Information("OnExit: IronworksTranslator is closing.");
-            Log.CloseAndFlush();
+            Log.Information(
+                "OnExit: IronworksTranslator is closing. ExitCode: {ExitCode}",
+                e.ApplicationExitCode);
 
-            await _host.StopAsync();
-            _host.Dispose();
+            await StopHostOnceAsync("Application.OnExit");
+
+            Log.Information("OnExit: IronworksTranslator closed.");
+            Log.CloseAndFlush();
         }
 
-        public static void RequestShutdown()
+        public static void RequestShutdown(
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string filePath = "",
+            [CallerLineNumber] int lineNumber = 0)
         {
-            _host.StopAsync().Wait();
-            Log.Information("RequestShutdown: IronworksTranslator is closing.");
-            _host.Dispose();
+            if (Interlocked.Exchange(ref _shutdownRequested, 1) != 0)
+            {
+                Log.Information(
+                    "RequestShutdown ignored because shutdown is already requested. Caller: {Caller} ({File}:{Line})",
+                    caller,
+                    Path.GetFileName(filePath),
+                    lineNumber);
+                return;
+            }
 
-            Current.Shutdown();
+            Log.Information(
+                "RequestShutdown requested by {Caller} ({File}:{Line}).",
+                caller,
+                Path.GetFileName(filePath),
+                lineNumber);
+
+            var dispatcher = Current.Dispatcher;
+            if (dispatcher.CheckAccess())
+            {
+                Current.Shutdown();
+            }
+            else
+            {
+                dispatcher.BeginInvoke(new Action(Current.Shutdown));
+            }
+        }
+
+        private static async Task StopHostOnceAsync(string reason)
+        {
+            if (Interlocked.Exchange(ref _hostStopStarted, 1) != 0)
+            {
+                Log.Debug("Host stop already started. Reason: {Reason}", reason);
+                return;
+            }
+
+            try
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                await _host.StopAsync(cts.Token);
+            }
+            catch (OperationCanceledException ex)
+            {
+                Log.Warning(ex, "Timed out while stopping host. Reason: {Reason}", reason);
+            }
+            catch (ObjectDisposedException ex)
+            {
+                Log.Warning(ex, "Host was already disposed. Reason: {Reason}", reason);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to stop host. Reason: {Reason}", reason);
+            }
+
+            try
+            {
+                _host.Dispose();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to dispose host. Reason: {Reason}", reason);
+            }
         }
 
         private static void InitLogger()

@@ -2,11 +2,13 @@
 
 namespace IronworksTranslator.Utils
 {
-    public class WebBrowser
+    public class WebBrowser : IDisposable
     {
         private Browser? browser;
         private Page? webPage;
         private readonly object lockObj = new();
+        private bool disposed;
+
         public WebBrowser()
         {
             InitWebBrowser();
@@ -14,10 +16,33 @@ namespace IronworksTranslator.Utils
 
         ~WebBrowser()
         {
-            webPage?.CloseAsync();
-            browser?.CloseAsync();
-            webPage?.Dispose();
-            browser?.Dispose();
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            lock (lockObj)
+            {
+                try
+                {
+                    webPage?.CloseAsync().GetAwaiter().GetResult();
+                    browser?.CloseAsync().GetAwaiter().GetResult();
+                }
+                catch
+                {
+                }
+
+                webPage?.Dispose();
+                browser?.Dispose();
+            }
+
+            GC.SuppressFinalize(this);
         }
 
         public string Navigate(string url)
