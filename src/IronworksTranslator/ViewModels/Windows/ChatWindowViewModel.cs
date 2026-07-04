@@ -120,6 +120,19 @@ namespace IronworksTranslator.ViewModels.Windows
                 string line = chat.Line;
                 ChatLogItem decodedChat = chat.Bytes.DecodeAutoTranslate();
 
+                if (IsEmoteMessage(code))
+                {
+                    var emoteBody = GetEmoteBody(chat, decodedChat);
+                    var sourceLanguage = ResolveEmoteSourceLanguage(emoteBody, channel.MajorLanguage);
+                    var text = CreateTranslationText(emoteBody, sourceLanguage);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        AddMessage(text, channel);
+                        Diet();
+                    });
+                    return;
+                }
+
                 if (IsSystemMessage(code))
                 {
                     var text = CreateTranslationText(line, channel.MajorLanguage);
@@ -184,6 +197,120 @@ namespace IronworksTranslator.ViewModels.Windows
             return code == ChatCode.NPCDialog ||
                    code == ChatCode.NPCAnnounce ||
                    code == ChatCode.BossQuotes;
+        }
+
+        private static bool IsEmoteMessage(ChatCode code)
+        {
+            return code == ChatCode.Emote ||
+                   code == ChatCode.EmoteCustom;
+        }
+
+        private static string GetEmoteBody(ChatLogItem chat, ChatLogItem decodedChat)
+        {
+            var author = GetAuthorFromLine(decodedChat.Line);
+            var body = FirstNonEmpty(decodedChat.Message, chat.Message);
+
+            if (string.IsNullOrWhiteSpace(body))
+            {
+                body = GetBodyFromLine(decodedChat.Line);
+            }
+
+            if (string.IsNullOrWhiteSpace(body))
+            {
+                body = GetBodyFromLine(chat.Line);
+            }
+
+            return StripAuthorPrefix(
+                body,
+                author,
+                decodedChat.PlayerName,
+                chat.PlayerName,
+                decodedChat.PlayerCharacterName,
+                chat.PlayerCharacterName);
+        }
+
+        private static ClientLanguage ResolveEmoteSourceLanguage(
+            string sentence,
+            ClientLanguage configuredSourceLanguage)
+        {
+            if (configuredSourceLanguage != ClientLanguage.English &&
+                sentence.HasEnglish() &&
+                !sentence.HasJapanese() &&
+                !sentence.HasKorean())
+            {
+                return ClientLanguage.English;
+            }
+
+            return configuredSourceLanguage;
+        }
+
+        private static string FirstNonEmpty(params string?[] values)
+        {
+            return values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))?.Trim()
+                ?? string.Empty;
+        }
+
+        private static string GetAuthorFromLine(string? line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                return string.Empty;
+            }
+
+            var index = line.IndexOf(':');
+            return index > 0
+                ? line[..index].Trim()
+                : string.Empty;
+        }
+
+        private static string GetBodyFromLine(string? line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                return string.Empty;
+            }
+
+            var index = line.IndexOf(':');
+            return index > 0
+                ? line[(index + 1)..].Trim()
+                : line.Trim();
+        }
+
+        private static string StripAuthorPrefix(string value, params string?[] authors)
+        {
+            var result = value.Trim();
+            foreach (var author in authors.Where(author => !string.IsNullOrWhiteSpace(author)).Distinct())
+            {
+                var trimmedAuthor = author!.Trim();
+                if (!result.StartsWith(trimmedAuthor, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                var remainder = result[trimmedAuthor.Length..];
+                if (string.IsNullOrWhiteSpace(remainder))
+                {
+                    return string.Empty;
+                }
+
+                if (remainder[0] == ':' || remainder[0] == '：')
+                {
+                    return remainder[1..].Trim();
+                }
+
+                if (char.IsWhiteSpace(remainder[0]))
+                {
+                    return remainder.Trim();
+                }
+
+                var firstSpace = remainder.IndexOf(' ');
+                if (firstSpace >= 0)
+                {
+                    return remainder[(firstSpace + 1)..].Trim();
+                }
+            }
+
+            return result;
         }
 
         private static TranslationText CreateTranslationText(
