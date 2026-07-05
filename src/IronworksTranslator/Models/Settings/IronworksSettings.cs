@@ -61,7 +61,7 @@ namespace IronworksTranslator.Models.Settings
                     ClientLanguage = ClientLanguage.Korean,
                     TranslatorEngine = TranslatorEngine.Papago,
                     MiLMMTModelSize = MiLMMTModelSize.MiLLMT_1B,
-                    MiLMMTQuantization = MiLMMTQuantization.Q4_K_M,
+                    MiLMMTQuantization = MiLMMTQuantization.Q8_0,
                     LocalModelDevicePriority = LocalModelDevicePriority.Cuda,
                     DialogueTranslationMethod = DialogueTranslationMethod.MemorySearch,
                     DeeplApiKeys = [],

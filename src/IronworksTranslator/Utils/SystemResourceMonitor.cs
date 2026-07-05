@@ -9,16 +9,29 @@ namespace IronworksTranslator.Utils
         ulong TotalRamBytes,
         ulong UsedRamBytes,
         ulong? TotalVramBytes,
-        ulong? UsedVramBytes);
+        ulong? UsedVramBytes,
+        string? VramAdapterName)
+    {
+        public ulong AvailableRamBytes => TotalRamBytes > UsedRamBytes
+            ? TotalRamBytes - UsedRamBytes
+            : 0;
+
+        public ulong? AvailableVramBytes => TotalVramBytes is { } totalVram
+            && UsedVramBytes is { } usedVram
+            ? totalVram > usedVram
+                ? totalVram - usedVram
+                : 0
+            : null;
+    }
 
     public static class SystemResourceMonitor
     {
         public static SystemResourceSnapshot GetSnapshot()
         {
             var (totalRam, usedRam) = GetRamUsage();
-            var (totalVram, usedVram) = GetVramUsage();
+            var (totalVram, usedVram, vramAdapterName) = GetVramUsage();
 
-            return new SystemResourceSnapshot(totalRam, usedRam, totalVram, usedVram);
+            return new SystemResourceSnapshot(totalRam, usedRam, totalVram, usedVram, vramAdapterName);
         }
 
         private static (ulong TotalBytes, ulong UsedBytes) GetRamUsage()
@@ -32,15 +45,17 @@ namespace IronworksTranslator.Utils
             return (status.TotalPhys, status.TotalPhys - status.AvailPhys);
         }
 
-        private static (ulong? TotalBytes, ulong? UsedBytes) GetVramUsage()
+        private static (ulong? TotalBytes, ulong? UsedBytes, string? AdapterName) GetVramUsage()
         {
             var primaryGpu = GetPrimaryGpuAdapter();
             var totalBytes = primaryGpu?.DedicatedVideoMemoryBytes
                 ?? GetVramTotalBytesFromWmi();
             var usedBytes = GetDedicatedVramUsageFromPerformanceCounters(primaryGpu?.PerformanceCounterLuid)
                 ?? GetDedicatedVramUsageFromWmi();
+            var adapterName = primaryGpu?.Name
+                ?? GetVramAdapterNameFromWmi();
 
-            return (totalBytes, usedBytes);
+            return (totalBytes, usedBytes, adapterName);
         }
 
         private static GpuAdapterInfo? GetPrimaryGpuAdapter()
@@ -113,6 +128,42 @@ namespace IronworksTranslator.Utils
             catch (Exception ex)
             {
                 Log.Debug(ex, "Failed to query total VRAM.");
+                return null;
+            }
+        }
+
+        private static string? GetVramAdapterNameFromWmi()
+        {
+            try
+            {
+                string? adapterName = null;
+                ulong largestAdapterRam = 0;
+                using (var searcher = new ManagementObjectSearcher("SELECT Name, AdapterRAM FROM Win32_VideoController"))
+                using (var results = searcher.Get())
+                {
+                    foreach (ManagementObject result in results)
+                    {
+                        if (result["Name"] is not string name)
+                        {
+                            continue;
+                        }
+
+                        var adapterRam = result["AdapterRAM"] is uint ram
+                            ? ram
+                            : 0;
+                        if (adapterName == null || adapterRam > largestAdapterRam)
+                        {
+                            adapterName = name;
+                            largestAdapterRam = adapterRam;
+                        }
+                    }
+                }
+
+                return adapterName;
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Failed to query VRAM adapter name.");
                 return null;
             }
         }

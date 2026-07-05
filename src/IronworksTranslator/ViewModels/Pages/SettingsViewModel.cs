@@ -79,6 +79,10 @@ namespace IronworksTranslator.ViewModels.Pages
         private MiLMMTModelSize _miLMMTModelSize = IronworksSettings.Instance.TranslatorSettings.MiLMMTModelSize;
         [ObservableProperty]
         private int _miLMMTModelSizeIndex = (int)IronworksSettings.Instance.TranslatorSettings.MiLMMTModelSize;
+        partial void OnMiLMMTModelSizeChanged(MiLMMTModelSize value)
+        {
+            EnsureSupportedMiLMMTProfile();
+        }
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
@@ -92,6 +96,10 @@ namespace IronworksTranslator.ViewModels.Pages
         private MiLMMTQuantization _miLMMTQuantization = IronworksSettings.Instance.TranslatorSettings.MiLMMTQuantization;
         [ObservableProperty]
         private int _miLMMTQuantizationIndex = (int)IronworksSettings.Instance.TranslatorSettings.MiLMMTQuantization;
+        partial void OnMiLMMTQuantizationChanged(MiLMMTQuantization value)
+        {
+            EnsureSupportedMiLMMTProfile();
+        }
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
@@ -99,6 +107,10 @@ namespace IronworksTranslator.ViewModels.Pages
         private LocalModelDevicePriority _localModelDevicePriority = IronworksSettings.Instance.TranslatorSettings.LocalModelDevicePriority;
         [ObservableProperty]
         private int _localModelDevicePriorityIndex = (int)IronworksSettings.Instance.TranslatorSettings.LocalModelDevicePriority;
+        partial void OnLocalModelDevicePriorityChanged(LocalModelDevicePriority value)
+        {
+            RefreshMiLMMTProfileSummary();
+        }
 
         public MiLMMTModelProfile SelectedMiLMMTProfile =>
             MiLMMTModelProfiles.Get(MiLMMTModelSize, MiLMMTQuantization);
@@ -117,9 +129,26 @@ namespace IronworksTranslator.ViewModels.Pages
             ? Localizer.GetString("settings.translator.engine.milmmt.status.downloaded")
             : Localizer.GetString("settings.translator.engine.milmmt.status.not_downloaded");
 
+        private void EnsureSupportedMiLMMTProfile()
+        {
+            if (MiLMMTModelProfiles.IsSupported(MiLMMTModelSize, MiLMMTQuantization))
+            {
+                return;
+            }
+
+            var fallbackQuantization = MiLMMTModelProfiles.GetDefaultQuantization(MiLMMTModelSize);
+            if (MiLMMTQuantization != fallbackQuantization)
+            {
+                MiLMMTQuantization = fallbackQuantization;
+                MiLMMTQuantizationIndex = (int)fallbackQuantization;
+            }
+        }
+
         [ObservableProperty]
         private List<MiLMMTModelStorageItem> _miLMMTModelStorageItems =
-            MiLMMTModelProfiles.All.Select(MiLMMTModelStorageItem.FromProfile).ToList();
+            [];
+
+        private SystemResourceSnapshot? _lastSystemResourceSnapshot;
 
         public void RefreshMiLMMTProfileSummary()
         {
@@ -129,8 +158,23 @@ namespace IronworksTranslator.ViewModels.Pages
             OnPropertyChanged(nameof(SelectedMiLMMTEstimatedMemory));
             OnPropertyChanged(nameof(SelectedMiLMMTNote));
             OnPropertyChanged(nameof(SelectedMiLMMTModelStatus));
-            MiLMMTModelStorageItems = MiLMMTModelProfiles.All
-                .Select(MiLMMTModelStorageItem.FromProfile)
+            MiLMMTModelStorageItems = BuildMiLMMTModelStorageItems();
+        }
+
+        public void UpdateMiLMMTResourceSnapshot(SystemResourceSnapshot snapshot)
+        {
+            _lastSystemResourceSnapshot = snapshot;
+            MiLMMTModelStorageItems = BuildMiLMMTModelStorageItems();
+        }
+
+        private List<MiLMMTModelStorageItem> BuildMiLMMTModelStorageItems()
+        {
+            return MiLMMTModelProfiles.All
+                .Select(profile => MiLMMTModelStorageItem.FromProfile(
+                    profile,
+                    SelectedMiLMMTProfile,
+                    _lastSystemResourceSnapshot,
+                    LocalModelDevicePriority))
                 .ToList();
         }
 
@@ -166,6 +210,7 @@ namespace IronworksTranslator.ViewModels.Pages
         public SettingsViewModel(IContentDialogService contentDialogService)
         {
             _contentDialogService = contentDialogService;
+            EnsureSupportedMiLMMTProfile();
         }
 
         public void OnNavigatedTo()

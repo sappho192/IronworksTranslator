@@ -314,6 +314,15 @@ namespace IronworksTranslator.Views.Pages
             if (comboBox == null) return;
 
             var selectedItem = ViewModel.TranslatorEngine;
+            if (selectedItem == Models.Enums.TranslatorEngine.Ironworks_Ja_Ko
+                && !ConfirmDeprecatedIronworksJaKo())
+            {
+                SelectTranslatorEngine(Models.Enums.TranslatorEngine.MiLLMT, comboBox);
+                UpdateTranslatorTooltip(ViewModel.TranslatorEngine);
+                EnsureLocalTranslatorModelReady(ViewModel.TranslatorEngine, comboBox);
+                return;
+            }
+
             if (selectedItem == Models.Enums.TranslatorEngine.DeepL_API)
             {
                 if (IronworksSettings.Instance.TranslatorSettings.DeeplApiKeys.Count == 0)
@@ -334,12 +343,23 @@ namespace IronworksTranslator.Views.Pages
             }
         }
 
+        private static bool ConfirmDeprecatedIronworksJaKo()
+        {
+            var result = System.Windows.MessageBox.Show(
+                Localizer.GetString("settings.translator.engine.jako.deprecated.confirm"),
+                Localizer.GetString("settings.translator.engine.jako.deprecated.title"),
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning);
+
+            return result == System.Windows.MessageBoxResult.Yes;
+        }
+
         private void MiLMMTModelOption_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_isInitialized || _isChangingTranslatorSelection) return;
 
             UpdateMiLMMTProfileSummary();
-            if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.MiLLMT_1B_Q4_K_M)
+            if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.MiLLMT)
             {
                 EnsureLocalTranslatorModelReady(ViewModel.TranslatorEngine, cbTranslator);
             }
@@ -353,6 +373,14 @@ namespace IronworksTranslator.Views.Pages
         private void DeleteSelectedMiLMMTModel_Click(object sender, RoutedEventArgs e)
         {
             DeleteMiLMMTModel(ViewModel.SelectedMiLMMTProfile);
+        }
+
+        private void SelectMiLMMTModel_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as System.Windows.Controls.Button)?.Tag is MiLMMTModelStorageItem item)
+            {
+                SelectMiLMMTModel(item.Profile);
+            }
         }
 
         private void OpenMiLMMTModelDirectory_Click(object sender, RoutedEventArgs e)
@@ -422,6 +450,19 @@ namespace IronworksTranslator.Views.Pages
             UpdateMiLMMTProfileSummary();
         }
 
+        private void SelectMiLMMTModel(MiLMMTModelProfile profile)
+        {
+            SelectMiLMMTProfile(profile, File.Exists(profile.FilePath));
+            if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.MiLLMT)
+            {
+                EnsureLocalTranslatorModelReady(ViewModel.TranslatorEngine, cbTranslator);
+            }
+            else
+            {
+                UpdateMiLMMTProfileSummary();
+            }
+        }
+
         private void EnsureLocalTranslatorModelReady(
             Models.Enums.TranslatorEngine selectedItem,
             ComboBox comboBox)
@@ -439,7 +480,7 @@ namespace IronworksTranslator.Views.Pages
 
             if (result != System.Windows.MessageBoxResult.Yes)
             {
-                if (selectedItem == Models.Enums.TranslatorEngine.MiLLMT_1B_Q4_K_M
+                if (selectedItem == Models.Enums.TranslatorEngine.MiLLMT
                     && TrySelectAvailableMiLMMTProfile())
                 {
                     UpdateTranslatorTooltip(selectedItem);
@@ -450,7 +491,7 @@ namespace IronworksTranslator.Views.Pages
                 return;
             }
 
-            var window = selectedItem == Models.Enums.TranslatorEngine.MiLLMT_1B_Q4_K_M
+            var window = selectedItem == Models.Enums.TranslatorEngine.MiLLMT
                 ? new InitializationWindow(selectedItem, ViewModel.SelectedMiLMMTProfile)
                 : new InitializationWindow(selectedItem);
             window.ShowDialog();
@@ -460,14 +501,21 @@ namespace IronworksTranslator.Views.Pages
 
         private void RevertTranslatorEngineToDefault(ComboBox comboBox)
         {
+            SelectTranslatorEngine(Models.Enums.TranslatorEngine.Papago, comboBox);
+        }
+
+        private void SelectTranslatorEngine(
+            Models.Enums.TranslatorEngine translatorEngine,
+            ComboBox comboBox)
+        {
             _isChangingTranslatorSelection = true;
             try
             {
-                ViewModel.TranslatorEngine = Models.Enums.TranslatorEngine.Papago;
-                ViewModel.TranslatorEngineIndex = (int)Models.Enums.TranslatorEngine.Papago;
-                comboBox.SelectedItem = Models.Enums.TranslatorEngine.Papago;
-                comboBox.SelectedIndex = (int)Models.Enums.TranslatorEngine.Papago;
-                UpdateTranslatorTooltip(Models.Enums.TranslatorEngine.Papago);
+                ViewModel.TranslatorEngine = translatorEngine;
+                ViewModel.TranslatorEngineIndex = (int)translatorEngine;
+                comboBox.SelectedItem = translatorEngine;
+                comboBox.SelectedIndex = (int)translatorEngine;
+                UpdateTranslatorTooltip(translatorEngine);
             }
             finally
             {
@@ -478,7 +526,7 @@ namespace IronworksTranslator.Views.Pages
         private static bool RequiresLocalTranslatorModel(Models.Enums.TranslatorEngine selectedItem)
         {
             return selectedItem is Models.Enums.TranslatorEngine.Ironworks_Ja_Ko
-                or Models.Enums.TranslatorEngine.MiLLMT_1B_Q4_K_M;
+                or Models.Enums.TranslatorEngine.MiLLMT;
         }
 
         private bool LocalTranslatorModelExists(Models.Enums.TranslatorEngine selectedItem)
@@ -488,7 +536,7 @@ namespace IronworksTranslator.Views.Pages
                 Models.Enums.TranslatorEngine.Ironworks_Ja_Ko =>
                     File.Exists(Path.Combine(AppPaths.AihubJaKoModelDirectory, "encoder_model.onnx"))
                     && File.Exists(Path.Combine(AppPaths.AihubJaKoModelDirectory, "decoder_model_merged.onnx")),
-                Models.Enums.TranslatorEngine.MiLLMT_1B_Q4_K_M => File.Exists(ViewModel.SelectedMiLMMTProfile.FilePath),
+                Models.Enums.TranslatorEngine.MiLLMT => File.Exists(ViewModel.SelectedMiLMMTProfile.FilePath),
                 _ => true,
             };
         }
@@ -506,10 +554,10 @@ namespace IronworksTranslator.Views.Pages
             txtJaKoTooltip.Visibility = selectedItem == Models.Enums.TranslatorEngine.Ironworks_Ja_Ko
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-            txtMiLMMTTooltip.Visibility = selectedItem == Models.Enums.TranslatorEngine.MiLLMT_1B_Q4_K_M
+            txtMiLMMTTooltip.Visibility = selectedItem == Models.Enums.TranslatorEngine.MiLLMT
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-            panelMiLMMTOptions.Visibility = selectedItem == Models.Enums.TranslatorEngine.MiLLMT_1B_Q4_K_M
+            panelMiLMMTOptions.Visibility = selectedItem == Models.Enums.TranslatorEngine.MiLLMT
                 ? Visibility.Visible
                 : Visibility.Collapsed;
             UpdateMiLMMTProfileSummary();
@@ -573,7 +621,7 @@ namespace IronworksTranslator.Views.Pages
             return true;
         }
 
-        private void SelectMiLMMTProfile(MiLMMTModelProfile profile)
+        private void SelectMiLMMTProfile(MiLMMTModelProfile profile, bool rememberIfAvailable = true)
         {
             _isChangingTranslatorSelection = true;
             try
@@ -582,8 +630,11 @@ namespace IronworksTranslator.Views.Pages
                 ViewModel.MiLMMTModelSizeIndex = (int)profile.Size;
                 ViewModel.MiLMMTQuantization = profile.Quantization;
                 ViewModel.MiLMMTQuantizationIndex = (int)profile.Quantization;
-                _lastAvailableMiLMMTModelSize = profile.Size;
-                _lastAvailableMiLMMTQuantization = profile.Quantization;
+                if (rememberIfAvailable)
+                {
+                    _lastAvailableMiLMMTModelSize = profile.Size;
+                    _lastAvailableMiLMMTQuantization = profile.Quantization;
+                }
                 ViewModel.RefreshMiLMMTProfileSummary();
             }
             finally
@@ -600,6 +651,10 @@ namespace IronworksTranslator.Views.Pages
             }
 
             var snapshot = SystemResourceMonitor.GetSnapshot();
+            ViewModel.UpdateMiLMMTResourceSnapshot(snapshot);
+            txtVramAdapterName.Text = string.IsNullOrWhiteSpace(snapshot.VramAdapterName)
+                ? "GPU: N/A"
+                : $"GPU: {snapshot.VramAdapterName}";
             if (snapshot.TotalRamBytes > 0)
             {
                 txtRamUsage.Text = FormatUsage(snapshot.UsedRamBytes, snapshot.TotalRamBytes);

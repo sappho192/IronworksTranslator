@@ -46,8 +46,10 @@ namespace IronworksTranslator.Services
                 var deserializer = new DeserializerBuilder()
                                     .WithNamingConvention(UnderscoredNamingConvention.Instance)
                                     .Build();
+                var settingsYaml = File.ReadAllText(settingsPath)
+                    .Replace("MiLLMT_1B_Q4_K_M", "MiLLMT");
                 var settings = deserializer.Deserialize<IronworksSettings>(
-                    File.ReadAllText(settingsPath)
+                    settingsYaml
                 );
                 IronworksSettings.Instance = settings;
                 if (IronworksSettings.IsSettingsFileInValid(settings))

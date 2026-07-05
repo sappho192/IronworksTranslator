@@ -9,5 +9,8 @@ namespace IronworksTranslator.Models.Enums
 
         [Description("MiLLMT 4B")]
         MiLLMT_4B,
+
+        [Description("MiLLMT 12B")]
+        MiLLMT_12B,
     }
 }

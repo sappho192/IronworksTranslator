@@ -389,7 +389,7 @@ namespace IronworksTranslator.ViewModels.Windows
             menuItemDeepLAPI.Click += DeepLRetranslate_Click;
             var menuItemMiLMMT = new MenuItem
             {
-                Header = "MiLLMT 1B Q4_K_M",
+                Header = "MiLLMT",
                 Tag = translationParagraph
             };
             menuItemMiLMMT.Click += MiLMMTRetranslate_Click;
@@ -487,7 +487,7 @@ namespace IronworksTranslator.ViewModels.Windows
             menuItemDeepLAPI.Click += DeepLRetranslate_Click;
             var menuItemMiLMMT = new MenuItem
             {
-                Header = "MiLLMT 1B Q4_K_M",
+                Header = "MiLLMT",
                 Tag = translationParagraph
             };
             menuItemMiLMMT.Click += MiLMMTRetranslate_Click;
@@ -559,7 +559,7 @@ namespace IronworksTranslator.ViewModels.Windows
             if (((MenuItem)sender).Tag is TranslationParagraph tParagraph)
             {
                 var tText = tParagraph.Text;
-                var api = TranslatorEngine.MiLLMT_1B_Q4_K_M;
+                var api = TranslatorEngine.MiLLMT;
                 ReplaceTextInParagraph(tParagraph.Paragraph, ReTranslate(tText, api));
             }
         }
@@ -592,7 +592,7 @@ namespace IronworksTranslator.ViewModels.Windows
                             (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
                         );
                     break;
-                case TranslatorEngine.MiLLMT_1B_Q4_K_M:
+                case TranslatorEngine.MiLLMT:
                     result = App.GetService<MiLMMTTranslator>().Translate(
                             input,
                             (TranslationLanguageCode)channelLanguage,

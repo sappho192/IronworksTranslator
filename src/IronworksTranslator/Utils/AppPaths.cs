@@ -42,7 +42,7 @@ namespace IronworksTranslator.Utils
 
         public static string MiLMMTModelPath { get; } = Path.Combine(
             MiLMMTModelDirectory,
-            "MiLMMT-46-1B-v0.1.Q4_K_M.gguf");
+            "MiLMMT-46-1B-v0.1.Q8_0.gguf");
 
         public static string GetMiLMMTModelDirectory(MiLMMTModelSize modelSize)
         {
@@ -51,6 +51,7 @@ namespace IronworksTranslator.Utils
                 modelSize switch
                 {
                     MiLMMTModelSize.MiLLMT_4B => "milmmt-46-4b-v0.1",
+                    MiLMMTModelSize.MiLLMT_12B => "milmmt-46-12b-v0.1",
                     _ => "milmmt-46-1b-v0.1",
                 });
         }

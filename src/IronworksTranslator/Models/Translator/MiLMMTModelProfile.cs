@@ -19,6 +19,7 @@ namespace IronworksTranslator.Models.Translator
         {
             MiLMMTModelSize.MiLLMT_1B => "MiLLMT 1B",
             MiLMMTModelSize.MiLLMT_4B => "MiLLMT 4B",
+            MiLMMTModelSize.MiLLMT_12B => "MiLLMT 12B",
             _ => Size.ToString(),
         };
         public string DirectoryPath => AppPaths.GetMiLMMTModelDirectory(Size);
@@ -66,6 +67,15 @@ namespace IronworksTranslator.Models.Translator
                 "f97bca9c5e1e221568c87ed0e71d7869418b728e07469187c46b708c4f6b148f",
                 5.8,
                 "settings.translator.engine.milmmt.note.4b.q8"),
+            new(
+                MiLMMTModelSize.MiLLMT_12B,
+                MiLMMTQuantization.Q4_K_M,
+                "mradermacher/MiLMMT-46-12B-v0.1-GGUF",
+                "MiLMMT-46-12B-v0.1.Q4_K_M.gguf",
+                7867146656,
+                "c9ccc4ae361c83aa63d2c0995851f4bb1981609959ed184727c1d135d81cd28f",
+                9.5,
+                "settings.translator.engine.milmmt.note.12b.q4"),
         ];
 
         public static IReadOnlyList<MiLMMTModelProfile> All => Profiles;
@@ -75,12 +85,29 @@ namespace IronworksTranslator.Models.Translator
             return Profiles.First(profile => profile.Size == size && profile.Quantization == quantization);
         }
 
+        public static bool IsSupported(MiLMMTModelSize size, MiLMMTQuantization quantization)
+        {
+            return Profiles.Any(profile => profile.Size == size && profile.Quantization == quantization);
+        }
+
+        public static MiLMMTQuantization GetDefaultQuantization(MiLMMTModelSize size)
+        {
+            return Profiles.First(profile => profile.Size == size).Quantization;
+        }
+
         public static MiLMMTModelProfile GetCurrent()
         {
             var settings = Models.Settings.IronworksSettings.Instance?.TranslatorSettings;
+            var size = settings?.MiLMMTModelSize ?? MiLMMTModelSize.MiLLMT_1B;
+            var quantization = settings?.MiLMMTQuantization ?? MiLMMTQuantization.Q8_0;
+            if (!IsSupported(size, quantization))
+            {
+                quantization = GetDefaultQuantization(size);
+            }
+
             return Get(
-                settings?.MiLMMTModelSize ?? MiLMMTModelSize.MiLLMT_1B,
-                settings?.MiLMMTQuantization ?? MiLMMTQuantization.Q4_K_M);
+                size,
+                quantization);
         }
     }
 }

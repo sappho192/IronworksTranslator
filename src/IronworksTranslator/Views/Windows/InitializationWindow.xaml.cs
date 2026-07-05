@@ -116,7 +116,7 @@ namespace IronworksTranslator.Views.Windows
                 case TranslatorEngine.Ironworks_Ja_Ko:
                     PrepareIronworksJaKoModel();
                     break;
-                case TranslatorEngine.MiLLMT_1B_Q4_K_M:
+                case TranslatorEngine.MiLLMT:
                     PrepareMiLMMTModel(requestedMiLMMTProfile ?? MiLMMTModelProfiles.GetCurrent());
                     break;
                 default:
