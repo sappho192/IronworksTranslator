@@ -23,10 +23,8 @@
 
         public double Invert(double value)
         {
-            // Adjust this method based on how you've modified Scale()
-            // This might involve applying the inverse of the transformations applied in Scale()
-            var inverseLogScaledValue = Math.Exp(value / (_max / _min));
-            return inverseLogScaledValue * _min;
+            var normalizedValue = Math.Sqrt(value);
+            return _min * Math.Pow(_max / _min, normalizedValue);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace IronworksTranslator.Helpers.Extensions
             {
                 if (rawMessage[i].Equals(0x02)) // STX
                 {
-                    if (i + 1 == rawMessage.Length)
+                    if (i + 2 >= rawMessage.Length)
                     {// Bound check
                         rawResult.Add(rawMessage[i]);
                         continue;
@@ -31,19 +31,20 @@ namespace IronworksTranslator.Helpers.Extensions
                         continue;
                     }
                     byte range = rawMessage[i + 2];
-                    if (i + range > rawMessage.Length)
+                    var endIndex = i + range + 2;
+                    if (range < 1 || endIndex >= rawMessage.Length)
                     {
                         rawResult.Add(rawMessage[i]);
                         continue;
                     }
 
-                    if (rawMessage[i + range + 2].Equals(0x03)) // ETX
+                    if (rawMessage[endIndex].Equals(0x03)) // ETX
                     {// Found AutoTranslate block
                         byte[] autoTranslate = new byte[range - 1];
                         Array.Copy(rawMessage, i + 3, autoTranslate, 0, range - 1);
                         //result.Add(autoTranslate);
                         rawResult.AddRange(test);
-                        i = i + range + 2;
+                        i = endIndex;
                     }
                     else
                     {
@@ -72,17 +73,18 @@ namespace IronworksTranslator.Helpers.Extensions
             {
                 if (rawMessage[i].Equals(0x02)) // STX
                 {
-                    if (i + 1 == rawMessage.Length) break; // Bound check
+                    if (i + 2 >= rawMessage.Length) break; // Bound check
                     if (!rawMessage[i + 1].Equals(0x2E)) continue; // it should be char '.'(=0x2E)
                     byte range = rawMessage[i + 2];
-                    if (i + range > rawMessage.Length) continue;
+                    var endIndex = i + range + 2;
+                    if (range < 1 || endIndex >= rawMessage.Length) continue;
 
-                    if (rawMessage[i + range + 2].Equals(0x03)) // ETX
+                    if (rawMessage[endIndex].Equals(0x03)) // ETX
                     {// Found AutoTranslate block
                         byte[] autoTranslate = new byte[range - 1];
                         Array.Copy(rawMessage, i + 3, autoTranslate, 0, range - 1);
                         result.Add(autoTranslate);
-                        i = i + range + 2;
+                        i = endIndex;
                     }
                 }
             }

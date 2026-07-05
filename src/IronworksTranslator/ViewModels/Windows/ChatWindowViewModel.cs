@@ -178,7 +178,7 @@ namespace IronworksTranslator.ViewModels.Windows
             }
         }
 
-        private static bool IsSystemMessage(ChatCode code)
+        internal static bool IsSystemMessage(ChatCode code)
         {
             return code == ChatCode.Recruitment ||
                    code == ChatCode.System ||
@@ -192,20 +192,20 @@ namespace IronworksTranslator.ViewModels.Windows
                    code == ChatCode.FieldAttack;
         }
 
-        private static bool IsDialogueMessage(ChatCode code)
+        internal static bool IsDialogueMessage(ChatCode code)
         {
             return code == ChatCode.NPCDialog ||
                    code == ChatCode.NPCAnnounce ||
                    code == ChatCode.BossQuotes;
         }
 
-        private static bool IsEmoteMessage(ChatCode code)
+        internal static bool IsEmoteMessage(ChatCode code)
         {
             return code == ChatCode.Emote ||
                    code == ChatCode.EmoteCustom;
         }
 
-        private static string GetEmoteBody(ChatLogItem chat, ChatLogItem decodedChat)
+        internal static string GetEmoteBody(ChatLogItem chat, ChatLogItem decodedChat)
         {
             var author = GetAuthorFromLine(decodedChat.Line);
             var body = FirstNonEmpty(decodedChat.Message, chat.Message);
@@ -229,7 +229,7 @@ namespace IronworksTranslator.ViewModels.Windows
                 chat.PlayerCharacterName);
         }
 
-        private static ClientLanguage ResolveEmoteSourceLanguage(
+        internal static ClientLanguage ResolveEmoteSourceLanguage(
             string sentence,
             ClientLanguage configuredSourceLanguage)
         {
@@ -244,13 +244,13 @@ namespace IronworksTranslator.ViewModels.Windows
             return configuredSourceLanguage;
         }
 
-        private static string FirstNonEmpty(params string?[] values)
+        internal static string FirstNonEmpty(params string?[] values)
         {
             return values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))?.Trim()
                 ?? string.Empty;
         }
 
-        private static string GetAuthorFromLine(string? line)
+        internal static string GetAuthorFromLine(string? line)
         {
             if (string.IsNullOrWhiteSpace(line))
             {
@@ -263,7 +263,7 @@ namespace IronworksTranslator.ViewModels.Windows
                 : string.Empty;
         }
 
-        private static string GetBodyFromLine(string? line)
+        internal static string GetBodyFromLine(string? line)
         {
             if (string.IsNullOrWhiteSpace(line))
             {
@@ -276,7 +276,7 @@ namespace IronworksTranslator.ViewModels.Windows
                 : line.Trim();
         }
 
-        private static string StripAuthorPrefix(string value, params string?[] authors)
+        internal static string StripAuthorPrefix(string value, params string?[] authors)
         {
             var result = value.Trim();
             foreach (var author in authors.Where(author => !string.IsNullOrWhiteSpace(author)).Distinct())

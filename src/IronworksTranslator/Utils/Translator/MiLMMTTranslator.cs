@@ -233,7 +233,7 @@ namespace IronworksTranslator.Utils.Translator
                 ?? LocalModelDevicePriority.Cuda;
         }
 
-        private static string RenderPrompt(
+        internal static string RenderPrompt(
             TranslationLanguageCode sourceLanguage,
             TranslationLanguageCode targetLanguage,
             string text)
@@ -259,7 +259,7 @@ namespace IronworksTranslator.Utils.Translator
             };
         }
 
-        private static string StripStops(string text)
+        internal static string StripStops(string text)
         {
             foreach (var stop in StopTokens)
             {
