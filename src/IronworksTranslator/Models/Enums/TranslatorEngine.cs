@@ -10,5 +10,7 @@ namespace IronworksTranslator.Models.Enums
         DeepL_API,
         [Description("Ironworks Ja→Ko (Beta)")]
         Ironworks_Ja_Ko,
+        [Description("MiLLMT (Local GGUF)")]
+        MiLLMT_1B_Q4_K_M,
     }
 }

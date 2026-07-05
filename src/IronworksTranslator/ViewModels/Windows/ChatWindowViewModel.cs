@@ -387,9 +387,16 @@ namespace IronworksTranslator.ViewModels.Windows
                 Tag = translationParagraph
             };
             menuItemDeepLAPI.Click += DeepLRetranslate_Click;
+            var menuItemMiLMMT = new MenuItem
+            {
+                Header = "MiLLMT 1B Q4_K_M",
+                Tag = translationParagraph
+            };
+            menuItemMiLMMT.Click += MiLMMTRetranslate_Click;
 
             menuItemReTranslate.Items.Add(menuItemPapago);
             menuItemReTranslate.Items.Add(menuItemDeepLAPI);
+            menuItemReTranslate.Items.Add(menuItemMiLMMT);
             contextMenu.Items.Add(menuItemReTranslate);
 
             paragraph.ContextMenu = contextMenu;
@@ -478,9 +485,16 @@ namespace IronworksTranslator.ViewModels.Windows
                 Tag = translationParagraph
             };
             menuItemDeepLAPI.Click += DeepLRetranslate_Click;
+            var menuItemMiLMMT = new MenuItem
+            {
+                Header = "MiLLMT 1B Q4_K_M",
+                Tag = translationParagraph
+            };
+            menuItemMiLMMT.Click += MiLMMTRetranslate_Click;
 
             menuItemReTranslate.Items.Add(menuItemPapago);
             menuItemReTranslate.Items.Add(menuItemDeepLAPI);
+            menuItemReTranslate.Items.Add(menuItemMiLMMT);
             contextMenu.Items.Add(menuItemReTranslate);
 
             paragraph.ContextMenu = contextMenu;
@@ -540,6 +554,16 @@ namespace IronworksTranslator.ViewModels.Windows
             }
         }
 
+        private void MiLMMTRetranslate_Click(object sender, RoutedEventArgs e)
+        {
+            if (((MenuItem)sender).Tag is TranslationParagraph tParagraph)
+            {
+                var tText = tParagraph.Text;
+                var api = TranslatorEngine.MiLLMT_1B_Q4_K_M;
+                ReplaceTextInParagraph(tParagraph.Paragraph, ReTranslate(tText, api));
+            }
+        }
+
         private static string Translate(string input, ClientLanguage channelLanguage, TranslatorEngine? translatorEngine = null)
         {
             Log.Information($"Translating {input}");
@@ -563,6 +587,13 @@ namespace IronworksTranslator.ViewModels.Windows
                     break;
                 case TranslatorEngine.Ironworks_Ja_Ko:
                     result = App.GetService<IronworksJaKoTranslator>().Translate(
+                            input,
+                            (TranslationLanguageCode)channelLanguage,
+                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
+                        );
+                    break;
+                case TranslatorEngine.MiLLMT_1B_Q4_K_M:
+                    result = App.GetService<MiLMMTTranslator>().Translate(
                             input,
                             (TranslationLanguageCode)channelLanguage,
                             (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage

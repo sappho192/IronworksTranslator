@@ -11,7 +11,7 @@
         Topmost="True"
         ResizeMode="NoResize"
         Style="{StaticResource WindowAll}"
-        Title="InitializationWindow" Height="220" Width="300">
+        Title="InitializationWindow" Height="240" Width="340">
     <Grid>
         <StackPanel Orientation="Vertical" Margin="16">
             <ui:ProgressRing Width="30" Height="30" Name="prWorker" IsIndeterminate="True"/>
@@ -21,9 +21,11 @@
             <ui:TextBlock Name="txtProgress" HorizontalAlignment="Center"
                 FontTypography="Body" FontSize="16"/>
             <Border Height="16"/>
-            <ProgressBar Name="pbDownloader" Width="150" Height="15"/>
+            <ProgressBar Name="pbDownloader" Width="240" Height="15"/>
             <Border Height="8"/>
-            <ui:TextBlock TextWrapping="Wrap" Name="txtDownloaderFilename" FontSize="12"/>
+            <ui:TextBlock TextWrapping="Wrap" Name="txtDownloaderFilename" FontSize="12" TextAlignment="Center"/>
+            <Border Height="2"/>
+            <ui:TextBlock TextWrapping="Wrap" Name="txtDownloaderBytes" FontSize="12" TextAlignment="Center"/>
         </StackPanel>
     </Grid>
 </Window>

@@ -1,9 +1,11 @@
 ﻿using IronworksTranslator.Helpers;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
+using IronworksTranslator.Models.Translator;
 using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Aspect;
 using ObservableCollections;
+using System.IO;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
@@ -64,6 +66,73 @@ namespace IronworksTranslator.ViewModels.Pages
         private TranslatorEngine _translatorEngine = IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
         [ObservableProperty]
         private int _translatorEngineIndex = (int)IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        [NotifyPropertyChangedFor(nameof(MiLMMTModelSizeIndex))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTProfile))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTModelDisplayName))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTDownloadSize))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTEstimatedMemory))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTNote))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTModelStatus))]
+        private MiLMMTModelSize _miLMMTModelSize = IronworksSettings.Instance.TranslatorSettings.MiLMMTModelSize;
+        [ObservableProperty]
+        private int _miLMMTModelSizeIndex = (int)IronworksSettings.Instance.TranslatorSettings.MiLMMTModelSize;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        [NotifyPropertyChangedFor(nameof(MiLMMTQuantizationIndex))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTProfile))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTModelDisplayName))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTDownloadSize))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTEstimatedMemory))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTNote))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTModelStatus))]
+        private MiLMMTQuantization _miLMMTQuantization = IronworksSettings.Instance.TranslatorSettings.MiLMMTQuantization;
+        [ObservableProperty]
+        private int _miLMMTQuantizationIndex = (int)IronworksSettings.Instance.TranslatorSettings.MiLMMTQuantization;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        [NotifyPropertyChangedFor(nameof(LocalModelDevicePriorityIndex))]
+        private LocalModelDevicePriority _localModelDevicePriority = IronworksSettings.Instance.TranslatorSettings.LocalModelDevicePriority;
+        [ObservableProperty]
+        private int _localModelDevicePriorityIndex = (int)IronworksSettings.Instance.TranslatorSettings.LocalModelDevicePriority;
+
+        public MiLMMTModelProfile SelectedMiLMMTProfile =>
+            MiLMMTModelProfiles.Get(MiLMMTModelSize, MiLMMTQuantization);
+
+        public string SelectedMiLMMTModelDisplayName => SelectedMiLMMTProfile.DisplayName;
+        public string SelectedMiLMMTDownloadSize =>
+            string.Format(
+                Localizer.GetString("settings.translator.engine.milmmt.download_size"),
+                SelectedMiLMMTProfile.FileSize / 1024d / 1024d / 1024d);
+        public string SelectedMiLMMTEstimatedMemory =>
+            string.Format(
+                Localizer.GetString("settings.translator.engine.milmmt.estimated_memory"),
+                SelectedMiLMMTProfile.EstimatedMemoryGb);
+        public string SelectedMiLMMTNote => Localizer.GetString(SelectedMiLMMTProfile.NoteKey);
+        public string SelectedMiLMMTModelStatus => File.Exists(SelectedMiLMMTProfile.FilePath)
+            ? Localizer.GetString("settings.translator.engine.milmmt.status.downloaded")
+            : Localizer.GetString("settings.translator.engine.milmmt.status.not_downloaded");
+
+        [ObservableProperty]
+        private List<MiLMMTModelStorageItem> _miLMMTModelStorageItems =
+            MiLMMTModelProfiles.All.Select(MiLMMTModelStorageItem.FromProfile).ToList();
+
+        public void RefreshMiLMMTProfileSummary()
+        {
+            OnPropertyChanged(nameof(SelectedMiLMMTProfile));
+            OnPropertyChanged(nameof(SelectedMiLMMTModelDisplayName));
+            OnPropertyChanged(nameof(SelectedMiLMMTDownloadSize));
+            OnPropertyChanged(nameof(SelectedMiLMMTEstimatedMemory));
+            OnPropertyChanged(nameof(SelectedMiLMMTNote));
+            OnPropertyChanged(nameof(SelectedMiLMMTModelStatus));
+            MiLMMTModelStorageItems = MiLMMTModelProfiles.All
+                .Select(MiLMMTModelStorageItem.FromProfile)
+                .ToList();
+        }
 
         [ObservableProperty]
         private INotifyCollectionChangedSynchronizedViewList<string> _deeplApiKeys = 

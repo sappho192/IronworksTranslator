@@ -188,6 +188,13 @@ namespace IronworksTranslator.Views.Windows
                             (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
                         );
                     break;
+                case TranslatorEngine.MiLLMT_1B_Q4_K_M:
+                    result = App.GetService<MiLMMTTranslator>().Translate(
+                            input,
+                            (TranslationLanguageCode)channelLanguage,
+                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
+                        );
+                    break;
                 default:
                     break;
             }

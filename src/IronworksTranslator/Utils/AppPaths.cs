@@ -1,3 +1,4 @@
+using IronworksTranslator.Models.Enums;
 using Serilog;
 using System.IO;
 
@@ -34,6 +35,25 @@ namespace IronworksTranslator.Utils
         public static string AihubJaKoModelDirectory { get; } = Path.Combine(
             ModelDirectory,
             "aihub-ja-ko-translator");
+
+        public static string MiLMMTModelDirectory { get; } = Path.Combine(
+            ModelDirectory,
+            "milmmt-46-1b-v0.1");
+
+        public static string MiLMMTModelPath { get; } = Path.Combine(
+            MiLMMTModelDirectory,
+            "MiLMMT-46-1B-v0.1.Q4_K_M.gguf");
+
+        public static string GetMiLMMTModelDirectory(MiLMMTModelSize modelSize)
+        {
+            return Path.Combine(
+                ModelDirectory,
+                modelSize switch
+                {
+                    MiLMMTModelSize.MiLLMT_4B => "milmmt-46-4b-v0.1",
+                    _ => "milmmt-46-1b-v0.1",
+                });
+        }
 
         public static string TokenizersDirectory { get; } = Path.Combine(
             DataDirectory,

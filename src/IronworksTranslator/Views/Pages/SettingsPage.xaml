@@ -27,6 +27,9 @@
         <converters:AppLanguageToStringConverter x:Key="AppLanguageToStringConverter"/>
         <converters:ClientLanguageToStringConverter x:Key="ClientLanguageToStringConverter"/>
         <converters:TranslatorEngineToStringConverter x:Key="TranslatorEngineToStringConverter"/>
+        <converters:MiLMMTModelSizeToStringConverter x:Key="MiLMMTModelSizeToStringConverter"/>
+        <converters:MiLMMTQuantizationToStringConverter x:Key="MiLMMTQuantizationToStringConverter"/>
+        <converters:LocalModelDevicePriorityToStringConverter x:Key="LocalModelDevicePriorityToStringConverter"/>
         <converters:DialogueTranslationMethodToStringConverter x:Key="DialogueTranslationMethodToStringConverter"/>
         <StackPanel x:Key="DialogContent">
             <ui:TextBox Name="tbNewDeeplApiKey" Text="" 
@@ -120,6 +123,122 @@
                                         Text="{i18n:StringLocalizer settings.translator.engine.tooltip.papago}"/>
                                     <ui:TextBlock Name="txtJaKoTooltip" FontTypography="BodyStrong" FontSize="12" Visibility="Collapsed"
                                         Text="{i18n:StringLocalizer settings.translator.engine.tooltip.jako}"/>
+                                    <ui:TextBlock Name="txtMiLMMTTooltip" FontTypography="BodyStrong" FontSize="12" Visibility="Collapsed"
+                                        Text="{i18n:StringLocalizer settings.translator.engine.tooltip.milmmt}"/>
+                                    <StackPanel Name="panelMiLMMTOptions" Margin="0,12,0,0" Visibility="Collapsed">
+                                        <ui:TextBlock Margin="0,0,0,8"
+                                            Text="{i18n:StringLocalizer settings.translator.engine.milmmt.apply_notice}"
+                                            TextWrapping="Wrap"
+                                            FontTypography="Caption"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="16"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="16"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.milmmt.model}" FontTypography="Caption"/>
+                                                <ComboBox Margin="0,4,0,0"
+                                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:MiLMMTModelSize}}"
+                                                    SelectedValue="{Binding ViewModel.MiLMMTModelSize, Converter={StaticResource MiLMMTModelSizeToStringConverter}, Mode=TwoWay}"
+                                                    SelectedIndex="{Binding ViewModel.MiLMMTModelSizeIndex, Mode=TwoWay}"
+                                                    SelectionChanged="MiLMMTModelOption_SelectionChanged"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.milmmt.quantization}" FontTypography="Caption"/>
+                                                <ComboBox Margin="0,4,0,0"
+                                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:MiLMMTQuantization}}"
+                                                    SelectedValue="{Binding ViewModel.MiLMMTQuantization, Converter={StaticResource MiLMMTQuantizationToStringConverter}, Mode=TwoWay}"
+                                                    SelectedIndex="{Binding ViewModel.MiLMMTQuantizationIndex, Mode=TwoWay}"
+                                                    SelectionChanged="MiLMMTModelOption_SelectionChanged"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="4">
+                                                <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.milmmt.device}" FontTypography="Caption"/>
+                                                <ComboBox Margin="0,4,0,0"
+                                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:LocalModelDevicePriority}}"
+                                                    SelectedValue="{Binding ViewModel.LocalModelDevicePriority, Converter={StaticResource LocalModelDevicePriorityToStringConverter}, Mode=TwoWay}"
+                                                    SelectedIndex="{Binding ViewModel.LocalModelDevicePriorityIndex, Mode=TwoWay}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                        <Grid Margin="0,12,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="16"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Padding="12" BorderThickness="1" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" CornerRadius="6">
+                                                <StackPanel>
+                                                    <ui:TextBlock Text="{Binding ViewModel.SelectedMiLMMTModelDisplayName}" FontTypography="BodyStrong"/>
+                                                    <ui:TextBlock Margin="0,4,0,0" Text="{Binding ViewModel.SelectedMiLMMTDownloadSize}" FontTypography="Caption"/>
+                                                    <ui:TextBlock Margin="0,2,0,0" Text="{Binding ViewModel.SelectedMiLMMTEstimatedMemory}" FontTypography="Caption"/>
+                                                    <ui:TextBlock Margin="0,2,0,0" Text="{Binding ViewModel.SelectedMiLMMTModelStatus}" FontTypography="Caption"/>
+                                                    <ui:TextBlock Margin="0,8,0,0" Text="{Binding ViewModel.SelectedMiLMMTNote}" TextWrapping="Wrap" FontTypography="Caption"/>
+                                                    <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                                                        <Button Content="{i18n:StringLocalizer settings.translator.engine.milmmt.open_directory}"
+                                                            Click="OpenSelectedMiLMMTModelDirectory_Click"/>
+                                                        <Button Margin="8,0,0,0" Content="{i18n:StringLocalizer settings.translator.engine.milmmt.delete_selected}"
+                                                            Click="DeleteSelectedMiLMMTModel_Click"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Grid.Column="2" Padding="12" BorderThickness="1" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" CornerRadius="6">
+                                                <StackPanel>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="80"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="110"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <ui:TextBlock Grid.Column="0" Text="RAM" FontTypography="Caption" VerticalAlignment="Center"/>
+                                                        <ProgressBar Grid.Column="1" Name="pbRamUsage" Height="6" Minimum="0" Maximum="100" VerticalAlignment="Center"/>
+                                                        <ui:TextBlock Grid.Column="2" Name="txtRamUsage" Margin="8,0,0,0" Text="N/A" FontTypography="Caption" VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                    <Grid Margin="0,8,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="80"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="110"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <ui:TextBlock Grid.Column="0" Text="VRAM" FontTypography="Caption" VerticalAlignment="Center"/>
+                                                        <ProgressBar Grid.Column="1" Name="pbVramUsage" Height="6" Minimum="0" Maximum="100" VerticalAlignment="Center"/>
+                                                        <ui:TextBlock Grid.Column="2" Name="txtVramUsage" Margin="8,0,0,0" Text="N/A" FontTypography="Caption" VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+                                        </Grid>
+                                        <ui:TextBlock Margin="0,16,0,0"
+                                            Text="{i18n:StringLocalizer settings.translator.engine.milmmt.storage}"
+                                            FontTypography="BodyStrong"/>
+                                        <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding ViewModel.MiLMMTModelStorageItems}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Margin="0,0,0,8" Padding="10" BorderThickness="1" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" CornerRadius="6">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="120"/>
+                                                                <ColumnDefinition Width="110"/>
+                                                                <ColumnDefinition Width="88"/>
+                                                                <ColumnDefinition Width="88"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel Grid.Column="0">
+                                                                <ui:TextBlock Text="{Binding DisplayName}" FontTypography="BodyStrong"/>
+                                                                <ui:TextBlock Text="{Binding Status}" FontTypography="Caption"/>
+                                                            </StackPanel>
+                                                            <ui:TextBlock Grid.Column="1" Text="{Binding InstalledSize}" FontTypography="Caption" VerticalAlignment="Center"/>
+                                                            <ui:TextBlock Grid.Column="2" Text="{Binding Profile.Quantization}" FontTypography="Caption" VerticalAlignment="Center"/>
+                                                            <Button Grid.Column="3" Margin="8,0,0,0" Content="{i18n:StringLocalizer settings.translator.engine.milmmt.open}"
+                                                                Tag="{Binding}" Click="OpenMiLMMTModelDirectory_Click"/>
+                                                            <Button Grid.Column="4" Margin="8,0,0,0" Content="{i18n:StringLocalizer settings.translator.engine.milmmt.delete}"
+                                                                Tag="{Binding}" Click="DeleteMiLMMTModel_Click"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
                                 </StackPanel>
                             </ui:Card>
                             <ui:CardExpander IsExpanded="True">

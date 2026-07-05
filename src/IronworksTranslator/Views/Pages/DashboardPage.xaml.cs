@@ -15,15 +15,7 @@ namespace IronworksTranslator.Views.Pages
 
             InitializeComponent();
 
-            // Check translation model exists
-            CheckModelIntegrity();
             Dispatcher.InvokeAsync(ViewModel.RunStartupPromptsAsync);
-        }
-
-        private void CheckModelIntegrity()
-        {
-            var window = new InitializationWindow();
-            window.ShowDialog();
         }
 
         private void tsShowChatWindow_Click(object sender, RoutedEventArgs e)

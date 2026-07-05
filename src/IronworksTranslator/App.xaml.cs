@@ -97,6 +97,7 @@ namespace IronworksTranslator
                 services.AddSingleton<PapagoTranslator>();
                 services.AddSingleton<DeepLAPITranslator>();
                 services.AddSingleton<IronworksJaKoTranslator>();
+                services.AddSingleton<MiLMMTTranslator>();
             }).Build();
         }
 
