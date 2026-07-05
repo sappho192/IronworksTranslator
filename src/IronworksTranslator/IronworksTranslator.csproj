@@ -144,4 +144,46 @@
     </Resource>
   </ItemGroup>
 
+  <Target Name="ExcludeNonWindowsRuntimeAssetsFromPublish" BeforeTargets="CopyFilesToPublishDirectory">
+    <ItemGroup>
+      <NonWindowsRuntimePublishFiles Include="@(ResolvedFileToPublish)"
+        Condition="$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/android-'))
+          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\android-'))
+          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/browser-'))
+          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\browser-'))
+          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/ios-'))
+          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\ios-'))
+          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/linux-'))
+          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\linux-'))
+          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/maccatalyst-'))
+          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\maccatalyst-'))
+          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/osx-'))
+          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\osx-'))
+          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/unix-'))
+          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\unix-'))" />
+      <ResolvedFileToPublish Remove="@(NonWindowsRuntimePublishFiles)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RemoveNonWindowsRuntimeAssets" AfterTargets="Publish">
+    <ItemGroup>
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\android-x64" />
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\android-x86" />
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\android-*" />
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\browser-*" />
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\ios-arm64" />
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\iossimulator-x64" />
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\ios-*" />
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\linux-arm64" />
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\linux-x64" />
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\linux-*" />
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\maccatalyst-*" />
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\osx-arm64" />
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\osx-x64" />
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\osx-*" />
+      <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\unix-*" />
+    </ItemGroup>
+    <RemoveDir Directories="@(NonWindowsRuntimeDirectories)" />
+  </Target>
+
 </Project>
