@@ -5,6 +5,17 @@ namespace IronworksTranslator.Helpers.Extensions
 #pragma warning disable CS8603, CS8600
     public static class EnumExtension
     {
+        public static string GetDescription(Enum value)
+        {
+            return value.GetType()
+                .GetField(value.ToString())
+                ?.GetCustomAttributes(typeof(DescriptionAttribute), false)
+                .Cast<DescriptionAttribute>()
+                .FirstOrDefault()
+                ?.Description
+                ?? value.ToString();
+        }
+
         public static T GetValueFromDescription<T>(string description) where T : Enum
         {
             foreach (var field in typeof(T).GetFields())

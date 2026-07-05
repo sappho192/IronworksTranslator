@@ -77,6 +77,10 @@
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <PackageReference Include="Lepo.i18n.DependencyInjection" Version="2.1.0" />
     <PackageReference Include="Lepo.i18n.Wpf" Version="2.1.0" />
+    <PackageReference Include="LLamaSharp" Version="0.27.0" />
+    <PackageReference Include="LLamaSharp.Backend.Cpu" Version="0.27.0" />
+    <PackageReference Include="LLamaSharp.Backend.Cuda12" Version="0.27.0" />
+    <PackageReference Include="LLamaSharp.Backend.Vulkan" Version="0.27.0" />
     <PackageReference Include="MdXaml" Version="1.27.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
     <PackageReference Include="MrAdvice" Version="2.20.5" />
@@ -85,6 +89,7 @@
     <PackageReference Include="Serilog" Version="4.3.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="Sharlayan.Lite" Version="8.0.1" />
+    <PackageReference Include="System.Management" Version="10.0.0" />
     <PackageReference Include="System.Text.Json" Version="10.0.9" />
     <PackageReference Include="Tokenizers.DotNet" Version="1.4.1" />
     <PackageReference Include="Tokenizers.DotNet.runtime.win-x64" Version="1.4.1" />

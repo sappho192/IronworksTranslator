@@ -16,6 +16,9 @@ namespace IronworksTranslator.Models.Settings
         {
             Messenger.Register<PropertyChangedMessage<ClientLanguage>>(this, OnClientLanguageMessage);
             Messenger.Register<PropertyChangedMessage<TranslatorEngine>>(this, OnTranslatorEngineMessage);
+            Messenger.Register<PropertyChangedMessage<MiLMMTModelSize>>(this, OnMiLMMTModelSizeMessage);
+            Messenger.Register<PropertyChangedMessage<MiLMMTQuantization>>(this, OnMiLMMTQuantizationMessage);
+            Messenger.Register<PropertyChangedMessage<LocalModelDevicePriority>>(this, OnLocalModelDevicePriorityMessage);
             Messenger.Register<PropertyChangedMessage<DialogueTranslationMethod>>(this, OnDialogueTranslationMethodMessage);
             Messenger.Register<PropertyChangedMessage<bool>>(this, OnBoolMessage);
         }
@@ -47,6 +50,18 @@ namespace IronworksTranslator.Models.Settings
         [ObservableProperty]
         [property: YamlMember(Alias = "translator_engine")]
         private TranslatorEngine _translatorEngine;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "milmmt_model_size")]
+        private MiLMMTModelSize _miLMMTModelSize;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "milmmt_quantization")]
+        private MiLMMTQuantization _miLMMTQuantization;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "local_model_device_priority")]
+        private LocalModelDevicePriority _localModelDevicePriority;
 
         [ObservableProperty]
         [property: YamlMember(Alias = "dialogue_translation_method")]
@@ -92,6 +107,54 @@ namespace IronworksTranslator.Models.Settings
             {
                 case nameof(SettingsViewModel.TranslatorEngine):
                     TranslatorEngine = m.NewValue;
+                    break;
+            }
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnMiLMMTModelSizeChanged(MiLMMTModelSize value)
+        {
+            Log.Information("MiLLMTModelSize changed to {Value}", value);
+        }
+
+        private void OnMiLMMTModelSizeMessage(object s, PropertyChangedMessage<MiLMMTModelSize> m)
+        {
+            switch (m.PropertyName)
+            {
+                case nameof(SettingsViewModel.MiLMMTModelSize):
+                    MiLMMTModelSize = m.NewValue;
+                    break;
+            }
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnMiLMMTQuantizationChanged(MiLMMTQuantization value)
+        {
+            Log.Information("MiLLMTQuantization changed to {Value}", value);
+        }
+
+        private void OnMiLMMTQuantizationMessage(object s, PropertyChangedMessage<MiLMMTQuantization> m)
+        {
+            switch (m.PropertyName)
+            {
+                case nameof(SettingsViewModel.MiLMMTQuantization):
+                    MiLMMTQuantization = m.NewValue;
+                    break;
+            }
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnLocalModelDevicePriorityChanged(LocalModelDevicePriority value)
+        {
+            Log.Information("LocalModelDevicePriority changed to {Value}", value);
+        }
+
+        private void OnLocalModelDevicePriorityMessage(object s, PropertyChangedMessage<LocalModelDevicePriority> m)
+        {
+            switch (m.PropertyName)
+            {
+                case nameof(SettingsViewModel.LocalModelDevicePriority):
+                    LocalModelDevicePriority = m.NewValue;
                     break;
             }
         }
