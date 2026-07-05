@@ -159,7 +159,8 @@
                                                 <ComboBox Margin="0,4,0,0"
                                                     ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:LocalModelDevicePriority}}"
                                                     SelectedValue="{Binding ViewModel.LocalModelDevicePriority, Converter={StaticResource LocalModelDevicePriorityToStringConverter}, Mode=TwoWay}"
-                                                    SelectedIndex="{Binding ViewModel.LocalModelDevicePriorityIndex, Mode=TwoWay}"/>
+                                                    SelectedIndex="{Binding ViewModel.LocalModelDevicePriorityIndex, Mode=TwoWay}"
+                                                    SelectionChanged="LocalModelDevicePriority_SelectionChanged"/>
                                             </StackPanel>
                                         </Grid>
                                         <Grid Margin="0,12,0,0">

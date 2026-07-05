@@ -20,8 +20,11 @@ namespace IronworksTranslator.Views.Pages
         public SettingsViewModel ViewModel { get; }
         private bool _isInitialized;
         private bool _isChangingTranslatorSelection;
+        private bool _isChangingDevicePrioritySelection;
         private MiLMMTModelSize _lastAvailableMiLMMTModelSize;
         private MiLMMTQuantization _lastAvailableMiLMMTQuantization;
+        private LocalModelDevicePriority _previousLocalModelDevicePriority;
+        private SystemResourceSnapshot? _lastSystemResourceSnapshot;
         private readonly DispatcherTimer resourceTimer;
 
         public SettingsPage(SettingsViewModel viewModel)
@@ -36,6 +39,7 @@ namespace IronworksTranslator.Views.Pages
             ViewModel.CheckLinkShellIntegrity();
             ViewModel.CheckCwLinkShellIntegrity();
             ViewModel.CheckSystemIntegrity();
+            _previousLocalModelDevicePriority = ViewModel.LocalModelDevicePriority;
             InitializeLastAvailableMiLMMTProfile();
             UpdateTranslatorTooltip(ViewModel.TranslatorEngine);
             EnsureLocalTranslatorModelReady(ViewModel.TranslatorEngine, cbTranslator);
@@ -365,6 +369,43 @@ namespace IronworksTranslator.Views.Pages
             }
         }
 
+        private void LocalModelDevicePriority_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isInitialized || _isChangingDevicePrioritySelection) return;
+
+            var comboBox = sender as ComboBox;
+            if (comboBox == null) return;
+
+            var selectedPriority = ViewModel.LocalModelDevicePriority;
+            if (selectedPriority == LocalModelDevicePriority.Cpu
+                || IsDevicePriorityCompatibleWithCurrentGpu(selectedPriority))
+            {
+                _previousLocalModelDevicePriority = selectedPriority;
+                ViewModel.RefreshMiLMMTProfileSummary();
+                return;
+            }
+
+            var recommendedPriority = GetRecommendedDevicePriority(_lastSystemResourceSnapshot?.VramAdapterName);
+            var result = System.Windows.MessageBox.Show(
+                string.Format(
+                    Localizer.GetString("settings.translator.engine.milmmt.device_mismatch.confirm"),
+                    _lastSystemResourceSnapshot?.VramAdapterName ?? "N/A",
+                    GetDevicePriorityLabel(recommendedPriority!.Value),
+                    GetDevicePriorityLabel(selectedPriority)),
+                Localizer.GetString("settings.translator.engine.milmmt.device_mismatch.title"),
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning);
+
+            if (result == System.Windows.MessageBoxResult.Yes)
+            {
+                _previousLocalModelDevicePriority = selectedPriority;
+                ViewModel.RefreshMiLMMTProfileSummary();
+                return;
+            }
+
+            RevertLocalModelDevicePriority(comboBox);
+        }
+
         private void OpenSelectedMiLMMTModelDirectory_Click(object sender, RoutedEventArgs e)
         {
             OpenMiLMMTModelDirectory(ViewModel.SelectedMiLMMTProfile);
@@ -651,6 +692,7 @@ namespace IronworksTranslator.Views.Pages
             }
 
             var snapshot = SystemResourceMonitor.GetSnapshot();
+            _lastSystemResourceSnapshot = snapshot;
             ViewModel.UpdateMiLMMTResourceSnapshot(snapshot);
             txtVramAdapterName.Text = string.IsNullOrWhiteSpace(snapshot.VramAdapterName)
                 ? "GPU: N/A"
@@ -696,6 +738,61 @@ namespace IronworksTranslator.Views.Pages
         private static double ToGiB(ulong bytes)
         {
             return bytes / 1024d / 1024d / 1024d;
+        }
+
+        private bool IsDevicePriorityCompatibleWithCurrentGpu(LocalModelDevicePriority selectedPriority)
+        {
+            var recommendedPriority = GetRecommendedDevicePriority(_lastSystemResourceSnapshot?.VramAdapterName);
+            return recommendedPriority == null || recommendedPriority == selectedPriority;
+        }
+
+        private static LocalModelDevicePriority? GetRecommendedDevicePriority(string? adapterName)
+        {
+            if (string.IsNullOrWhiteSpace(adapterName))
+            {
+                return null;
+            }
+
+            if (adapterName.Contains("NVIDIA", StringComparison.OrdinalIgnoreCase))
+            {
+                return LocalModelDevicePriority.Cuda;
+            }
+
+            if (adapterName.Contains("AMD", StringComparison.OrdinalIgnoreCase)
+                || adapterName.Contains("Radeon", StringComparison.OrdinalIgnoreCase)
+                || adapterName.Contains("Intel", StringComparison.OrdinalIgnoreCase))
+            {
+                return LocalModelDevicePriority.Vulkan;
+            }
+
+            return null;
+        }
+
+        private static string GetDevicePriorityLabel(LocalModelDevicePriority priority)
+        {
+            return priority switch
+            {
+                LocalModelDevicePriority.Cuda => "CUDA",
+                LocalModelDevicePriority.Vulkan => "Vulkan",
+                _ => "CPU",
+            };
+        }
+
+        private void RevertLocalModelDevicePriority(ComboBox comboBox)
+        {
+            _isChangingDevicePrioritySelection = true;
+            try
+            {
+                ViewModel.LocalModelDevicePriority = _previousLocalModelDevicePriority;
+                ViewModel.LocalModelDevicePriorityIndex = (int)_previousLocalModelDevicePriority;
+                comboBox.SelectedItem = _previousLocalModelDevicePriority;
+                comboBox.SelectedIndex = (int)_previousLocalModelDevicePriority;
+                ViewModel.RefreshMiLMMTProfileSummary();
+            }
+            finally
+            {
+                _isChangingDevicePrioritySelection = false;
+            }
         }
     }
 #pragma warning restore CS8602

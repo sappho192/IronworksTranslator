@@ -99,6 +99,8 @@ settings.translator.engine.tooltip.milmmt: "MiLLMT supports Japanese, Korean, an
 settings.translator.engine.milmmt.model: "Model"
 settings.translator.engine.milmmt.quantization: "Quantization"
 settings.translator.engine.milmmt.device: "Device priority"
+settings.translator.engine.milmmt.device_mismatch.title: "Check GPU and device priority"
+settings.translator.engine.milmmt.device_mismatch.confirm: "The GPU currently used for VRAM reporting is {0}. {1} is usually the better fit for this GPU. Do you still want to prioritize {2}?"
 settings.translator.engine.milmmt.apply_notice: "Model and quantization changes apply from the next translation. Device priority changes apply after restarting the app."
 settings.translator.engine.milmmt.ffxiv_memory_note: "Final Fantasy XIV generally uses up to 3-4 GB of RAM/VRAM."
 settings.translator.engine.milmmt.download_size: "Download size about {0:N2} GB"
