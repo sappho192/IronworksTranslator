@@ -6,6 +6,7 @@ using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Aspect;
 using ObservableCollections;
 using System.IO;
+using System.Reflection;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
@@ -242,8 +243,24 @@ namespace IronworksTranslator.ViewModels.Pages
 
         private static string GetAssemblyVersion()
         {
-            return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3)
+            var assembly = Assembly.GetExecutingAssembly();
+            var informationalVersion = assembly
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                ?.InformationalVersion;
+
+            return FormatDisplayVersion(informationalVersion)
+                ?? assembly.GetName().Version?.ToString(3)
                 ?? string.Empty;
+        }
+
+        internal static string? FormatDisplayVersion(string? informationalVersion)
+        {
+            if (string.IsNullOrWhiteSpace(informationalVersion))
+            {
+                return null;
+            }
+
+            return informationalVersion.Split('+', 2)[0];
         }
 
         [RelayCommand]
