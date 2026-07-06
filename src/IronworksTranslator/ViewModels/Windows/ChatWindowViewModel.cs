@@ -36,7 +36,7 @@ namespace IronworksTranslator.ViewModels.Windows
         [ObservableProperty]
         private bool _isDraggable = IronworksSettings.Instance.ChatUiSettings.IsDraggable;
         [ObservableProperty]
-        private double _chatWindowOpacity = IronworksSettings.Instance.ChatUiSettings.WindowOpacity;
+        private double _chatWindowOpacity = IronworksSettings.Instance.ChatUiSettings.ChatWindowOpacity;
         [ObservableProperty]
         private double _width = IronworksSettings.Instance.UiSettings.ChatWindowWidth;
         [ObservableProperty]
@@ -75,7 +75,7 @@ namespace IronworksTranslator.ViewModels.Windows
         {
             switch (message.PropertyName)
             {
-                case nameof(SettingsViewModel.ChildWindowOpacity):
+                case nameof(SettingsViewModel.ChatWindowOpacity):
                     ChatWindowOpacity = message.NewValue;
                     break;
             }

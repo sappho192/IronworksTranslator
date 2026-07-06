@@ -44,13 +44,23 @@ namespace IronworksTranslator.ViewModels.Pages
 
         private readonly LogScale _logScale = new(0.01, 1.0);
         [ObservableProperty]
-        private double _childWindowOpacityRaw = IronworksSettings.Instance.ChatUiSettings.WindowOpacity;
+        private double _chatWindowOpacityRaw = new LogScale(0.01, 1.0).Invert(IronworksSettings.Instance.ChatUiSettings.ChatWindowOpacity);
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private double _childWindowOpacity = IronworksSettings.Instance.ChatUiSettings.WindowOpacity;
-        partial void OnChildWindowOpacityRawChanged(double value)
+        private double _chatWindowOpacity = IronworksSettings.Instance.ChatUiSettings.ChatWindowOpacity;
+        partial void OnChatWindowOpacityRawChanged(double value)
         {
-            ChildWindowOpacity = _logScale.Scale(ChildWindowOpacityRaw);
+            ChatWindowOpacity = _logScale.Scale(ChatWindowOpacityRaw);
+        }
+
+        [ObservableProperty]
+        private double _dialogueWindowOpacityRaw = new LogScale(0.01, 1.0).Invert(IronworksSettings.Instance.ChatUiSettings.DialogueWindowOpacity);
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private double _dialogueWindowOpacity = IronworksSettings.Instance.ChatUiSettings.DialogueWindowOpacity;
+        partial void OnDialogueWindowOpacityRawChanged(double value)
+        {
+            DialogueWindowOpacity = _logScale.Scale(DialogueWindowOpacityRaw);
         }
 
         [ObservableProperty]

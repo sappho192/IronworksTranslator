@@ -84,6 +84,7 @@ settings.ui.dialogue.font.size: "Font size of NPC dialogue"
 settings.ui.chat.font.family: "Font family"
 settings.ui.chat.margin: "Chat line space"
 settings.ui.chat.opacity: "Chat window opacity"
+settings.ui.dialogue.opacity: "NPC dialogue window opacity"
 
 settings.translator: "Translator"
 settings.translator.client_language: "My language"

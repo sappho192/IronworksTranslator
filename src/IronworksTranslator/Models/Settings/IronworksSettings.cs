@@ -54,7 +54,9 @@ namespace IronworksTranslator.Models.Settings
                     ChatMargin = 0,
                     IsDraggable = true,
                     IsResizable = true,
-                    WindowOpacity = 1.0
+                    WindowOpacity = 1.0,
+                    ChatWindowOpacity = 1.0,
+                    DialogueWindowOpacity = 1.0
                 },
                 TranslatorSettings = new TranslatorSettings
                 {
@@ -102,12 +104,33 @@ namespace IronworksTranslator.Models.Settings
                 return true;
             }
 
+            NormalizeSettings(settings);
+
             if (!ChatUISettings.CheckSpecificFontExists(settings.ChatUiSettings, settings.ChatUiSettings.Font))
             {
                 return false;
             }
 
             return false;
+        }
+
+        private static void NormalizeSettings(IronworksSettings settings)
+        {
+            var chatUiSettings = settings.ChatUiSettings!;
+
+            chatUiSettings.WindowOpacity = NormalizeOpacity(chatUiSettings.WindowOpacity, 1.0);
+            chatUiSettings.ChatWindowOpacity = NormalizeOpacity(chatUiSettings.ChatWindowOpacity, chatUiSettings.WindowOpacity);
+            chatUiSettings.DialogueWindowOpacity = NormalizeOpacity(chatUiSettings.DialogueWindowOpacity, chatUiSettings.WindowOpacity);
+        }
+
+        private static double NormalizeOpacity(double value, double fallback)
+        {
+            if (value <= 0 || value > 1.0)
+            {
+                return fallback;
+            }
+
+            return value;
         }
     }
 }
