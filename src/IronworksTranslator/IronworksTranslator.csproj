@@ -96,7 +96,6 @@
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="Sharlayan.Lite" Version="8.0.1" />
     <PackageReference Include="System.Management" Version="10.0.9" />
-    <PackageReference Include="System.Text.Json" Version="10.0.9" />
     <PackageReference Include="Tokenizers.DotNet" Version="1.4.1" />
     <PackageReference Include="Tokenizers.DotNet.runtime.win-x64" Version="1.4.1" />
     <PackageReference Include="WPF-UI" Version="3.1.1" />
@@ -153,21 +152,7 @@
 
   <Target Name="ExcludeNonWindowsRuntimeAssetsFromPublish" BeforeTargets="CopyFilesToPublishDirectory">
     <ItemGroup>
-      <NonWindowsRuntimePublishFiles Include="@(ResolvedFileToPublish)"
-        Condition="$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/android-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\android-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/browser-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\browser-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/ios-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\ios-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/linux-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\linux-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/maccatalyst-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\maccatalyst-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/osx-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\osx-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/unix-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\unix-'))" />
+      <NonWindowsRuntimePublishFiles Include="@(ResolvedFileToPublish)" Condition="$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/android-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\android-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/browser-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\browser-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/ios-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\ios-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/linux-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\linux-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/maccatalyst-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\maccatalyst-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/osx-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\osx-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/unix-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\unix-'))" />
       <ResolvedFileToPublish Remove="@(NonWindowsRuntimePublishFiles)" />
     </ItemGroup>
   </Target>
