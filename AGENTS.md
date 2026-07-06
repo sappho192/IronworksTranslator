@@ -6,9 +6,9 @@
 ## 프로젝트 개요
 
 - IronworksTranslator는 Final Fantasy XIV 채팅과 NPC 대사를 실시간 번역하는 Windows WPF 데스크톱 앱입니다.
-- 주 앱은 `src/IronworksTranslator/IronworksTranslator.csproj`이고 `net8.0-windows`, `UseWPF`, nullable, implicit usings를 사용합니다.
+- 주 앱은 `src/IronworksTranslator/IronworksTranslator.csproj`이고 `net10.0-windows`, `UseWPF`, nullable, implicit usings를 사용합니다.
 - 솔루션은 `src/IronworksTranslator/IronworksTranslator.sln`에 있으며 앱, `tests/IronworksTranslator.Tests`, `tools/IronworksLogDecryptor`를 포함합니다.
-- .NET SDK는 `global.json` 기준 `8.0.100` 이상 최신 minor roll-forward를 사용합니다.
+- .NET SDK는 `global.json` 기준 `10.0.100` 이상 최신 minor roll-forward를 사용합니다.
 - 앱 릴리스와 업데이트는 GitVersion + Velopack 기반입니다. Visual Studio Publish 대신 `publish-release.ps1`를 사용합니다.
 
 ## 주요 명령

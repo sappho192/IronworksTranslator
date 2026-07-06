@@ -20,7 +20,7 @@ $packId = "Sappho192.IronworksTranslator"
 $packTitle = "IronworksTranslator"
 $mainExe = "IronworksTranslator.exe"
 $runtime = "win-x64"
-$framework = "net8.0-x64-desktop"
+$framework = "net10.0-x64-desktop"
 $channel = "win"
 $packVersion = $null
 

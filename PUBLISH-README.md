@@ -47,7 +47,7 @@ Velopack settings used by the script:
 - Stable `channel`: `win`
 - Beta `channel`: `beta`
 - `runtime`: `win-x64`
-- `framework`: `net8.0-x64-desktop`
+- `framework`: `net10.0-x64-desktop`
 
 ## Release Assets
 
