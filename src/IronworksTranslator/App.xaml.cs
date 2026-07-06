@@ -1,6 +1,7 @@
 ﻿using IronworksTranslator.Services;
 using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
+using IronworksTranslator.Utils.Logging;
 using IronworksTranslator.Utils.Translator;
 using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.ViewModels.Windows;
@@ -322,11 +323,21 @@ namespace IronworksTranslator
             // Logging
             AppPaths.EnsureDirectories();
             var date = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-            Log.Logger = new LoggerConfiguration()
+            var logFilePathWithoutExtension = Path.Combine(AppPaths.LogsDirectory, date);
+            var encryptedLogSink = new EncryptedLogSink(
+                $"{logFilePathWithoutExtension}.iwlog",
+                EncryptedLogResources.LoadPublicKeyPem());
+            var loggerConfiguration = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .WriteTo.File(Path.Combine(AppPaths.LogsDirectory, $"{date}.txt"))
-                .CreateLogger();
+                .WriteTo.Sink(encryptedLogSink);
+#if DEBUG
+            loggerConfiguration.WriteTo.File($"{logFilePathWithoutExtension}.txt");
+#endif
+            Log.Logger = loggerConfiguration.CreateLogger();
             Log.Information($"IronworksTranslator {Assembly.GetExecutingAssembly().GetName().Version.ToString(3)} started.");
+#if !DEBUG
+            LegacyLogMigrator.MigrateLegacyTextLogs(AppPaths.LogsDirectory);
+#endif
         }
 
 

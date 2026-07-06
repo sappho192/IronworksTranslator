@@ -40,9 +40,9 @@ This Privacy Policy sets forth the collection and use of personal information in
 
 ## **1. Types of Personal Information Collected and Collection Method**
 
-1.1. This Program stores detailed operational records in log files for performance and quality improvement purposes.
+1.1. This Program stores detailed operational records in encrypted log files for performance and quality improvement purposes.
 
-1.2. Examples of information collected in clause 1.1 include interactions with the UI (buttons, tabs, etc.), changes in settings, chat history, etc.
+1.2. Examples of information collected in clause 1.1 include interactions with the UI (buttons, tabs, etc.), changes in settings, chat history, etc. Log files are stored with public-key encryption and cannot be read without the private key kept by the developer.
 
 1.3. If you wish, you may select and send certain chat history to developers to improve the quality of translations.
 
@@ -56,9 +56,9 @@ This Privacy Policy sets forth the collection and use of personal information in
 
 ## **3. Retention and Use Period of Personal Information**
 
-3.1. The log files specified in Section 1.1 are always stored on your device and are never automatically sent to the developer.
+3.1. The encrypted log files specified in Section 1.1 are always stored on your device and are never automatically sent to the developer.
 
-3.2. Only when a user reports Program errors or malfunctions to the developer, the developer may request sharing of log files for reference. Users can refuse to share log files.
+3.2. Only when a user reports Program errors or malfunctions to the developer, the developer may request sharing of encrypted log files for reference. Users can refuse to share log files.
 
 3.3. Shared log files are deleted immediately after the issue is resolved.
 
@@ -66,7 +66,7 @@ This Privacy Policy sets forth the collection and use of personal information in
 
 ## **4. Procedures and Methods for Destroying Personal Information**
 
-4.1. Users can delete log files at any time in the Program settings.
+4.1. Users can delete encrypted log files at any time in the Program settings.
 
 4.2. Log files shared with the developer are permanently deleted immediately after the issue is resolved.
 

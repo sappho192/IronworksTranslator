@@ -91,7 +91,10 @@
                                 <ui:TextBlock FontTypography="Body" Text="{Binding ViewModel.LogDirectorySize}"/>
                             </StackPanel>
                             <Border Height="8"/>
-                            <ui:Button Content="{i18n:StringLocalizer dashboard.log.clear}" Command="{Binding ViewModel.ClearLogDirectoryCommand}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:Button Content="{i18n:StringLocalizer dashboard.log.clear}" Command="{Binding ViewModel.ClearLogDirectoryCommand}"/>
+                                <ui:Button Margin="8,0,0,0" Content="{i18n:StringLocalizer dashboard.log.open}" Command="{Binding ViewModel.OpenLogDirectoryCommand}"/>
+                            </StackPanel>
                         </StackPanel>
                     </ui:Card>                    
                 </StackPanel>

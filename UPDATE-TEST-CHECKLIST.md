@@ -62,7 +62,7 @@ Expected result:
 $env:APPDATA\IronworksTranslator\settings.yaml
 ```
 
-- A log file is created under:
+- An encrypted `.iwlog` log file is created under:
 
 ```powershell
 $env:LOCALAPPDATA\IronworksTranslator\logs
@@ -158,7 +158,8 @@ After an update:
 - Toggle translator on/off.
 - Show/hide chat and dialogue windows.
 - Reset chat/dialogue window positions.
-- Clear logs from the dashboard and confirm only `%LOCALAPPDATA%\IronworksTranslator\logs` is affected.
+- Open the log folder from the dashboard and confirm Windows Explorer opens `%LOCALAPPDATA%\IronworksTranslator\logs`.
+- Clear logs from the dashboard and confirm only `.iwlog` and legacy `.txt` files in `%LOCALAPPDATA%\IronworksTranslator\logs` are affected.
 - Select the internal Ja-Ko translator and confirm model download/reuse works.
 
 ## 9. Release Blockers

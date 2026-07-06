@@ -8,6 +8,7 @@ using MdXaml;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows.Controls;
@@ -244,7 +245,12 @@ namespace IronworksTranslator.ViewModels.Pages
                 return;
             }
 
-            string[] filePaths = Directory.GetFiles(AppPaths.LogsDirectory, "*.txt");
+            string[] filePaths = Directory
+                .GetFiles(AppPaths.LogsDirectory, "*.*")
+                .Where(filePath =>
+                    string.Equals(Path.GetExtension(filePath), ".iwlog", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(Path.GetExtension(filePath), ".txt", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
             foreach (string filePath in filePaths)
             {
                 try
@@ -258,6 +264,18 @@ namespace IronworksTranslator.ViewModels.Pages
             }
 
             UpdateLogFolderSize();
+        }
+
+        [TraceMethod]
+        [RelayCommand]
+        private void OnOpenLogDirectory()
+        {
+            Directory.CreateDirectory(AppPaths.LogsDirectory);
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                ArgumentList = { AppPaths.LogsDirectory },
+            });
         }
 
         private void UpdateLogFolderSize()

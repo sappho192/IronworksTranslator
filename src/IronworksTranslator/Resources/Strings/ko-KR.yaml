@@ -16,7 +16,7 @@ huh: "헉...?!"
 version: "버전"
 
 app.exception.title: "프로그램 오류"
-app.exception.description: "예상치 못한 상황으로 프로그램이 종료됩니다. logs 폴더에 있는 최근 로그와 함께 개발자에게 보고해주세요."
+app.exception.description: "예상치 못한 상황으로 프로그램이 종료됩니다. logs 폴더에 있는 최근 암호화 로그 파일과 함께 개발자에게 보고해주세요."
 app.exception.process.lost: "파판 프로세스를 잃어버렸습니다. 번역기를 비활성화합니다."
 app.exception.address.not_exist: "address.json이 없습니다. 자체주소 설정을 무시하겠습니다."
 
@@ -69,6 +69,7 @@ dashboard.chat.position.reset: "채팅창 위치 초기화"
 dashboard.dialogue.position.reset: "대사창 위치 초기화"
 dashboard.log.size: "로그 폴더 크기: "
 dashboard.log.clear: "비우기"
+dashboard.log.open: "로그 폴더 열기"
 
 settings.general: "일반"
 settings.general.theme: "테마"

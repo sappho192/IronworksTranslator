@@ -127,6 +127,7 @@
     <EmbeddedResource Include="Resources\Strings\ko-KR.yaml">
       <CopyToOutputDirectory></CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Crypto\log_public_key.pem" />
     <EmbeddedResource Include="Resources\Strings\terms-and-privacy-policy-en.md" />
     <EmbeddedResource Include="Resources\Strings\terms-and-privacy-policy-ko.md" />
   </ItemGroup>
