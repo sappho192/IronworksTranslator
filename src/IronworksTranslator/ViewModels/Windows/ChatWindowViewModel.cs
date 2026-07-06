@@ -55,6 +55,12 @@ namespace IronworksTranslator.ViewModels.Windows
         // Semaphore to ensure messages are processed sequentially
         private readonly SemaphoreSlim _translationSemaphore = new(1, 1);
 
+#if DEBUG
+        private const bool IsRetranslateUiEnabled = true;
+#else
+        private const bool IsRetranslateUiEnabled = false;
+#endif
+
         public ChatWindowViewModel(IContentDialogService contentDialogService)
         {
             _contentDialogService = contentDialogService;
@@ -462,7 +468,11 @@ namespace IronworksTranslator.ViewModels.Windows
             // Create and attach a custom context menu to the paragraph
             var contextMenu = new ContextMenu();
 
-            var menuItemReTranslate = new MenuItem { Header = "Re-Translate" };
+            var menuItemReTranslate = new MenuItem
+            {
+                Header = "Re-Translate",
+                IsEnabled = IsRetranslateUiEnabled
+            };
             var menuItemPapago = new MenuItem
             {
                 Header = "Papago",
@@ -560,7 +570,11 @@ namespace IronworksTranslator.ViewModels.Windows
             menuItem.Tag = translationParagraph;
             contextMenu.Items.Add(menuItem);
 
-            var menuItemReTranslate = new MenuItem { Header = Localizer.GetString("chat.retranslate") };
+            var menuItemReTranslate = new MenuItem
+            {
+                Header = Localizer.GetString("chat.retranslate"),
+                IsEnabled = IsRetranslateUiEnabled
+            };
             var menuItemPapago = new MenuItem
             {
                 Header = "Papago",
