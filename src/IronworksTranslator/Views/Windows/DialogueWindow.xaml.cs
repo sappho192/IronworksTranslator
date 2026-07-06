@@ -53,6 +53,7 @@ namespace IronworksTranslator.Views.Windows
             {
                 ResizeMode = ResizeMode.NoResize;
             }
+            ChangeDialogueFontSize(IronworksSettings.Instance.ChatUiSettings.DialogueFontSize);
 
             _resizeEndTimer.Interval = TimeSpan.FromMilliseconds(3000);
             _resizeEndTimer.Tick += ResizeEndTimer_Tick;

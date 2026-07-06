@@ -33,6 +33,9 @@ namespace IronworksTranslator.Views.Windows
                 ResizeMode = ResizeMode.NoResize;
             }
             ChatPanel.Document = ViewModel.ChatDocument;
+            ViewModel.ChangeChatFontSize(IronworksSettings.Instance.ChatUiSettings.ChatboxFontSize);
+            ViewModel.ChangeChatFontFamily(IronworksSettings.Instance.ChatUiSettings.Font);
+            ViewModel.ChangeChatMargin(IronworksSettings.Instance.ChatUiSettings.ChatMargin);
 
             _resizeEndTimer.Interval = TimeSpan.FromMilliseconds(3000);
             _resizeEndTimer.Tick += ResizeEndTimer_Tick;

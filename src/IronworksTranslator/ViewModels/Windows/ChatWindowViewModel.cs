@@ -713,6 +713,8 @@ namespace IronworksTranslator.ViewModels.Windows
                 return;
             }
 
+            ChatDocument.FontSize = fontSize;
+
             // Traverse all elements in the FlowDocument
             foreach (var block in ChatDocument.Blocks)
             {
@@ -750,6 +752,8 @@ namespace IronworksTranslator.ViewModels.Windows
                 Application.Current.Dispatcher.Invoke(() => ChangeChatFontFamily(fontFamily));
                 return;
             }
+
+            ChatDocument.FontFamily = new FontFamily(fontFamily);
 
             // Traverse all elements in the FlowDocument
             foreach (var block in ChatDocument.Blocks)
