@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using Velopack;
 using Velopack.Exceptions;
+using Velopack.Locators;
 using Velopack.Sources;
 
 namespace IronworksTranslator.Services
@@ -15,6 +16,7 @@ namespace IronworksTranslator.Services
     public class AppUpdateService
     {
         private const string RepositoryUrl = "https://github.com/sappho192/IronworksTranslator";
+        private const string LauncherExeName = "IronworksTranslator.Launcher.exe";
         private int _isChecking;
 
         public async Task CheckForUpdatesWithPromptAsync(CancellationToken cancellationToken = default)
@@ -70,7 +72,8 @@ namespace IronworksTranslator.Services
                 new UpdateOptions
                 {
                     ExplicitChannel = releaseChannel.VelopackChannel,
-                });
+                },
+                CreateUpdateLocator());
 
             Log.Information(
                 "Checking for updates. ReleaseChannel: {ReleaseChannel}, VelopackChannel: {VelopackChannel}, IncludePrereleases: {IncludePrereleases}",
@@ -177,6 +180,76 @@ namespace IronworksTranslator.Services
                 Localizer.GetString("main.update.failed.title"),
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
+        }
+
+        private static IVelopackLocator CreateUpdateLocator()
+        {
+            var locator = VelopackLocator.CreateDefaultForPlatform(null, null);
+            return new LauncherRestartVelopackLocator(locator);
+        }
+
+        private sealed class LauncherRestartVelopackLocator : IVelopackLocator
+        {
+            private readonly IVelopackLocator _inner;
+
+            public LauncherRestartVelopackLocator(IVelopackLocator inner)
+            {
+                _inner = inner;
+            }
+
+            public string AppId => _inner.AppId ?? string.Empty;
+
+            public string RootAppDir => _inner.RootAppDir ?? string.Empty;
+
+            public string PackagesDir => _inner.PackagesDir ?? string.Empty;
+
+            public string AppContentDir => _inner.AppContentDir ?? string.Empty;
+
+            public string AppTempDir => _inner.AppTempDir ?? string.Empty;
+
+            public string UpdateExePath => _inner.UpdateExePath ?? string.Empty;
+
+            public SemanticVersion? CurrentlyInstalledVersion => _inner.CurrentlyInstalledVersion;
+
+            public string ThisExeRelativePath => GetLauncherRelativePath(_inner.ThisExeRelativePath);
+
+            public string Channel => _inner.Channel ?? string.Empty;
+
+            public string AppUserModelId => _inner.AppUserModelId ?? string.Empty;
+
+            public Velopack.Logging.IVelopackLogger Log => _inner.Log;
+
+            public bool IsPortable => _inner.IsPortable;
+
+            public IProcessImpl Process => _inner.Process;
+
+            public void AddLogger(Velopack.Logging.IVelopackLogger logger)
+            {
+                _inner.AddLogger(logger);
+            }
+
+            public List<VelopackAsset> GetLocalPackages()
+            {
+                return _inner.GetLocalPackages();
+            }
+
+            public VelopackAsset? GetLatestLocalFullPackage()
+            {
+                return _inner.GetLatestLocalFullPackage();
+            }
+
+            public Guid? GetOrCreateStagedUserId()
+            {
+                return _inner.GetOrCreateStagedUserId();
+            }
+
+            private static string GetLauncherRelativePath(string? mainExeRelativePath)
+            {
+                var directory = Path.GetDirectoryName(mainExeRelativePath);
+                return string.IsNullOrEmpty(directory)
+                    ? LauncherExeName
+                    : Path.Combine(directory, LauncherExeName);
+            }
         }
     }
 }
