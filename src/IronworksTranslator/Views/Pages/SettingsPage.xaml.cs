@@ -722,24 +722,7 @@ namespace IronworksTranslator.Views.Pages
 
         private static LocalModelDevicePriority? GetRecommendedDevicePriority(string? adapterName)
         {
-            if (string.IsNullOrWhiteSpace(adapterName))
-            {
-                return null;
-            }
-
-            if (adapterName.Contains("NVIDIA", StringComparison.OrdinalIgnoreCase))
-            {
-                return LocalModelDevicePriority.Cuda;
-            }
-
-            if (adapterName.Contains("AMD", StringComparison.OrdinalIgnoreCase)
-                || adapterName.Contains("Radeon", StringComparison.OrdinalIgnoreCase)
-                || adapterName.Contains("Intel", StringComparison.OrdinalIgnoreCase))
-            {
-                return LocalModelDevicePriority.Vulkan;
-            }
-
-            return null;
+            return LocalModelDevicePrioritySelector.GetRecommendedPriority(adapterName);
         }
 
         private static string GetDevicePriorityLabel(LocalModelDevicePriority priority)

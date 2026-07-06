@@ -64,6 +64,10 @@ namespace IronworksTranslator.Models.Settings
         private LocalModelDevicePriority _localModelDevicePriority;
 
         [ObservableProperty]
+        [property: YamlMember(Alias = "local_model_device_priority_user_selected")]
+        private bool _localModelDevicePriorityUserSelected;
+
+        [ObservableProperty]
         [property: YamlMember(Alias = "dialogue_translation_method")]
         private DialogueTranslationMethod _dialogueTranslationMethod;
 
@@ -154,6 +158,7 @@ namespace IronworksTranslator.Models.Settings
             switch (m.PropertyName)
             {
                 case nameof(SettingsViewModel.LocalModelDevicePriority):
+                    LocalModelDevicePriorityUserSelected = true;
                     LocalModelDevicePriority = m.NewValue;
                     break;
             }

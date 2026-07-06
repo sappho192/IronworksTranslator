@@ -1,6 +1,7 @@
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Models.Translator;
+using IronworksTranslator.Utils;
 using Wpf.Ui.Appearance;
 
 namespace IronworksTranslator.Tests.Models;
@@ -79,6 +80,43 @@ public class SettingsTests
         IronworksSettings.NormalizeSettings(settings);
 
         Assert.Equal(TranslatorEngine.MiLLMT, settings.TranslatorSettings.TranslatorEngine);
+    }
+
+    [Theory]
+    [InlineData("NVIDIA GeForce RTX 4070", LocalModelDevicePriority.Cuda)]
+    [InlineData("AMD Radeon RX 7900 XTX", LocalModelDevicePriority.Vulkan)]
+    [InlineData("Intel Arc A770 Graphics", LocalModelDevicePriority.Vulkan)]
+    public void LocalModelDevicePrioritySelector_RecommendsBackendFromAdapterName(
+        string adapterName,
+        LocalModelDevicePriority expectedPriority)
+    {
+        var priority = LocalModelDevicePrioritySelector.GetRecommendedPriority(adapterName);
+
+        Assert.Equal(expectedPriority, priority);
+    }
+
+    [Fact]
+    public void NormalizeSettings_UsesRecommendedDevicePriorityBeforeUserSelection()
+    {
+        var settings = IronworksSettings.CreateDefault();
+        settings.TranslatorSettings!.LocalModelDevicePriority = LocalModelDevicePriority.Cuda;
+        settings.TranslatorSettings.LocalModelDevicePriorityUserSelected = false;
+
+        IronworksSettings.NormalizeSettings(settings, LocalModelDevicePriority.Vulkan);
+
+        Assert.Equal(LocalModelDevicePriority.Vulkan, settings.TranslatorSettings.LocalModelDevicePriority);
+    }
+
+    [Fact]
+    public void NormalizeSettings_PreservesUserSelectedDevicePriority()
+    {
+        var settings = IronworksSettings.CreateDefault();
+        settings.TranslatorSettings!.LocalModelDevicePriority = LocalModelDevicePriority.Cuda;
+        settings.TranslatorSettings.LocalModelDevicePriorityUserSelected = true;
+
+        IronworksSettings.NormalizeSettings(settings, LocalModelDevicePriority.Vulkan);
+
+        Assert.Equal(LocalModelDevicePriority.Cuda, settings.TranslatorSettings.LocalModelDevicePriority);
     }
 
     [Fact]
