@@ -28,6 +28,8 @@ namespace IronworksTranslator.Utils.Translator
         private readonly TranslationLanguageCode[] translationLanguages = [
             TranslationLanguageCode.Japanese,
             TranslationLanguageCode.English,
+            TranslationLanguageCode.German,
+            TranslationLanguageCode.French,
             TranslationLanguageCode.Korean
         ];
 
@@ -254,6 +256,8 @@ namespace IronworksTranslator.Utils.Translator
             {
                 TranslationLanguageCode.Japanese => "Japanese",
                 TranslationLanguageCode.English => "English",
+                TranslationLanguageCode.German => "German",
+                TranslationLanguageCode.French => "French",
                 TranslationLanguageCode.Korean => "Korean",
                 _ => throw new ArgumentException($"Unsupported MiLLMT language: {language}", nameof(language)),
             };

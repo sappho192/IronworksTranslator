@@ -6,6 +6,23 @@ namespace IronworksTranslator.Tests.Utils;
 public class MiLMMTTranslatorTests
 {
     [Fact]
+    public void SupportedLanguages_IncludeMiLMMTSupportedLanguages()
+    {
+        var translator = new MiLMMTTranslator();
+        var expected = new[]
+        {
+            TranslationLanguageCode.Japanese,
+            TranslationLanguageCode.English,
+            TranslationLanguageCode.German,
+            TranslationLanguageCode.French,
+            TranslationLanguageCode.Korean,
+        };
+
+        Assert.Equal(expected, translator.SupportedSourceLanguages);
+        Assert.Equal(expected, translator.SupportedTargetLanguages);
+    }
+
+    [Fact]
     public void RenderPrompt_UsesSourceTargetLanguageNamesAndTrimmedText()
     {
         var prompt = MiLMMTTranslator.RenderPrompt(
@@ -15,6 +32,19 @@ public class MiLMMTTranslatorTests
 
         Assert.Equal(
             "Translate this from Japanese to Korean:\nJapanese: こんにちは\nKorean:",
+            prompt);
+    }
+
+    [Fact]
+    public void RenderPrompt_SupportsGermanAndFrenchLanguageNames()
+    {
+        var prompt = MiLMMTTranslator.RenderPrompt(
+            TranslationLanguageCode.German,
+            TranslationLanguageCode.French,
+            "  Guten Morgen  ");
+
+        Assert.Equal(
+            "Translate this from German to French:\nGerman: Guten Morgen\nFrench:",
             prompt);
     }
 

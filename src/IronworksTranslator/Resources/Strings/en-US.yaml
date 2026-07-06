@@ -95,7 +95,7 @@ settings.translator.engine.tooltip.papago: "This engine is currently experiencin
 settings.translator.engine.tooltip.jako: "Ironworks Ja→Ko is deprecated. MiLLMT is recommended."
 settings.translator.engine.jako.deprecated.title: "Deprecated translator model"
 settings.translator.engine.jako.deprecated.confirm: "Ironworks Ja→Ko is no longer recommended. MiLLMT is recommended instead. Do you still want to use Ironworks Ja→Ko?"
-settings.translator.engine.tooltip.milmmt: "MiLLMT supports Japanese, Korean, and English only."
+settings.translator.engine.tooltip.milmmt: "MiLLMT supports Japanese, English, Korean, German, and French."
 settings.translator.engine.milmmt.model: "Model"
 settings.translator.engine.milmmt.quantization: "Quantization"
 settings.translator.engine.milmmt.device: "Device priority"
