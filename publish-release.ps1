@@ -13,12 +13,15 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$solutionPath = "src\IronworksTranslator\IronworksTranslator.sln"
 $projectPath = "src\IronworksTranslator\IronworksTranslator.csproj"
+$launcherProjectPath = "src\IronworksTranslator.Launcher\IronworksTranslator.Launcher.csproj"
 $iconPath = "src\IronworksTranslator\icon.ico"
 $velopackVersion = "1.2.0"
 $packId = "Sappho192.IronworksTranslator"
 $packTitle = "IronworksTranslator"
-$mainExe = "IronworksTranslator.exe"
+$appExe = "IronworksTranslator.exe"
+$launcherExe = "IronworksTranslator.Launcher.exe"
 $runtime = "win-x64"
 $framework = "net10.0-x64-desktop"
 $channel = "win"
@@ -76,6 +79,16 @@ if (-not $SkipClean) {
         Write-Host "  - Removed obj folder" -ForegroundColor Gray
     }
 
+    if (Test-Path "src\IronworksTranslator.Launcher\bin") {
+        Remove-Item "src\IronworksTranslator.Launcher\bin" -Recurse -Force
+        Write-Host "  - Removed launcher bin folder" -ForegroundColor Gray
+    }
+
+    if (Test-Path "src\IronworksTranslator.Launcher\obj") {
+        Remove-Item "src\IronworksTranslator.Launcher\obj" -Recurse -Force
+        Write-Host "  - Removed launcher obj folder" -ForegroundColor Gray
+    }
+
     Write-Host "  Clean completed." -ForegroundColor Green
 } else {
     Write-Host "[1/6] Skipping clean (--SkipClean specified)" -ForegroundColor Gray
@@ -83,7 +96,7 @@ if (-not $SkipClean) {
 Write-Host ""
 
 Write-Host "[2/6] Restoring NuGet packages..." -ForegroundColor Yellow
-dotnet restore $projectPath
+dotnet restore $solutionPath
 Assert-Success "Package restore failed!"
 Write-Host "  Restore completed." -ForegroundColor Green
 Write-Host ""
@@ -91,6 +104,8 @@ Write-Host ""
 Write-Host "[3/6] Building in Release configuration..." -ForegroundColor Yellow
 dotnet build $projectPath -c Release --no-restore $releaseChannelBuildProperty
 Assert-Success "Build failed!"
+dotnet build $launcherProjectPath -c Release --no-restore
+Assert-Success "Launcher build failed!"
 Write-Host "  Build completed." -ForegroundColor Green
 Write-Host ""
 
@@ -116,7 +131,7 @@ if (Test-Path $gitversionPath) {
 }
 Write-Host ""
 
-Write-Host "[5/6] Publishing application (single-file, framework-dependent)..." -ForegroundColor Yellow
+Write-Host "[5/6] Publishing application and launcher (single-file, framework-dependent)..." -ForegroundColor Yellow
 $publishPath = Join-Path $OutputDir "IronworksTranslator ($packVersion)"
 dotnet publish $projectPath -c Release -o $publishPath `
     $releaseChannelBuildProperty `
@@ -124,27 +139,43 @@ dotnet publish $projectPath -c Release -o $publishPath `
     /p:RuntimeIdentifier=$runtime `
     /p:SelfContained=false
 Assert-Success "Publish failed!"
+dotnet publish $launcherProjectPath -c Release -o $publishPath `
+    /p:PublishSingleFile=true `
+    /p:RuntimeIdentifier=$runtime `
+    /p:SelfContained=false
+Assert-Success "Launcher publish failed!"
 Write-Host "  Published to: $publishPath" -ForegroundColor Green
 Write-Host ""
 
-$exePath = Join-Path $publishPath $mainExe
-if (Test-Path $exePath) {
-    $fileVersion = (Get-Item $exePath).VersionInfo.FileVersion
-    $productVersion = (Get-Item $exePath).VersionInfo.ProductVersion
-    $fileSize = [math]::Round((Get-Item $exePath).Length / 1MB, 2)
+$appExePath = Join-Path $publishPath $appExe
+$launcherExePath = Join-Path $publishPath $launcherExe
+if ((Test-Path $appExePath) -and (Test-Path $launcherExePath)) {
+    $fileVersion = (Get-Item $appExePath).VersionInfo.FileVersion
+    $productVersion = (Get-Item $appExePath).VersionInfo.ProductVersion
+    $fileSize = [math]::Round((Get-Item $appExePath).Length / 1MB, 2)
+    $launcherFileVersion = (Get-Item $launcherExePath).VersionInfo.FileVersion
+    $launcherFileSize = [math]::Round((Get-Item $launcherExePath).Length / 1MB, 2)
 
     Write-Host "Verification:" -ForegroundColor Cyan
-    Write-Host "  EXE File Version: $fileVersion" -ForegroundColor Green
-    Write-Host "  EXE Product Version: $productVersion" -ForegroundColor Green
-    Write-Host "  EXE Size: $fileSize MB" -ForegroundColor Green
+    Write-Host "  App EXE File Version: $fileVersion" -ForegroundColor Green
+    Write-Host "  App EXE Product Version: $productVersion" -ForegroundColor Green
+    Write-Host "  App EXE Size: $fileSize MB" -ForegroundColor Green
+    Write-Host "  Launcher EXE File Version: $launcherFileVersion" -ForegroundColor Green
+    Write-Host "  Launcher EXE Size: $launcherFileSize MB" -ForegroundColor Green
 
     if ($fileVersion -like "$version.*") {
-        Write-Host "  Version is correct." -ForegroundColor Green
+        Write-Host "  App version is correct." -ForegroundColor Green
     } else {
-        Write-Warning "Version mismatch detected. Expected $version.*, got $fileVersion"
+        Write-Warning "App version mismatch detected. Expected $version.*, got $fileVersion"
+    }
+
+    if ($launcherFileVersion -like "$version.*") {
+        Write-Host "  Launcher version is correct." -ForegroundColor Green
+    } else {
+        Write-Warning "Launcher version mismatch detected. Expected $version.*, got $launcherFileVersion"
     }
 } else {
-    Write-Error "Could not find published EXE for verification: $exePath"
+    Write-Error "Could not find published EXEs for verification: $appExePath, $launcherExePath"
     exit 1
 }
 Write-Host ""
@@ -161,7 +192,7 @@ if (-not $SkipVelopack) {
         --packId $packId `
         --packVersion $packVersion `
         --packDir $publishPath `
-        --mainExe $mainExe `
+        --mainExe $launcherExe `
         --packTitle $packTitle `
         --outputDir $VelopackOutputDir `
         --channel $channel `

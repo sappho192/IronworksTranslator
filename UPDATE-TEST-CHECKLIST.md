@@ -38,6 +38,7 @@ Expected result:
 
 - Script completes without errors.
 - `publish\IronworksTranslator ({VERSION})\IronworksTranslator.exe` exists.
+- `publish\IronworksTranslator ({VERSION})\IronworksTranslator.Launcher.exe` exists.
 - `Releases\releases.win.json` exists.
 - `Releases\Sappho192.IronworksTranslator-{VERSION}-full.nupkg` exists.
 - `Releases\Sappho192.IronworksTranslator-win-Setup.exe` exists.
@@ -53,6 +54,7 @@ Expected result:
 
 - Script completes without errors.
 - `publish\IronworksTranslator ({VERSION}-beta.1)\IronworksTranslator.exe` exists.
+- `publish\IronworksTranslator ({VERSION}-beta.1)\IronworksTranslator.Launcher.exe` exists.
 - `Releases\beta\releases.beta.json` exists.
 - `Releases\beta\Sappho192.IronworksTranslator-{VERSION}-beta.1-full.nupkg` exists.
 - `Releases\beta\Sappho192.IronworksTranslator-beta-Setup.exe` exists.
@@ -68,6 +70,9 @@ Run:
 Expected result:
 
 - Installer completes and launches IronworksTranslator.
+- The launcher shows a UAC prompt for the real app.
+- Accepting the UAC prompt starts `IronworksTranslator.exe` as administrator.
+- Cancelling the UAC prompt cancels only app startup; the installer should not report a failed install.
 - The app starts without a crash.
 - The terms dialog appears on a clean profile.
 - Accepting the terms writes:
@@ -92,10 +97,11 @@ Extract:
 .\Releases\Sappho192.IronworksTranslator-win-Portable.zip
 ```
 
-Run `IronworksTranslator.exe` from the extracted folder.
+Run `IronworksTranslator.Launcher.exe` from the extracted folder.
 
 Expected result:
 
+- The launcher shows a UAC prompt for the real app.
 - The portable app starts without a crash.
 - If the user data folders are clean, the terms dialog appears.
 - Settings and logs are still written to `%APPDATA%` and `%LOCALAPPDATA%`, not inside the portable folder.
@@ -134,7 +140,8 @@ Run the app directly from `bin`, `publish`, or Visual Studio.
 
 Expected result:
 
-- The app starts normally.
+- Running `IronworksTranslator.exe` directly starts normally when administrator permission is granted.
+- Running `IronworksTranslator.Launcher.exe` starts the real app via UAC.
 - Update checks are skipped silently when the app is not a real Velopack install.
 - No user-facing update error is shown for `NotInstalledException`.
 - Logs mention that the process is not a Velopack install.
@@ -161,6 +168,7 @@ Expected result:
 - Release notes render as readable markdown.
 - Choosing `Download and restart` downloads the update.
 - The app exits, applies the update, restarts, and reports the new version.
+- The restart target is `IronworksTranslator.Launcher.exe`, which prompts for UAC and starts the real app.
 - Settings under `%APPDATA%\IronworksTranslator` are preserved.
 - Logs and model files under `%LOCALAPPDATA%\IronworksTranslator` are preserved.
 
@@ -171,6 +179,8 @@ Stable isolation check:
 - Confirm the Stable app does not offer the Beta update.
 
 Beta channel check:
+
+The `1.2.0-beta.*` packages were reset before public use. Start launcher-based Beta testing at `1.2.1-beta.1`. Do not treat automatic updates from `1.2.0-beta.*` as a release requirement.
 
 1. Publish an older Beta GitHub prerelease with:
    - `Sappho192.IronworksTranslator-beta-Setup.exe`
@@ -187,6 +197,7 @@ Expected result:
 
 - The Beta app offers the newer Beta update.
 - The app exits, applies the update, restarts, and reports the new Beta version.
+- The restarted launcher prompts for UAC and starts the real app as administrator.
 - Settings, logs, and model files are preserved.
 - Returning from Beta to Stable is manual: reinstall the latest Stable installer. Automatic Stable downgrade is not supported in this first Beta channel.
 
@@ -207,6 +218,8 @@ After an update:
 Do not publish the release if any of these fail:
 
 - `vpk pack` does not verify `VelopackApp.Run()`.
+- Velopack shortcuts or update restarts do not target `IronworksTranslator.Launcher.exe`.
+- Installer first-run fails when the user cancels the UAC prompt.
 - `releases.win.json` is missing from GitHub release assets.
 - Installed app cannot update from GitHub.
 - Settings or model files are deleted during update.

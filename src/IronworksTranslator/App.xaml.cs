@@ -18,7 +18,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Threading;
-using Velopack;
 using Wpf.Ui;
 
 namespace IronworksTranslator
@@ -107,8 +106,6 @@ namespace IronworksTranslator
         [STAThread]
         private static void Main(string[] args)
         {
-            VelopackApp.Build().Run();
-
             var app = new App();
             app.InitializeComponent();
             app.Run();

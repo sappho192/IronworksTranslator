@@ -36,18 +36,24 @@ The script:
 2. Restores packages.
 3. Builds Release with GitVersion and the selected release channel.
 4. Reads `src\IronworksTranslator\obj\gitversion.json`.
-5. Publishes a framework-dependent `win-x64` app to `publish\IronworksTranslator ({PACKAGE_VERSION})`.
+5. Publishes the framework-dependent `win-x64` app and launcher to `publish\IronworksTranslator ({PACKAGE_VERSION})`.
 6. Runs `vpk pack` and writes Stable Velopack assets to `Releases` or Beta assets to `Releases\beta`.
 
 Velopack settings used by the script:
 
 - `packId`: `Sappho192.IronworksTranslator`
 - `packTitle`: `IronworksTranslator`
-- `mainExe`: `IronworksTranslator.exe`
+- `mainExe`: `IronworksTranslator.Launcher.exe`
 - Stable `channel`: `win`
 - Beta `channel`: `beta`
 - `runtime`: `win-x64`
 - `framework`: `net10.0-x64-desktop`
+
+## Launcher And Administrator Rights
+
+Velopack launches `IronworksTranslator.Launcher.exe`, which runs as the invoking user and handles Velopack startup hooks. On normal startup, the launcher starts `IronworksTranslator.exe` with the Windows `runas` verb, so the real WPF translator app still runs with administrator rights.
+
+This keeps per-user Velopack install/update flows separate from the app's FFXIV memory access requirement. Installer first-run and update restart should show a UAC prompt from the launcher. If the user cancels the UAC prompt, installation should still be considered complete; only the app launch is cancelled.
 
 ## Release Assets
 
@@ -78,6 +84,7 @@ The model files are not part of the default app update package. The app stores d
 - Beta versions must use labels such as `1.1.5-beta.1` and `1.1.5-beta.2`.
 - When promoting a tested Beta to Stable, publish the Stable version without the prerelease label, such as `1.1.5`.
 - The first Beta channel does not provide automatic downgrade back to Stable. Beta testers should reinstall the latest Stable installer to return to Stable.
+- The `1.2.0-beta.*` packages were reset before public use. Start the launcher-based Beta line at `1.2.1-beta.1`; do not rely on automatic updates from `1.2.0-beta.*`.
 
 ## Useful Options
 
@@ -96,7 +103,8 @@ The model files are not part of the default app update package. The app stores d
 After publishing, verify the executable version:
 
 ```powershell
-(Get-Item "publish\IronworksTranslator (1.1.5)\IronworksTranslator.exe").VersionInfo.FileVersion
+(Get-Item "publish\IronworksTranslator (1.2.1-beta.1)\IronworksTranslator.exe").VersionInfo.FileVersion
+(Get-Item "publish\IronworksTranslator (1.2.1-beta.1)\IronworksTranslator.Launcher.exe").VersionInfo.FileVersion
 ```
 
 For local update testing, build two different versions into the same `Releases` folder, install the older `Setup.exe`, then launch it and confirm it updates to the newer release.
