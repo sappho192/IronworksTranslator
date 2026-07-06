@@ -6,6 +6,7 @@ using IronworksTranslator.Models.Cloudflare;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Models.Translator;
+using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Aspect;
 using IronworksTranslator.Utils.Cloudflare;
@@ -117,14 +118,40 @@ namespace IronworksTranslator.ViewModels.Windows
                     return;
                 }
 
-                string line = chat.Line;
-                ChatLogItem decodedChat = chat.Bytes.DecodeAutoTranslate();
+                var targetLanguage = IronworksSettings.Instance.TranslatorSettings.ClientLanguage;
+                var markerDecode = chat.Bytes.DecodeAutoTranslateMarker(
+                    channel.MajorLanguage,
+                    targetLanguage);
+                var sourceDecode = markerDecode.HasAutoTranslate
+                    ? chat.Bytes.DecodeAutoTranslate(
+                        channel.MajorLanguage,
+                        channel.MajorLanguage,
+                        targetLanguage,
+                        channel.MajorLanguage)
+                    : markerDecode;
+                var targetDecode = markerDecode.HasAutoTranslate
+                    ? chat.Bytes.DecodeAutoTranslate(
+                        targetLanguage,
+                        channel.MajorLanguage,
+                        targetLanguage,
+                        channel.MajorLanguage)
+                    : markerDecode;
+
+                ChatLogItem decodedChat = sourceDecode.DecodedChat;
+                ChatLogItem targetChat = targetDecode.DecodedChat;
+                var pureAutoTranslate = IsPureAutoTranslateMessage(markerDecode);
 
                 if (IsEmoteMessage(code))
                 {
                     var emoteBody = GetEmoteBody(chat, decodedChat);
                     var sourceLanguage = ResolveEmoteSourceLanguage(emoteBody, channel.MajorLanguage);
-                    var text = CreateTranslationText(emoteBody, sourceLanguage);
+                    var text = pureAutoTranslate
+                        ? CreateResolvedAutoTranslateText(
+                            emoteBody,
+                            GetEmoteBody(chat, targetChat),
+                            sourceLanguage,
+                            targetLanguage)
+                        : CreateTranslationText(emoteBody, sourceLanguage);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         AddMessage(text, channel);
@@ -135,7 +162,15 @@ namespace IronworksTranslator.ViewModels.Windows
 
                 if (IsSystemMessage(code))
                 {
-                    var text = CreateTranslationText(line, channel.MajorLanguage);
+                    var sourceLine = FirstNonEmpty(decodedChat.Line, chat.Line);
+                    var targetLine = FirstNonEmpty(targetChat.Line, sourceLine);
+                    var text = pureAutoTranslate
+                        ? CreateResolvedAutoTranslateText(
+                            sourceLine,
+                            targetLine,
+                            channel.MajorLanguage,
+                            targetLanguage)
+                        : CreateTranslationText(sourceLine, channel.MajorLanguage);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         AddMessage(text, channel);
@@ -144,12 +179,22 @@ namespace IronworksTranslator.ViewModels.Windows
                     return;
                 }
 
-                var author = decodedChat.Line.RemoveAfter(":");
-                var sentence = decodedChat.Line.RemoveBefore(":");
+                var decodedLine = FirstNonEmpty(decodedChat.Line, chat.Line);
+                var targetLineForChat = FirstNonEmpty(targetChat.Line, decodedLine);
+                var author = FirstNonEmpty(GetAuthorFromLine(decodedLine), decodedChat.PlayerName);
+                var sentence = GetBodyFromLine(decodedLine);
+                var targetSentence = GetBodyFromLine(targetLineForChat);
 
                 if (!IsDialogueMessage(code))
                 {
-                    var text = CreateTranslationText(sentence, channel.MajorLanguage, author);
+                    var text = pureAutoTranslate
+                        ? CreateResolvedAutoTranslateText(
+                            sentence,
+                            targetSentence,
+                            channel.MajorLanguage,
+                            targetLanguage,
+                            author)
+                        : CreateTranslationText(sentence, channel.MajorLanguage, author);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         AddMessage(text, channel, author);
@@ -161,7 +206,14 @@ namespace IronworksTranslator.ViewModels.Windows
                 if (IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod
                     == DialogueTranslationMethod.ChatMessage)
                 {
-                    var text = CreateTranslationText(sentence, channel.MajorLanguage, author);
+                    var text = pureAutoTranslate
+                        ? CreateResolvedAutoTranslateText(
+                            sentence,
+                            targetSentence,
+                            channel.MajorLanguage,
+                            targetLanguage,
+                            author)
+                        : CreateTranslationText(sentence, channel.MajorLanguage, author);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         App.GetService<DialogueWindow>().PushDialogueTextBox(text.TranslatedText);
@@ -203,6 +255,25 @@ namespace IronworksTranslator.ViewModels.Windows
         {
             return code == ChatCode.Emote ||
                    code == ChatCode.EmoteCustom;
+        }
+
+        internal static bool IsPureAutoTranslateMessage(AutoTranslateDecodeResult markerDecode)
+        {
+            if (!markerDecode.HasAutoTranslate)
+            {
+                return false;
+            }
+
+            var lineBody = GetBodyFromLine(markerDecode.DecodedChat.Line);
+            var body = string.IsNullOrWhiteSpace(GetAuthorFromLine(markerDecode.DecodedChat.Line))
+                ? FirstNonEmpty(markerDecode.DecodedChat.Message, lineBody)
+                : lineBody;
+            foreach (var block in markerDecode.Blocks)
+            {
+                body = body.Replace(block.MarkerText, string.Empty, StringComparison.Ordinal);
+            }
+
+            return body.All(char.IsWhiteSpace);
         }
 
         internal static string GetEmoteBody(ChatLogItem chat, ChatLogItem decodedChat)
@@ -332,6 +403,23 @@ namespace IronworksTranslator.ViewModels.Windows
             }
 
             return text;
+        }
+
+        internal static TranslationText CreateResolvedAutoTranslateText(
+            string originalText,
+            string translatedText,
+            ClientLanguage sourceLanguage,
+            ClientLanguage targetLanguage,
+            string author = "")
+        {
+            return new TranslationText(
+                originalText,
+                (TranslationLanguageCode)sourceLanguage,
+                (TranslationLanguageCode)targetLanguage)
+            {
+                Author = author,
+                TranslatedText = translatedText,
+            };
         }
 
         private static void InvokeOnUiThread(Action action)
