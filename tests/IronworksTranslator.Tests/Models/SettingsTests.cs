@@ -3,6 +3,8 @@ using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Models.Translator;
 using IronworksTranslator.Utils;
 using Wpf.Ui.Appearance;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace IronworksTranslator.Tests.Models;
 
@@ -67,6 +69,30 @@ public class SettingsTests
 
         Assert.Contains("translator_engine: MiLLMT", normalized);
         Assert.DoesNotContain("Ironworks_Ja_Ko", normalized);
+    }
+
+    [Fact]
+    public void SettingsDeserializer_IgnoresUnknownProperties()
+    {
+        var yaml = """
+            ui_settings:
+              is_tos_displayed: false
+            chat_ui_settings:
+              font: KoPubWorld Dotum
+            translator_settings:
+              translator_engine: Papago
+              unknown_future_property: true
+            channel_settings:
+              preset_name: Default
+            """;
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .IgnoreUnmatchedProperties()
+            .Build();
+
+        var settings = deserializer.Deserialize<IronworksSettings>(yaml);
+
+        Assert.Equal(TranslatorEngine.Papago, settings.TranslatorSettings!.TranslatorEngine);
     }
 
     [Theory]

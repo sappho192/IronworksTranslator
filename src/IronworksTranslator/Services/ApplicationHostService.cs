@@ -45,6 +45,7 @@ namespace IronworksTranslator.Services
             {
                 var deserializer = new DeserializerBuilder()
                                     .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                                    .IgnoreUnmatchedProperties()
                                     .Build();
                 var settingsYaml = IronworksSettings.NormalizeLegacySettingsYaml(File.ReadAllText(settingsPath));
                 var settings = deserializer.Deserialize<IronworksSettings>(
