@@ -135,11 +135,13 @@ Write-Host "[5/6] Publishing application and launcher (single-file, framework-de
 $publishPath = Join-Path $OutputDir "IronworksTranslator ($packVersion)"
 dotnet publish $projectPath -c Release -o $publishPath `
     $releaseChannelBuildProperty `
+    /p:IronworksPackageVersion=$packVersion `
     /p:PublishSingleFile=true `
     /p:RuntimeIdentifier=$runtime `
     /p:SelfContained=false
 Assert-Success "Publish failed!"
 dotnet publish $launcherProjectPath -c Release -o $publishPath `
+    /p:IronworksPackageVersion=$packVersion `
     /p:PublishSingleFile=true `
     /p:RuntimeIdentifier=$runtime `
     /p:SelfContained=false

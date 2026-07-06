@@ -18,6 +18,7 @@
     <AssemblyVersion Condition="'$(GitVersion_AssemblySemVer)' != ''">$(GitVersion_AssemblySemVer)</AssemblyVersion>
     <FileVersion Condition="'$(GitVersion_AssemblySemFileVer)' != ''">$(GitVersion_AssemblySemFileVer)</FileVersion>
     <InformationalVersion Condition="'$(GitVersion_InformationalVersion)' != ''">$(GitVersion_InformationalVersion)</InformationalVersion>
+    <InformationalVersion Condition="'$(IronworksPackageVersion)' != ''">$(IronworksPackageVersion)</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
