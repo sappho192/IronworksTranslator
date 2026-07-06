@@ -334,7 +334,11 @@ namespace IronworksTranslator
             loggerConfiguration.WriteTo.File($"{logFilePathWithoutExtension}.txt");
 #endif
             Log.Logger = loggerConfiguration.CreateLogger();
-            Log.Information($"IronworksTranslator {Assembly.GetExecutingAssembly().GetName().Version.ToString(3)} started.");
+            Log.Information(
+                "IronworksTranslator {Version} started. ReleaseChannel: {ReleaseChannel}, VelopackChannel: {VelopackChannel}",
+                Assembly.GetExecutingAssembly().GetName().Version.ToString(3),
+                BuildInfo.ReleaseChannel.DisplayName,
+                BuildInfo.ReleaseChannel.VelopackChannel);
 #if !DEBUG
             LegacyLogMigrator.MigrateLegacyTextLogs(AppPaths.LogsDirectory);
 #endif

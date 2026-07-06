@@ -28,7 +28,7 @@ Remove-Item "$env:LOCALAPPDATA\IronworksTranslator" -Recurse -Force -ErrorAction
 
 ## 2. Build And Package
 
-Run:
+Run the Stable package:
 
 ```powershell
 .\publish-release.ps1 -SkipClean
@@ -42,6 +42,20 @@ Expected result:
 - `Releases\Sappho192.IronworksTranslator-{VERSION}-full.nupkg` exists.
 - `Releases\Sappho192.IronworksTranslator-win-Setup.exe` exists.
 - `Releases\Sappho192.IronworksTranslator-win-Portable.zip` exists.
+
+Run the Beta package:
+
+```powershell
+.\publish-release.ps1 -ReleaseChannel Beta -PrereleaseLabel beta.1 -SkipClean
+```
+
+Expected result:
+
+- Script completes without errors.
+- `publish\IronworksTranslator ({VERSION}-beta.1)\IronworksTranslator.exe` exists.
+- `Releases\beta\releases.beta.json` exists.
+- `Releases\beta\Sappho192.IronworksTranslator-{VERSION}-beta.1-full.nupkg` exists.
+- `Releases\beta\Sappho192.IronworksTranslator-beta-Setup.exe` exists.
 
 ## 3. Installer First-Run Smoke Test
 
@@ -127,18 +141,18 @@ Expected result:
 
 ## 7. Real Update Test With GitHub Releases
 
-This app uses `GithubSource("https://github.com/sappho192/IronworksTranslator", prerelease: false)`, so the real in-app update flow must be tested against GitHub release assets.
+Stable builds use GitHub non-prerelease releases and the Velopack `win` channel. Beta builds use GitHub prereleases and the Velopack `beta` channel. The real in-app update flow must be tested against GitHub release assets.
 
-1. Publish an older Velopack release to GitHub with these files:
+1. Publish an older Stable Velopack release to a normal GitHub release with these files:
    - `Sappho192.IronworksTranslator-win-Setup.exe`
    - `Sappho192.IronworksTranslator-{OLD_VERSION}-full.nupkg`
    - `releases.win.json`
-2. Install the older version using `Sappho192.IronworksTranslator-win-Setup.exe`.
-3. Publish a newer non-prerelease GitHub release with:
+2. Install the older Stable version using `Sappho192.IronworksTranslator-win-Setup.exe`.
+3. Publish a newer normal GitHub release with:
    - `Sappho192.IronworksTranslator-{NEW_VERSION}-full.nupkg`
    - `Sappho192.IronworksTranslator-{NEW_VERSION}-delta.nupkg` if generated
    - updated `releases.win.json`
-4. Launch the older installed app.
+4. Launch the older Stable installed app.
 
 Expected result:
 
@@ -149,6 +163,32 @@ Expected result:
 - The app exits, applies the update, restarts, and reports the new version.
 - Settings under `%APPDATA%\IronworksTranslator` are preserved.
 - Logs and model files under `%LOCALAPPDATA%\IronworksTranslator` are preserved.
+
+Stable isolation check:
+
+- Publish a newer Beta GitHub prerelease that contains only `beta` channel assets.
+- Launch an older Stable installed app.
+- Confirm the Stable app does not offer the Beta update.
+
+Beta channel check:
+
+1. Publish an older Beta GitHub prerelease with:
+   - `Sappho192.IronworksTranslator-beta-Setup.exe`
+   - `Sappho192.IronworksTranslator-{OLD_VERSION}-beta.1-full.nupkg`
+   - `releases.beta.json`
+2. Install the older Beta version using `Sappho192.IronworksTranslator-beta-Setup.exe`.
+3. Publish a newer Beta GitHub prerelease with:
+   - `Sappho192.IronworksTranslator-{NEW_VERSION}-beta.2-full.nupkg`
+   - `Sappho192.IronworksTranslator-{NEW_VERSION}-beta.2-delta.nupkg` if generated
+   - updated `releases.beta.json`
+4. Launch the older Beta installed app.
+
+Expected result:
+
+- The Beta app offers the newer Beta update.
+- The app exits, applies the update, restarts, and reports the new Beta version.
+- Settings, logs, and model files are preserved.
+- Returning from Beta to Stable is manual: reinstall the latest Stable installer. Automatic Stable downgrade is not supported in this first Beta channel.
 
 ## 8. Post-Update Regression Checks
 

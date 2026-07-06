@@ -24,6 +24,12 @@
     <InformationalVersion Condition="'$(GitVersion_InformationalVersion)' != ''">$(GitVersion_InformationalVersion)</InformationalVersion>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <IronworksReleaseChannel Condition="'$(IronworksReleaseChannel)' == '' And '$(IRONWORKS_BETA)' != ''">Beta</IronworksReleaseChannel>
+    <IronworksReleaseChannel Condition="'$(IronworksReleaseChannel)' == ''">Stable</IronworksReleaseChannel>
+    <DefineConstants Condition="'$(IronworksReleaseChannel)' == 'Beta'">$(DefineConstants);IRONWORKS_BETA</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <ApplicationDefinition Remove="App.xaml" />
     <Page Include="App.xaml" />

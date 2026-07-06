@@ -18,40 +18,66 @@ dotnet tool update --global vpk --version 1.2.0
 
 ## Build A Release
 
+Stable releases are the default:
+
 ```powershell
 .\publish-release.ps1
+```
+
+Beta releases must use a SemVer prerelease label:
+
+```powershell
+.\publish-release.ps1 -ReleaseChannel Beta -PrereleaseLabel beta.1
 ```
 
 The script:
 
 1. Cleans `bin` and `obj` unless `-SkipClean` is used.
 2. Restores packages.
-3. Builds Release with GitVersion.
+3. Builds Release with GitVersion and the selected release channel.
 4. Reads `src\IronworksTranslator\obj\gitversion.json`.
-5. Publishes a framework-dependent `win-x64` app to `publish\IronworksTranslator ({VERSION})`.
-6. Runs `vpk pack` and writes Velopack assets to `Releases`.
+5. Publishes a framework-dependent `win-x64` app to `publish\IronworksTranslator ({PACKAGE_VERSION})`.
+6. Runs `vpk pack` and writes Stable Velopack assets to `Releases` or Beta assets to `Releases\beta`.
 
 Velopack settings used by the script:
 
 - `packId`: `Sappho192.IronworksTranslator`
 - `packTitle`: `IronworksTranslator`
 - `mainExe`: `IronworksTranslator.exe`
-- `channel`: `win`
+- Stable `channel`: `win`
+- Beta `channel`: `beta`
 - `runtime`: `win-x64`
 - `framework`: `net8.0-x64-desktop`
 
 ## Release Assets
 
-Upload these Velopack files from `Releases` to the GitHub release:
+Upload these Stable Velopack files from `Releases` to a normal GitHub release:
 
 - `Sappho192.IronworksTranslator-win-Setup.exe`
 - `Sappho192.IronworksTranslator-{VERSION}-full.nupkg`
 - `Sappho192.IronworksTranslator-{VERSION}-delta.nupkg` when generated
 - `releases.win.json`
 
+Upload these Beta Velopack files from `Releases\beta` to a GitHub prerelease:
+
+- `Sappho192.IronworksTranslator-beta-Setup.exe`
+- `Sappho192.IronworksTranslator-{VERSION}-beta.N-full.nupkg`
+- `Sappho192.IronworksTranslator-{VERSION}-beta.N-delta.nupkg` when generated
+- `releases.beta.json`
+
 Optional generated files such as `Sappho192.IronworksTranslator-win-Portable.zip`, `assets.win.json`, and `RELEASES` are not required for the in-app updater.
 
 The model files are not part of the default app update package. The app stores downloaded model/tokenizer data under `%LocalAppData%\IronworksTranslator\data`.
+
+## Stable And Beta Rules
+
+- Stable builds use GitHub non-prerelease releases and the Velopack `win` channel.
+- Beta builds use GitHub prereleases and the Velopack `beta` channel.
+- Do not upload `releases.beta.json` or Beta `.nupkg` files to a Stable GitHub release.
+- Do not upload `releases.win.json` or Stable `.nupkg` files to a Beta GitHub prerelease.
+- Beta versions must use labels such as `1.1.5-beta.1` and `1.1.5-beta.2`.
+- When promoting a tested Beta to Stable, publish the Stable version without the prerelease label, such as `1.1.5`.
+- The first Beta channel does not provide automatic downgrade back to Stable. Beta testers should reinstall the latest Stable installer to return to Stable.
 
 ## Useful Options
 
@@ -59,6 +85,7 @@ The model files are not part of the default app update package. The app stores d
 .\publish-release.ps1 -SkipClean
 .\publish-release.ps1 -CreateZip
 .\publish-release.ps1 -SkipVelopack
+.\publish-release.ps1 -ReleaseChannel Beta -PrereleaseLabel beta.1
 .\publish-release.ps1 -OutputDir "publish" -VelopackOutputDir "Releases"
 ```
 
@@ -73,6 +100,8 @@ After publishing, verify the executable version:
 ```
 
 For local update testing, build two different versions into the same `Releases` folder, install the older `Setup.exe`, then launch it and confirm it updates to the newer release.
+
+For local Beta update testing, build two different Beta versions into `Releases\beta`, install the older `Sappho192.IronworksTranslator-beta-Setup.exe`, then launch it and confirm it updates to the newer Beta release.
 
 ## Why Not Visual Studio Publish?
 

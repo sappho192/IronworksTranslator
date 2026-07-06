@@ -5,6 +5,9 @@ param(
     [switch]$SkipClean,
     [switch]$CreateZip,
     [switch]$SkipVelopack,
+    [ValidateSet("Stable", "Beta")]
+    [string]$ReleaseChannel = "Stable",
+    [string]$PrereleaseLabel = "",
     [string]$OutputDir = "publish",
     [string]$VelopackOutputDir = "Releases"
 )
@@ -16,9 +19,10 @@ $velopackVersion = "1.2.0"
 $packId = "Sappho192.IronworksTranslator"
 $packTitle = "IronworksTranslator"
 $mainExe = "IronworksTranslator.exe"
-$channel = "win"
 $runtime = "win-x64"
 $framework = "net8.0-x64-desktop"
+$channel = "win"
+$packVersion = $null
 
 function Assert-Success($message) {
     if ($LASTEXITCODE -ne 0) {
@@ -27,9 +31,36 @@ function Assert-Success($message) {
     }
 }
 
+if ($ReleaseChannel -eq "Beta") {
+    if ([string]::IsNullOrWhiteSpace($PrereleaseLabel)) {
+        Write-Error "Beta releases require -PrereleaseLabel, for example: -PrereleaseLabel beta.1"
+        exit 1
+    }
+
+    if ($PrereleaseLabel -notmatch '^beta\.[1-9][0-9]*$') {
+        Write-Error "Beta prerelease label must use the format beta.N, for example: beta.1"
+        exit 1
+    }
+
+    $channel = "beta"
+    if ((Split-Path -Leaf $VelopackOutputDir) -ne "beta") {
+        $VelopackOutputDir = Join-Path $VelopackOutputDir "beta"
+    }
+} elseif (-not [string]::IsNullOrWhiteSpace($PrereleaseLabel)) {
+    Write-Error "-PrereleaseLabel can only be used with -ReleaseChannel Beta"
+    exit 1
+}
+
+$releaseChannelBuildProperty = "/p:IronworksReleaseChannel=$ReleaseChannel"
+
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "IronworksTranslator Release Publisher" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Release channel: $ReleaseChannel ($channel)" -ForegroundColor Cyan
+if ($ReleaseChannel -eq "Beta") {
+    Write-Host "Prerelease label: $PrereleaseLabel" -ForegroundColor Cyan
+}
 Write-Host ""
 
 if (-not $SkipClean) {
@@ -58,7 +89,7 @@ Write-Host "  Restore completed." -ForegroundColor Green
 Write-Host ""
 
 Write-Host "[3/6] Building in Release configuration..." -ForegroundColor Yellow
-dotnet build $projectPath -c Release --no-restore
+dotnet build $projectPath -c Release --no-restore $releaseChannelBuildProperty
 Assert-Success "Build failed!"
 Write-Host "  Build completed." -ForegroundColor Green
 Write-Host ""
@@ -70,8 +101,13 @@ if (Test-Path $gitversionPath) {
     $version = $gitversion.MajorMinorPatch
     $fullVersion = $gitversion.InformationalVersion
     $assemblyVersion = $gitversion.AssemblySemVer
+    $packVersion = $version
+    if ($ReleaseChannel -eq "Beta") {
+        $packVersion = "$version-$PrereleaseLabel"
+    }
 
     Write-Host "  Version: $version" -ForegroundColor Green
+    Write-Host "  Package Version: $packVersion" -ForegroundColor Green
     Write-Host "  Assembly Version: $assemblyVersion" -ForegroundColor Green
     Write-Host "  Full Version: $fullVersion" -ForegroundColor Green
 } else {
@@ -81,8 +117,9 @@ if (Test-Path $gitversionPath) {
 Write-Host ""
 
 Write-Host "[5/6] Publishing application (single-file, framework-dependent)..." -ForegroundColor Yellow
-$publishPath = Join-Path $OutputDir "IronworksTranslator ($version)"
+$publishPath = Join-Path $OutputDir "IronworksTranslator ($packVersion)"
 dotnet publish $projectPath -c Release -o $publishPath `
+    $releaseChannelBuildProperty `
     /p:PublishSingleFile=true `
     /p:RuntimeIdentifier=$runtime `
     /p:SelfContained=false
@@ -122,7 +159,7 @@ if (-not $SkipVelopack) {
 
     vpk pack `
         --packId $packId `
-        --packVersion $version `
+        --packVersion $packVersion `
         --packDir $publishPath `
         --mainExe $mainExe `
         --packTitle $packTitle `
@@ -140,7 +177,7 @@ Write-Host ""
 
 if ($CreateZip) {
     Write-Host "Creating legacy distribution ZIP..." -ForegroundColor Yellow
-    $zipPath = Join-Path $OutputDir "IronworksTranslator-v$version.zip"
+    $zipPath = Join-Path $OutputDir "IronworksTranslator-v$packVersion.zip"
 
     if (Test-Path $zipPath) {
         Remove-Item $zipPath -Force
@@ -158,6 +195,7 @@ Write-Host ""
 Write-Host "Publish output: $publishPath" -ForegroundColor White
 if (-not $SkipVelopack) {
     Write-Host "Velopack assets: $VelopackOutputDir" -ForegroundColor White
+    Write-Host "Velopack channel: $channel" -ForegroundColor White
 }
 if ($CreateZip) {
     Write-Host "Legacy ZIP file: $zipPath" -ForegroundColor White
@@ -165,6 +203,7 @@ if ($CreateZip) {
 Write-Host ""
 Write-Host "Usage examples:" -ForegroundColor Gray
 Write-Host "  .\publish-release.ps1" -ForegroundColor Gray
+Write-Host "  .\publish-release.ps1 -ReleaseChannel Beta -PrereleaseLabel beta.1" -ForegroundColor Gray
 Write-Host "  .\publish-release.ps1 -SkipClean" -ForegroundColor Gray
 Write-Host "  .\publish-release.ps1 -CreateZip" -ForegroundColor Gray
 Write-Host "  .\publish-release.ps1 -SkipVelopack" -ForegroundColor Gray

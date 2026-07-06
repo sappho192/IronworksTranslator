@@ -59,12 +59,24 @@ namespace IronworksTranslator.Services
 
         private static async Task CheckForUpdatesCoreAsync(CancellationToken cancellationToken)
         {
+            var releaseChannel = BuildInfo.ReleaseChannel;
             var source = new GithubSource(
                 RepositoryUrl,
                 accessToken: null,
-                prerelease: false,
+                prerelease: releaseChannel.IncludePrereleases,
                 downloader: null);
-            var updateManager = new UpdateManager(source);
+            var updateManager = new UpdateManager(
+                source,
+                new UpdateOptions
+                {
+                    ExplicitChannel = releaseChannel.VelopackChannel,
+                });
+
+            Log.Information(
+                "Checking for updates. ReleaseChannel: {ReleaseChannel}, VelopackChannel: {VelopackChannel}, IncludePrereleases: {IncludePrereleases}",
+                releaseChannel.DisplayName,
+                releaseChannel.VelopackChannel,
+                releaseChannel.IncludePrereleases);
 
             var updateInfo = await updateManager.CheckForUpdatesAsync();
             if (updateInfo == null)
