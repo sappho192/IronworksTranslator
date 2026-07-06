@@ -43,7 +43,7 @@ dotnet tool update --global vpk --version 1.2.0
 - `Models/Settings/`: YAML로 저장되는 사용자 설정 모델. `IronworksSettings.Instance`가 런타임 전역 설정입니다.
 - `ViewModels/`: CommunityToolkit.Mvvm 기반 WPF ViewModel. `[ObservableProperty]`, `[RelayCommand]`, Messenger, Dispatcher 패턴을 따릅니다.
 - `Views/`: WPF XAML과 code-behind. WPF-UI 컨트롤과 기존 리소스 구조를 유지합니다.
-- `Utils/Translator/`: Papago, DeepL API, 내부 Ja-Ko, MiLMMT 번역기 구현. 추상 기반 클래스는 `Utils/Translator/TranslatorBase.cs` 파일에 있지만 namespace는 `IronworksTranslator.Utils.Translators`입니다.
+- `Utils/Translator/`: Papago, DeepL API, MiLMMT 번역기 구현. 추상 기반 클래스는 `Utils/Translator/TranslatorBase.cs` 파일에 있지만 namespace는 `IronworksTranslator.Utils.Translators`입니다.
 - `Resources/Strings/*.yaml`: UI 문자열 리소스. 사용자에게 보이는 문자열을 추가하거나 바꾸면 `ko-KR.yaml`과 `en-US.yaml`을 함께 갱신하세요.
 - `Utils/AppPaths.cs`: 사용자 데이터 경로. 설정은 `%APPDATA%\IronworksTranslator`, 로그/모델/데이터는 `%LOCALAPPDATA%\IronworksTranslator` 아래에 둡니다.
 
@@ -73,7 +73,7 @@ dotnet tool update --global vpk --version 1.2.0
 - GitVersion 속성은 `Directory.Build.props`와 앱 csproj에 설정되어 있습니다. 버전 스탬프를 우회하지 마세요.
 - 릴리스 빌드는 `publish-release.ps1`가 `dotnet restore`, `dotnet build -c Release`, `dotnet publish`, `vpk pack` 순서로 처리합니다.
 - Velopack 업데이트 흐름을 바꾸는 경우 `UPDATE-TEST-CHECKLIST.md`와 `PUBLISH-README.md`를 함께 확인하고 갱신하세요.
-- `WatchDogMain.exe`, bundled unidic data, fonts, embedded string resources, encrypted log public key는 앱 실행/배포에 필요한 자산입니다. csproj의 copy/resource 설정을 변경할 때 실제 publish 산출물을 확인하세요.
+- `WatchDogMain.exe`, fonts, embedded string resources, encrypted log public key는 앱 실행/배포에 필요한 자산입니다. csproj의 copy/resource 설정을 변경할 때 실제 publish 산출물을 확인하세요.
 
 ## 작업 전 체크리스트
 

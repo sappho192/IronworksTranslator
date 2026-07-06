@@ -687,13 +687,6 @@ namespace IronworksTranslator.ViewModels.Windows
                             (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
                         );
                     break;
-                case TranslatorEngine.Ironworks_Ja_Ko:
-                    result = App.GetService<IronworksJaKoTranslator>().Translate(
-                            input,
-                            (TranslationLanguageCode)channelLanguage,
-                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
-                        );
-                    break;
                 case TranslatorEngine.MiLLMT:
                     result = App.GetService<MiLMMTTranslator>().Translate(
                             input,
@@ -702,6 +695,8 @@ namespace IronworksTranslator.ViewModels.Windows
                         );
                     break;
                 default:
+                    Log.Warning("Unknown translator engine {TranslatorEngine}. Returning original input.", switcher);
+                    result = input;
                     break;
             }
             Log.Information($"Translated {input}");

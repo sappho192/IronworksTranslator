@@ -200,7 +200,7 @@ After an update:
 - Reset chat/dialogue window positions.
 - Open the log folder from the dashboard and confirm Windows Explorer opens `%LOCALAPPDATA%\IronworksTranslator\logs`.
 - Clear logs from the dashboard and confirm only `.iwlog` and legacy `.txt` files in `%LOCALAPPDATA%\IronworksTranslator\logs` are affected.
-- Select the internal Ja-Ko translator and confirm model download/reuse works.
+- Select the MiLLMT translator and confirm model download/reuse works.
 
 ## 9. Release Blockers
 

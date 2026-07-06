@@ -2,6 +2,7 @@
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Aspect;
+using Serilog;
 using System.IO;
 using Wpf.Ui.Appearance;
 using YamlDotNet.Serialization;
@@ -114,13 +115,42 @@ namespace IronworksTranslator.Models.Settings
             return false;
         }
 
-        private static void NormalizeSettings(IronworksSettings settings)
+        internal static string NormalizeLegacySettingsYaml(string settingsYaml)
+        {
+            return settingsYaml
+                .Replace("MiLLMT_1B_Q4_K_M", nameof(TranslatorEngine.MiLLMT))
+                .Replace("Ironworks_Ja_Ko", nameof(TranslatorEngine.MiLLMT))
+                .Replace("Ironworks Ja→Ko (사용 금지)", nameof(TranslatorEngine.MiLLMT));
+        }
+
+        internal static void NormalizeSettings(IronworksSettings settings)
         {
             var chatUiSettings = settings.ChatUiSettings!;
+            var translatorSettings = settings.TranslatorSettings!;
 
             chatUiSettings.WindowOpacity = NormalizeOpacity(chatUiSettings.WindowOpacity, 1.0);
             chatUiSettings.ChatWindowOpacity = NormalizeOpacity(chatUiSettings.ChatWindowOpacity, chatUiSettings.WindowOpacity);
             chatUiSettings.DialogueWindowOpacity = NormalizeOpacity(chatUiSettings.DialogueWindowOpacity, chatUiSettings.WindowOpacity);
+
+            NormalizeTranslatorEngine(translatorSettings);
+        }
+
+        private static void NormalizeTranslatorEngine(TranslatorSettings translatorSettings)
+        {
+            var engineValue = (int)translatorSettings.TranslatorEngine;
+            if (engineValue is 2 or 3)
+            {
+                translatorSettings.TranslatorEngine = TranslatorEngine.MiLLMT;
+                return;
+            }
+
+            if (!Enum.IsDefined(typeof(TranslatorEngine), translatorSettings.TranslatorEngine))
+            {
+                Log.Warning(
+                    "Unknown translator engine value {TranslatorEngine}. Falling back to Papago.",
+                    translatorSettings.TranslatorEngine);
+                translatorSettings.TranslatorEngine = TranslatorEngine.Papago;
+            }
         }
 
         private static double NormalizeOpacity(double value, double fallback)

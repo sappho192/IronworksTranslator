@@ -53,4 +53,47 @@ public class SettingsTests
         Assert.Contains("huggingface.co", profile.DownloadUrl);
         Assert.EndsWith(profile.FileName, profile.FilePath);
     }
+
+    [Fact]
+    public void NormalizeLegacySettingsYaml_ReplacesRemovedJaKoEngine()
+    {
+        var yaml = """
+            translator_settings:
+              translator_engine: Ironworks_Ja_Ko
+            """;
+
+        var normalized = IronworksSettings.NormalizeLegacySettingsYaml(yaml);
+
+        Assert.Contains("translator_engine: MiLLMT", normalized);
+        Assert.DoesNotContain("Ironworks_Ja_Ko", normalized);
+    }
+
+    [Theory]
+    [InlineData(2)]
+    [InlineData(3)]
+    public void NormalizeSettings_MigratesLegacyJaKoAndMiLMMTNumericValues(int legacyValue)
+    {
+        var settings = IronworksSettings.CreateDefault();
+        settings.TranslatorSettings!.TranslatorEngine = (TranslatorEngine)legacyValue;
+
+        IronworksSettings.NormalizeSettings(settings);
+
+        Assert.Equal(TranslatorEngine.MiLLMT, settings.TranslatorSettings.TranslatorEngine);
+    }
+
+    [Fact]
+    public void TranslatorEngine_DoesNotExposeRemovedJaKoEngine()
+    {
+        var engines = Enum.GetValues<TranslatorEngine>();
+        var expectedEngines = new[]
+        {
+            TranslatorEngine.Papago,
+            TranslatorEngine.DeepL_API,
+            TranslatorEngine.MiLLMT,
+        };
+
+        Assert.Equal(expectedEngines, engines);
+        Assert.DoesNotContain("Ironworks_Ja_Ko", Enum.GetNames<TranslatorEngine>());
+        Assert.Equal(2, (int)TranslatorEngine.MiLLMT);
+    }
 }

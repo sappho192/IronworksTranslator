@@ -1,4 +1,5 @@
 using IronworksTranslator.Models.Enums;
+using IronworksTranslator.Models.Translator;
 using Serilog;
 using System.IO;
 
@@ -32,10 +33,6 @@ namespace IronworksTranslator.Utils
             DataDirectory,
             "model");
 
-        public static string AihubJaKoModelDirectory { get; } = Path.Combine(
-            ModelDirectory,
-            "aihub-ja-ko-translator");
-
         public static string MiLMMTModelDirectory { get; } = Path.Combine(
             ModelDirectory,
             "milmmt-46-1b-v0.1");
@@ -56,18 +53,6 @@ namespace IronworksTranslator.Utils
                 });
         }
 
-        public static string TokenizersDirectory { get; } = Path.Combine(
-            DataDirectory,
-            "tokenizers");
-
-        public static string BundledDataDirectory { get; } = Path.Combine(
-            AppContext.BaseDirectory,
-            "data");
-
-        public static string BundledUnidicDirectory { get; } = Path.Combine(
-            BundledDataDirectory,
-            "unidic-mecab-2.1.2_bin");
-
         public static void EnsureDirectories()
         {
             Directory.CreateDirectory(RoamingAppDataDirectory);
@@ -83,8 +68,16 @@ namespace IronworksTranslator.Utils
             foreach (var baseDirectory in GetLegacyBaseDirectories())
             {
                 MigrateLegacyFile(Path.Combine(baseDirectory, "settings.yaml"), SettingsFilePath);
-                MigrateLegacyDirectory(Path.Combine(baseDirectory, "data", "model"), ModelDirectory);
-                MigrateLegacyDirectory(Path.Combine(baseDirectory, "data", "tokenizers"), TokenizersDirectory);
+                MigrateLegacyMiLMMTModels(baseDirectory);
+            }
+        }
+
+        private static void MigrateLegacyMiLMMTModels(string baseDirectory)
+        {
+            foreach (var profile in MiLMMTModelProfiles.All)
+            {
+                var sourceDirectory = Path.Combine(baseDirectory, "data", "model", Path.GetFileName(profile.DirectoryPath));
+                MigrateLegacyDirectory(sourceDirectory, profile.DirectoryPath);
             }
         }
 

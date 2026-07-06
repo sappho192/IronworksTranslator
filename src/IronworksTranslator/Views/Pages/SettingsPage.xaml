@@ -121,8 +121,6 @@
                                     <Border Height="8"/>
                                     <ui:TextBlock Name="txtPapagoTooltip" FontTypography="BodyStrong" FontSize="12" Visibility="Collapsed"
                                         Text="{i18n:StringLocalizer settings.translator.engine.tooltip.papago}"/>
-                                    <ui:TextBlock Name="txtJaKoTooltip" FontTypography="BodyStrong" FontSize="12" Visibility="Collapsed"
-                                        Text="{i18n:StringLocalizer settings.translator.engine.tooltip.jako}"/>
                                     <ui:TextBlock Name="txtMiLMMTTooltip" FontTypography="BodyStrong" FontSize="12" Visibility="Collapsed"
                                         Text="{i18n:StringLocalizer settings.translator.engine.tooltip.milmmt}"/>
                                     <StackPanel Name="panelMiLMMTOptions" Margin="0,12,0,0" Visibility="Collapsed">

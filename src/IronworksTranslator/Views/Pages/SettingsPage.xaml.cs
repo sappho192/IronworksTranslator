@@ -318,14 +318,6 @@ namespace IronworksTranslator.Views.Pages
             if (comboBox == null) return;
 
             var selectedItem = ViewModel.TranslatorEngine;
-            if (selectedItem == Models.Enums.TranslatorEngine.Ironworks_Ja_Ko
-                && !ConfirmDeprecatedIronworksJaKo())
-            {
-                SelectTranslatorEngine(Models.Enums.TranslatorEngine.MiLLMT, comboBox);
-                UpdateTranslatorTooltip(ViewModel.TranslatorEngine);
-                EnsureLocalTranslatorModelReady(ViewModel.TranslatorEngine, comboBox);
-                return;
-            }
 
             if (selectedItem == Models.Enums.TranslatorEngine.DeepL_API)
             {
@@ -345,17 +337,6 @@ namespace IronworksTranslator.Views.Pages
                 UpdateTranslatorTooltip(selectedItem);
                 EnsureLocalTranslatorModelReady(selectedItem, comboBox);
             }
-        }
-
-        private static bool ConfirmDeprecatedIronworksJaKo()
-        {
-            var result = System.Windows.MessageBox.Show(
-                Localizer.GetString("settings.translator.engine.jako.deprecated.confirm"),
-                Localizer.GetString("settings.translator.engine.jako.deprecated.title"),
-                System.Windows.MessageBoxButton.YesNo,
-                System.Windows.MessageBoxImage.Warning);
-
-            return result == System.Windows.MessageBoxResult.Yes;
         }
 
         private void MiLMMTModelOption_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -566,17 +547,13 @@ namespace IronworksTranslator.Views.Pages
 
         private static bool RequiresLocalTranslatorModel(Models.Enums.TranslatorEngine selectedItem)
         {
-            return selectedItem is Models.Enums.TranslatorEngine.Ironworks_Ja_Ko
-                or Models.Enums.TranslatorEngine.MiLLMT;
+            return selectedItem is Models.Enums.TranslatorEngine.MiLLMT;
         }
 
         private bool LocalTranslatorModelExists(Models.Enums.TranslatorEngine selectedItem)
         {
             return selectedItem switch
             {
-                Models.Enums.TranslatorEngine.Ironworks_Ja_Ko =>
-                    File.Exists(Path.Combine(AppPaths.AihubJaKoModelDirectory, "encoder_model.onnx"))
-                    && File.Exists(Path.Combine(AppPaths.AihubJaKoModelDirectory, "decoder_model_merged.onnx")),
                 Models.Enums.TranslatorEngine.MiLLMT => File.Exists(ViewModel.SelectedMiLMMTProfile.FilePath),
                 _ => true,
             };
@@ -584,15 +561,12 @@ namespace IronworksTranslator.Views.Pages
 
         private void UpdateTranslatorTooltip(Models.Enums.TranslatorEngine selectedItem)
         {
-            if (txtPapagoTooltip == null || txtJaKoTooltip == null || txtMiLMMTTooltip == null)
+            if (txtPapagoTooltip == null || txtMiLMMTTooltip == null)
             {
                 return;
             }
 
             txtPapagoTooltip.Visibility = selectedItem == Models.Enums.TranslatorEngine.Papago
-                ? Visibility.Visible
-                : Visibility.Collapsed;
-            txtJaKoTooltip.Visibility = selectedItem == Models.Enums.TranslatorEngine.Ironworks_Ja_Ko
                 ? Visibility.Visible
                 : Visibility.Collapsed;
             txtMiLMMTTooltip.Visibility = selectedItem == Models.Enums.TranslatorEngine.MiLLMT
