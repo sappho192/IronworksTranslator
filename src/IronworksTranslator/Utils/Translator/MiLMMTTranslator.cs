@@ -22,6 +22,7 @@ namespace IronworksTranslator.Utils.Translator
 
         private static readonly string[] StopTokens = ["<end_of_turn>", "<eos>", "</s>"];
         private static readonly object NativeConfigLock = new();
+        private static readonly MiLMMTNativeBackendSession NativeBackendSession = new();
         private static bool isNativeConfigured;
         private static LocalModelDevicePriority? configuredDevicePriority;
 
@@ -42,6 +43,18 @@ namespace IronworksTranslator.Utils.Translator
 
         public override TranslationLanguageCode[] SupportedSourceLanguages => translationLanguages;
         public override TranslationLanguageCode[] SupportedTargetLanguages => translationLanguages;
+
+        internal void ConfigureNativeBackendAtStartup()
+        {
+            try
+            {
+                _ = ConfigureNativeLibrary(GetDevicePriority());
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to configure the MiLLMT native backend at startup.");
+            }
+        }
 
         public override string Translate(
             string input,
@@ -118,10 +131,10 @@ namespace IronworksTranslator.Utils.Translator
 
         private bool EnsureInitialized(MiLMMTModelProfile modelProfile)
         {
-            var devicePriority = GetDevicePriority();
+            var effectiveDevicePriority = ConfigureNativeLibrary(GetDevicePriority());
             if (executor != null
                 && loadedModelPath == modelProfile.FilePath
-                && loadedDevicePriority == devicePriority)
+                && loadedDevicePriority == effectiveDevicePriority)
             {
                 return true;
             }
@@ -129,7 +142,6 @@ namespace IronworksTranslator.Utils.Translator
             try
             {
                 UnloadModel();
-                var effectiveDevicePriority = ConfigureNativeLibrary(devicePriority);
                 var useGpu = effectiveDevicePriority is LocalModelDevicePriority.Cuda
                     or LocalModelDevicePriority.Vulkan;
                 var modelParams = new ModelParams(modelProfile.FilePath)
@@ -168,11 +180,6 @@ namespace IronworksTranslator.Utils.Translator
             {
                 if (isNativeConfigured)
                 {
-                    if (devicePriority == LocalModelDevicePriority.Cpu)
-                    {
-                        return LocalModelDevicePriority.Cpu;
-                    }
-
                     if (configuredDevicePriority != devicePriority)
                     {
                         Log.Warning(
@@ -181,15 +188,36 @@ namespace IronworksTranslator.Utils.Translator
                             devicePriority);
                     }
 
-                    return configuredDevicePriority ?? devicePriority;
+                    return configuredDevicePriority ?? LocalModelDevicePriority.Cpu;
                 }
 
-                var config = NativeLibraryConfig.All
-                    .WithCuda(devicePriority == LocalModelDevicePriority.Cuda)
-                    .WithVulkan(devicePriority == LocalModelDevicePriority.Vulkan)
-                    .WithAutoFallback(true);
+                var selectedDevicePriority = NativeBackendSession.Select(
+                    devicePriority,
+                    System.Runtime.Intrinsics.X86.Avx2.IsSupported,
+                    MiLMMTNativeBackendSelector.ProbeGpuBackend);
 
-                config.WithLogCallback((level, message) =>
+                if (selectedDevicePriority is LocalModelDevicePriority.Cuda
+                    or LocalModelDevicePriority.Vulkan)
+                {
+                    var llamaPath = MiLMMTNativeBackendSelector.GetLlamaPath(
+                        selectedDevicePriority,
+                        AppContext.BaseDirectory);
+                    if (!File.Exists(llamaPath))
+                    {
+                        throw new FileNotFoundException("MiLLMT native runtime pack is missing.", llamaPath);
+                    }
+
+                    NativeLibraryConfig.LLama.WithLibrary(llamaPath);
+                }
+                else
+                {
+                    NativeLibraryConfig.All
+                        .WithCuda(false)
+                        .WithVulkan(false)
+                        .WithAutoFallback(false);
+                }
+
+                NativeLibraryConfig.All.WithLogCallback((level, message) =>
                 {
                     if (ShouldLogNativeMessage(level.ToString(), message))
                     {
@@ -197,9 +225,13 @@ namespace IronworksTranslator.Utils.Translator
                     }
                 });
 
-                configuredDevicePriority = devicePriority;
+                configuredDevicePriority = selectedDevicePriority;
                 isNativeConfigured = true;
-                return devicePriority;
+                Log.Information(
+                    "MiLLMT native backend configured as {SelectedDevicePriority} for requested {RequestedDevicePriority}.",
+                    selectedDevicePriority,
+                    devicePriority);
+                return selectedDevicePriority;
             }
         }
 

@@ -1,0 +1,190 @@
+{
+  "sourcePath": "D:\\tg-src-3f7c29d",
+  "sourceCommit": "3f7c29d318e317b63f54c558bc69803963d7d88c",
+  "expectedRevision": "3f7c29d318e317b63f54c558bc69803963d7d88c",
+  "patchPath": "D:\\REPO\\google-translategemma-4b-it-compact\\patches\\llama.cpp\\llamasharp-0.27-milmmt-cuda-minimal.patch",
+  "patchSha256": "d5622f2aa503734caec3d1dcd04ff452552d59a8078f79ee6e844eed1a9bf476",
+  "cmakeSource": "D:\\REPO\\google-translategemma-4b-it-compact\\artifacts\\native\\milmmt-cuda-consumer-forward-ptx-final-build-20260724\\source",
+  "modelProfile": "milmmt-gemma3-q4km",
+  "configuration": "Release",
+  "cpuIsa": "avx2",
+  "parallel": 8,
+  "cudaArchitectures": "61-real;75-real;86-real;89-real;120a-real;120-virtual",
+  "cudaArchitectureSpec": "61-real;75-real;86-real;89-real;120a-real;120-virtual",
+  "cudaPreserveGeneric12x": true,
+  "cudaNativeCubinArchitectures": [
+    "sm_120a",
+    "sm_61",
+    "sm_75",
+    "sm_86",
+    "sm_89"
+  ],
+  "cudaPtxArchitectures": [
+    "sm_120"
+  ],
+  "cudaFatbinAudit": {
+    "schemaVersion": 1,
+    "cudaArchitectures": "61-real;75-real;86-real;89-real;120a-real;120-virtual",
+    "requested": {
+      "entries": [
+        {
+          "cmakeEntry": "61-real",
+          "capability": "61",
+          "kind": "real"
+        },
+        {
+          "cmakeEntry": "75-real",
+          "capability": "75",
+          "kind": "real"
+        },
+        {
+          "cmakeEntry": "86-real",
+          "capability": "86",
+          "kind": "real"
+        },
+        {
+          "cmakeEntry": "89-real",
+          "capability": "89",
+          "kind": "real"
+        },
+        {
+          "cmakeEntry": "120a-real",
+          "capability": "120a",
+          "kind": "real"
+        },
+        {
+          "cmakeEntry": "120-virtual",
+          "capability": "120",
+          "kind": "virtual"
+        }
+      ],
+      "sassCapabilities": [
+        "120a",
+        "61",
+        "75",
+        "86",
+        "89"
+      ],
+      "ptxCapabilities": [
+        "120"
+      ]
+    },
+    "actual": {
+      "sass": {
+        "targets": [
+          {
+            "target": "sm_120a",
+            "capability": "120a",
+            "count": 59
+          },
+          {
+            "target": "sm_61",
+            "capability": "61",
+            "count": 59
+          },
+          {
+            "target": "sm_75",
+            "capability": "75",
+            "count": 59
+          },
+          {
+            "target": "sm_86",
+            "capability": "86",
+            "count": 59
+          },
+          {
+            "target": "sm_89",
+            "capability": "89",
+            "count": 59
+          }
+        ],
+        "capabilities": [
+          "120a",
+          "61",
+          "75",
+          "86",
+          "89"
+        ]
+      },
+      "ptx": {
+        "targets": [
+          {
+            "target": "sm_120",
+            "capability": "120",
+            "count": 59
+          }
+        ],
+        "capabilities": [
+          "120"
+        ]
+      }
+    },
+    "cuobjdump": {
+      "path": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.8\\bin\\cuobjdump.exe",
+      "version": "cuobjdump: NVIDIA (R) fat binary listing tool\r\nCopyright (c) 2005-2025 NVIDIA Corporation\r\nBuilt on Thu_Feb_13_02:51:08_Pacific_Standard_Time_2025\r\nCuda compilation tools, release 12.8, V12.8.90\r\nBuild cuda_12.8.r12.8/compiler.35538042_0"
+    }
+  },
+  "cudaDependencyAudit": {
+    "schemaVersion": 1,
+    "dll": "D:\\REPO\\google-translategemma-4b-it-compact\\artifacts\\native\\milmmt-cuda-min-win-x64-consumer-forward-ptx-final-20260724\\ggml-cuda.dll",
+    "dumpbinPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\dumpbin.exe",
+    "dumpbinVersion": "Microsoft (R) COFF/PE Dumper Version 14.51.36248.0\r\nCopyright (C) Microsoft Corporation.  All rights reserved.",
+    "dependencies": [
+      "api-ms-win-crt-convert-l1-1-0.dll",
+      "api-ms-win-crt-environment-l1-1-0.dll",
+      "api-ms-win-crt-heap-l1-1-0.dll",
+      "api-ms-win-crt-math-l1-1-0.dll",
+      "api-ms-win-crt-runtime-l1-1-0.dll",
+      "api-ms-win-crt-stdio-l1-1-0.dll",
+      "api-ms-win-crt-string-l1-1-0.dll",
+      "api-ms-win-crt-time-l1-1-0.dll",
+      "ggml-base.dll",
+      "kernel32.dll",
+      "msvcp140.dll",
+      "nvcuda.dll",
+      "vcruntime140_1.dll",
+      "vcruntime140.dll"
+    ],
+    "forbiddenDependencies": [
+      "cublas64_12.dll",
+      "cublaslt64_12.dll",
+      "cudart64_12.dll"
+    ],
+    "passes": true
+  },
+  "cudaCompilerPath": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.8\\bin\\nvcc.exe",
+  "cudaToolkitRoot": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.8",
+  "cudaCompilerVersion": "Build cuda_12.8.r12.8/compiler.35583870_0",
+  "cmakeCudaCompilerPath": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.8\\bin\\nvcc.exe",
+  "cmakeCudaCompilerVersion": "12.8.93",
+  "cudaRuntimeDependencyMode": "driver-only",
+  "runtime": "llama.cpp + LLamaSharp 0.27 CUDA",
+  "nativeLibraries": [
+    {
+      "name": "llama.dll",
+      "sha256": "39807fddc54cbf0a7f23ad7ff56ce9acf251ffdc7b733284f03c791314b9bff1",
+      "bytes": 2064896
+    },
+    {
+      "name": "ggml.dll",
+      "sha256": "187449b704100c008877d841128ebc30dc2e97bb4f01c37455b45db9c3786bf9",
+      "bytes": 67584
+    },
+    {
+      "name": "ggml-base.dll",
+      "sha256": "6cf5fffec88c999e77fde24e90b0f31c2bae44c669ba8e05588e3dfec5209c1f",
+      "bytes": 617984
+    },
+    {
+      "name": "ggml-cpu.dll",
+      "sha256": "62e0f5c547fe458e4d6f7b3ad25d17bbad13c3213b0994c757bf212a1aea95e2",
+      "bytes": 881664
+    },
+    {
+      "name": "ggml-cuda.dll",
+      "sha256": "7f5e3889be098ae1ef3c48efcf3ef1d5c81fc73dc8232aefdd0a6714939897ad",
+      "bytes": 25134080
+    }
+  ],
+  "visibleDevices": "Use a CUDA device selected by the host runtime; do not claim a CUDA pass without strict probe/native log evidence."
+}

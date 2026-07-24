@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronworksTranslator.Tests",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronworksLogDecryptor", "..\..\tools\IronworksLogDecryptor\IronworksLogDecryptor.csproj", "{33F63A04-F132-41F6-9F33-CF8ED203D9C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronworksMiLMMTNativeProbe", "..\..\tools\IronworksMiLMMTNativeProbe\IronworksMiLMMTNativeProbe.csproj", "{3A0C68D0-4B8A-42F6-9A69-67C0D80C75A2}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronworksTranslator.Launcher", "..\IronworksTranslator.Launcher\IronworksTranslator.Launcher.csproj", "{89D848DC-8690-4B1B-9A38-DC014839583E}"
 EndProject
 Global
@@ -29,6 +31,10 @@ Global
 		{33F63A04-F132-41F6-9F33-CF8ED203D9C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33F63A04-F132-41F6-9F33-CF8ED203D9C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33F63A04-F132-41F6-9F33-CF8ED203D9C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A0C68D0-4B8A-42F6-9A69-67C0D80C75A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A0C68D0-4B8A-42F6-9A69-67C0D80C75A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A0C68D0-4B8A-42F6-9A69-67C0D80C75A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A0C68D0-4B8A-42F6-9A69-67C0D80C75A2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{89D848DC-8690-4B1B-9A38-DC014839583E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{89D848DC-8690-4B1B-9A38-DC014839583E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89D848DC-8690-4B1B-9A38-DC014839583E}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -9,6 +9,7 @@ using System.IO;
 using Serilog;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Utils.Aspect;
+using IronworksTranslator.Utils.Translator;
 
 namespace IronworksTranslator.Services
 {
@@ -90,6 +91,8 @@ namespace IronworksTranslator.Services
         /// <param name="cancellationToken">Indicates that the start process has been aborted.</param>
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            var miLMMTTranslator = _serviceProvider.GetService(typeof(MiLMMTTranslator)) as MiLMMTTranslator;
+            miLMMTTranslator?.ConfigureNativeBackendAtStartup();
             await HandleActivationAsync();
         }
 
