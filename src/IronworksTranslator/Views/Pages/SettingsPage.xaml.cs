@@ -26,6 +26,9 @@ namespace IronworksTranslator.Views.Pages
         private LocalModelDevicePriority _previousLocalModelDevicePriority;
         private SystemResourceSnapshot? _lastSystemResourceSnapshot;
         private readonly DispatcherTimer resourceTimer;
+        private bool _isResourcePollingActive;
+        private bool _isResourceSnapshotInProgress;
+        private long _resourcePollingGeneration;
 
         public SettingsPage(SettingsViewModel viewModel)
         {
@@ -48,9 +51,9 @@ namespace IronworksTranslator.Views.Pages
             {
                 Interval = TimeSpan.FromSeconds(2),
             };
-            resourceTimer.Tick += (_, _) => UpdateResourceSnapshot();
-            resourceTimer.Start();
-            UpdateResourceSnapshot();
+            resourceTimer.Tick += ResourceTimer_Tick;
+            Loaded += SettingsPage_Loaded;
+            Unloaded += SettingsPage_Unloaded;
         }
 
         private void ChatFontSize_ValueChanged(object sender, RoutedEventArgs e)
@@ -717,14 +720,71 @@ namespace IronworksTranslator.Views.Pages
             }
         }
 
-        private void UpdateResourceSnapshot()
+        private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (_isResourcePollingActive)
+            {
+                return;
+            }
+
+            _isResourcePollingActive = true;
+            _resourcePollingGeneration++;
+            resourceTimer.Start();
+            _ = UpdateResourceSnapshotAsync();
+        }
+
+        private void SettingsPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _isResourcePollingActive = false;
+            _resourcePollingGeneration++;
+            resourceTimer.Stop();
+        }
+
+        private void ResourceTimer_Tick(object? sender, EventArgs e)
+        {
+            _ = UpdateResourceSnapshotAsync();
+        }
+
+        private async Task UpdateResourceSnapshotAsync()
+        {
+            if (!_isResourcePollingActive || _isResourceSnapshotInProgress)
+            {
+                return;
+            }
+
+            _isResourceSnapshotInProgress = true;
+            var pollingGeneration = _resourcePollingGeneration;
+            try
+            {
+                var snapshot = await Task.Run(SystemResourceMonitor.GetSnapshot);
+                if (!_isResourcePollingActive || pollingGeneration != _resourcePollingGeneration)
+                {
+                    return;
+                }
+
+                ApplyResourceSnapshot(snapshot);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Debug(ex, "Failed to update the local-model resource snapshot.");
+            }
+            finally
+            {
+                _isResourceSnapshotInProgress = false;
+                if (_isResourcePollingActive && pollingGeneration != _resourcePollingGeneration)
+                {
+                    _ = UpdateResourceSnapshotAsync();
+                }
+            }
+        }
+
+        private void ApplyResourceSnapshot(SystemResourceSnapshot snapshot)
         {
             if (txtRamUsage == null || txtVramUsage == null)
             {
                 return;
             }
 
-            var snapshot = SystemResourceMonitor.GetSnapshot();
             _lastSystemResourceSnapshot = snapshot;
             ViewModel.UpdateMiLMMTResourceSnapshot(snapshot);
             UpdateRetiredMiLMMTModelsVisibility();

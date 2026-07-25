@@ -121,6 +121,38 @@ public class SettingsTests
     }
 
     [Fact]
+    public void MiLMMTModelStorageItem_CompatibilityChangesOnlyAtMemoryThresholds()
+    {
+        var profile = MiLMMTModelProfiles.Get(
+            MiLMMTModelSize.MiLMMT_4B,
+            MiLMMTQuantization.Q4_K_M);
+        const ulong gib = 1024UL * 1024UL * 1024UL;
+
+        var comfortable = new SystemResourceSnapshot(16 * gib, 8 * gib, null, null, null);
+        var stillComfortable = new SystemResourceSnapshot(16 * gib, 8 * gib + 512UL * 1024UL * 1024UL, null, null, null);
+        var tight = new SystemResourceSnapshot(16 * gib, 9 * gib, null, null, null);
+        var insufficient = new SystemResourceSnapshot(16 * gib, 13 * gib, null, null, null);
+        var unknown = new SystemResourceSnapshot(16 * gib, 8 * gib, null, null, null);
+
+        Assert.Equal(
+            MiLMMTResourceCompatibility.Comfortable,
+            MiLMMTModelStorageItem.GetCompatibility(profile, comfortable, LocalModelDevicePriority.Cpu));
+        Assert.Equal(
+            MiLMMTResourceCompatibility.Tight,
+            MiLMMTModelStorageItem.GetCompatibility(profile, tight, LocalModelDevicePriority.Cpu));
+        Assert.Equal(
+            MiLMMTResourceCompatibility.Insufficient,
+            MiLMMTModelStorageItem.GetCompatibility(profile, insufficient, LocalModelDevicePriority.Cpu));
+        Assert.Equal(
+            MiLMMTResourceCompatibility.Unknown,
+            MiLMMTModelStorageItem.GetCompatibility(profile, unknown, LocalModelDevicePriority.Cuda));
+        Assert.False(MiLMMTModelStorageItem.HasCompatibilityChanged(
+            [profile], comfortable, stillComfortable, LocalModelDevicePriority.Cpu));
+        Assert.True(MiLMMTModelStorageItem.HasCompatibilityChanged(
+            [profile], comfortable, tight, LocalModelDevicePriority.Cpu));
+    }
+
+    [Fact]
     public void NormalizeLegacySettingsYaml_ReplacesRemovedJaKoEngine()
     {
         var yaml = """

@@ -188,8 +188,24 @@ namespace IronworksTranslator.ViewModels.Pages
 
         public void UpdateMiLMMTResourceSnapshot(SystemResourceSnapshot snapshot)
         {
+            var isInitialSnapshot = _lastSystemResourceSnapshot == null;
+            var compatibilityChanged = MiLMMTModelStorageItem.HasCompatibilityChanged(
+                MiLMMTModelProfiles.All,
+                _lastSystemResourceSnapshot,
+                snapshot,
+                LocalModelDevicePriority);
             _lastSystemResourceSnapshot = snapshot;
-            RefreshMiLMMTModelStorageItems();
+            if (compatibilityChanged)
+            {
+                if (isInitialSnapshot)
+                {
+                    RefreshMiLMMTModelStorageItems();
+                }
+                else
+                {
+                    MiLMMTModelStorageItems = BuildMiLMMTModelStorageItems();
+                }
+            }
         }
 
         private void RefreshMiLMMTModelStorageItems()
