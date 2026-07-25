@@ -61,3 +61,4 @@ src/IronworksTranslator/data/unidic-mecab-2.1.2_bin/char.bin filter=lfs diff=lfs
 src/IronworksTranslator/data/unidic-mecab-2.1.2_bin/matrix.bin filter=lfs diff=lfs merge=lfs -text
 src/IronworksTranslator/data/unidic-mecab-2.1.2_bin/sys.dic filter=lfs diff=lfs merge=lfs -text
 src/IronworksTranslator/data/unidic-mecab-2.1.2_bin/unk.dic filter=lfs diff=lfs merge=lfs -text
+NativeRuntimePacks/**/*.dll filter=lfs diff=lfs merge=lfs -text

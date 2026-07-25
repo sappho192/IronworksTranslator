@@ -1,0 +1,17 @@
+{
+  "name": "milmmt-gemma3-q4km",
+  "description": "Text-only Gemma3 GGUFs used by the MiLMMT Q4_K_M Vulkan runtime.",
+  "architectures": ["gemma3"],
+  "allowed_tensor_types": ["f32", "f16", "q5_0", "q8_0", "q4_k", "q6_k"],
+  "runtime_profile": "milmmt-gemma3-q4km",
+  "requires_raw_prompt": true,
+  "validation": {
+    "context_size": 2048,
+    "batch_size": 512,
+    "ubatch_size": 128,
+    "max_tokens": 512,
+    "quality_metric": "chrF++",
+    "minimum_quality_ratio": 0.99,
+    "minimum_worst_pair_ratio": 0.95
+  }
+}

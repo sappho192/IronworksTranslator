@@ -118,7 +118,7 @@ namespace IronworksTranslator.Models.Settings
         [SaveSettingsOnChange]
         partial void OnMiLMMTModelSizeChanged(MiLMMTModelSize value)
         {
-            Log.Information("MiLLMTModelSize changed to {Value}", value);
+            Log.Information("MiLMMTModelSize changed to {Value}", value);
         }
 
         private void OnMiLMMTModelSizeMessage(object s, PropertyChangedMessage<MiLMMTModelSize> m)
@@ -134,7 +134,7 @@ namespace IronworksTranslator.Models.Settings
         [SaveSettingsOnChange]
         partial void OnMiLMMTQuantizationChanged(MiLMMTQuantization value)
         {
-            Log.Information("MiLLMTQuantization changed to {Value}", value);
+            Log.Information("MiLMMTQuantization changed to {Value}", value);
         }
 
         private void OnMiLMMTQuantizationMessage(object s, PropertyChangedMessage<MiLMMTQuantization> m)

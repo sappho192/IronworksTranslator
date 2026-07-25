@@ -16,12 +16,14 @@ $ErrorActionPreference = "Stop"
 $solutionPath = "src\IronworksTranslator\IronworksTranslator.sln"
 $projectPath = "src\IronworksTranslator\IronworksTranslator.csproj"
 $launcherProjectPath = "src\IronworksTranslator.Launcher\IronworksTranslator.Launcher.csproj"
+$nativeProbeProjectPath = "tools\IronworksMiLMMTNativeProbe\IronworksMiLMMTNativeProbe.csproj"
 $iconPath = "src\IronworksTranslator\icon.ico"
 $velopackVersion = "1.2.0"
 $packId = "Sappho192.IronworksTranslator"
 $packTitle = "IronworksTranslator"
 $appExe = "IronworksTranslator.exe"
 $launcherExe = "IronworksTranslator.Launcher.exe"
+$nativeProbeExe = "IronworksMiLMMTNativeProbe.exe"
 $runtime = "win-x64"
 $framework = "net10.0-x64-desktop"
 $channel = "win"
@@ -106,6 +108,8 @@ dotnet build $projectPath -c Release --no-restore $releaseChannelBuildProperty
 Assert-Success "Build failed!"
 dotnet build $launcherProjectPath -c Release --no-restore
 Assert-Success "Launcher build failed!"
+dotnet build $nativeProbeProjectPath -c Release --no-restore
+Assert-Success "MiLMMT native probe build failed!"
 Write-Host "  Build completed." -ForegroundColor Green
 Write-Host ""
 
@@ -131,7 +135,7 @@ if (Test-Path $gitversionPath) {
 }
 Write-Host ""
 
-Write-Host "[5/6] Publishing application and launcher (single-file, framework-dependent)..." -ForegroundColor Yellow
+Write-Host "[5/6] Publishing application, launcher, and native probe (single-file, framework-dependent)..." -ForegroundColor Yellow
 $publishPath = Join-Path $OutputDir "IronworksTranslator ($packVersion)"
 dotnet publish $projectPath -c Release -o $publishPath `
     $releaseChannelBuildProperty `
@@ -146,17 +150,25 @@ dotnet publish $launcherProjectPath -c Release -o $publishPath `
     /p:RuntimeIdentifier=$runtime `
     /p:SelfContained=false
 Assert-Success "Launcher publish failed!"
+dotnet publish $nativeProbeProjectPath -c Release -o $publishPath `
+    /p:IronworksPackageVersion=$packVersion `
+    /p:PublishSingleFile=true `
+    /p:RuntimeIdentifier=$runtime `
+    /p:SelfContained=false
+Assert-Success "MiLMMT native probe publish failed!"
 Write-Host "  Published to: $publishPath" -ForegroundColor Green
 Write-Host ""
 
 $appExePath = Join-Path $publishPath $appExe
 $launcherExePath = Join-Path $publishPath $launcherExe
-if ((Test-Path $appExePath) -and (Test-Path $launcherExePath)) {
+$nativeProbeExePath = Join-Path $publishPath $nativeProbeExe
+if ((Test-Path $appExePath) -and (Test-Path $launcherExePath) -and (Test-Path $nativeProbeExePath)) {
     $fileVersion = (Get-Item $appExePath).VersionInfo.FileVersion
     $productVersion = (Get-Item $appExePath).VersionInfo.ProductVersion
     $fileSize = [math]::Round((Get-Item $appExePath).Length / 1MB, 2)
     $launcherFileVersion = (Get-Item $launcherExePath).VersionInfo.FileVersion
     $launcherFileSize = [math]::Round((Get-Item $launcherExePath).Length / 1MB, 2)
+    $nativeProbeFileSize = [math]::Round((Get-Item $nativeProbeExePath).Length / 1MB, 2)
 
     Write-Host "Verification:" -ForegroundColor Cyan
     Write-Host "  App EXE File Version: $fileVersion" -ForegroundColor Green
@@ -164,6 +176,7 @@ if ((Test-Path $appExePath) -and (Test-Path $launcherExePath)) {
     Write-Host "  App EXE Size: $fileSize MB" -ForegroundColor Green
     Write-Host "  Launcher EXE File Version: $launcherFileVersion" -ForegroundColor Green
     Write-Host "  Launcher EXE Size: $launcherFileSize MB" -ForegroundColor Green
+    Write-Host "  MiLMMT native probe EXE Size: $nativeProbeFileSize MB" -ForegroundColor Green
 
     if ($fileVersion -like "$version.*") {
         Write-Host "  App version is correct." -ForegroundColor Green
@@ -177,7 +190,7 @@ if ((Test-Path $appExePath) -and (Test-Path $launcherExePath)) {
         Write-Warning "Launcher version mismatch detected. Expected $version.*, got $launcherFileVersion"
     }
 } else {
-    Write-Error "Could not find published EXEs for verification: $appExePath, $launcherExePath"
+    Write-Error "Could not find published EXEs for verification: $appExePath, $launcherExePath, $nativeProbeExePath"
     exit 1
 }
 Write-Host ""

@@ -42,6 +42,24 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\..\NativeRuntimePacks\runtimes\win-x64\native\**\*">
+      <Link>runtimes\win-x64\native\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\..\NativeRuntimePacks\runtime-packs-manifest.json">
+      <Link>runtimes\win-x64\native\milmmt-runtime-packs-manifest.json</Link>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\..\NativeRuntimePacks\LICENSES\llama.cpp-MIT.txt">
+      <Link>LICENSES\llama.cpp-MIT.txt</Link>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -57,8 +75,6 @@
     <PackageReference Include="Lepo.i18n.Wpf" Version="2.1.0" />
     <PackageReference Include="LLamaSharp" Version="0.27.0" />
     <PackageReference Include="LLamaSharp.Backend.Cpu" Version="0.27.0" />
-    <PackageReference Include="LLamaSharp.Backend.Cuda12" Version="0.27.0" />
-    <PackageReference Include="LLamaSharp.Backend.Vulkan" Version="0.27.0" />
     <PackageReference Include="MdXaml" Version="1.27.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
     <PackageReference Include="MrAdvice" Version="2.20.5" />
@@ -139,6 +155,64 @@
       <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\unix-*" />
     </ItemGroup>
     <RemoveDir Directories="@(NonWindowsRuntimeDirectories)" />
+  </Target>
+
+  <Target Name="ExcludeNonWinX64RuntimeAssetsFromBuild"
+          AfterTargets="ResolveLockFileCopyLocalFiles"
+          BeforeTargets="_CopyFilesMarkedCopyLocal">
+    <ItemGroup>
+      <NonWinX64RuntimeCopyLocalItems Include="@(ReferenceCopyLocalPaths)"
+                                         Condition="$([System.String]::Copy('%(ReferenceCopyLocalPaths.DestinationSubDirectory)').StartsWith('runtimes\')) And !$([System.String]::Copy('%(ReferenceCopyLocalPaths.DestinationSubDirectory)').StartsWith('runtimes\win-x64\'))" />
+      <ReferenceCopyLocalPaths Remove="@(NonWinX64RuntimeCopyLocalItems)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RemoveStaleNonWinX64RuntimeAssets" AfterTargets="Build">
+    <ItemGroup>
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android-x86" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\browser-wasm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\ios-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\ios-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\iossimulator-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\iossimulator-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-musl-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-musl-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-musl-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\maccatalyst-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\maccatalyst-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\osx-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\osx-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\unix" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\unix-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\unix-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\win" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\win-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\win-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\win-x86" />
+    </ItemGroup>
+    <RemoveDir Directories="@(NonWinX64RuntimeDirectories)" />
+  </Target>
+
+  <Target Name="BuildMiLMMTNativeProbe" BeforeTargets="Build" Condition="'$(RuntimeIdentifier)' == ''">
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\..\tools\IronworksMiLMMTNativeProbe\IronworksMiLMMTNativeProbe.csproj"
+             Targets="Build"
+             Properties="Configuration=$(Configuration)" />
+  </Target>
+
+  <Target Name="CopyMiLMMTNativeProbeBuildOutput" AfterTargets="Build" DependsOnTargets="BuildMiLMMTNativeProbe" Condition="'$(RuntimeIdentifier)' == ''">
+    <ItemGroup>
+      <MiLMMTNativeProbeBuildOutput Include="$(MSBuildProjectDirectory)\..\..\tools\IronworksMiLMMTNativeProbe\bin\$(Configuration)\net10.0\IronworksMiLMMTNativeProbe.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(MiLMMTNativeProbeBuildOutput)"
+          DestinationFolder="$(OutDir)"
+          SkipUnchangedFiles="true" />
   </Target>
 
 </Project>

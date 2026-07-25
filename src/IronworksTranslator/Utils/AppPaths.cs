@@ -51,8 +51,9 @@ namespace IronworksTranslator.Utils
                 ModelDirectory,
                 modelSize switch
                 {
-                    MiLMMTModelSize.MiLLMT_4B => "milmmt-46-4b-v0.1",
-                    MiLMMTModelSize.MiLLMT_12B => "milmmt-46-12b-v0.1",
+                    MiLMMTModelSize.MiLMMT_4B => "milmmt-46-4b-v0.1",
+                    MiLMMTModelSize.MiLMMT_12B => "milmmt-46-12b-v0.1",
+                    MiLMMTModelSize.MiLMMT_1B_Compact => "milmmt-46-1b-v0.1",
                     _ => "milmmt-46-1b-v0.1",
                 });
         }
@@ -112,7 +113,7 @@ namespace IronworksTranslator.Utils
 
         private static void MigrateLegacyMiLMMTModels(string baseDirectory)
         {
-            foreach (var profile in MiLMMTModelProfiles.All)
+            foreach (var profile in MiLMMTModelProfiles.AllKnown)
             {
                 var sourceDirectory = Path.Combine(baseDirectory, "data", "model", Path.GetFileName(profile.DirectoryPath));
                 MigrateLegacyDirectory(sourceDirectory, profile.DirectoryPath);

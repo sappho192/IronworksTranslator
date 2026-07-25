@@ -39,6 +39,8 @@ Expected result:
 - Script completes without errors.
 - `publish\IronworksTranslator ({VERSION})\IronworksTranslator.exe` exists.
 - `publish\IronworksTranslator ({VERSION})\IronworksTranslator.Launcher.exe` exists.
+- `publish\IronworksTranslator ({VERSION})\IronworksMiLMMTNativeProbe.exe` exists.
+- The publish directory contains `LICENSES\llama.cpp-MIT.txt` and separate `milmmt-cuda` and `milmmt-vulkan` runtime-pack directories.
 - `Releases\releases.win.json` exists.
 - `Releases\Sappho192.IronworksTranslator-{VERSION}-full.nupkg` exists.
 - `Releases\Sappho192.IronworksTranslator-win-Setup.exe` exists.
@@ -55,6 +57,7 @@ Expected result:
 - Script completes without errors.
 - `publish\IronworksTranslator ({VERSION}-beta.1)\IronworksTranslator.exe` exists.
 - `publish\IronworksTranslator ({VERSION}-beta.1)\IronworksTranslator.Launcher.exe` exists.
+- `publish\IronworksTranslator ({VERSION}-beta.1)\IronworksMiLMMTNativeProbe.exe` exists.
 - `Releases\beta\releases.beta.json` exists.
 - `Releases\beta\Sappho192.IronworksTranslator-{VERSION}-beta.1-full.nupkg` exists.
 - `Releases\beta\Sappho192.IronworksTranslator-beta-Setup.exe` exists.
@@ -211,7 +214,7 @@ After an update:
 - Reset chat/dialogue window positions.
 - Open the log folder from the dashboard and confirm Windows Explorer opens `%LOCALAPPDATA%\IronworksTranslator\logs`.
 - Clear logs from the dashboard and confirm only `.iwlog` and legacy `.txt` files in `%LOCALAPPDATA%\IronworksTranslator\logs` are affected.
-- Select the MiLLMT translator and confirm model download/reuse works.
+- Select the MiLMMT translator and confirm model download/reuse works.
 
 ## 9. Release Blockers
 

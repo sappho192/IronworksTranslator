@@ -113,7 +113,7 @@ namespace IronworksTranslator.Views.Windows
                 ?? TranslatorEngine.Papago;
             switch (selectedEngine)
             {
-                case TranslatorEngine.MiLLMT:
+                case TranslatorEngine.MiLMMT:
                     PrepareMiLMMTModel(requestedMiLMMTProfile ?? MiLMMTModelProfiles.GetCurrent());
                     break;
                 default:
@@ -148,7 +148,12 @@ namespace IronworksTranslator.Views.Windows
         [TraceMethod]
         private async Task DownloadMiLMMTModel(MiLMMTModelProfile profile)
         {
-            await DownloadModelAsync(profile.DownloadUrl, profile.DirectoryPath, profile.FileName, profile.FileSize);
+            await DownloadModelAsync(
+                profile.DownloadUrl,
+                profile.DirectoryPath,
+                profile.FileName,
+                profile.FileSize,
+                profile.DisplayName);
         }
 
         [TraceMethod]
@@ -156,12 +161,14 @@ namespace IronworksTranslator.Views.Windows
             string url,
             string modelDirectory,
             string fileName,
-            long? expectedBytes = null)
+            long? expectedBytes = null,
+            string? displayName = null)
         {
             Directory.CreateDirectory(modelDirectory);
 
             var modelPath = Path.Combine(modelDirectory, fileName);
             var tempPath = $"{modelPath}.download";
+            var downloadDisplayName = displayName ?? fileName;
 
             if (File.Exists(tempPath))
             {
@@ -171,7 +178,7 @@ namespace IronworksTranslator.Views.Windows
             Application.Current.Dispatcher.Invoke(() =>
             {
                 pbDownloader.Value = 0;
-                txtDownloaderFilename.Text = fileName;
+                txtDownloaderFilename.Text = downloadDisplayName;
                 txtDownloaderBytes.Text = string.Empty;
             });
 
@@ -243,7 +250,7 @@ namespace IronworksTranslator.Views.Windows
             Application.Current.Dispatcher.Invoke(() =>
             {
                 pbDownloader.Value = 100;
-                txtDownloaderFilename.Text = fileName;
+                txtDownloaderFilename.Text = downloadDisplayName;
                 txtDownloaderBytes.Text = Localizer.GetString("downloader.worker.progress.download.complete");
             });
         }
@@ -287,7 +294,7 @@ namespace IronworksTranslator.Views.Windows
             if (fileInfo.Length != profile.FileSize)
             {
                 Log.Warning(
-                    "MiLLMT model size mismatch. Expected: {ExpectedSize}, Actual: {ActualSize}",
+                    "MiLMMT model size mismatch. Expected: {ExpectedSize}, Actual: {ActualSize}",
                     profile.FileSize,
                     fileInfo.Length);
                 return false;
