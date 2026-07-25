@@ -593,12 +593,12 @@ FallbackReason
 - [x] 이름과 text가 pipeline 끝까지 분리되어 보존된다.
 - [x] 중복 판정이 `TalkObservationTracker` 한 곳에서 수행된다.
 - [x] queue capacity와 처리 순서가 유지된다.
-- [ ] 실제 WPF DialogueWindow와 게임에서 speaker 표시 및 번역 순서를 확인한다.
-  이 항목은 Phase 5 release gate다.
+- [x] 실제 WPF DialogueWindow와 게임에서 speaker 표시 및 entry 순서를 확인했다.
+  2026-07-26 live screenshot에서 `Krile: ...`, `Koana: ...` 형식과 순차 표시를 확인했다.
 
 ### Phase 4: Legacy 정리
 
-상태: **코드 구현 및 자동 검증 완료, publish gate 대기**
+상태: **완료**
 
 - [x] `HermesAddress.cs` 삭제
 - [x] `UseInternalAddress` property와 runtime 분기 제거
@@ -628,20 +628,49 @@ legacy cache migration 검토 결과:
 완료 조건:
 
 - [x] source에 legacy Hermes consumer가 없다.
-- [ ] publish 산출물에 legacy Hermes consumer가 없는지 Phase 5에서 확인한다.
+- [x] publish 산출물에 legacy Hermes consumer가 없는지 Phase 5에서 확인한다.
 - [x] 기존 settings.yaml을 안전하게 읽을 수 있다.
 - [x] `use_internal_address` 값이 resource mode 선택에 영향을 주지 않는다.
 - [x] 앱 runtime source는 `latest/address.json`을 요청하지 않는다.
 
 ### Phase 5: Release 검증
 
-- [ ] 전체 unit test 실행
-- [ ] Release build 실행
-- [ ] `publish-release.ps1 -SkipVelopack` 검증
-- [ ] 실제 Velopack package에서 remote/cache/embedded 확인
+상태: **자동·패키지·remote startup 검증 완료, live/release gate 진행 중**
+
+- [x] 전체 unit test 실행
+- [x] Release build 실행
+- [x] `publish-release.ps1 -SkipVelopack` 검증
+- [x] 실제 Velopack package 구조와 legacy consumer 부재 확인
+- [x] packaged app에서 remote `live-verified` revision 초기화 확인
+- [ ] packaged app에서 cache/embedded fallback 확인
 - [ ] 글로벌 및 한국 client Talk smoke test
-- [ ] UPDATE 또는 release checklist에 Hermes v2 항목 추가
+- [ ] packaged app에서 CHATLOG/Talk 동시 동작 확인
+- [x] packaged app에서 `Speaker: Text` 표시와 entry 순서 확인
+- [ ] FFXIV process 종료 및 재연결 확인
+- [x] packaged app 정상 종료와 process 정리 확인
+- [x] UPDATE 또는 release checklist에 Hermes v2 항목 추가
 - [ ] release note에 legacy setting 변경 기록
+
+2026-07-26 검증 결과:
+
+- clean NuGet cache에서 Release build 경고 0개, 오류 0개
+- Release unit test 141개 통과
+- `publish-release.ps1 -SkipVelopack`와 실제 `vpk pack` 통과
+- `vpk pack`이 launcher의 `VelopackApp.Run()`을 확인함
+- publish 및 Velopack package에 `FFXIVClientStructs`, `HermesAddress`,
+  `latest/address.json`, local `address.json`, `UseInternalAddress` consumer가 없음
+- packaged app이 실제 실행 중인 FFXIV에 attach되어 remote `live-verified` revision
+  `sha256:419248bf2ef93aa64e72723ea9e97d5503163178dab63e90a8155b359ebcf96d`을
+  새 `hermes-v2` cache에 기록함
+- 메인 창 close를 통한 정상 종료 후 process가 남지 않았고 암호화 로그가 정상 flush됨
+- 최초 smoke에서는 대화 창에 실제 Talk가 나타나지 않았으나, 후속 live screenshot에서
+  `Krile: ...`, `Koana: ...` 형식과 entry 순서를 확인함
+- CHATLOG/Talk 동시 동작은 아직 확인하지 못함
+- local Velopack package는 code signing parameter 없이 생성됐으므로 production
+  installer 검증을 대신하지 않음
+
+상세 증거와 남은 blocker는
+[Phase 5 validation log](../2026-07-26/2026-07-26-hermes-v2-phase5-validation.md)에 기록한다.
 
 완료 조건:
 
