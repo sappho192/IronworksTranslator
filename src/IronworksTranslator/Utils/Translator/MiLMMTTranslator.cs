@@ -114,6 +114,17 @@ namespace IronworksTranslator.Utils.Translator
             }
 
             var modelProfile = MiLMMTModelProfiles.GetCurrent();
+            if (!modelProfile.Supports(sourceLanguage) || !modelProfile.Supports(targetLanguage))
+            {
+                Log.Warning(
+                    "MiLMMT model {ModelName} only supports {SupportedLanguages}; requested {SourceLanguage} -> {TargetLanguage}. Returning original input.",
+                    modelProfile.DisplayName,
+                    modelProfile.SupportedLanguageNames,
+                    sourceLanguage,
+                    targetLanguage);
+                return input;
+            }
+
             if (!File.Exists(modelProfile.FilePath))
             {
                 Log.Error("MiLMMT model file does not exist: {ModelPath}", modelProfile.FilePath);

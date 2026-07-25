@@ -38,9 +38,7 @@ namespace IronworksTranslator.Models.Translator
             var fileInfo = File.Exists(profile.FilePath)
                 ? new FileInfo(profile.FilePath)
                 : null;
-            var isSelected = selectedProfile != null
-                && profile.Size == selectedProfile.Size
-                && profile.Quantization == selectedProfile.Quantization;
+            var isSelected = profile == selectedProfile;
             var compatibilityHint = GetCompatibilityHint(profile, resourceSnapshot, devicePriority);
 
             return new MiLMMTModelStorageItem(

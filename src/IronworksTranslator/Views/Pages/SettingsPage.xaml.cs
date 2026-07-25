@@ -446,7 +446,7 @@ namespace IronworksTranslator.Views.Pages
                 return;
             }
 
-            var result = System.Windows.MessageBox.Show(
+            var result = ShowMiLMMTModelMessageBox(
                 string.Format(
                     Localizer.GetString("settings.translator.engine.milmmt.delete.confirm"),
                     profile.DisplayName),
@@ -470,13 +470,28 @@ namespace IronworksTranslator.Views.Pages
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(
+                ShowMiLMMTModelMessageBox(
                     string.Format(
                         Localizer.GetString("settings.translator.engine.milmmt.delete.failed"),
-                        ex.Message));
+                        ex.Message),
+                    Localizer.GetString("settings.translator.engine.milmmt.delete"),
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
             }
 
             UpdateMiLMMTProfileSummary();
+        }
+
+        private System.Windows.MessageBoxResult ShowMiLMMTModelMessageBox(
+            string message,
+            string caption,
+            System.Windows.MessageBoxButton buttons,
+            System.Windows.MessageBoxImage image)
+        {
+            var owner = System.Windows.Window.GetWindow(this);
+            return owner == null
+                ? System.Windows.MessageBox.Show(message, caption, buttons, image)
+                : System.Windows.MessageBox.Show(owner, message, caption, buttons, image);
         }
 
         private void SelectMiLMMTModel(MiLMMTModelProfile profile)
@@ -589,6 +604,17 @@ namespace IronworksTranslator.Views.Pages
         {
             RememberCurrentMiLMMTProfileIfAvailable();
             ViewModel.RefreshMiLMMTProfileSummary();
+            UpdateRetiredMiLMMTModelsVisibility();
+        }
+
+        private void UpdateRetiredMiLMMTModelsVisibility()
+        {
+            if (panelRetiredMiLMMTModels != null)
+            {
+                panelRetiredMiLMMTModels.Visibility = ViewModel.HasRetiredMiLMMTModelStorageItems
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+            }
         }
 
         private void InitializeLastAvailableMiLMMTProfile()
@@ -701,6 +727,7 @@ namespace IronworksTranslator.Views.Pages
             var snapshot = SystemResourceMonitor.GetSnapshot();
             _lastSystemResourceSnapshot = snapshot;
             ViewModel.UpdateMiLMMTResourceSnapshot(snapshot);
+            UpdateRetiredMiLMMTModelsVisibility();
             txtVramAdapterName.Text = string.IsNullOrWhiteSpace(snapshot.VramAdapterName)
                 ? "GPU: N/A"
                 : $"GPU: {snapshot.VramAdapterName}";

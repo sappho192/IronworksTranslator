@@ -172,6 +172,7 @@
                                                     <ui:TextBlock Text="{Binding ViewModel.SelectedMiLMMTModelDisplayName}" FontTypography="BodyStrong"/>
                                                     <ui:TextBlock Margin="0,4,0,0" Text="{Binding ViewModel.SelectedMiLMMTDownloadSize}" FontTypography="Caption"/>
                                                     <ui:TextBlock Margin="0,2,0,0" Text="{Binding ViewModel.SelectedMiLMMTEstimatedMemory}" FontTypography="Caption"/>
+                                                    <ui:TextBlock Margin="0,2,0,0" Text="{Binding ViewModel.SelectedMiLMMTSupportedLanguages}" FontTypography="Caption"/>
                                                     <ui:TextBlock Margin="0,2,0,0" Text="{Binding ViewModel.SelectedMiLMMTModelStatus}" FontTypography="Caption"/>
                                                     <ui:TextBlock Margin="0,8,0,0" Text="{Binding ViewModel.SelectedMiLMMTNote}" TextWrapping="Wrap" FontTypography="Caption"/>
                                                     <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
@@ -255,6 +256,33 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
+                                        <StackPanel Name="panelRetiredMiLMMTModels" Margin="0,6,0,0" Visibility="Collapsed">
+                                            <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.milmmt.storage.retired}" FontTypography="BodyStrong"/>
+                                            <ui:TextBlock Margin="0,4,0,8" Text="{i18n:StringLocalizer settings.translator.engine.milmmt.storage.retired.note}" TextWrapping="Wrap" FontTypography="Caption"/>
+                                            <ItemsControl ItemsSource="{Binding ViewModel.RetiredMiLMMTModelStorageItems}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Margin="0,0,0,10" Padding="14" BorderThickness="1" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" CornerRadius="6">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="16"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <StackPanel Grid.Column="0">
+                                                                    <ui:TextBlock Text="{Binding DisplayName}" FontTypography="BodyStrong"/>
+                                                                    <ui:TextBlock Margin="0,2,0,0" Text="{Binding StatusLine}" FontTypography="Caption"/>
+                                                                    <ui:TextBlock Margin="0,6,0,0" Text="{Binding Note}" TextWrapping="Wrap" FontTypography="Caption"/>
+                                                                    <ui:TextBlock Margin="0,10,0,0" Text="{Binding InstalledSizeLine}" FontTypography="Caption"/>
+                                                                </StackPanel>
+                                                                <Button Grid.Column="2" MinWidth="64" Content="{i18n:StringLocalizer settings.translator.engine.milmmt.delete}"
+                                                                    Tag="{Binding}" Click="DeleteMiLMMTModel_Click" VerticalAlignment="Center"/>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
                             </ui:Card>

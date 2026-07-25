@@ -85,6 +85,7 @@ namespace IronworksTranslator.ViewModels.Pages
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTModelDisplayName))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTDownloadSize))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTEstimatedMemory))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTSupportedLanguages))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTNote))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTModelStatus))]
         private MiLMMTModelSize _miLMMTModelSize = IronworksSettings.Instance.TranslatorSettings.MiLMMTModelSize;
@@ -102,6 +103,7 @@ namespace IronworksTranslator.ViewModels.Pages
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTModelDisplayName))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTDownloadSize))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTEstimatedMemory))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTSupportedLanguages))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTNote))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTModelStatus))]
         private MiLMMTQuantization _miLMMTQuantization = IronworksSettings.Instance.TranslatorSettings.MiLMMTQuantization;
@@ -135,6 +137,10 @@ namespace IronworksTranslator.ViewModels.Pages
             string.Format(
                 Localizer.GetString("settings.translator.engine.milmmt.estimated_memory"),
                 SelectedMiLMMTProfile.EstimatedMemoryGb);
+        public string SelectedMiLMMTSupportedLanguages =>
+            string.Format(
+                Localizer.GetString("settings.translator.engine.milmmt.supported_languages"),
+                SelectedMiLMMTProfile.SupportedLanguageNames);
         public string SelectedMiLMMTNote => Localizer.GetString(SelectedMiLMMTProfile.NoteKey);
         public string SelectedMiLMMTModelStatus => File.Exists(SelectedMiLMMTProfile.FilePath)
             ? Localizer.GetString("settings.translator.engine.milmmt.status.downloaded")
@@ -159,6 +165,13 @@ namespace IronworksTranslator.ViewModels.Pages
         private List<MiLMMTModelStorageItem> _miLMMTModelStorageItems =
             [];
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasRetiredMiLMMTModelStorageItems))]
+        private List<MiLMMTModelStorageItem> _retiredMiLMMTModelStorageItems =
+            [];
+
+        public bool HasRetiredMiLMMTModelStorageItems => RetiredMiLMMTModelStorageItems.Count > 0;
+
         private SystemResourceSnapshot? _lastSystemResourceSnapshot;
 
         public void RefreshMiLMMTProfileSummary()
@@ -167,15 +180,22 @@ namespace IronworksTranslator.ViewModels.Pages
             OnPropertyChanged(nameof(SelectedMiLMMTModelDisplayName));
             OnPropertyChanged(nameof(SelectedMiLMMTDownloadSize));
             OnPropertyChanged(nameof(SelectedMiLMMTEstimatedMemory));
+            OnPropertyChanged(nameof(SelectedMiLMMTSupportedLanguages));
             OnPropertyChanged(nameof(SelectedMiLMMTNote));
             OnPropertyChanged(nameof(SelectedMiLMMTModelStatus));
-            MiLMMTModelStorageItems = BuildMiLMMTModelStorageItems();
+            RefreshMiLMMTModelStorageItems();
         }
 
         public void UpdateMiLMMTResourceSnapshot(SystemResourceSnapshot snapshot)
         {
             _lastSystemResourceSnapshot = snapshot;
+            RefreshMiLMMTModelStorageItems();
+        }
+
+        private void RefreshMiLMMTModelStorageItems()
+        {
             MiLMMTModelStorageItems = BuildMiLMMTModelStorageItems();
+            RetiredMiLMMTModelStorageItems = BuildRetiredMiLMMTModelStorageItems();
         }
 
         private List<MiLMMTModelStorageItem> BuildMiLMMTModelStorageItems()
@@ -186,6 +206,13 @@ namespace IronworksTranslator.ViewModels.Pages
                     SelectedMiLMMTProfile,
                     _lastSystemResourceSnapshot,
                     LocalModelDevicePriority))
+                .ToList();
+        }
+
+        private static List<MiLMMTModelStorageItem> BuildRetiredMiLMMTModelStorageItems()
+        {
+            return MiLMMTModelProfiles.GetDownloadedRetiredProfiles(profile => File.Exists(profile.FilePath))
+                .Select(profile => MiLMMTModelStorageItem.FromProfile(profile))
                 .ToList();
         }
 
