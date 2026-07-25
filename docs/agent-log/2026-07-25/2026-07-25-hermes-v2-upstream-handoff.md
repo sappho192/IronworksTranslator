@@ -57,6 +57,12 @@ var configuration = new SharlayanConfiguration {
 
 `HermesV2LatestUri`는 현재 같은 값을 기본값으로 제공하지만, consumer 정책을 명확히 하기 위해
 IronworksTranslator에서 명시한다. 앱은 Hermes JSON을 직접 다운로드하거나 해석하지 않는다.
+`GameRegion`은 Sharlayan.Lite `9.1.2`에서 obsolete no-op이며 chat resource가
+region-independent이므로 IronworksTranslator configuration에 전달하지 않는다.
+
+IronworksTranslator의 consumer 정책은 `RemotePreferred`로 고정한다. `EmbeddedOnly` 사용자
+설정과 수동 resource reload UI는 제공하지 않으며, 실행 중 선택된 revision은 handler 수명
+동안 유지한다. 사용자가 새 revision을 즉시 확인하려면 앱을 재시작한다.
 
 Talk 읽기:
 
@@ -113,24 +119,30 @@ Sharlayan.Lite `9.1.2`는 지인 테스트를 시작하기 위한 명시적 일�
 3. `HermesAddress.GetLatestAddress()`와 앱의 Hermes HTTP 요청을 제거한다.
 4. `ALLMESSAGES` custom signature와 raw `GetString(..., 2048)` polling을 제거한다.
 5. current-first `CanGetTalk()` / `GetTalk()`으로 전환한다.
-6. speaker와 text를 typed pipeline 끝까지 분리해 보존한다.
+6. speaker와 text를 typed pipeline 끝까지 분리해 보존하고 DialogueWindow에는
+   `Speaker: Text` 형식으로 표시한다.
 7. current-visible 처리, last baseline, 중복 및 reconnect tracker를 단위 테스트한다.
 8. `ResourceInfo`를 이용해 선택된 source와 revision을 attach당 한 번 기록한다.
 9. remote, cache 및 embedded fallback에서 CHATLOG와 Talk를 검증한다.
 10. packaged app과 실제 게임에서 최종 smoke를 수행한다.
+11. `UseInternalAddress`와 local `address.json` 지원을 제거하며 legacy 값을 다른 resource
+    mode로 mapping하지 않는다.
 
 ## 완료 경계
 
 이 handoff가 증명하는 것은 Hermes와 Sharlayan이 IronworksTranslator 통합을 시작할 수 있는
 상태라는 점이다. 다음 항목은 IronworksTranslator에서 별도로 완료해야 한다.
 
-- 기존 settings YAML의 `use_internal_address` 호환 migration
+- 기존 settings YAML의 `use_internal_address`를 값 mapping 없이 안전하게 제거
 - typed dialogue queue와 중복 추적기
-- speaker 표시 여부와 UI 정책
+- DialogueWindow의 `Speaker: Text` 표시
 - packaged-app fallback
 - 실제 게임에서 CHATLOG와 current Talk 동시 동작
 - process 종료·재연결 및 앱 shutdown
 - IronworksTranslator release와 rollback 검증
+
+수동 resource reload는 consumer 작업 범위에 포함하지 않는다. 새 revision의 사용자 지원
+갱신 경로는 앱 재시작이다.
 
 통합 중 upstream API 또는 runtime 결함을 발견하면 consumer workaround를 먼저 고정하지 말고
 Hermes 계약 또는 Sharlayan API 책임인지 분리해 해당 저장소에서 수정·검증한 뒤 package

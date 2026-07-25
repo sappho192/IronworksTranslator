@@ -20,6 +20,7 @@ Hermes v2 schema는 ffxiv-hermes 문서가, runtime API와 fallback 동작은 Sh
 - Sharlayan을 `RemotePreferred`로 구성하여 주소 데이터만 바뀐 경우 앱 재배포 없이 대응한다.
 - 네트워크, cache 또는 remote manifest 오류가 앱 시작과 CHATLOG 번역을 중단하지 않게 한다.
 - 표준 NPC Talk의 이름과 대사를 typed data로 처리한다.
+- DialogueWindow에는 NPC 이름과 번역문을 `Speaker: Text` 형식으로 표시한다.
 - attach 직후 메모리에 남아 있는 이전 Talk를 신규 대사로 번역하지 않는다.
 - 동일 대사 반복과 게임 process 재연결을 명시적으로 처리한다.
 - 사용 중인 Hermes revision과 fallback source를 진단 로그에 기록한다.
@@ -141,7 +142,6 @@ worktree에 있지만, restore·build·test가 끝나기 전에는 통합 완료
 var configuration = new SharlayanConfiguration {
     ProcessModel = processModel,
     GameLanguage = gameLanguage,
-    GameRegion = gameRegion,
     ResourceMode = ResourceMode.RemotePreferred,
     HermesV2LatestUri = new Uri("https://hermes.sapphosound.com/v2/latest.json"),
     ResourceCacheDirectory = AppPaths.SharlayanCacheDirectory,
@@ -161,7 +161,13 @@ var configuration = new SharlayanConfiguration {
 - app 자체에서 Hermes HTTP 요청을 수행하지 않는다.
 - Sharlayan initialization이 비동기로 진행되는 동안 UI thread를 막지 않는다.
 - cache 경로는 기존 `%LOCALAPPDATA%\IronworksTranslator\data\sharlayan`을 재사용한다.
-- 긴급 진단을 위해 EmbeddedOnly를 선택할 수 있는 developer override는 별도로 검토한다.
+- 기본값과 production 동작은 `RemotePreferred`로 고정한다.
+- `EmbeddedOnly`를 선택하는 사용자 설정이나 UI는 추가하지 않는다.
+- 선택된 resource revision은 handler 수명 동안 고정한다.
+- 수동 resource reload 기능은 추가하지 않는다. 사용자가 새 revision을 즉시 확인하려면 앱을
+  재시작해야 한다.
+- `GameRegion`은 Sharlayan.Lite `9.1.2`에서 obsolete no-op이며 chat resource가
+  region-independent이므로 configuration에서 제거한다.
 
 ## 9. 기존 Hermes 코드 제거
 
@@ -185,20 +191,23 @@ src/IronworksTranslator/Utils/HermesAddress.cs
 
 기존 `latest/address.json` endpoint는 구버전 app을 위해 Hermes에서 유지하지만 새 IronworksTranslator는 요청하지 않는다.
 
-## 10. `UseInternalAddress` 설정 migration
+## 10. `UseInternalAddress` 설정 제거
 
-현재 persisted YAML에는 `use_internal_address`가 존재할 수 있다. source에서 즉시 제거하면 사용자 설정 역직렬화와 재저장 동작을 확인해야 한다.
+현재 persisted YAML에는 `use_internal_address`가 존재할 수 있지만 Hermes v2 전환 후에는 더
+이상 사용하지 않는다. `true`와 `false` 모두 `ResourceMode.RemotePreferred`를 사용하며
+`EmbeddedOnly` 또는 다른 동작으로 mapping하지 않는다.
 
-권장 migration:
+제거 정책:
 
-1. 첫 Hermes v2 지원 release에서는 property를 deprecated 상태로 유지한다.
-2. 값이 false이면 `RemotePreferred`를 사용한다.
-3. 값이 true이면 기존 local `address.json`을 읽지 않고 EmbeddedOnly를 사용한다.
-4. true 값을 발견하면 변경된 의미를 진단 로그에 한 번 기록한다.
-5. UI에 노출된 설정이 있다면 제거하거나 새 resource mode 설명으로 교체한다.
-6. 한 차례 설정 재저장과 release migration 후 property 제거 여부를 결정한다.
+1. `TranslatorSettings.UseInternalAddress`와 해당 runtime 분기를 제거한다.
+2. 기존 YAML의 `use_internal_address`는 역직렬화 전에 제거하거나 unknown property로 안전하게
+   무시한다.
+3. 값의 존재 여부와 값 자체는 resource mode 선택에 영향을 주지 않는다.
+4. 설정을 다시 저장하면 `use_internal_address`가 출력되지 않는지 검증한다.
+5. 기존 local `address.json`은 읽지 않으며 production fallback으로 유지하지 않는다.
+6. 사용자 설정이나 UI에 `EmbeddedOnly` 선택지를 새로 추가하지 않는다.
 
-사용자가 직접 만든 legacy `address.json`을 계속 지원할 필요가 있다면 v2 구현과 분리된 명시적 developer 기능으로 다시 설계한다. legacy JSON 해석을 production fallback에 남기지 않는다.
+사용자가 직접 만든 legacy `address.json`을 계속 지원하는 호환 기능은 제공하지 않는다.
 
 ## 11. Talk polling
 
@@ -294,12 +303,18 @@ public sealed class DialogueEntry {
 `DialogueWindow` 변경:
 
 - typed entry에서 `Text`만 번역기에 전달한다.
-- speaker 표시 또는 번역 정책은 기존 UI 요구에 맞춰 별도 결정한다.
-- 초기 migration에서 UI가 speaker를 표시하지 않더라도 queue에는 원본 speaker를 보존한다.
+- `Speaker`는 번역하지 않고 원본 이름을 유지한다.
+- 이번 단계에서는 기존 TextBox append 구조를 유지하고 각 항목을
+  `Speaker: {translated text}` 형식으로 표시한다.
+- speaker가 비어 있으면 구분자 없이 번역문만 표시한다.
+- `DialogueTranslationMethod.ChatMessage` 경로도 기존 author를 speaker로 전달한다.
+- speaker별 별도 스타일이나 목록형 UI는 이번 단계에 포함하지 않는다.
 - 기존 control payload 정제 순서를 유지한다.
 - 정제 결과가 빈 문자열이면 표시하지 않는다.
 
-이름 표시를 추가하면 사용자-visible 문자열이나 layout 변경이 필요한지 확인하고 한국어 및 영어 resource를 함께 갱신한다.
+이름 표시 자체는 게임에서 읽은 이름과 구분자만 사용하므로 별도 localized label을 추가하지
+않는다. 그 외 사용자-visible 문자열이나 layout을 변경하면 한국어 및 영어 resource를 함께
+갱신한다.
 
 ## 14. Timer와 초기화
 
@@ -413,16 +428,20 @@ FallbackReason
 
 ### Settings migration
 
-- 기존 `use_internal_address: false` YAML load
-- 기존 `use_internal_address: true` YAML load와 EmbeddedOnly mapping
+- 기존 `use_internal_address: false` YAML을 안전하게 읽고 RemotePreferred 사용
+- 기존 `use_internal_address: true` YAML을 안전하게 읽고 동일하게 RemotePreferred 사용
+- legacy 값이 resource mode 선택에 영향을 주지 않음
+- 설정 재저장 후 `use_internal_address`가 출력되지 않음
 - 설정 재저장 후 다른 translator 설정 보존
-- property 제거 단계에서 unknown YAML 처리 확인
 
 ### UI helper
 
 - DialogueEntry text 정제
 - control payload 제거 후 빈 text 처리
 - speaker를 번역 text와 분리하여 보존
+- speaker가 있으면 `Speaker: Text` 형식으로 표시
+- speaker가 비어 있으면 `Text`만 표시
+- ChatMessage 경로의 author도 동일한 speaker 형식으로 표시
 - 기존 `DialogueTranslationMethod.MemorySearch` 동작 유지
 
 ## 19. 통합 및 수동 테스트
@@ -435,6 +454,7 @@ FallbackReason
 - 손상된 remote latest
 - hash가 다른 immutable manifest
 - 오래된 cache와 새 remote revision
+- 앱 재시작 후 새 remote revision 선택
 
 ### Game matrix
 
@@ -464,17 +484,27 @@ FallbackReason
 ### Phase 1: Sharlayan 9.1.2 통합
 
 - [x] Hermes v2 지원 Sharlayan package version `9.1.2` 확정
-- [ ] package reference 갱신
-- [ ] 새 public API compile 확인
-- [ ] RemotePreferred configuration 적용
-- [ ] 기존 obsolete Sharlayan JSON configuration 제거
-- [ ] resource diagnostics logging 추가
+- [x] package reference 갱신
+- [x] 새 public API compile 확인
+- [x] RemotePreferred configuration 적용
+- [x] 기존 obsolete Sharlayan JSON configuration 제거
+- [x] resource diagnostics logging 추가
 
-완료 조건:
+구현 검증:
 
-- 앱이 Hermes JSON을 직접 다운로드하지 않는다.
-- remote, cache 및 embedded 각 source에서 handler가 초기화된다.
-- 기존 CHATLOG polling이 유지된다.
+- `dotnet restore src\IronworksTranslator\IronworksTranslator.sln` 통과
+- `dotnet build src\IronworksTranslator\IronworksTranslator.sln -c Debug --no-restore`
+  경고 0개, 오류 0개
+- `dotnet test tests\IronworksTranslator.Tests\IronworksTranslator.Tests.csproj -c Debug
+  --no-build --no-restore` 120개 통과
+- resolved package `Sharlayan.Lite 9.1.2` 확인
+- Debug output에 `Sharlayan.dll`만 포함되고 FCS assembly는 포함되지 않음
+
+남은 runtime 완료 조건:
+
+- [ ] 앱이 Hermes JSON을 직접 다운로드하지 않는다. Phase 2에서 legacy dialogue 경로와 함께 제거한다.
+- [ ] remote, cache 및 embedded 각 source에서 handler가 초기화된다.
+- [ ] 실제 게임에서 기존 CHATLOG polling이 유지된다.
 
 ### Phase 2: Talk API 전환
 
@@ -499,7 +529,8 @@ FallbackReason
 - [ ] dialogue queue를 typed entry로 변경
 - [ ] `LastMsg` 중복 상태 제거
 - [ ] DialogueWindow가 entry text를 번역하도록 변경
-- [ ] speaker 보존 및 표시 정책 결정
+- [ ] DialogueWindow에 `Speaker: Text` 형식으로 표시
+- [ ] ChatMessage 경로의 author를 speaker로 전달
 - [ ] queue와 tracker 단위 테스트 추가
 
 완료 조건:
@@ -511,7 +542,8 @@ FallbackReason
 ### Phase 4: Legacy 정리
 
 - [ ] `HermesAddress.cs` 삭제
-- [ ] `UseInternalAddress` deprecated migration 적용
+- [ ] `UseInternalAddress` property와 runtime 분기 제거
+- [ ] 기존 YAML의 `use_internal_address`를 값 mapping 없이 안전하게 무시 또는 제거
 - [ ] local `address.json` 경로 제거
 - [ ] legacy cache migration에서 불필요한 address 파일 처리 검토
 - [ ] 사용되지 않는 using과 dependency 제거
@@ -521,6 +553,7 @@ FallbackReason
 
 - source와 publish 산출물에 legacy Hermes consumer가 없다.
 - 기존 settings.yaml을 안전하게 읽을 수 있다.
+- `use_internal_address` 값이 resource mode 선택에 영향을 주지 않는다.
 - 앱은 `latest/address.json`을 요청하지 않는다.
 
 ### Phase 5: Release 검증
@@ -574,18 +607,21 @@ IronworksTranslator 배포가 해당 gate를 대신하지 않는다.
 ### 데이터 rollback
 
 - Hermes가 `v2/latest.json`을 이전 immutable revision으로 되돌린다.
-- IronworksTranslator는 다음 ETag 확인 또는 재attach에서 이전 revision을 사용한다.
-- 현재 handler는 실행 중 revision을 바꾸지 않으므로 필요하면 재attach 또는 app 재시작을 안내한다.
+- IronworksTranslator는 다음 앱 시작 시 ETag를 확인하고 이전 revision을 사용한다.
+- 현재 handler는 실행 중 revision을 바꾸지 않으며 수동 reload 기능을 제공하지 않는다.
+- 즉시 rollback revision을 적용해야 하면 사용자에게 앱 재시작을 안내한다.
 
 ### 앱 rollback
 
 - 새 Sharlayan package 또는 Talk pipeline 회귀가 있으면 이전 정상 dependency로 새 IronworksTranslator release를 만든다.
 - 구버전 app은 유지된 `latest/address.json`을 계속 사용할 수 있다.
-- `UseInternalAddress` migration은 되돌려도 settings.yaml이 손상되지 않게 additive하게 수행한다.
+- `UseInternalAddress` 제거 후에도 기존 settings.yaml의 다른 설정이 손상되지 않아야 한다.
 
 ### 긴급 EmbeddedOnly
 
-remote 계층의 광범위한 장애가 있는 경우 developer 또는 release configuration으로 EmbeddedOnly를 강제할 수 있게 한다. 일반 사용자 설정으로 노출할지는 별도로 결정한다.
+`RemotePreferred`는 remote와 verified cache가 모두 실패하면 package embedded manifest로 자동
+fallback한다. 일반 사용자에게 `EmbeddedOnly` 설정이나 UI를 제공하지 않는다. 특정 release를
+강제로 EmbeddedOnly로 배포해야 하는 상황은 별도의 code/release 결정으로 처리한다.
 
 ## 24. 완료 기준
 
@@ -593,10 +629,10 @@ remote 계층의 광범위한 장애가 있는 경우 developer 또는 release c
 - `HermesAddress`, `ALLMESSAGES` 및 raw 2048-byte read가 제거된다.
 - Sharlayan `RemotePreferred`를 명시적으로 사용한다.
 - CHATLOG와 Talk를 Sharlayan 고수준 API로만 읽는다.
-- Talk 이름과 text가 typed pipeline에서 보존된다.
+- Talk 이름과 text가 typed pipeline에서 보존되고 `Speaker: Text` 형식으로 표시된다.
 - source-aware attach baseline, 중복 및 reconnect 동작이 테스트된다.
 - remote, cache 및 embedded fallback이 packaged app에서 검증된다.
-- 기존 settings.yaml migration이 검증된다.
+- 기존 settings.yaml의 `use_internal_address`가 값 mapping 없이 안전하게 제거된다.
 - unit test, Debug build 및 release package 검증이 통과한다.
 - legacy `latest/address.json` endpoint는 구버전 app을 위해 무기한 유지된다.
 
@@ -608,7 +644,8 @@ remote 계층의 광범위한 장애가 있는 경우 developer 또는 release c
 - [확정] Talk API: `CanGetTalk()` / current-first `GetTalk()`
 - [확정] unavailable 표현: `TalkResult.IsAvailable == false`
 - [확정] legacy `latest/address.json` endpoint 지원 종료 조건: 무기한 유지
-- speaker를 DialogueWindow에 표시할지 여부
-- `UseInternalAddress=true`를 EmbeddedOnly로 mapping할 기간
-- 사용자가 선택할 수 있는 EmbeddedOnly UI를 제공할지 여부
-- resource revision 갱신을 app 재attach에서만 적용할지 수동 reload를 제공할지 여부
+- [확정] speaker 표시: 기존 TextBox에 `Speaker: Text` 형식
+- [확정] `UseInternalAddress`: 제거하며 값 mapping 없음
+- [확정] user-selectable `EmbeddedOnly`: 제공하지 않음
+- [확정] resource revision 갱신: 수동 reload 없이 앱 재시작
+- [확정] `GameRegion`: Sharlayan configuration에서 제거
