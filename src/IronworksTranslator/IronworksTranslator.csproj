@@ -157,6 +157,49 @@
     <RemoveDir Directories="@(NonWindowsRuntimeDirectories)" />
   </Target>
 
+  <Target Name="ExcludeNonWinX64RuntimeAssetsFromBuild"
+          AfterTargets="ResolveLockFileCopyLocalFiles"
+          BeforeTargets="_CopyFilesMarkedCopyLocal">
+    <ItemGroup>
+      <NonWinX64RuntimeCopyLocalItems Include="@(ReferenceCopyLocalPaths)"
+                                         Condition="$([System.String]::Copy('%(ReferenceCopyLocalPaths.DestinationSubDirectory)').StartsWith('runtimes\')) And !$([System.String]::Copy('%(ReferenceCopyLocalPaths.DestinationSubDirectory)').StartsWith('runtimes\win-x64\'))" />
+      <ReferenceCopyLocalPaths Remove="@(NonWinX64RuntimeCopyLocalItems)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RemoveStaleNonWinX64RuntimeAssets" AfterTargets="Build">
+    <ItemGroup>
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android-x86" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\browser-wasm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\ios-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\ios-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\iossimulator-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\iossimulator-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-musl-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-musl-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-musl-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\maccatalyst-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\maccatalyst-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\osx-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\osx-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\unix" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\unix-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\unix-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\win" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\win-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\win-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\win-x86" />
+    </ItemGroup>
+    <RemoveDir Directories="@(NonWinX64RuntimeDirectories)" />
+  </Target>
+
   <Target Name="BuildMiLMMTNativeProbe" BeforeTargets="Build" Condition="'$(RuntimeIdentifier)' == ''">
     <MSBuild Projects="$(MSBuildProjectDirectory)\..\..\tools\IronworksMiLMMTNativeProbe\IronworksMiLMMTNativeProbe.csproj"
              Targets="Build"

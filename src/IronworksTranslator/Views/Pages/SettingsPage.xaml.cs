@@ -363,6 +363,7 @@ namespace IronworksTranslator.Views.Pages
             {
                 _previousLocalModelDevicePriority = selectedPriority;
                 ViewModel.RefreshMiLMMTProfileSummary();
+                ShowDevicePriorityRestartNotice();
                 return;
             }
 
@@ -381,6 +382,7 @@ namespace IronworksTranslator.Views.Pages
             {
                 _previousLocalModelDevicePriority = selectedPriority;
                 ViewModel.RefreshMiLMMTProfileSummary();
+                ShowDevicePriorityRestartNotice();
                 return;
             }
 
@@ -733,6 +735,15 @@ namespace IronworksTranslator.Views.Pages
                 LocalModelDevicePriority.Vulkan => "Vulkan",
                 _ => "CPU",
             };
+        }
+
+        private static void ShowDevicePriorityRestartNotice()
+        {
+            System.Windows.MessageBox.Show(
+                Localizer.GetString("settings.translator.engine.milmmt.device_restart.notice"),
+                Localizer.GetString("settings.translator.engine.milmmt.device_restart.title"),
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
         }
 
         private void RevertLocalModelDevicePriority(ComboBox comboBox)
