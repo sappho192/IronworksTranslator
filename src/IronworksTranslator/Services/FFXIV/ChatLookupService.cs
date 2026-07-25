@@ -9,6 +9,7 @@ using Sharlayan;
 using Sharlayan.Enums;
 using Sharlayan.Models;
 using Sharlayan.Models.ReadResults;
+using Sharlayan.Models.Resources;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 
@@ -26,17 +27,18 @@ namespace IronworksTranslator.Services.FFXIV
         private const int period = 250;
         // Dialogue polling interval: 200ms for faster dialogue detection
         private const int dPeriod = 200;
+        private static readonly Uri HermesV2LatestUri = new("https://hermes.sapphosound.com/v2/latest.json");
 
         // For chatlog you must locally store previous array offsets and indexes in order to pull the correct log from the last time you read it.
         private static int _previousArrayIndex = 0;
         private static int _previousOffset = 0;
 
         private readonly object _timerLock = new();
+        private readonly TalkObservationTracker _talkObservationTracker = new();
         private bool _hostStarted;
         private bool _chatLogUnavailableLogged;
-        private bool _dialogueAddressUnavailableLogged;
-
-        private string lastMessage = "";
+        private bool _talkUnavailableLogged;
+        private bool _resourceDiagnosticsLogged;
 
         public ChatLookupService()
         {
@@ -62,11 +64,19 @@ namespace IronworksTranslator.Services.FFXIV
 
         public void Destruct()
         {
+            _talkObservationTracker.Reset();
             if (Attached)
             {
                 StopAsync(CancellationToken.None);
                 DetachMemoryHandlerEvents();
-                CurrentMemoryHandler?.Dispose();
+                var handler = CurrentMemoryHandler;
+                if (GameProcessID <= 0 || !SharlayanMemoryManager.Instance.RemoveHandler(GameProcessID))
+                {
+                    handler?.Dispose();
+                }
+
+                CurrentMemoryHandler = null;
+                GameProcessID = 0;
                 Attached = false;
                 App.GetService<DashboardViewModel>().IsTranslatorActive = Attached;
                 App.GetService<DashboardViewModel>().InitTranslatorToggle();
@@ -88,7 +98,7 @@ namespace IronworksTranslator.Services.FFXIV
                 lock (_timerLock)
                 {
                     _hostStarted = true;
-                    EnsureDialogueTimerStarted();
+                    EnsureDialogueTimerStartedIfReady();
                     EnsureChatTimerStartedIfReady();
                 }
             }
@@ -146,16 +156,34 @@ namespace IronworksTranslator.Services.FFXIV
         {
             try
             {
-                var raw = GetDialogueMessage();
-                if (string.IsNullOrEmpty(raw))
+                var handler = CurrentMemoryHandler;
+                if (handler?.Reader.CanGetTalk() != true)
+                {
+                    LogTalkNotReady();
+                    return;
+                }
+
+                _talkUnavailableLogged = false;
+                TalkResult talk = handler.Reader.GetTalk();
+                if (!_talkObservationTracker.ShouldEnqueue(talk))
                 {
                     return;
                 }
 
-                if (ChatQueue.EnqueueDialogueIfNew(raw))
-                {
-                    Log.Debug("Enqueue new message: {@message}", raw);
-                }
+                var dialogueEntry = new DialogueEntry(talk.Name, talk.Text);
+                ChatQueue.EnqueueDialogue(dialogueEntry);
+                Log.Debug(
+                    "Enqueued Talk observation. Source: {TalkSource}, Visible: {IsVisible}, " +
+                    "Speaker length: {SpeakerLength}, Text length: {TextLength}",
+                    talk.Source,
+                    talk.IsVisible,
+                    dialogueEntry.Speaker.Length,
+                    dialogueEntry.Text.Length);
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                Log.Information("Process lost");
+                Destruct();
             }
             catch (Exception ex)
             {
@@ -163,44 +191,10 @@ namespace IronworksTranslator.Services.FFXIV
             }
         }
 
-        private string GetDialogueMessage()
-        {
-            try
-            {
-                var handler = CurrentMemoryHandler;
-                if (handler == null)
-                {
-                    return "";
-                }
-
-                if (!handler.Scanner.Locations.ContainsKey("ALLMESSAGES"))
-                {
-                    LogDialogueAddressNotReady();
-                    return "";
-                }
-
-                _dialogueAddressUnavailableLogged = false;
-                var message = handler.GetString(handler.Scanner.Locations["ALLMESSAGES"], 0, 2048);
-                if (message != lastMessage)
-                {
-                    lastMessage = message;
-                    return message;
-                }
-            }
-            catch (System.ComponentModel.Win32Exception)
-            {
-                //MessageBox.Show(Localizer.GetString("app.exception.process.lost"));
-                Log.Information("Process lost");
-                Destruct();
-            }
-            return "";
-        }
-
         [TraceMethod]
         public void AttachGame()
         {
             string processName = "ffxiv_dx11";
-            AppPaths.MigrateLegacySharlayanCache();
 
             // ko client filtering
             var processes = Process.GetProcessesByName(processName).Where(x => { try { return System.IO.File.Exists(x.MainModule.FileName.Replace("game\\ffxiv_dx11.exe", "boot\\ffxivboot.exe")); } catch { return false; } }).ToArray();
@@ -208,13 +202,7 @@ namespace IronworksTranslator.Services.FFXIV
             if (processes.Length > 0)
             {
 
-                // supported: English, Chinese, Japanese, French, German, Korean
-                GameRegion gameRegion = GameRegion.Global;
                 GameLanguage gameLanguage = GameLanguage.English;
-                // whether to always hit API on start to get the latest sigs based on patchVersion, or use the local json cache (if the file doesn't exist, API will be hit)
-                bool useLocalCache = true;
-                // patchVersion of game, or latest
-                string patchVersion = "latest";
                 Process process = processes[0];
                 ProcessModel processModel = new()
                 {
@@ -226,26 +214,20 @@ namespace IronworksTranslator.Services.FFXIV
                 {
                     ProcessModel = processModel,
                     GameLanguage = gameLanguage,
-                    GameRegion = gameRegion,
-                    PatchVersion = patchVersion,
-                    UseLocalCache = useLocalCache,
-                    JSONCacheDirectory = AppPaths.SharlayanCacheDirectory
+                    ResourceMode = ResourceMode.RemotePreferred,
+                    HermesV2LatestUri = HermesV2LatestUri,
+                    ResourceCacheDirectory = AppPaths.SharlayanCacheDirectory
                 };
                 _previousArrayIndex = 0;
                 _previousOffset = 0;
                 _chatLogUnavailableLogged = false;
-                _dialogueAddressUnavailableLogged = false;
+                _talkUnavailableLogged = false;
+                _resourceDiagnosticsLogged = false;
+                _talkObservationTracker.Reset();
 
                 CurrentMemoryHandler = SharlayanMemoryManager.Instance.AddHandler(configuration);
                 CurrentMemoryHandler.OnMemoryLocationsFound += OnMemoryLocationsFound;
-                var signatures = new List<Signature>();
-                signatures.Add(new Signature
-                {
-                    Key = "ALLMESSAGES",
-                    PointerPath = HermesAddress.GetLatestAddress().Address
-                });
-                CurrentMemoryHandler.Scanner.LoadOffsets([.. signatures]);
-                ChatQueue.EnqueueDialogue("Dialogue window");
+                _ = ObserveResourceInitializationAsync(CurrentMemoryHandler);
 
                 Log.Information(
                     "Attached {ProcessName}.exe ({GameLanguage}). Sharlayan cache: {CacheDirectory}",
@@ -295,11 +277,20 @@ namespace IronworksTranslator.Services.FFXIV
             }
         }
 
-        private void EnsureDialogueTimerStarted()
+        private void EnsureDialogueTimerStartedIfReady()
         {
+            var handler = CurrentMemoryHandler;
+            if (handler?.Reader.CanGetTalk() != true)
+            {
+                LogTalkNotReady();
+                return;
+            }
+
+            _talkUnavailableLogged = false;
             if (dialogueTimer == null)
             {
                 dialogueTimer = new Timer(UpdateDialogue, null, 0, dPeriod);
+                Log.Information("Talk polling started.");
             }
             else
             {
@@ -312,26 +303,87 @@ namespace IronworksTranslator.Services.FFXIV
             ConcurrentDictionary<string, MemoryLocation> memoryLocations,
             long processingTime)
         {
-            var hasChatLog = memoryLocations.ContainsKey(Signatures.CHATLOG_KEY);
-            var hasDialogue = memoryLocations.ContainsKey("ALLMESSAGES");
-            Log.Information(
-                "Sharlayan memory locations resolved in {ProcessingTime} ms. CHATLOG: {HasChatLog}, ALLMESSAGES: {HasDialogue}",
-                processingTime,
-                hasChatLog,
-                hasDialogue);
-
-            if (!hasChatLog)
+            if (sender is not MemoryHandler handler || !ReferenceEquals(handler, CurrentMemoryHandler))
             {
                 return;
             }
+
+            LogResourceDiagnosticsOnce(handler);
+            var hasChatLog = memoryLocations.ContainsKey(Signatures.CHATLOG_KEY);
+            var hasTalk = handler.Reader.CanGetTalk();
+            Log.Information(
+                "Sharlayan memory locations resolved in {ProcessingTime} ms. CHATLOG: {HasChatLog}, Talk: {HasTalk}",
+                processingTime,
+                hasChatLog,
+                hasTalk);
 
             lock (_timerLock)
             {
                 if (_hostStarted)
                 {
                     EnsureChatTimerStartedIfReady();
+                    EnsureDialogueTimerStartedIfReady();
                 }
             }
+        }
+
+        private async Task ObserveResourceInitializationAsync(MemoryHandler handler)
+        {
+            try
+            {
+                await handler.InitializationTask.ConfigureAwait(false);
+                if (ReferenceEquals(handler, CurrentMemoryHandler))
+                {
+                    LogResourceDiagnosticsOnce(handler);
+                    lock (_timerLock)
+                    {
+                        if (_hostStarted)
+                        {
+                            EnsureChatTimerStartedIfReady();
+                            EnsureDialogueTimerStartedIfReady();
+                        }
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                Log.Debug("Sharlayan Hermes v2 resource initialization was canceled.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Sharlayan Hermes v2 resource initialization failed.");
+            }
+        }
+
+        private void LogResourceDiagnosticsOnce(MemoryHandler handler)
+        {
+            ResourceInfo? resourceInfo = handler.ResourceInfo;
+            if (resourceInfo == null)
+            {
+                return;
+            }
+
+            lock (_timerLock)
+            {
+                if (_resourceDiagnosticsLogged)
+                {
+                    return;
+                }
+
+                _resourceDiagnosticsLogged = true;
+            }
+
+            Log.Information(
+                "Sharlayan Hermes v2 resource selected. Source: {ResourceSource}, Revision: {ResourceRevision}, " +
+                "FCS commit: {FcsCommit}, Generator commit: {GeneratorCommit}, Validation: {ValidationStatus}, " +
+                "Resolved locations: {ResolvedLocationCount}, Fallback: {FallbackReason}",
+                resourceInfo.Source,
+                resourceInfo.ResourceRevision,
+                resourceInfo.FcsCommit,
+                resourceInfo.GeneratorCommit,
+                resourceInfo.ValidationStatus,
+                resourceInfo.ResolvedLocationCount,
+                resourceInfo.FallbackReason);
         }
 
         private void DetachMemoryHandlerEvents()
@@ -353,15 +405,15 @@ namespace IronworksTranslator.Services.FFXIV
             Log.Information("Waiting for Sharlayan CHATLOG memory location before starting chat polling.");
         }
 
-        private void LogDialogueAddressNotReady()
+        private void LogTalkNotReady()
         {
-            if (_dialogueAddressUnavailableLogged)
+            if (_talkUnavailableLogged)
             {
                 return;
             }
 
-            _dialogueAddressUnavailableLogged = true;
-            Log.Information("Waiting for Sharlayan ALLMESSAGES memory location before reading dialogue.");
+            _talkUnavailableLogged = true;
+            Log.Information("Waiting for Sharlayan Talk memory locations before starting dialogue polling.");
         }
 #pragma warning restore CS8602
     }

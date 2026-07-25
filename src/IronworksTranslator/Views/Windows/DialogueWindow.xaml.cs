@@ -81,35 +81,32 @@ namespace IronworksTranslator.Views.Windows
 
             try
             {
-                if (!ChatQueue.rq.IsEmpty)
+                if (ChatQueue.TryDequeueDialogue(out DialogueEntry? entry))
                 {
-                    var result = ChatQueue.rq.TryDequeue(out string? msg);
-                    if (msg == null) return;
                     if (IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod == DialogueTranslationMethod.MemorySearch)
                     {
-                        if (result)
+                        var msg = entry.Text;
+                        msg = MyRegex1().Replace(msg, "[HQ]");
+                        msg = MyRegex2().Replace(msg, "⇒");
+                        msg = MyRegex3().Replace(msg, string.Empty);
+                        msg = MyRegex4().Replace(msg, string.Empty);
+                        if (msg.StartsWith('\u0002'))
                         {
-                            msg = MyRegex1().Replace(msg, "[HQ]");
-                            msg = MyRegex2().Replace(msg, "⇒");
-                            msg = MyRegex3().Replace(msg, string.Empty);
-                            msg = MyRegex4().Replace(msg, string.Empty);
-                            if (msg.StartsWith('\u0002'))
+                            var filter = regexItem.Match(msg);
+                            if (filter.Success)
                             {
-                                var filter = regexItem.Match(msg);
-                                if (filter.Success)
-                                {
-                                    msg = filter.Groups[1].Value;
-                                }
+                                msg = filter.Groups[1].Value;
                             }
-                            if (!msg.Equals(string.Empty))
-                            {
-                                var translated = Translate(msg, IronworksSettings.Instance.ChannelSettings.NpcDialog.MajorLanguage);
+                        }
+                        if (!msg.Equals(string.Empty))
+                        {
+                            var translated = Translate(msg, IronworksSettings.Instance.ChannelSettings.NpcDialog.MajorLanguage);
+                            var displayText = DialogueTextFormatter.Format(entry.Speaker, translated);
 
-                                Application.Current.Dispatcher.Invoke(() =>
-                                {
-                                    AppendDialogueText(translated);
-                                });
-                            }
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                AppendDialogueText(displayText);
+                            });
                         }
                     }
                 }
@@ -125,16 +122,16 @@ namespace IronworksTranslator.Views.Windows
             }
         }
 
-        public void PushDialogueTextBox(string? dialogue)
+        public void PushDialogueTextBox(DialogueEntry? entry)
         {
-            if (dialogue == null) return;
+            if (entry == null) return;
             if (!Dispatcher.CheckAccess())
             {
-                Dispatcher.Invoke(() => PushDialogueTextBox(dialogue));
+                Dispatcher.Invoke(() => PushDialogueTextBox(entry));
                 return;
             }
 
-            AppendDialogueText(dialogue);
+            AppendDialogueText(DialogueTextFormatter.Format(entry.Speaker, entry.Text));
         }
 
         private void AppendDialogueText(string dialogue)

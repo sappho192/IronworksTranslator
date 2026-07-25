@@ -216,7 +216,41 @@ After an update:
 - Clear logs from the dashboard and confirm only `.iwlog` and legacy `.txt` files in `%LOCALAPPDATA%\IronworksTranslator\logs` are affected.
 - Select the MiLMMT translator and confirm model download/reuse works.
 
-## 9. Release Blockers
+## 9. Hermes v2 and Sharlayan Checks
+
+Sharlayan upstream smoke는 IronworksTranslator의 release readiness를 대신하지 않는다.
+릴리스할 정확한 IronworksTranslator package에서 다음 항목을 별도로 확인한다.
+
+Package and resource checks:
+
+- [ ] Restore 결과와 publish 산출물이 `Sharlayan.Lite 9.1.4`를 사용한다.
+- [ ] Publish 및 Velopack package에 `FFXIVClientStructs`, `HermesAddress`,
+  `latest/address.json`, local `address.json` 또는 `UseInternalAddress` consumer가 없다.
+- [ ] 새 Hermes cache에서 앱을 시작하면 `RemotePreferred`가 remote
+  `live-verified` revision을 선택하고 source와 revision을 진단 로그에 남긴다.
+- [ ] 기존 verified cache를 보존한 상태로 remote를 사용할 수 없게 만들면 cache fallback으로
+  앱이 시작되고 CHATLOG와 Talk가 계속 동작한다.
+- [ ] 별도의 깨끗한 cache에서 remote를 사용할 수 없게 만들면 embedded fallback으로 앱이
+  시작되고 CHATLOG와 Talk가 계속 동작한다.
+- [ ] fallback 검증 전 사용자 cache를 백업하고 검증 후 원상 복구한다. 사용자 cache나 legacy
+  파일을 검증 과정에서 삭제하지 않는다.
+- [ ] 실행 중 resource revision을 수동 갱신하는 기능은 제공하지 않는다. 새 revision 적용에는
+  앱 재시작이 필요함을 확인한다.
+
+Packaged live checks:
+
+- [ ] 실제 게임에서 CHATLOG와 표준 Talk를 동시에 수집하고 번역한다.
+- [x] DialogueWindow가 이름과 대사를 `Speaker: Text` 형식으로 표시한다.
+- [ ] attach 시 기존 LastTalk를 신규 대사로 처리하지 않으며, 같은 name/text 쌍을 닫았다 다시
+  열면 신규 Talk로 처리한다.
+- [ ] 글로벌 client와 한국 client에서 Talk 읽기와 CHATLOG 회귀 여부를 각각 확인한다.
+- [ ] FFXIV process 종료 시 poller와 handler가 정리되고, 게임 재실행 후 재연결되어 다시
+  CHATLOG와 Talk를 처리한다.
+- [ ] 앱 정상 종료 후 background callback, 종료 예외 또는 남은 IronworksTranslator process가
+  없다.
+- [ ] production signing을 적용한 installer에서 최초 설치, 실행, 업데이트 및 재시작을 확인한다.
+
+## 10. Release Blockers
 
 Do not publish the release if any of these fail:
 
@@ -228,3 +262,4 @@ Do not publish the release if any of these fail:
 - Settings or model files are deleted during update.
 - Update failure shows a crash instead of a recoverable error.
 - The app writes user settings or logs into the install/current app folder.
+- Any required Hermes v2 or Sharlayan check in section 9 is incomplete or fails.
