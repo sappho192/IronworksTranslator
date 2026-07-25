@@ -32,14 +32,29 @@ workflow가 참조하는 입력과 repository/environment 설정을 읽기 전�
 
 ### Sharlayan.Lite
 
-- consumer package는 stable `9.1.2`다.
+- Phase 1 resource consumer package는 stable `9.1.2`다.
 - 지원 target에는 IronworksTranslator가 사용하는 `net10.0`이 포함된다.
 - `RemotePreferred`는 remote → verified cache → embedded 순서로 resource를 선택한다.
 - 원격 manifest와 cache는 strict validation을 통과해야 하며 실패하면 다음 source로 fallback한다.
 - embedded manifest는 handoff 시점의 Hermes live-verified production byte와 동기화되어 있다.
-- CHATLOG와 Talk location은 선택된 같은 manifest revision에서 초기화된다.
+- `9.1.2` package는 선택된 manifest revision에서 CHATLOG를 초기화한다.
 - `MemoryHandler.ResourceInfo`로 source, revision, FCS commit, validation 및 fallback 정보를
   확인할 수 있다.
+
+### 2026-07-26 consumer compile 정정
+
+NuGet에 발행된 `9.1.2`는 repository commit `1f1bc33`에서 패키징됐다. current Talk API는
+그 이후 commit `3e27261`에서 추가됐으므로 공개 `9.1.2` DLL에 포함되지 않는다.
+
+- `Reader`에는 `CanGetLastTalk()` / `GetLastTalk()`만 존재한다.
+- `CanGetTalk()`, `GetTalk()`, `GetCurrentTalk()`은 존재하지 않는다.
+- `TalkResult`에는 `IsAvailable`, `Name`, `Text`만 있고 `Source`, `IsVisible`이 없다.
+- local nupkg SHA-512는 NuGet cache metadata와 일치하므로 cache 손상이 아니다.
+- NuGet V3에는 `8.0.1`과 `9.1.2`만 공개되어 있다.
+
+따라서 `9.1.2`는 Phase 1 resource configuration에는 사용할 수 있지만 Phase 2 Talk API
+전환에는 사용할 수 없다. current Talk API를 포함하는 새 stable package를 별도 버전으로
+발행하기 전까지 IronworksTranslator Phase 2는 blocked다.
 
 ## IronworksTranslator가 사용할 API
 
@@ -64,7 +79,8 @@ IronworksTranslator의 consumer 정책은 `RemotePreferred`로 고정한다. `Em
 설정과 수동 resource reload UI는 제공하지 않으며, 실행 중 선택된 revision은 handler 수명
 동안 유지한다. 사용자가 새 revision을 즉시 확인하려면 앱을 재시작한다.
 
-Talk 읽기:
+Talk 읽기 요구 계약이며, 다음 API는 `9.1.2` package가 아니라 새 stable package에서
+제공되어야 한다.
 
 ```csharp
 if (handler.Reader.CanGetTalk()) {
@@ -102,11 +118,14 @@ artifact 및 공유 로그에는 source, visibility, 길이와 일치 여부만 
 - candidate → live smoke → 수동 production 승격
 - Sharlayan remote, cache 및 embedded resource 선택
 - embedded manifest와 production immutable manifest의 byte 일치
-- CHATLOG와 Talk signature/location 초기화
-- current Talk 화면 일치 및 다음 Talk로의 전환
-- Talk 종료 후 `Last/not visible` fallback
+- source checkout에서 CHATLOG와 Talk signature/location 초기화
+- source checkout에서 current Talk 화면 일치 및 다음 Talk로의 전환
+- source checkout에서 Talk 종료 후 `Last/not visible` fallback
 - Sharlayan.Lite `9.1.2` package 생성, 검증, NuGet 배포 및 신규 cache restore
 - `net10.0` 소비자 build
+
+위 목록은 source checkout의 Talk 검증과 공개 `9.1.2` package 검증을 합쳐 package Talk API를
+증명하지 않는다. `9.1.2` consumer compile은 Talk API 부재로 실패했다.
 
 Sharlayan.Lite `9.1.2`는 지인 테스트를 시작하기 위한 명시적 일회성 release waiver를
 포함한다. 일부 장시간·다중 client evidence가 미충족인 사실은 그대로 유지되며, 이 waiver를
@@ -130,8 +149,9 @@ Sharlayan.Lite `9.1.2`는 지인 테스트를 시작하기 위한 명시적 일�
 
 ## 완료 경계
 
-이 handoff가 증명하는 것은 Hermes와 Sharlayan이 IronworksTranslator 통합을 시작할 수 있는
-상태라는 점이다. 다음 항목은 IronworksTranslator에서 별도로 완료해야 한다.
+이 handoff가 증명하는 것은 Hermes와 Sharlayan resource provider가 IronworksTranslator
+Phase 1을 시작할 수 있는 상태라는 점이다. Phase 2는 새 stable Sharlayan package 발행이
+선행되어야 한다. 그 이후 다음 항목을 IronworksTranslator에서 별도로 완료해야 한다.
 
 - 기존 settings YAML의 `use_internal_address`를 값 mapping 없이 안전하게 제거
 - typed dialogue queue와 중복 추적기

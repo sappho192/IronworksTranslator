@@ -71,20 +71,24 @@ tests/IronworksTranslator.Tests/Models/ChatQueueTests.cs
 
 ## 5. 확정된 upstream 기준
 
-2026-07-25 기준으로 IronworksTranslator 변경의 선행 조건은 충족됐다.
+2026-07-25 기준으로 Phase 1의 선행 조건은 충족됐지만, 2026-07-26 consumer compile에서
+Phase 2의 stable package 선행 조건이 충족되지 않았음이 확인됐다.
 
 - Hermes v2 production latest는 `live-verified` immutable manifest를 가리킨다.
-- 최소 호환 버전과 사용할 stable package는 Sharlayan.Lite `9.1.2`다.
+- Phase 1 resource provider에 사용할 stable package는 Sharlayan.Lite `9.1.2`다.
 - `RemotePreferred`는 remote → verified cache → embedded 순서로 fallback한다.
-- CHATLOG와 Talk는 선택된 같은 manifest revision에서 초기화된다.
-- current-first API는 `Reader.CanGetTalk()` / `Reader.GetTalk()`이다.
+- upstream source에서 CHATLOG와 Talk는 선택된 같은 manifest revision에서 초기화된다.
+- Phase 2에 필요한 source API는 `Reader.CanGetTalk()` / `Reader.GetTalk()`이다.
 - 필요하면 `Reader.GetCurrentTalk()`과 `Reader.GetLastTalk()`으로 source를 명시적으로 구분할 수 있다.
 - `TalkResult`는 `Name`, `Text`, `Source`, `IsVisible`, `IsAvailable`을 제공한다.
 - 선택된 resource source, revision, FCS commit 및 fallback reason은
   `MemoryHandler.ResourceInfo`에서 확인한다.
 
-Sharlayan.Lite `9.1.2`는 NuGet V3에서 restore 가능한 상태까지 확인됐다. 상세한 upstream
-검증 범위와 남아 있는 제한은 handoff 문서를 기준으로 한다.
+NuGet의 Sharlayan.Lite `9.1.2`는 repository commit `1f1bc33`에서 패키징됐고 current Talk
+API가 추가된 `3e27261`보다 이전이다. 실제 `9.1.2` DLL은 `CanGetLastTalk()` /
+`GetLastTalk()`만 제공하고 `TalkResult.Source` 및 `TalkResult.IsVisible`을 제공하지 않는다.
+package SHA-512는 NuGet cache metadata와 일치하므로 local cache 손상이 아니다. Phase 2는
+Talk API를 포함하는 새 stable package가 발행될 때까지 진행하지 않는다.
 
 ## 6. 대상 구조
 
@@ -118,8 +122,9 @@ IronworksTranslator가 몰라야 하는 정보:
 
 ## 7. Sharlayan package 갱신
 
-`src/IronworksTranslator/IronworksTranslator.csproj`의 `Sharlayan.Lite` dependency를
-`9.1.2`로 올린다.
+Phase 1에서는 `src/IronworksTranslator/IronworksTranslator.csproj`의 `Sharlayan.Lite`
+dependency를 `9.1.2`로 올린다. Phase 2 전에 current Talk API를 포함하는 새 stable package
+version으로 다시 갱신해야 한다.
 
 검증 항목:
 
@@ -129,8 +134,8 @@ IronworksTranslator가 몰라야 하는 정보:
 - package update가 기존 `ChatLogItem`, `ChatLogResult` 및 Reader 호출과 호환된다.
 - GitVersion과 Velopack versioning에는 별도 영향을 주지 않는다.
 
-최종 commit은 NuGet.org의 stable `9.1.2`를 사용한다. 현재 package reference 변경은
-worktree에 있지만, restore·build·test가 끝나기 전에는 통합 완료로 표시하지 않는다.
+Phase 1 commit은 NuGet.org의 stable `9.1.2`를 사용한다. 전체 migration의 최종 dependency는
+current Talk API를 포함하고 별도 버전으로 발행된 stable package여야 한다.
 
 ## 8. Sharlayan configuration
 
@@ -508,6 +513,17 @@ FallbackReason
 
 ### Phase 2: Talk API 전환
 
+상태: **upstream package blocker**
+
+- NuGet `9.1.2` repository commit: `1f1bc33`
+- current Talk API source commit: `3e27261`
+- NuGet V3에 공개된 버전: `8.0.1`, `9.1.2`
+- consumer compile 결과: `Reader.CanGetTalk()`, `Reader.GetTalk()`,
+  `TalkResult.Source`, `TalkResult.IsVisible` 없음
+- 필요한 조치: current Talk API를 포함하는 새 stable Sharlayan.Lite package 발행 및
+  신규 cache restore/API 검증
+- 금지: local project reference, 임의 DLL 복사 또는 reflection 기반 consumer workaround
+
 - [ ] `ALLMESSAGES` custom signature 제거
 - [ ] `GetString(..., 2048)` 제거
 - [ ] Sharlayan current-first `GetTalk()` 사용
@@ -638,7 +654,8 @@ fallback한다. 일반 사용자에게 `EmbeddedOnly` 설정이나 UI를 제공�
 
 ## 25. 구현 전 확정 사항
 
-- [확정] Sharlayan.Lite package version: `9.1.2`
+- [확정] Phase 1 Sharlayan.Lite package version: `9.1.2`
+- [미확정] Phase 2 이상 package version: current Talk API를 포함하는 새 stable version
 - [확정] resource configuration: `ResourceMode.RemotePreferred`,
   `HermesV2LatestUri`, `ResourceCacheDirectory`
 - [확정] Talk API: `CanGetTalk()` / current-first `GetTalk()`
