@@ -54,6 +54,8 @@ namespace IronworksTranslator.ViewModels.Windows
 
         // Semaphore to ensure messages are processed sequentially
         private readonly SemaphoreSlim _translationSemaphore = new(1, 1);
+        private readonly object _chatTranslationCancellationLock = new();
+        private CancellationTokenSource? _currentChatTranslationCancellation;
 
 #if DEBUG
         private const bool IsRetranslateUiEnabled = true;
@@ -92,6 +94,7 @@ namespace IronworksTranslator.ViewModels.Windows
         {
             if (!_translationSemaphore.Wait(0))
             {
+                CancelSupersededChatTranslation();
                 return;
             }
 
@@ -101,11 +104,14 @@ namespace IronworksTranslator.ViewModels.Windows
                 return;
             }
 
-            _ = Task.Run(() => ProcessChat(chat));
+            _ = Task.Run(() => ProcessChatAsync(chat, new CancellationTokenSource()));
         }
 
-        private void ProcessChat(ChatLogItem chat)
+        private async Task ProcessChatAsync(
+            ChatLogItem chat,
+            CancellationTokenSource chatCancellation)
         {
+            using var cancellationScope = chatCancellation;
             try
             {
                 Log.Information($"Dequeued {chat.Line}");
@@ -157,7 +163,10 @@ namespace IronworksTranslator.ViewModels.Windows
                             GetEmoteBody(chat, targetChat),
                             sourceLanguage,
                             targetLanguage)
-                        : CreateTranslationText(emoteBody, sourceLanguage);
+                        : await CreateCancellableChatTranslationTextAsync(
+                            emoteBody,
+                            sourceLanguage,
+                            cancellationTokenSource: chatCancellation);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         AddMessage(text, channel);
@@ -176,7 +185,10 @@ namespace IronworksTranslator.ViewModels.Windows
                             targetLine,
                             channel.MajorLanguage,
                             targetLanguage)
-                        : CreateTranslationText(sourceLine, channel.MajorLanguage);
+                        : await CreateCancellableChatTranslationTextAsync(
+                            sourceLine,
+                            channel.MajorLanguage,
+                            cancellationTokenSource: chatCancellation);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         AddMessage(text, channel);
@@ -200,7 +212,11 @@ namespace IronworksTranslator.ViewModels.Windows
                             channel.MajorLanguage,
                             targetLanguage,
                             author)
-                        : CreateTranslationText(sentence, channel.MajorLanguage, author);
+                        : await CreateCancellableChatTranslationTextAsync(
+                            sentence,
+                            channel.MajorLanguage,
+                            author,
+                            chatCancellation);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         AddMessage(text, channel, author);
@@ -219,12 +235,21 @@ namespace IronworksTranslator.ViewModels.Windows
                             channel.MajorLanguage,
                             targetLanguage,
                             author)
-                        : CreateTranslationText(sentence, channel.MajorLanguage, author);
+                        : await CreateTranslationTextAsync(
+                            sentence,
+                            channel.MajorLanguage,
+                            author,
+                            MiLMMTTranslationKind.Dialogue,
+                            chatCancellation.Token);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         App.GetService<DialogueWindow>().PushDialogueTextBox(text.TranslatedText);
                     });
                 }
+            }
+            catch (OperationCanceledException) when (chatCancellation.IsCancellationRequested)
+            {
+                Log.Debug("Skipped a superseded chat translation.");
             }
             catch (Exception ex)
             {
@@ -390,10 +415,12 @@ namespace IronworksTranslator.ViewModels.Windows
             return result;
         }
 
-        private static TranslationText CreateTranslationText(
+        private static async Task<TranslationText> CreateTranslationTextAsync(
             string originalText,
             ClientLanguage sourceLanguage,
-            string author = "")
+            string author,
+            MiLMMTTranslationKind requestKind,
+            CancellationToken cancellationToken)
         {
             var text = new TranslationText(
                 originalText,
@@ -405,10 +432,71 @@ namespace IronworksTranslator.ViewModels.Windows
 
             if (!ContainsNativeLanguage(originalText))
             {
-                text.TranslatedText = Translate(originalText, sourceLanguage);
+                text.TranslatedText = await TranslateAsync(
+                    originalText,
+                    sourceLanguage,
+                    requestKind,
+                    cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
             }
 
             return text;
+        }
+
+        private async Task<TranslationText> CreateCancellableChatTranslationTextAsync(
+            string originalText,
+            ClientLanguage sourceLanguage,
+            string author = "",
+            CancellationTokenSource? cancellationTokenSource = null)
+        {
+            using var ownedCancellationSource = cancellationTokenSource is null
+                ? new CancellationTokenSource()
+                : null;
+            var effectiveCancellationSource = cancellationTokenSource ?? ownedCancellationSource!;
+            lock (_chatTranslationCancellationLock)
+            {
+                _currentChatTranslationCancellation = effectiveCancellationSource;
+            }
+
+            try
+            {
+                return await CreateTranslationTextAsync(
+                    originalText,
+                    sourceLanguage,
+                    author,
+                    MiLMMTTranslationKind.Chat,
+                    effectiveCancellationSource.Token);
+            }
+            finally
+            {
+                lock (_chatTranslationCancellationLock)
+                {
+                    if (ReferenceEquals(_currentChatTranslationCancellation, effectiveCancellationSource))
+                    {
+                        _currentChatTranslationCancellation = null;
+                    }
+                }
+            }
+        }
+
+        private void CancelSupersededChatTranslation()
+        {
+            if (ChatQueue.q.Count == 0)
+            {
+                return;
+            }
+
+            lock (_chatTranslationCancellationLock)
+            {
+                try
+                {
+                    _currentChatTranslationCancellation?.Cancel();
+                }
+                catch (ObjectDisposedException)
+                {
+                    _currentChatTranslationCancellation = null;
+                }
+            }
         }
 
         internal static TranslationText CreateResolvedAutoTranslateText(
@@ -700,6 +788,45 @@ namespace IronworksTranslator.ViewModels.Windows
                     break;
             }
             Log.Information($"Translated {input}");
+            return result;
+        }
+
+        private static async Task<string> TranslateAsync(
+            string input,
+            ClientLanguage channelLanguage,
+            MiLMMTTranslationKind requestKind,
+            CancellationToken cancellationToken,
+            TranslatorEngine? translatorEngine = null)
+        {
+            Log.Information("Translating {Input}", input);
+            var switcher = translatorEngine ?? IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
+            var targetLanguage = (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage;
+            var sourceLanguage = (TranslationLanguageCode)channelLanguage;
+            var result = switcher switch
+            {
+                TranslatorEngine.Papago => await App.GetService<PapagoTranslator>().TranslateAsync(
+                    input,
+                    sourceLanguage,
+                    targetLanguage),
+                TranslatorEngine.DeepL_API => await App.GetService<DeepLAPITranslator>().TranslateAsync(
+                    input,
+                    sourceLanguage,
+                    targetLanguage),
+                TranslatorEngine.MiLLMT => await App.GetService<MiLMMTTranslator>().TranslateAsync(
+                    input,
+                    sourceLanguage,
+                    targetLanguage,
+                    requestKind,
+                    cancellationToken),
+                _ => input,
+            };
+
+            if (!Enum.IsDefined(switcher))
+            {
+                Log.Warning("Unknown translator engine {TranslatorEngine}. Returning original input.", switcher);
+            }
+
+            Log.Information("Translated {Input}", input);
             return result;
         }
 

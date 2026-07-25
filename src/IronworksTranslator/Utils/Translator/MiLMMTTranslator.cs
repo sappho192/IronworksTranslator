@@ -13,12 +13,8 @@ namespace IronworksTranslator.Utils.Translator
 {
     public sealed class MiLMMTTranslator : TranslatorBase, IDisposable
     {
-        private const int ContextSize = 2048;
-        private const int GpuLayerCount = 99;
-        private const int BatchSize = 2048;
-        private const int UBatchSize = 512;
-        private const int MaxTokens = 512;
         private const int TimeoutSeconds = 30;
+        private const int TranslationCacheCapacity = 256;
 
         private static readonly string[] StopTokens = ["<end_of_turn>", "<eos>", "</s>"];
         private static readonly object NativeConfigLock = new();
@@ -35,10 +31,14 @@ namespace IronworksTranslator.Utils.Translator
         ];
 
         private readonly SemaphoreSlim inferenceLock = new(1, 1);
+        private readonly BoundedTranslationCache<TranslationCacheKey> translationCache = new(
+            TranslationCacheCapacity,
+            TimeSpan.FromMinutes(5));
         private LLamaWeights? weights;
         private StatelessExecutor? executor;
         private string? loadedModelPath;
         private LocalModelDevicePriority? loadedDevicePriority;
+        private MiLMMTInferenceProfile? loadedInferenceProfile;
         private bool disposed;
 
         public override TranslationLanguageCode[] SupportedSourceLanguages => translationLanguages;
@@ -61,13 +61,40 @@ namespace IronworksTranslator.Utils.Translator
             TranslationLanguageCode sourceLanguage,
             TranslationLanguageCode targetLanguage)
         {
-            return TranslateAsync(input, sourceLanguage, targetLanguage).GetAwaiter().GetResult();
+            return Translate(
+                input,
+                sourceLanguage,
+                targetLanguage,
+                MiLMMTTranslationKind.Manual);
+        }
+
+        public string Translate(
+            string input,
+            TranslationLanguageCode sourceLanguage,
+            TranslationLanguageCode targetLanguage,
+            MiLMMTTranslationKind requestKind)
+        {
+            return TranslateAsync(input, sourceLanguage, targetLanguage, requestKind).GetAwaiter().GetResult();
         }
 
         public override async Task<string> TranslateAsync(
             string input,
             TranslationLanguageCode sourceLanguage,
             TranslationLanguageCode targetLanguage)
+        {
+            return await TranslateAsync(
+                input,
+                sourceLanguage,
+                targetLanguage,
+                MiLMMTTranslationKind.Manual);
+        }
+
+        public async Task<string> TranslateAsync(
+            string input,
+            TranslationLanguageCode sourceLanguage,
+            TranslationLanguageCode targetLanguage,
+            MiLMMTTranslationKind requestKind,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(input) || sourceLanguage == targetLanguage)
             {
@@ -93,17 +120,39 @@ namespace IronworksTranslator.Utils.Translator
                 return input;
             }
 
-            await inferenceLock.WaitAsync();
+            var inferenceProfile = MiLMMTInferenceProfile.GameSafe;
+            var maxTokens = inferenceProfile.GetMaxTokens(requestKind);
+            var cacheKey = new TranslationCacheKey(
+                modelProfile.Sha256,
+                sourceLanguage,
+                targetLanguage,
+                maxTokens,
+                NormalizeForCache(input));
+            if (translationCache.TryGet(cacheKey, out var cachedOutput))
+            {
+                return cachedOutput;
+            }
+
+            var lockAcquired = false;
             try
             {
-                if (!EnsureInitialized(modelProfile))
+                await inferenceLock.WaitAsync(cancellationToken);
+                lockAcquired = true;
+
+                if (translationCache.TryGet(cacheKey, out cachedOutput))
+                {
+                    return cachedOutput;
+                }
+
+                if (!EnsureInitialized(modelProfile, inferenceProfile))
                 {
                     return input;
                 }
 
                 var prompt = RenderPrompt(sourceLanguage, targetLanguage, input);
-                var inferenceParams = CreateInferenceParams();
-                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds));
+                var inferenceParams = CreateInferenceParams(maxTokens);
+                using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                timeout.CancelAfter(TimeSpan.FromSeconds(TimeoutSeconds));
                 var generated = new List<string>();
 
                 await foreach (var chunk in executor!.InferAsync(prompt, inferenceParams, timeout.Token))
@@ -112,7 +161,24 @@ namespace IronworksTranslator.Utils.Translator
                 }
 
                 var output = StripStops(string.Concat(generated)).Trim();
-                return string.IsNullOrWhiteSpace(output) ? input : output;
+                if (string.IsNullOrWhiteSpace(output))
+                {
+                    return input;
+                }
+
+                if (!string.Equals(output, input, StringComparison.Ordinal))
+                {
+                    translationCache.Set(cacheKey, output);
+                }
+
+                return output;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                Log.Debug(
+                    "MiLLMT {RequestKind} translation was cancelled before completion.",
+                    requestKind);
+                throw;
             }
             catch (Exception ex)
             {
@@ -125,16 +191,22 @@ namespace IronworksTranslator.Utils.Translator
             }
             finally
             {
-                inferenceLock.Release();
+                if (lockAcquired)
+                {
+                    inferenceLock.Release();
+                }
             }
         }
 
-        private bool EnsureInitialized(MiLMMTModelProfile modelProfile)
+        private bool EnsureInitialized(
+            MiLMMTModelProfile modelProfile,
+            MiLMMTInferenceProfile inferenceProfile)
         {
             var effectiveDevicePriority = ConfigureNativeLibrary(GetDevicePriority());
             if (executor != null
                 && loadedModelPath == modelProfile.FilePath
-                && loadedDevicePriority == effectiveDevicePriority)
+                && loadedDevicePriority == effectiveDevicePriority
+                && loadedInferenceProfile == inferenceProfile)
             {
                 return true;
             }
@@ -146,10 +218,10 @@ namespace IronworksTranslator.Utils.Translator
                     or LocalModelDevicePriority.Vulkan;
                 var modelParams = new ModelParams(modelProfile.FilePath)
                 {
-                    ContextSize = ContextSize,
-                    GpuLayerCount = useGpu ? GpuLayerCount : 0,
-                    BatchSize = BatchSize,
-                    UBatchSize = UBatchSize,
+                    ContextSize = checked((uint)inferenceProfile.ContextSize),
+                    GpuLayerCount = useGpu ? inferenceProfile.GpuLayerCount : 0,
+                    BatchSize = checked((uint)inferenceProfile.BatchSize),
+                    UBatchSize = checked((uint)inferenceProfile.UBatchSize),
                 };
 
                 weights = LLamaWeights.LoadFromFile(modelParams);
@@ -160,10 +232,12 @@ namespace IronworksTranslator.Utils.Translator
 
                 loadedModelPath = modelProfile.FilePath;
                 loadedDevicePriority = effectiveDevicePriority;
+                loadedInferenceProfile = inferenceProfile;
                 Log.Information(
-                    "MiLLMT model loaded from {ModelPath}. DevicePriority: {DevicePriority}",
+                    "MiLLMT model loaded from {ModelPath}. DevicePriority: {DevicePriority}. InferenceProfile: {InferenceProfile}",
                     modelProfile.FilePath,
-                    effectiveDevicePriority);
+                    effectiveDevicePriority,
+                    inferenceProfile.Name);
                 return true;
             }
             catch (Exception ex)
@@ -244,11 +318,11 @@ namespace IronworksTranslator.Utils.Translator
                 || message.Contains("Vulkan", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static InferenceParams CreateInferenceParams()
+        private static InferenceParams CreateInferenceParams(int maxTokens)
         {
             return new InferenceParams
             {
-                MaxTokens = MaxTokens,
+                MaxTokens = maxTokens,
                 AntiPrompts = StopTokens,
                 SamplingPipeline = new DefaultSamplingPipeline
                 {
@@ -309,6 +383,13 @@ namespace IronworksTranslator.Utils.Translator
             return text;
         }
 
+        internal static string NormalizeForCache(string input)
+        {
+            return string.Join(
+                ' ',
+                input.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        }
+
         public void Dispose()
         {
             if (disposed)
@@ -328,6 +409,14 @@ namespace IronworksTranslator.Utils.Translator
             executor = null;
             loadedModelPath = null;
             loadedDevicePriority = null;
+            loadedInferenceProfile = null;
         }
+
+        private readonly record struct TranslationCacheKey(
+            string ModelSha256,
+            TranslationLanguageCode SourceLanguage,
+            TranslationLanguageCode TargetLanguage,
+            int MaxTokens,
+            string NormalizedInput);
     }
 }

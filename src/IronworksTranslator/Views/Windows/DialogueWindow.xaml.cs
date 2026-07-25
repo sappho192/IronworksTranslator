@@ -186,7 +186,8 @@ namespace IronworksTranslator.Views.Windows
                     result = App.GetService<MiLMMTTranslator>().Translate(
                             input,
                             (TranslationLanguageCode)channelLanguage,
-                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
+                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage,
+                            MiLMMTTranslationKind.Dialogue
                         );
                     break;
                 default:
