@@ -143,6 +143,7 @@ namespace IronworksTranslator.Models.Settings
             chatUiSettings.DialogueWindowOpacity = NormalizeOpacity(chatUiSettings.DialogueWindowOpacity, chatUiSettings.WindowOpacity);
 
             NormalizeTranslatorEngine(translatorSettings);
+            NormalizeMiLMMTModelProfile(translatorSettings);
             NormalizeLocalModelDevicePriority(settings.TranslatorSettings!, recommendedDevicePriority);
         }
 
@@ -183,6 +184,29 @@ namespace IronworksTranslator.Models.Settings
                 translatorSettings.LocalModelDevicePriority,
                 resolvedPriority);
             translatorSettings.LocalModelDevicePriority = resolvedPriority;
+        }
+
+        private static void NormalizeMiLMMTModelProfile(TranslatorSettings translatorSettings)
+        {
+            if (IronworksTranslator.Models.Translator.MiLMMTModelProfiles.IsSupported(
+                translatorSettings.MiLMMTModelSize,
+                translatorSettings.MiLMMTQuantization))
+            {
+                return;
+            }
+
+            var fallbackSize = IronworksTranslator.Models.Translator.MiLMMTModelProfiles.GetFallbackModelSize(
+                translatorSettings.MiLMMTModelSize);
+            var fallbackQuantization = IronworksTranslator.Models.Translator.MiLMMTModelProfiles.GetDefaultQuantization(
+                fallbackSize);
+            Log.Information(
+                "MiLMMT model profile normalized from {PreviousSize} {PreviousQuantization} to {Size} {Quantization}.",
+                translatorSettings.MiLMMTModelSize,
+                translatorSettings.MiLMMTQuantization,
+                fallbackSize,
+                fallbackQuantization);
+            translatorSettings.MiLMMTModelSize = fallbackSize;
+            translatorSettings.MiLMMTQuantization = fallbackQuantization;
         }
 
         private static double NormalizeOpacity(double value, double fallback)

@@ -22,6 +22,7 @@ namespace IronworksTranslator.Models.Translator
             MiLMMTModelSize.MiLMMT_1B => "MiLMMT 1B",
             MiLMMTModelSize.MiLMMT_4B => "MiLMMT 4B",
             MiLMMTModelSize.MiLMMT_12B => "MiLMMT 12B",
+            MiLMMTModelSize.MiLMMT_1B_Compact => "MiLMMT 1B Compact (Debug)",
             _ => Size.ToString(),
         };
         public string DirectoryPath => AppPaths.GetMiLMMTModelDirectory(Size);
@@ -62,14 +63,13 @@ namespace IronworksTranslator.Models.Translator
             new(
                 MiLMMTModelSize.MiLMMT_1B,
                 MiLMMTQuantization.Q4_K_M,
-                "sappho192/MiLMMT-46-1B-v0.1-ko-en-ja-pruned-130k-imatrix-Q4_K_M-GGUF",
-                "milmmt-pruned-130k-bf16-imatrix-mix-late16-25-ffngateupq8-Q4_K_M.gguf",
-                803547328,
-                "5f781fdc9a685212dba3244b7cf2df39625776066043408f769549195f018b0d",
-                1.2,
-                KoEnJaLanguages,
-                "settings.translator.engine.milmmt.note.1b.q4",
-                "MiLMMT 1B Compact"),
+                "mradermacher/MiLMMT-46-1B-v0.1-GGUF",
+                "MiLMMT-46-1B-v0.1.Q4_K_M.gguf",
+                1013675392,
+                "9d5c10855eb2688d453e3069e7b6dee1756fc834d738d2dc04318511993fd54f",
+                1.4,
+                AllLanguages,
+                "settings.translator.engine.milmmt.note.1b.q4"),
             new(
                 MiLMMTModelSize.MiLMMT_1B,
                 MiLMMTQuantization.Q8_0,
@@ -110,26 +110,50 @@ namespace IronworksTranslator.Models.Translator
                 9.5,
                 AllLanguages,
                 "settings.translator.engine.milmmt.note.12b.q4"),
+#if DEBUG
+            new(
+                MiLMMTModelSize.MiLMMT_1B_Compact,
+                MiLMMTQuantization.Q4_K_M,
+                "sappho192/MiLMMT-46-1B-v0.1-ko-en-ja-pruned-130k-imatrix-Q4_K_M-GGUF",
+                "milmmt-pruned-130k-bf16-imatrix-mix-late16-25-ffngateupq8-Q4_K_M.gguf",
+                803547328,
+                "5f781fdc9a685212dba3244b7cf2df39625776066043408f769549195f018b0d",
+                1.2,
+                KoEnJaLanguages,
+                "settings.translator.engine.milmmt.note.1b.compact",
+                "MiLMMT 1B Compact (Debug)"),
+#endif
         ];
 
         private static readonly MiLMMTModelProfile[] RetiredProfiles =
         [
+#if !DEBUG
             new(
-                MiLMMTModelSize.MiLMMT_1B,
+                MiLMMTModelSize.MiLMMT_1B_Compact,
                 MiLMMTQuantization.Q4_K_M,
-                "mradermacher/MiLMMT-46-1B-v0.1-GGUF",
-                "MiLMMT-46-1B-v0.1.Q4_K_M.gguf",
-                1013675392,
-                "9d5c10855eb2688d453e3069e7b6dee1756fc834d738d2dc04318511993fd54f",
-                1.4,
-                AllLanguages,
-                "settings.translator.engine.milmmt.note.retired.1b.q4",
-                "MiLMMT 1B Q4 (legacy)"),
+                "sappho192/MiLMMT-46-1B-v0.1-ko-en-ja-pruned-130k-imatrix-Q4_K_M-GGUF",
+                "milmmt-pruned-130k-bf16-imatrix-mix-late16-25-ffngateupq8-Q4_K_M.gguf",
+                803547328,
+                "5f781fdc9a685212dba3244b7cf2df39625776066043408f769549195f018b0d",
+                1.2,
+                KoEnJaLanguages,
+                "settings.translator.engine.milmmt.note.retired.1b.compact",
+                "MiLMMT 1B Compact (Debug)"),
+#endif
         ];
 
         public static IReadOnlyList<MiLMMTModelProfile> All => Profiles;
         public static IReadOnlyList<MiLMMTModelProfile> Retired => RetiredProfiles;
         public static IEnumerable<MiLMMTModelProfile> AllKnown => Profiles.Concat(RetiredProfiles);
+        public static IReadOnlyList<MiLMMTModelSize> SelectableModelSizes { get; } =
+        [
+            MiLMMTModelSize.MiLMMT_1B,
+            MiLMMTModelSize.MiLMMT_4B,
+            MiLMMTModelSize.MiLMMT_12B,
+#if DEBUG
+            MiLMMTModelSize.MiLMMT_1B_Compact,
+#endif
+        ];
 
         public static IReadOnlyList<MiLMMTModelProfile> GetDownloadedRetiredProfiles(
             Func<MiLMMTModelProfile, bool> isAvailable)
@@ -149,9 +173,17 @@ namespace IronworksTranslator.Models.Translator
             return Profiles.Any(profile => profile.Size == size && profile.Quantization == quantization);
         }
 
+        public static MiLMMTModelSize GetFallbackModelSize(MiLMMTModelSize size)
+        {
+            return Profiles.Any(profile => profile.Size == size)
+                ? size
+                : MiLMMTModelSize.MiLMMT_1B;
+        }
+
         public static MiLMMTQuantization GetDefaultQuantization(MiLMMTModelSize size)
         {
-            return Profiles.First(profile => profile.Size == size).Quantization;
+            var fallbackSize = GetFallbackModelSize(size);
+            return Profiles.First(profile => profile.Size == fallbackSize).Quantization;
         }
 
         public static MiLMMTModelProfile? FindPreferredAvailableProfile(
@@ -161,6 +193,7 @@ namespace IronworksTranslator.Models.Translator
         {
             ArgumentNullException.ThrowIfNull(isAvailable);
 
+            size = GetFallbackModelSize(size);
             var defaultQuantization = GetDefaultQuantization(size);
             return Profiles
                 .Where(profile => profile.Size == size)
@@ -174,6 +207,7 @@ namespace IronworksTranslator.Models.Translator
             var settings = Models.Settings.IronworksSettings.Instance?.TranslatorSettings;
             var size = settings?.MiLMMTModelSize ?? MiLMMTModelSize.MiLMMT_1B;
             var quantization = settings?.MiLMMTQuantization ?? MiLMMTQuantization.Q8_0;
+            size = GetFallbackModelSize(size);
             if (!IsSupported(size, quantization))
             {
                 quantization = GetDefaultQuantization(size);

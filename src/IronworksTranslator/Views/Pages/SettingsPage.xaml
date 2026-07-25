@@ -139,7 +139,7 @@
                                             <StackPanel Grid.Column="0">
                                                 <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.engine.milmmt.model}" FontTypography="Caption"/>
                                                 <ComboBox Margin="0,4,0,0" Name="cbMiLMMTModelSize"
-                                                    ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:MiLMMTModelSize}}"
+                                                    ItemsSource="{Binding ViewModel.MiLMMTModelSizeOptions}"
                                                     SelectedValue="{Binding ViewModel.MiLMMTModelSize, Converter={StaticResource MiLMMTModelSizeToStringConverter}, Mode=TwoWay}"
                                                     SelectedIndex="{Binding ViewModel.MiLMMTModelSizeIndex, Mode=TwoWay}"
                                                     SelectionChanged="MiLMMTModelOption_SelectionChanged"/>

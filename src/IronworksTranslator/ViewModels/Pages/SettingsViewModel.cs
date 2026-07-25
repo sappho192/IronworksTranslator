@@ -91,6 +91,9 @@ namespace IronworksTranslator.ViewModels.Pages
         private MiLMMTModelSize _miLMMTModelSize = IronworksSettings.Instance.TranslatorSettings.MiLMMTModelSize;
         [ObservableProperty]
         private int _miLMMTModelSizeIndex = (int)IronworksSettings.Instance.TranslatorSettings.MiLMMTModelSize;
+        public IReadOnlyList<string> MiLMMTModelSizeOptions => MiLMMTModelProfiles.SelectableModelSizes
+            .Select(modelSize => IronworksTranslator.Helpers.Extensions.EnumExtension.GetDescription(modelSize))
+            .ToArray();
         partial void OnMiLMMTModelSizeChanged(MiLMMTModelSize value)
         {
             EnsureSupportedMiLMMTProfile();
@@ -153,7 +156,14 @@ namespace IronworksTranslator.ViewModels.Pages
                 return;
             }
 
-            var fallbackQuantization = MiLMMTModelProfiles.GetDefaultQuantization(MiLMMTModelSize);
+            var fallbackModelSize = MiLMMTModelProfiles.GetFallbackModelSize(MiLMMTModelSize);
+            var fallbackQuantization = MiLMMTModelProfiles.GetDefaultQuantization(fallbackModelSize);
+            if (MiLMMTModelSize != fallbackModelSize)
+            {
+                MiLMMTModelSize = fallbackModelSize;
+                MiLMMTModelSizeIndex = (int)fallbackModelSize;
+            }
+
             if (MiLMMTQuantization != fallbackQuantization)
             {
                 MiLMMTQuantization = fallbackQuantization;

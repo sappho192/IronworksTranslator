@@ -58,36 +58,54 @@ public class SettingsTests
     }
 
     [Fact]
-    public void MiLMMTModelProfiles_UseCompactKoEnJaQ4ProfileAndRetainLegacyCleanupMetadata()
+    public void MiLMMTModelProfiles_RestoreStandardQ4AndScopeCompactToDebugBuild()
     {
-        var compact = MiLMMTModelProfiles.Get(
+        var standard = MiLMMTModelProfiles.Get(
             MiLMMTModelSize.MiLMMT_1B,
             MiLMMTQuantization.Q4_K_M);
 
-        Assert.Equal("MiLMMT 1B Compact", compact.DisplayName);
+        Assert.Equal("MiLMMT 1B Q4_K_M", standard.DisplayName);
+        Assert.Equal(
+            "mradermacher/MiLMMT-46-1B-v0.1-GGUF",
+            standard.Repository);
+        Assert.Equal("MiLMMT-46-1B-v0.1.Q4_K_M.gguf", standard.FileName);
+        Assert.Equal(1013675392, standard.FileSize);
+        Assert.Equal(
+            "9d5c10855eb2688d453e3069e7b6dee1756fc834d738d2dc04318511993fd54f",
+            standard.Sha256);
+        Assert.True(standard.Supports(TranslationLanguageCode.German));
+        Assert.True(standard.Supports(TranslationLanguageCode.French));
+
+#if DEBUG
+        var compact = MiLMMTModelProfiles.Get(
+            MiLMMTModelSize.MiLMMT_1B_Compact,
+            MiLMMTQuantization.Q4_K_M);
+
+        Assert.Equal("MiLMMT 1B Compact (Debug)", compact.DisplayName);
         Assert.Equal(
             "sappho192/MiLMMT-46-1B-v0.1-ko-en-ja-pruned-130k-imatrix-Q4_K_M-GGUF",
             compact.Repository);
         Assert.Equal(
             "milmmt-pruned-130k-bf16-imatrix-mix-late16-25-ffngateupq8-Q4_K_M.gguf",
             compact.FileName);
-        Assert.Equal(803547328, compact.FileSize);
-        Assert.Equal(
-            "5f781fdc9a685212dba3244b7cf2df39625776066043408f769549195f018b0d",
-            compact.Sha256);
         Assert.True(compact.Supports(TranslationLanguageCode.Korean));
-        Assert.True(compact.Supports(TranslationLanguageCode.English));
-        Assert.True(compact.Supports(TranslationLanguageCode.Japanese));
         Assert.False(compact.Supports(TranslationLanguageCode.German));
-        Assert.False(compact.Supports(TranslationLanguageCode.French));
-
+        Assert.Contains(MiLMMTModelSize.MiLMMT_1B_Compact, MiLMMTModelProfiles.SelectableModelSizes);
+        Assert.Empty(MiLMMTModelProfiles.Retired);
+#else
         var retired = Assert.Single(MiLMMTModelProfiles.Retired);
-        Assert.DoesNotContain(retired, MiLMMTModelProfiles.All);
-        Assert.Equal("MiLMMT-46-1B-v0.1.Q4_K_M.gguf", retired.FileName);
-        Assert.NotEqual(retired, compact);
+        Assert.Equal(MiLMMTModelSize.MiLMMT_1B_Compact, retired.Size);
+        Assert.Equal(
+            "milmmt-pruned-130k-bf16-imatrix-mix-late16-25-ffngateupq8-Q4_K_M.gguf",
+            retired.FileName);
+        Assert.DoesNotContain(MiLMMTModelSize.MiLMMT_1B_Compact, MiLMMTModelProfiles.SelectableModelSizes);
+        Assert.Equal(
+            MiLMMTModelSize.MiLMMT_1B,
+            MiLMMTModelProfiles.GetFallbackModelSize(MiLMMTModelSize.MiLMMT_1B_Compact));
         Assert.Equal(
             new[] { retired },
             MiLMMTModelProfiles.GetDownloadedRetiredProfiles(profile => profile == retired));
+#endif
     }
 
     [Fact]

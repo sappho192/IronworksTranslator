@@ -12,5 +12,8 @@ namespace IronworksTranslator.Models.Enums
 
         [Description("MiLMMT 12B")]
         MiLMMT_12B,
+
+        [Description("MiLMMT 1B Compact (Debug)")]
+        MiLMMT_1B_Compact,
     }
 }
