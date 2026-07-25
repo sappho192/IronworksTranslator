@@ -170,7 +170,7 @@ namespace IronworksTranslator.Services.FFXIV
                     return;
                 }
 
-                ChatQueue.EnqueueDialogue(talk.Text);
+                ChatQueue.EnqueueDialogue(new DialogueEntry(talk.Name, talk.Text));
                 Log.Debug(
                     "Enqueued Talk observation. Source: {TalkSource}, Visible: {IsVisible}, " +
                     "Speaker length: {SpeakerLength}, Text length: {TextLength}",

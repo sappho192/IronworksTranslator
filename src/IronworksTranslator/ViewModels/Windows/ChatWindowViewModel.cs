@@ -241,9 +241,10 @@ namespace IronworksTranslator.ViewModels.Windows
                             author,
                             MiLMMTTranslationKind.Dialogue,
                             chatCancellation.Token);
+                    DialogueEntry? dialogueEntry = CreateDialogueEntry(text);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        App.GetService<DialogueWindow>().PushDialogueTextBox(text.TranslatedText);
+                        App.GetService<DialogueWindow>().PushDialogueTextBox(dialogueEntry);
                     });
                 }
             }
@@ -514,6 +515,15 @@ namespace IronworksTranslator.ViewModels.Windows
                 Author = author,
                 TranslatedText = translatedText,
             };
+        }
+
+        internal static DialogueEntry? CreateDialogueEntry(TranslationText translation)
+        {
+            ArgumentNullException.ThrowIfNull(translation);
+
+            return translation.TranslatedText is string translatedText
+                ? new DialogueEntry(translation.Author, translatedText)
+                : null;
         }
 
         private static void InvokeOnUiThread(Action action)

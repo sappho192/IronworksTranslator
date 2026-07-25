@@ -9,30 +9,38 @@ public class ChatQueueTests
     public ChatQueueTests()
     {
         ChatQueue.q = new BlockingCollection<ChatLogItem>(new ConcurrentQueue<ChatLogItem>(), boundedCapacity: 1000);
-        ChatQueue.rq = new ConcurrentQueue<string>();
-        ChatQueue.LastMsg = string.Empty;
+        ChatQueue.rq = new ConcurrentQueue<DialogueEntry>();
     }
 
     [Fact]
-    public void EnqueueDialogueIfNew_AddsFirstMessageAndUpdatesLastMessage()
+    public void EnqueueDialogue_PreservesSpeakerAndText()
     {
-        var added = ChatQueue.EnqueueDialogueIfNew("First message");
+        ChatQueue.EnqueueDialogue(new DialogueEntry("Alphinaud", "First message"));
 
-        Assert.True(added);
-        Assert.Equal("First message", ChatQueue.LastMsg);
-        Assert.True(ChatQueue.rq.TryDequeue(out var queued));
-        Assert.Equal("First message", queued);
+        Assert.True(ChatQueue.TryDequeueDialogue(out var queued));
+        Assert.NotNull(queued);
+        Assert.Equal("Alphinaud", queued.Speaker);
+        Assert.Equal("First message", queued.Text);
     }
 
     [Fact]
-    public void EnqueueDialogueIfNew_SkipsDuplicateLastMessage()
+    public void EnqueueDialogue_PreservesSameTextFromDifferentSpeakers()
     {
-        ChatQueue.EnqueueDialogue("Same");
+        ChatQueue.EnqueueDialogue(new DialogueEntry("Alphinaud", "Same"));
+        ChatQueue.EnqueueDialogue(new DialogueEntry("Tataru", "Same"));
 
-        var added = ChatQueue.EnqueueDialogueIfNew("Same");
+        Assert.True(ChatQueue.TryDequeueDialogue(out var first));
+        Assert.True(ChatQueue.TryDequeueDialogue(out var second));
+        Assert.NotNull(first);
+        Assert.NotNull(second);
+        Assert.Equal("Alphinaud", first.Speaker);
+        Assert.Equal("Tataru", second.Speaker);
+    }
 
-        Assert.False(added);
-        Assert.Single(ChatQueue.rq);
+    [Fact]
+    public void EnqueueDialogue_RejectsNullEntry()
+    {
+        Assert.Throws<ArgumentNullException>(() => ChatQueue.EnqueueDialogue(null!));
     }
 
     [Fact]
@@ -40,12 +48,12 @@ public class ChatQueueTests
     {
         for (var i = 0; i < 105; i++)
         {
-            ChatQueue.EnqueueDialogue($"Message {i}");
+            ChatQueue.EnqueueDialogue(new DialogueEntry($"Speaker {i}", $"Message {i}"));
         }
 
         Assert.Equal(100, ChatQueue.rq.Count);
         Assert.True(ChatQueue.rq.TryPeek(out var firstRemaining));
-        Assert.Equal("Message 5", firstRemaining);
-        Assert.Equal("Message 104", ChatQueue.LastMsg);
+        Assert.Equal("Speaker 5", firstRemaining.Speaker);
+        Assert.Equal("Message 5", firstRemaining.Text);
     }
 }

@@ -568,20 +568,33 @@ FallbackReason
 
 ### Phase 3: Typed dialogue pipeline
 
-- [ ] `DialogueEntry` 모델 추가
+상태: **코드 구현 및 자동 검증 완료, UI/live gate 대기**
+
+- [x] `DialogueEntry` 모델 추가
 - [x] `TalkObservationTracker` 추가 및 Phase 2 baseline/reconnect 단위 테스트
-- [ ] dialogue queue를 typed entry로 변경
-- [ ] `LastMsg` 중복 상태 제거
-- [ ] DialogueWindow가 entry text를 번역하도록 변경
-- [ ] DialogueWindow에 `Speaker: Text` 형식으로 표시
-- [ ] ChatMessage 경로의 author를 speaker로 전달
-- [ ] queue와 tracker 단위 테스트 추가
+- [x] dialogue queue를 typed entry로 변경
+- [x] `LastMsg` 중복 상태 제거
+- [x] DialogueWindow가 entry text만 번역하도록 변경
+- [x] DialogueWindow에 `Speaker: Text` 형식으로 표시
+- [x] ChatMessage 경로의 author를 speaker로 전달
+- [x] queue, tracker 및 표시 formatter 단위 테스트 추가
+
+구현 검증:
+
+- Debug build 경고 0개, 오류 0개
+- unit test 138개 통과
+- typed queue의 100개 capacity와 FIFO trim 유지 확인
+- 동일 text의 다른 speaker가 별도 entry로 보존됨을 확인
+- speaker가 없으면 번역문만, 있으면 `Speaker: Text`가 됨을 확인
+- ChatMessage `TranslationText.Author`가 `DialogueEntry.Speaker`로 전달됨을 확인
 
 완료 조건:
 
-- 이름과 text가 pipeline 끝까지 분리되어 보존된다.
-- 중복 판정이 한 곳에서 수행된다.
-- queue capacity와 처리 순서가 유지된다.
+- [x] 이름과 text가 pipeline 끝까지 분리되어 보존된다.
+- [x] 중복 판정이 `TalkObservationTracker` 한 곳에서 수행된다.
+- [x] queue capacity와 처리 순서가 유지된다.
+- [ ] 실제 WPF DialogueWindow와 게임에서 speaker 표시 및 번역 순서를 확인한다.
+  이 항목은 Phase 5 release gate다.
 
 ### Phase 4: Legacy 정리
 
