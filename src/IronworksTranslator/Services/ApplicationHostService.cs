@@ -3,8 +3,6 @@ using IronworksTranslator.Utils;
 using IronworksTranslator.Views.Windows;
 using Microsoft.Extensions.Hosting;
 using Wpf.Ui;
-using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization;
 using System.IO;
 using Serilog;
 using IronworksTranslator.Models.Enums;
@@ -44,14 +42,7 @@ namespace IronworksTranslator.Services
             }
             else
             {
-                var deserializer = new DeserializerBuilder()
-                                    .WithNamingConvention(UnderscoredNamingConvention.Instance)
-                                    .IgnoreUnmatchedProperties()
-                                    .Build();
-                var settingsYaml = IronworksSettings.NormalizeLegacySettingsYaml(File.ReadAllText(settingsPath));
-                var settings = deserializer.Deserialize<IronworksSettings>(
-                    settingsYaml
-                );
+                var settings = IronworksSettings.DeserializeSettings(File.ReadAllText(settingsPath));
                 IronworksSettings.Instance = settings;
                 if (IronworksSettings.IsSettingsFileInValid(settings))
                 {

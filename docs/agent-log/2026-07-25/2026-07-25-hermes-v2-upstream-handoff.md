@@ -188,3 +188,17 @@ release readiness를 대신하지 않는다. 다음 항목은 앱에서 별도�
 통합 중 upstream API 또는 runtime 결함을 발견하면 consumer workaround를 먼저 고정하지 말고
 Hermes 계약 또는 Sharlayan API 책임인지 분리해 해당 저장소에서 수정·검증한 뒤 package
 version을 갱신한다.
+
+## 2026-07-26 consumer 구현 상태
+
+IronworksTranslator Phase 2~4의 코드 구현과 자동 검증이 완료됐다.
+
+- Sharlayan.Lite `9.1.4` current-first Talk API 전환
+- source-aware baseline 및 reconnect tracker
+- typed dialogue queue와 `Speaker: Text` 표시
+- `HermesAddress`, local `address.json`, `UseInternalAddress` 및 Hermes v1 cache migration 제거
+- legacy `use_internal_address: true/false` YAML load 및 재직렬화 회귀 테스트
+
+이 상태는 앱의 release readiness를 의미하지 않는다. packaged app의 remote/cache/embedded,
+실제 게임 CHATLOG/Talk, WPF 표시, process 종료·재연결 및 app shutdown은 Phase 5 gate로
+남아 있다.

@@ -34,9 +34,9 @@ Hermes v2 schema는 ffxiv-hermes 문서가, runtime API와 fallback 동작은 Sh
 - `LastTalkText`만으로 현재 대화창의 open 및 closed 상태를 추측하지 않는다.
 - 번역 엔진, CHATLOG channel filtering 또는 Velopack update 구조를 변경하지 않는다.
 
-## 4. 현재 상태
+## 4. 마이그레이션 전 상태
 
-현재 NPC 대화 경로:
+마이그레이션 전 NPC 대화 경로:
 
 1. `HermesAddress.GetLatestAddress()`가 동기 HTTP로 legacy JSON을 다운로드한다.
 2. `ChatLookupService.AttachGame()`이 `ALLMESSAGES` signature를 직접 추가한다.
@@ -58,7 +58,7 @@ src/IronworksTranslator/Utils/AppPaths.cs
 tests/IronworksTranslator.Tests/Models/ChatQueueTests.cs
 ```
 
-현재 위험:
+마이그레이션 전 위험:
 
 - app attach가 동기 네트워크 요청에 의존한다.
 - HTTP status, timeout, response 크기 및 schema를 검증하지 않는다.
@@ -598,20 +598,40 @@ FallbackReason
 
 ### Phase 4: Legacy 정리
 
-- [ ] `HermesAddress.cs` 삭제
-- [ ] `UseInternalAddress` property와 runtime 분기 제거
-- [ ] 기존 YAML의 `use_internal_address`를 값 mapping 없이 안전하게 무시 또는 제거
-- [ ] local `address.json` 경로 제거
-- [ ] legacy cache migration에서 불필요한 address 파일 처리 검토
-- [ ] 사용되지 않는 using과 dependency 제거
-- [ ] 관련 로그와 문서 갱신
+상태: **코드 구현 및 자동 검증 완료, publish gate 대기**
+
+- [x] `HermesAddress.cs` 삭제
+- [x] `UseInternalAddress` property와 runtime 분기 제거
+- [x] 기존 YAML의 `use_internal_address`를 값 mapping 없이 안전하게 무시
+- [x] local `address.json` 경로 제거
+- [x] legacy cache migration에서 불필요한 address 파일 처리 검토
+- [x] 사용되지 않는 localization key, using 및 legacy cache migration 제거
+- [x] 관련 로그와 문서 갱신
+
+legacy cache migration 검토 결과:
+
+- 기존 migration은 `address.json`을 복사하지 않았고 Hermes v1의 `actions-*`,
+  `signatures-*`, `statuses-*`, `structures-*`, `zones-*` JSON만 복사했다.
+- Hermes v2는 해당 파일을 사용하지 않으므로 migration 호출과 구현을 제거했다.
+- 사용자 디렉터리의 legacy JSON 또는 local `address.json`을 삭제하지는 않는다.
+
+구현 검증:
+
+- Debug build 경고 0개, 오류 0개
+- unit test 141개 통과
+- `use_internal_address: true`와 `false` settings YAML 모두 역직렬화 통과
+- 두 legacy 값 모두 다른 resource mode로 mapping되지 않으며 재직렬화 결과에서
+  `use_internal_address`가 사라짐
+- production source와 resource에서 `HermesAddress`, `UseInternalAddress`,
+  `latest/address.json`, local `address.json` 참조가 없음
 
 완료 조건:
 
-- source와 publish 산출물에 legacy Hermes consumer가 없다.
-- 기존 settings.yaml을 안전하게 읽을 수 있다.
-- `use_internal_address` 값이 resource mode 선택에 영향을 주지 않는다.
-- 앱은 `latest/address.json`을 요청하지 않는다.
+- [x] source에 legacy Hermes consumer가 없다.
+- [ ] publish 산출물에 legacy Hermes consumer가 없는지 Phase 5에서 확인한다.
+- [x] 기존 settings.yaml을 안전하게 읽을 수 있다.
+- [x] `use_internal_address` 값이 resource mode 선택에 영향을 주지 않는다.
+- [x] 앱 runtime source는 `latest/address.json`을 요청하지 않는다.
 
 ### Phase 5: Release 검증
 

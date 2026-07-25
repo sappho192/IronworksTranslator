@@ -70,8 +70,7 @@ namespace IronworksTranslator.Models.Settings
                     LocalModelDevicePriorityUserSelected = false,
                     DialogueTranslationMethod = DialogueTranslationMethod.MemorySearch,
                     DeeplApiKeys = [],
-                    DeeplAutoSourceLanguage = false,
-                    UseInternalAddress = false
+                    DeeplAutoSourceLanguage = false
                 },
                 ChannelSettings = new ChannelSettings
                 {
@@ -83,12 +82,29 @@ namespace IronworksTranslator.Models.Settings
 
         public static void UpdateSettingsFile(IronworksSettings settings)
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(AppPaths.SettingsFilePath)!);
+            File.WriteAllText(AppPaths.SettingsFilePath, SerializeSettings(settings));
+        }
+
+        internal static IronworksSettings DeserializeSettings(string settingsYaml)
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .IgnoreUnmatchedProperties()
+                .Build();
+
+            return deserializer.Deserialize<IronworksSettings>(
+                NormalizeLegacySettingsYaml(settingsYaml));
+        }
+
+        internal static string SerializeSettings(IronworksSettings settings)
+        {
             var serializer = new SerializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .WithTypeInspector(inspector => new SettingsTypeInspector(inspector))
                 .Build();
-            Directory.CreateDirectory(Path.GetDirectoryName(AppPaths.SettingsFilePath)!);
-            File.WriteAllText(AppPaths.SettingsFilePath, serializer.Serialize(settings));
+
+            return serializer.Serialize(settings);
         }
 
         public static bool IsSettingsFileInValid(IronworksSettings settings)

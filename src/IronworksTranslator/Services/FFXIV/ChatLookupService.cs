@@ -194,7 +194,6 @@ namespace IronworksTranslator.Services.FFXIV
         public void AttachGame()
         {
             string processName = "ffxiv_dx11";
-            AppPaths.MigrateLegacySharlayanCache();
 
             // ko client filtering
             var processes = Process.GetProcessesByName(processName).Where(x => { try { return System.IO.File.Exists(x.MainModule.FileName.Replace("game\\ffxiv_dx11.exe", "boot\\ffxivboot.exe")); } catch { return false; } }).ToArray();

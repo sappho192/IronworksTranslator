@@ -225,6 +225,36 @@ public class SettingsTests
     }
 
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void DeserializeSettings_IgnoresRemovedUseInternalAddressAndDoesNotReserializeIt(bool legacyValue)
+    {
+        var yaml = $$"""
+            ui_settings:
+              is_tos_displayed: false
+            chat_ui_settings:
+              font: KoPubWorld Dotum
+            translator_settings:
+              translator_engine: Papago
+              use_internal_address: {{legacyValue.ToString().ToLowerInvariant()}}
+            channel_settings:
+              preset_name: Default
+            """;
+
+        var settings = IronworksSettings.DeserializeSettings(yaml);
+        var serialized = IronworksSettings.SerializeSettings(settings);
+
+        Assert.Equal(TranslatorEngine.Papago, settings.TranslatorSettings!.TranslatorEngine);
+        Assert.DoesNotContain("use_internal_address", serialized, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void TranslatorSettings_DoesNotExposeRemovedUseInternalAddressProperty()
+    {
+        Assert.Null(typeof(TranslatorSettings).GetProperty("UseInternalAddress"));
+    }
+
+    [Theory]
     [InlineData(2)]
     [InlineData(3)]
     public void NormalizeSettings_MigratesLegacyJaKoAndMiLMMTNumericValues(int legacyValue)

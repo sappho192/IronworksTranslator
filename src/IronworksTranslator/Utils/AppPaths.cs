@@ -71,44 +71,11 @@ namespace IronworksTranslator.Utils
         {
             EnsureDirectories();
 
-            MigrateLegacySharlayanCache();
-
             foreach (var baseDirectory in GetLegacyBaseDirectories())
             {
                 MigrateLegacyFile(Path.Combine(baseDirectory, "settings.yaml"), SettingsFilePath);
                 MigrateLegacyMiLMMTModels(baseDirectory);
             }
-        }
-
-        public static void MigrateLegacySharlayanCache()
-        {
-            EnsureDirectories();
-
-            foreach (var baseDirectory in GetLegacyBaseDirectories())
-            {
-                MigrateLegacySharlayanCacheFrom(baseDirectory);
-            }
-        }
-
-        private static void MigrateLegacySharlayanCacheFrom(string baseDirectory)
-        {
-            foreach (var filePath in Directory.EnumerateFiles(baseDirectory, "*.json", SearchOption.TopDirectoryOnly)
-                .Where(IsSharlayanCacheFile))
-            {
-                MigrateLegacyFile(
-                    filePath,
-                    Path.Combine(SharlayanCacheDirectory, Path.GetFileName(filePath)));
-            }
-        }
-
-        private static bool IsSharlayanCacheFile(string filePath)
-        {
-            var fileName = Path.GetFileName(filePath);
-            return fileName.StartsWith("actions-", StringComparison.OrdinalIgnoreCase)
-                || fileName.StartsWith("signatures-", StringComparison.OrdinalIgnoreCase)
-                || fileName.StartsWith("statuses-", StringComparison.OrdinalIgnoreCase)
-                || fileName.StartsWith("structures-", StringComparison.OrdinalIgnoreCase)
-                || fileName.StartsWith("zones-", StringComparison.OrdinalIgnoreCase);
         }
 
         private static void MigrateLegacyMiLMMTModels(string baseDirectory)
