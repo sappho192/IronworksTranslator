@@ -343,6 +343,11 @@ namespace IronworksTranslator.Views.Pages
         {
             if (!_isInitialized || _isChangingTranslatorSelection) return;
 
+            if (sender is ComboBox { Name: nameof(cbMiLMMTModelSize) })
+            {
+                TrySelectDownloadedMiLMMTProfileForSelectedSize();
+            }
+
             UpdateMiLMMTProfileSummary();
             if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.MiLLMT)
             {
@@ -618,6 +623,11 @@ namespace IronworksTranslator.Views.Pages
 
         private bool TrySelectAvailableMiLMMTProfile()
         {
+            if (TrySelectDownloadedMiLMMTProfileForSelectedSize())
+            {
+                return true;
+            }
+
             var lastProfile = MiLMMTModelProfiles.Get(
                 _lastAvailableMiLMMTModelSize,
                 _lastAvailableMiLMMTQuantization);
@@ -632,6 +642,27 @@ namespace IronworksTranslator.Views.Pages
             if (downloadedProfile == null)
             {
                 return false;
+            }
+
+            SelectMiLMMTProfile(downloadedProfile);
+            return true;
+        }
+
+        private bool TrySelectDownloadedMiLMMTProfileForSelectedSize()
+        {
+            var downloadedProfile = MiLMMTModelProfiles.FindPreferredAvailableProfile(
+                ViewModel.MiLMMTModelSize,
+                ViewModel.MiLMMTQuantization,
+                profile => File.Exists(profile.FilePath));
+            if (downloadedProfile == null)
+            {
+                return false;
+            }
+
+            if (downloadedProfile.Size == ViewModel.MiLMMTModelSize
+                && downloadedProfile.Quantization == ViewModel.MiLMMTQuantization)
+            {
+                return true;
             }
 
             SelectMiLMMTProfile(downloadedProfile);

@@ -95,6 +95,21 @@ namespace IronworksTranslator.Models.Translator
             return Profiles.First(profile => profile.Size == size).Quantization;
         }
 
+        public static MiLMMTModelProfile? FindPreferredAvailableProfile(
+            MiLMMTModelSize size,
+            MiLMMTQuantization preferredQuantization,
+            Func<MiLMMTModelProfile, bool> isAvailable)
+        {
+            ArgumentNullException.ThrowIfNull(isAvailable);
+
+            var defaultQuantization = GetDefaultQuantization(size);
+            return Profiles
+                .Where(profile => profile.Size == size)
+                .OrderBy(profile => profile.Quantization == preferredQuantization ? 0 : 1)
+                .ThenBy(profile => profile.Quantization == defaultQuantization ? 0 : 1)
+                .FirstOrDefault(isAvailable);
+        }
+
         public static MiLMMTModelProfile GetCurrent()
         {
             var settings = Models.Settings.IronworksSettings.Instance?.TranslatorSettings;

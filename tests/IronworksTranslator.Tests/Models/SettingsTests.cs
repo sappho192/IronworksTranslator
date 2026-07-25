@@ -58,6 +58,36 @@ public class SettingsTests
     }
 
     [Fact]
+    public void MiLMMTModelProfiles_PreferredAvailableProfile_UsesDownloadedFallbackForSelectedSize()
+    {
+        var expected = MiLMMTModelProfiles.Get(
+            MiLMMTModelSize.MiLLMT_4B,
+            MiLMMTQuantization.Q4_K_M);
+
+        var selected = MiLMMTModelProfiles.FindPreferredAvailableProfile(
+            MiLMMTModelSize.MiLLMT_4B,
+            MiLMMTQuantization.Q8_0,
+            profile => profile == expected);
+
+        Assert.Equal(expected, selected);
+    }
+
+    [Fact]
+    public void MiLMMTModelProfiles_PreferredAvailableProfile_PreservesAvailablePreferredQuantization()
+    {
+        var expected = MiLMMTModelProfiles.Get(
+            MiLMMTModelSize.MiLLMT_4B,
+            MiLMMTQuantization.Q8_0);
+
+        var selected = MiLMMTModelProfiles.FindPreferredAvailableProfile(
+            MiLMMTModelSize.MiLLMT_4B,
+            MiLMMTQuantization.Q8_0,
+            profile => profile.Quantization is MiLMMTQuantization.Q4_K_M or MiLMMTQuantization.Q8_0);
+
+        Assert.Equal(expected, selected);
+    }
+
+    [Fact]
     public void NormalizeLegacySettingsYaml_ReplacesRemovedJaKoEngine()
     {
         var yaml = """
