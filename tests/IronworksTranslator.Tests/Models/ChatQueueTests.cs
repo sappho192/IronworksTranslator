@@ -24,6 +24,17 @@ public class ChatQueueTests
     }
 
     [Fact]
+    public void EnqueueDialogue_NormalizesNullSpeaker()
+    {
+        ChatQueue.EnqueueDialogue(new DialogueEntry(null, "Narration"));
+
+        Assert.True(ChatQueue.TryDequeueDialogue(out var queued));
+        Assert.NotNull(queued);
+        Assert.Equal(string.Empty, queued.Speaker);
+        Assert.Equal("Narration", queued.Text);
+    }
+
+    [Fact]
     public void EnqueueDialogue_PreservesSameTextFromDifferentSpeakers()
     {
         ChatQueue.EnqueueDialogue(new DialogueEntry("Alphinaud", "Same"));

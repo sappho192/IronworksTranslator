@@ -170,14 +170,15 @@ namespace IronworksTranslator.Services.FFXIV
                     return;
                 }
 
-                ChatQueue.EnqueueDialogue(new DialogueEntry(talk.Name, talk.Text));
+                var dialogueEntry = new DialogueEntry(talk.Name, talk.Text);
+                ChatQueue.EnqueueDialogue(dialogueEntry);
                 Log.Debug(
                     "Enqueued Talk observation. Source: {TalkSource}, Visible: {IsVisible}, " +
                     "Speaker length: {SpeakerLength}, Text length: {TextLength}",
                     talk.Source,
                     talk.IsVisible,
-                    talk.Name.Length,
-                    talk.Text.Length);
+                    dialogueEntry.Speaker.Length,
+                    dialogueEntry.Text.Length);
             }
             catch (System.ComponentModel.Win32Exception)
             {
