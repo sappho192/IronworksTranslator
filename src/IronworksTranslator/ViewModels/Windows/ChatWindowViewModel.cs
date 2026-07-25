@@ -575,7 +575,7 @@ namespace IronworksTranslator.ViewModels.Windows
             menuItemDeepLAPI.Click += DeepLRetranslate_Click;
             var menuItemMiLMMT = new MenuItem
             {
-                Header = "MiLLMT",
+                Header = "MiLMMT",
                 Tag = translationParagraph
             };
             menuItemMiLMMT.Click += MiLMMTRetranslate_Click;
@@ -677,7 +677,7 @@ namespace IronworksTranslator.ViewModels.Windows
             menuItemDeepLAPI.Click += DeepLRetranslate_Click;
             var menuItemMiLMMT = new MenuItem
             {
-                Header = "MiLLMT",
+                Header = "MiLMMT",
                 Tag = translationParagraph
             };
             menuItemMiLMMT.Click += MiLMMTRetranslate_Click;
@@ -749,7 +749,7 @@ namespace IronworksTranslator.ViewModels.Windows
             if (((MenuItem)sender).Tag is TranslationParagraph tParagraph)
             {
                 var tText = tParagraph.Text;
-                var api = TranslatorEngine.MiLLMT;
+                var api = TranslatorEngine.MiLMMT;
                 ReplaceTextInParagraph(tParagraph.Paragraph, ReTranslate(tText, api));
             }
         }
@@ -775,7 +775,7 @@ namespace IronworksTranslator.ViewModels.Windows
                             (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
                         );
                     break;
-                case TranslatorEngine.MiLLMT:
+                case TranslatorEngine.MiLMMT:
                     result = App.GetService<MiLMMTTranslator>().Translate(
                             input,
                             (TranslationLanguageCode)channelLanguage,
@@ -812,7 +812,7 @@ namespace IronworksTranslator.ViewModels.Windows
                     input,
                     sourceLanguage,
                     targetLanguage),
-                TranslatorEngine.MiLLMT => await App.GetService<MiLMMTTranslator>().TranslateAsync(
+                TranslatorEngine.MiLMMT => await App.GetService<MiLMMTTranslator>().TranslateAsync(
                     input,
                     sourceLanguage,
                     targetLanguage,

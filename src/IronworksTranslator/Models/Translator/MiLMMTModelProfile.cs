@@ -17,9 +17,9 @@ namespace IronworksTranslator.Models.Translator
         public string DisplayName => $"{SizeLabel} {Quantization}";
         public string SizeLabel => Size switch
         {
-            MiLMMTModelSize.MiLLMT_1B => "MiLLMT 1B",
-            MiLMMTModelSize.MiLLMT_4B => "MiLLMT 4B",
-            MiLMMTModelSize.MiLLMT_12B => "MiLLMT 12B",
+            MiLMMTModelSize.MiLMMT_1B => "MiLMMT 1B",
+            MiLMMTModelSize.MiLMMT_4B => "MiLMMT 4B",
+            MiLMMTModelSize.MiLMMT_12B => "MiLMMT 12B",
             _ => Size.ToString(),
         };
         public string DirectoryPath => AppPaths.GetMiLMMTModelDirectory(Size);
@@ -32,7 +32,7 @@ namespace IronworksTranslator.Models.Translator
         private static readonly MiLMMTModelProfile[] Profiles =
         [
             new(
-                MiLMMTModelSize.MiLLMT_1B,
+                MiLMMTModelSize.MiLMMT_1B,
                 MiLMMTQuantization.Q4_K_M,
                 "mradermacher/MiLMMT-46-1B-v0.1-GGUF",
                 "MiLMMT-46-1B-v0.1.Q4_K_M.gguf",
@@ -41,7 +41,7 @@ namespace IronworksTranslator.Models.Translator
                 1.4,
                 "settings.translator.engine.milmmt.note.1b.q4"),
             new(
-                MiLMMTModelSize.MiLLMT_1B,
+                MiLMMTModelSize.MiLMMT_1B,
                 MiLMMTQuantization.Q8_0,
                 "mradermacher/MiLMMT-46-1B-v0.1-GGUF",
                 "MiLMMT-46-1B-v0.1.Q8_0.gguf",
@@ -50,7 +50,7 @@ namespace IronworksTranslator.Models.Translator
                 1.8,
                 "settings.translator.engine.milmmt.note.1b.q8"),
             new(
-                MiLMMTModelSize.MiLLMT_4B,
+                MiLMMTModelSize.MiLMMT_4B,
                 MiLMMTQuantization.Q4_K_M,
                 "mradermacher/MiLMMT-46-4B-v0.1-GGUF",
                 "MiLMMT-46-4B-v0.1.Q4_K_M.gguf",
@@ -59,7 +59,7 @@ namespace IronworksTranslator.Models.Translator
                 3.5,
                 "settings.translator.engine.milmmt.note.4b.q4"),
             new(
-                MiLMMTModelSize.MiLLMT_4B,
+                MiLMMTModelSize.MiLMMT_4B,
                 MiLMMTQuantization.Q8_0,
                 "mradermacher/MiLMMT-46-4B-v0.1-GGUF",
                 "MiLMMT-46-4B-v0.1.Q8_0.gguf",
@@ -68,7 +68,7 @@ namespace IronworksTranslator.Models.Translator
                 5.8,
                 "settings.translator.engine.milmmt.note.4b.q8"),
             new(
-                MiLMMTModelSize.MiLLMT_12B,
+                MiLMMTModelSize.MiLMMT_12B,
                 MiLMMTQuantization.Q4_K_M,
                 "mradermacher/MiLMMT-46-12B-v0.1-GGUF",
                 "MiLMMT-46-12B-v0.1.Q4_K_M.gguf",
@@ -113,7 +113,7 @@ namespace IronworksTranslator.Models.Translator
         public static MiLMMTModelProfile GetCurrent()
         {
             var settings = Models.Settings.IronworksSettings.Instance?.TranslatorSettings;
-            var size = settings?.MiLMMTModelSize ?? MiLMMTModelSize.MiLLMT_1B;
+            var size = settings?.MiLMMTModelSize ?? MiLMMTModelSize.MiLMMT_1B;
             var quantization = settings?.MiLMMTQuantization ?? MiLMMTQuantization.Q8_0;
             if (!IsSupported(size, quantization))
             {

@@ -36,7 +36,7 @@ The script:
 2. Restores packages.
 3. Builds Release with GitVersion and the selected release channel.
 4. Reads `src\IronworksTranslator\obj\gitversion.json`.
-5. Publishes the framework-dependent `win-x64` app, launcher, and MiLLMT native probe to `publish\IronworksTranslator ({PACKAGE_VERSION})`.
+5. Publishes the framework-dependent `win-x64` app, launcher, and MiLMMT native probe to `publish\IronworksTranslator ({PACKAGE_VERSION})`.
 6. Runs `vpk pack` and writes Stable Velopack assets to `Releases` or Beta assets to `Releases\beta`.
 
 Velopack settings used by the script:
@@ -107,7 +107,7 @@ After publishing, verify the executable version:
 (Get-Item "publish\IronworksTranslator (1.2.1-beta.1)\IronworksTranslator.Launcher.exe").VersionInfo.FileVersion
 ```
 
-For MiLLMT runtime-pack releases, also verify that the publish directory contains
+For MiLMMT runtime-pack releases, also verify that the publish directory contains
 `IronworksMiLMMTNativeProbe.exe`, `LICENSES\llama.cpp-MIT.txt`, and the separate
 `runtimes\win-x64\native\milmmt-cuda` and `milmmt-vulkan` directories. Run the
 bundled verifier before packaging, then run the probe against each published `llama.dll`

@@ -24,7 +24,7 @@ public class SettingsTests
         Assert.Equal(400, settings.UiSettings.ChatWindowWidth);
         Assert.Equal(200, settings.UiSettings.ChatWindowHeight);
         Assert.Equal(TranslatorEngine.Papago, settings.TranslatorSettings!.TranslatorEngine);
-        Assert.Equal(MiLMMTModelSize.MiLLMT_1B, settings.TranslatorSettings.MiLMMTModelSize);
+        Assert.Equal(MiLMMTModelSize.MiLMMT_1B, settings.TranslatorSettings.MiLMMTModelSize);
         Assert.Equal(MiLMMTQuantization.Q8_0, settings.TranslatorSettings.MiLMMTQuantization);
     }
 
@@ -46,11 +46,11 @@ public class SettingsTests
     [Fact]
     public void MiLMMTModelProfiles_ResolveSupportedProfilesAndFallbackQuantization()
     {
-        Assert.True(MiLMMTModelProfiles.IsSupported(MiLMMTModelSize.MiLLMT_1B, MiLMMTQuantization.Q8_0));
-        Assert.False(MiLMMTModelProfiles.IsSupported(MiLMMTModelSize.MiLLMT_12B, MiLMMTQuantization.Q8_0));
+        Assert.True(MiLMMTModelProfiles.IsSupported(MiLMMTModelSize.MiLMMT_1B, MiLMMTQuantization.Q8_0));
+        Assert.False(MiLMMTModelProfiles.IsSupported(MiLMMTModelSize.MiLMMT_12B, MiLMMTQuantization.Q8_0));
 
-        var fallback = MiLMMTModelProfiles.GetDefaultQuantization(MiLMMTModelSize.MiLLMT_12B);
-        var profile = MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLLMT_12B, fallback);
+        var fallback = MiLMMTModelProfiles.GetDefaultQuantization(MiLMMTModelSize.MiLMMT_12B);
+        var profile = MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_12B, fallback);
 
         Assert.Equal(MiLMMTQuantization.Q4_K_M, fallback);
         Assert.Contains("huggingface.co", profile.DownloadUrl);
@@ -61,11 +61,11 @@ public class SettingsTests
     public void MiLMMTModelProfiles_PreferredAvailableProfile_UsesDownloadedFallbackForSelectedSize()
     {
         var expected = MiLMMTModelProfiles.Get(
-            MiLMMTModelSize.MiLLMT_4B,
+            MiLMMTModelSize.MiLMMT_4B,
             MiLMMTQuantization.Q4_K_M);
 
         var selected = MiLMMTModelProfiles.FindPreferredAvailableProfile(
-            MiLMMTModelSize.MiLLMT_4B,
+            MiLMMTModelSize.MiLMMT_4B,
             MiLMMTQuantization.Q8_0,
             profile => profile == expected);
 
@@ -76,11 +76,11 @@ public class SettingsTests
     public void MiLMMTModelProfiles_PreferredAvailableProfile_PreservesAvailablePreferredQuantization()
     {
         var expected = MiLMMTModelProfiles.Get(
-            MiLMMTModelSize.MiLLMT_4B,
+            MiLMMTModelSize.MiLMMT_4B,
             MiLMMTQuantization.Q8_0);
 
         var selected = MiLMMTModelProfiles.FindPreferredAvailableProfile(
-            MiLMMTModelSize.MiLLMT_4B,
+            MiLMMTModelSize.MiLMMT_4B,
             MiLMMTQuantization.Q8_0,
             profile => profile.Quantization is MiLMMTQuantization.Q4_K_M or MiLMMTQuantization.Q8_0);
 
@@ -97,8 +97,24 @@ public class SettingsTests
 
         var normalized = IronworksSettings.NormalizeLegacySettingsYaml(yaml);
 
-        Assert.Contains("translator_engine: MiLLMT", normalized);
+        Assert.Contains("translator_engine: MiLMMT", normalized);
         Assert.DoesNotContain("Ironworks_Ja_Ko", normalized);
+    }
+
+    [Fact]
+    public void NormalizeLegacySettingsYaml_CorrectsMiLLMTEnumNames()
+    {
+        var yaml = """
+            translator_settings:
+              translator_engine: MiLLMT
+              milmmt_model_size: MiLLMT_4B
+            """;
+
+        var normalized = IronworksSettings.NormalizeLegacySettingsYaml(yaml);
+
+        Assert.Contains("translator_engine: MiLMMT", normalized);
+        Assert.Contains("milmmt_model_size: MiLMMT_4B", normalized);
+        Assert.DoesNotContain("MiLLMT", normalized);
     }
 
     [Fact]
@@ -135,7 +151,7 @@ public class SettingsTests
 
         IronworksSettings.NormalizeSettings(settings);
 
-        Assert.Equal(TranslatorEngine.MiLLMT, settings.TranslatorSettings.TranslatorEngine);
+        Assert.Equal(TranslatorEngine.MiLMMT, settings.TranslatorSettings.TranslatorEngine);
     }
 
     [Theory]
@@ -183,11 +199,11 @@ public class SettingsTests
         {
             TranslatorEngine.Papago,
             TranslatorEngine.DeepL_API,
-            TranslatorEngine.MiLLMT,
+            TranslatorEngine.MiLMMT,
         };
 
         Assert.Equal(expectedEngines, engines);
         Assert.DoesNotContain("Ironworks_Ja_Ko", Enum.GetNames<TranslatorEngine>());
-        Assert.Equal(2, (int)TranslatorEngine.MiLLMT);
+        Assert.Equal(2, (int)TranslatorEngine.MiLMMT);
     }
 }

@@ -58,7 +58,7 @@ namespace IronworksTranslator.Utils.Translator
             {
                 LocalModelDevicePriority.Cuda => "milmmt-cuda",
                 LocalModelDevicePriority.Vulkan => "milmmt-vulkan",
-                _ => throw new ArgumentOutOfRangeException(nameof(devicePriority), devicePriority, "CPU has no custom MiLLMT runtime pack.")
+                _ => throw new ArgumentOutOfRangeException(nameof(devicePriority), devicePriority, "CPU has no custom MiLMMT runtime pack.")
             };
 
             return Path.Combine(
@@ -76,7 +76,7 @@ namespace IronworksTranslator.Utils.Translator
             if (!File.Exists(llamaPath))
             {
                 Log.Warning(
-                    "MiLLMT {DevicePriority} runtime pack is missing: {LlamaPath}",
+                    "MiLMMT {DevicePriority} runtime pack is missing: {LlamaPath}",
                     devicePriority,
                     llamaPath);
                 return false;
@@ -85,7 +85,7 @@ namespace IronworksTranslator.Utils.Translator
             var probePath = Path.Combine(AppContext.BaseDirectory, ProbeExeName);
             if (!File.Exists(probePath))
             {
-                Log.Warning("MiLLMT native probe executable is missing: {ProbePath}", probePath);
+                Log.Warning("MiLMMT native probe executable is missing: {ProbePath}", probePath);
                 return false;
             }
 
@@ -108,7 +108,7 @@ namespace IronworksTranslator.Utils.Translator
                 using var process = Process.Start(startInfo);
                 if (process == null)
                 {
-                    Log.Warning("Failed to start the MiLLMT {DevicePriority} native probe.", devicePriority);
+                    Log.Warning("Failed to start the MiLMMT {DevicePriority} native probe.", devicePriority);
                     return false;
                 }
 
@@ -119,7 +119,7 @@ namespace IronworksTranslator.Utils.Translator
                     process.Kill(true);
                     process.WaitForExit();
                     Log.Warning(
-                        "MiLLMT {DevicePriority} native probe timed out after {TimeoutMilliseconds} ms.",
+                        "MiLMMT {DevicePriority} native probe timed out after {TimeoutMilliseconds} ms.",
                         devicePriority,
                         ProbeTimeoutMilliseconds);
                     return false;
@@ -131,14 +131,14 @@ namespace IronworksTranslator.Utils.Translator
                 if (process.ExitCode == 0)
                 {
                     Log.Information(
-                        "MiLLMT {DevicePriority} native probe passed. {ProbeOutput}",
+                        "MiLMMT {DevicePriority} native probe passed. {ProbeOutput}",
                         devicePriority,
                         standardOutput);
                     return true;
                 }
 
                 Log.Warning(
-                    "MiLLMT {DevicePriority} native probe failed with exit code {ExitCode}. Output: {ProbeOutput}. Error: {ProbeError}",
+                    "MiLMMT {DevicePriority} native probe failed with exit code {ExitCode}. Output: {ProbeOutput}. Error: {ProbeError}",
                     devicePriority,
                     process.ExitCode,
                     standardOutput,
@@ -147,7 +147,7 @@ namespace IronworksTranslator.Utils.Translator
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "MiLLMT {DevicePriority} native probe could not run.", devicePriority);
+                Log.Warning(ex, "MiLMMT {DevicePriority} native probe could not run.", devicePriority);
                 return false;
             }
         }

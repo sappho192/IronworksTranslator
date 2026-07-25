@@ -8,7 +8,7 @@ namespace IronworksTranslator.Models.Enums
         Papago = 0,
         [Description("DeepL (API)")]
         DeepL_API = 1,
-        [Description("MiLLMT (추천)")]
-        MiLLMT = 2,
+        [Description("MiLMMT (추천)")]
+        MiLMMT = 2,
     }
 }

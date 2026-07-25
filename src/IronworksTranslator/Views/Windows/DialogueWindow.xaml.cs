@@ -182,7 +182,7 @@ namespace IronworksTranslator.Views.Windows
                             (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
                         );
                     break;
-                case TranslatorEngine.MiLLMT:
+                case TranslatorEngine.MiLMMT:
                     result = App.GetService<MiLMMTTranslator>().Translate(
                             input,
                             (TranslationLanguageCode)channelLanguage,

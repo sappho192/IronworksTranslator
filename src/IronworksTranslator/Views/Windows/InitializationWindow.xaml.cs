@@ -113,7 +113,7 @@ namespace IronworksTranslator.Views.Windows
                 ?? TranslatorEngine.Papago;
             switch (selectedEngine)
             {
-                case TranslatorEngine.MiLLMT:
+                case TranslatorEngine.MiLMMT:
                     PrepareMiLMMTModel(requestedMiLMMTProfile ?? MiLMMTModelProfiles.GetCurrent());
                     break;
                 default:
@@ -287,7 +287,7 @@ namespace IronworksTranslator.Views.Windows
             if (fileInfo.Length != profile.FileSize)
             {
                 Log.Warning(
-                    "MiLLMT model size mismatch. Expected: {ExpectedSize}, Actual: {ActualSize}",
+                    "MiLMMT model size mismatch. Expected: {ExpectedSize}, Actual: {ActualSize}",
                     profile.FileSize,
                     fileInfo.Length);
                 return false;

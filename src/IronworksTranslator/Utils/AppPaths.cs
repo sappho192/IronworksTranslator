@@ -51,8 +51,8 @@ namespace IronworksTranslator.Utils
                 ModelDirectory,
                 modelSize switch
                 {
-                    MiLMMTModelSize.MiLLMT_4B => "milmmt-46-4b-v0.1",
-                    MiLMMTModelSize.MiLLMT_12B => "milmmt-46-12b-v0.1",
+                    MiLMMTModelSize.MiLMMT_4B => "milmmt-46-4b-v0.1",
+                    MiLMMTModelSize.MiLMMT_12B => "milmmt-46-12b-v0.1",
                     _ => "milmmt-46-1b-v0.1",
                 });
         }

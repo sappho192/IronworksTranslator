@@ -349,7 +349,7 @@ namespace IronworksTranslator.Views.Pages
             }
 
             UpdateMiLMMTProfileSummary();
-            if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.MiLLMT)
+            if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.MiLMMT)
             {
                 EnsureLocalTranslatorModelReady(ViewModel.TranslatorEngine, cbTranslator);
             }
@@ -482,7 +482,7 @@ namespace IronworksTranslator.Views.Pages
         private void SelectMiLMMTModel(MiLMMTModelProfile profile)
         {
             SelectMiLMMTProfile(profile, File.Exists(profile.FilePath));
-            if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.MiLLMT)
+            if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.MiLMMT)
             {
                 EnsureLocalTranslatorModelReady(ViewModel.TranslatorEngine, cbTranslator);
             }
@@ -509,7 +509,7 @@ namespace IronworksTranslator.Views.Pages
 
             if (result != System.Windows.MessageBoxResult.Yes)
             {
-                if (selectedItem == Models.Enums.TranslatorEngine.MiLLMT
+                if (selectedItem == Models.Enums.TranslatorEngine.MiLMMT
                     && TrySelectAvailableMiLMMTProfile())
                 {
                     UpdateTranslatorTooltip(selectedItem);
@@ -520,7 +520,7 @@ namespace IronworksTranslator.Views.Pages
                 return;
             }
 
-            var window = selectedItem == Models.Enums.TranslatorEngine.MiLLMT
+            var window = selectedItem == Models.Enums.TranslatorEngine.MiLMMT
                 ? new InitializationWindow(selectedItem, ViewModel.SelectedMiLMMTProfile)
                 : new InitializationWindow(selectedItem);
             window.ShowDialog();
@@ -554,14 +554,14 @@ namespace IronworksTranslator.Views.Pages
 
         private static bool RequiresLocalTranslatorModel(Models.Enums.TranslatorEngine selectedItem)
         {
-            return selectedItem is Models.Enums.TranslatorEngine.MiLLMT;
+            return selectedItem is Models.Enums.TranslatorEngine.MiLMMT;
         }
 
         private bool LocalTranslatorModelExists(Models.Enums.TranslatorEngine selectedItem)
         {
             return selectedItem switch
             {
-                Models.Enums.TranslatorEngine.MiLLMT => File.Exists(ViewModel.SelectedMiLMMTProfile.FilePath),
+                Models.Enums.TranslatorEngine.MiLMMT => File.Exists(ViewModel.SelectedMiLMMTProfile.FilePath),
                 _ => true,
             };
         }
@@ -576,10 +576,10 @@ namespace IronworksTranslator.Views.Pages
             txtPapagoTooltip.Visibility = selectedItem == Models.Enums.TranslatorEngine.Papago
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-            txtMiLMMTTooltip.Visibility = selectedItem == Models.Enums.TranslatorEngine.MiLLMT
+            txtMiLMMTTooltip.Visibility = selectedItem == Models.Enums.TranslatorEngine.MiLMMT
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-            panelMiLMMTOptions.Visibility = selectedItem == Models.Enums.TranslatorEngine.MiLLMT
+            panelMiLMMTOptions.Visibility = selectedItem == Models.Enums.TranslatorEngine.MiLMMT
                 ? Visibility.Visible
                 : Visibility.Collapsed;
             UpdateMiLMMTProfileSummary();

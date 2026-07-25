@@ -52,7 +52,7 @@ namespace IronworksTranslator.Utils.Translator
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to configure the MiLLMT native backend at startup.");
+                Log.Error(ex, "Failed to configure the MiLMMT native backend at startup.");
             }
         }
 
@@ -103,20 +103,20 @@ namespace IronworksTranslator.Utils.Translator
 
             if (!SupportedSourceLanguages.Contains(sourceLanguage))
             {
-                Log.Error("Unsupported MiLLMT sourceLanguage: {SourceLanguage}", sourceLanguage);
+                Log.Error("Unsupported MiLMMT sourceLanguage: {SourceLanguage}", sourceLanguage);
                 return input;
             }
 
             if (!SupportedTargetLanguages.Contains(targetLanguage))
             {
-                Log.Error("Unsupported MiLLMT targetLanguage: {TargetLanguage}", targetLanguage);
+                Log.Error("Unsupported MiLMMT targetLanguage: {TargetLanguage}", targetLanguage);
                 return input;
             }
 
             var modelProfile = MiLMMTModelProfiles.GetCurrent();
             if (!File.Exists(modelProfile.FilePath))
             {
-                Log.Error("MiLLMT model file does not exist: {ModelPath}", modelProfile.FilePath);
+                Log.Error("MiLMMT model file does not exist: {ModelPath}", modelProfile.FilePath);
                 return input;
             }
 
@@ -176,7 +176,7 @@ namespace IronworksTranslator.Utils.Translator
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
                 Log.Debug(
-                    "MiLLMT {RequestKind} translation was cancelled before completion.",
+                    "MiLMMT {RequestKind} translation was cancelled before completion.",
                     requestKind);
                 throw;
             }
@@ -184,7 +184,7 @@ namespace IronworksTranslator.Utils.Translator
             {
                 Log.Error(
                     ex,
-                    "Error translating with MiLLMT. SourceLanguage: {SourceLanguage}, TargetLanguage: {TargetLanguage}",
+                    "Error translating with MiLMMT. SourceLanguage: {SourceLanguage}, TargetLanguage: {TargetLanguage}",
                     sourceLanguage,
                     targetLanguage);
                 return input;
@@ -234,7 +234,7 @@ namespace IronworksTranslator.Utils.Translator
                 loadedDevicePriority = effectiveDevicePriority;
                 loadedInferenceProfile = inferenceProfile;
                 Log.Information(
-                    "MiLLMT model loaded from {ModelPath}. DevicePriority: {DevicePriority}. InferenceProfile: {InferenceProfile}",
+                    "MiLMMT model loaded from {ModelPath}. DevicePriority: {DevicePriority}. InferenceProfile: {InferenceProfile}",
                     modelProfile.FilePath,
                     effectiveDevicePriority,
                     inferenceProfile.Name);
@@ -242,7 +242,7 @@ namespace IronworksTranslator.Utils.Translator
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to initialize MiLLMT model.");
+                Log.Error(ex, "Failed to initialize MiLMMT model.");
                 UnloadModel();
                 return false;
             }
@@ -278,7 +278,7 @@ namespace IronworksTranslator.Utils.Translator
                         AppContext.BaseDirectory);
                     if (!File.Exists(llamaPath))
                     {
-                        throw new FileNotFoundException("MiLLMT native runtime pack is missing.", llamaPath);
+                        throw new FileNotFoundException("MiLMMT native runtime pack is missing.", llamaPath);
                     }
 
                     NativeLibraryConfig.LLama.WithLibrary(llamaPath);
@@ -302,7 +302,7 @@ namespace IronworksTranslator.Utils.Translator
                 configuredDevicePriority = selectedDevicePriority;
                 isNativeConfigured = true;
                 Log.Information(
-                    "MiLLMT native backend configured as {SelectedDevicePriority} for requested {RequestedDevicePriority}.",
+                    "MiLMMT native backend configured as {SelectedDevicePriority} for requested {RequestedDevicePriority}.",
                     selectedDevicePriority,
                     devicePriority);
                 return selectedDevicePriority;
@@ -365,7 +365,7 @@ namespace IronworksTranslator.Utils.Translator
                 TranslationLanguageCode.German => "German",
                 TranslationLanguageCode.French => "French",
                 TranslationLanguageCode.Korean => "Korean",
-                _ => throw new ArgumentException($"Unsupported MiLLMT language: {language}", nameof(language)),
+                _ => throw new ArgumentException($"Unsupported MiLMMT language: {language}", nameof(language)),
             };
         }
 

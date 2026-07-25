@@ -109,7 +109,7 @@ Assert-Success "Build failed!"
 dotnet build $launcherProjectPath -c Release --no-restore
 Assert-Success "Launcher build failed!"
 dotnet build $nativeProbeProjectPath -c Release --no-restore
-Assert-Success "MiLLMT native probe build failed!"
+Assert-Success "MiLMMT native probe build failed!"
 Write-Host "  Build completed." -ForegroundColor Green
 Write-Host ""
 
@@ -155,7 +155,7 @@ dotnet publish $nativeProbeProjectPath -c Release -o $publishPath `
     /p:PublishSingleFile=true `
     /p:RuntimeIdentifier=$runtime `
     /p:SelfContained=false
-Assert-Success "MiLLMT native probe publish failed!"
+Assert-Success "MiLMMT native probe publish failed!"
 Write-Host "  Published to: $publishPath" -ForegroundColor Green
 Write-Host ""
 
@@ -176,7 +176,7 @@ if ((Test-Path $appExePath) -and (Test-Path $launcherExePath) -and (Test-Path $n
     Write-Host "  App EXE Size: $fileSize MB" -ForegroundColor Green
     Write-Host "  Launcher EXE File Version: $launcherFileVersion" -ForegroundColor Green
     Write-Host "  Launcher EXE Size: $launcherFileSize MB" -ForegroundColor Green
-    Write-Host "  MiLLMT native probe EXE Size: $nativeProbeFileSize MB" -ForegroundColor Green
+    Write-Host "  MiLMMT native probe EXE Size: $nativeProbeFileSize MB" -ForegroundColor Green
 
     if ($fileVersion -like "$version.*") {
         Write-Host "  App version is correct." -ForegroundColor Green

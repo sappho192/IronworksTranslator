@@ -64,7 +64,7 @@ namespace IronworksTranslator.Models.Settings
                 {
                     ClientLanguage = ClientLanguage.Korean,
                     TranslatorEngine = TranslatorEngine.Papago,
-                    MiLMMTModelSize = MiLMMTModelSize.MiLLMT_1B,
+                    MiLMMTModelSize = MiLMMTModelSize.MiLMMT_1B,
                     MiLMMTQuantization = MiLMMTQuantization.Q8_0,
                     LocalModelDevicePriority = localModelDevicePriority,
                     LocalModelDevicePriorityUserSelected = false,
@@ -120,9 +120,10 @@ namespace IronworksTranslator.Models.Settings
         internal static string NormalizeLegacySettingsYaml(string settingsYaml)
         {
             return settingsYaml
-                .Replace("MiLLMT_1B_Q4_K_M", nameof(TranslatorEngine.MiLLMT))
-                .Replace("Ironworks_Ja_Ko", nameof(TranslatorEngine.MiLLMT))
-                .Replace("Ironworks Ja→Ko (사용 금지)", nameof(TranslatorEngine.MiLLMT));
+                .Replace("MiLLMT_1B_Q4_K_M", nameof(TranslatorEngine.MiLMMT))
+                .Replace("Ironworks_Ja_Ko", nameof(TranslatorEngine.MiLMMT))
+                .Replace("Ironworks Ja→Ko (사용 금지)", nameof(TranslatorEngine.MiLMMT))
+                .Replace("MiLLMT", nameof(TranslatorEngine.MiLMMT));
         }
 
         internal static void NormalizeSettings(IronworksSettings settings)
@@ -150,7 +151,7 @@ namespace IronworksTranslator.Models.Settings
             var engineValue = (int)translatorSettings.TranslatorEngine;
             if (engineValue is 2 or 3)
             {
-                translatorSettings.TranslatorEngine = TranslatorEngine.MiLLMT;
+                translatorSettings.TranslatorEngine = TranslatorEngine.MiLMMT;
                 return;
             }
 
