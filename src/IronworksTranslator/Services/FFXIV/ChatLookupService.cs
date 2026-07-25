@@ -34,12 +34,11 @@ namespace IronworksTranslator.Services.FFXIV
         private static int _previousOffset = 0;
 
         private readonly object _timerLock = new();
+        private readonly TalkObservationTracker _talkObservationTracker = new();
         private bool _hostStarted;
         private bool _chatLogUnavailableLogged;
-        private bool _dialogueAddressUnavailableLogged;
+        private bool _talkUnavailableLogged;
         private bool _resourceDiagnosticsLogged;
-
-        private string lastMessage = "";
 
         public ChatLookupService()
         {
@@ -65,11 +64,19 @@ namespace IronworksTranslator.Services.FFXIV
 
         public void Destruct()
         {
+            _talkObservationTracker.Reset();
             if (Attached)
             {
                 StopAsync(CancellationToken.None);
                 DetachMemoryHandlerEvents();
-                CurrentMemoryHandler?.Dispose();
+                var handler = CurrentMemoryHandler;
+                if (GameProcessID <= 0 || !SharlayanMemoryManager.Instance.RemoveHandler(GameProcessID))
+                {
+                    handler?.Dispose();
+                }
+
+                CurrentMemoryHandler = null;
+                GameProcessID = 0;
                 Attached = false;
                 App.GetService<DashboardViewModel>().IsTranslatorActive = Attached;
                 App.GetService<DashboardViewModel>().InitTranslatorToggle();
@@ -91,7 +98,7 @@ namespace IronworksTranslator.Services.FFXIV
                 lock (_timerLock)
                 {
                     _hostStarted = true;
-                    EnsureDialogueTimerStarted();
+                    EnsureDialogueTimerStartedIfReady();
                     EnsureChatTimerStartedIfReady();
                 }
             }
@@ -149,54 +156,38 @@ namespace IronworksTranslator.Services.FFXIV
         {
             try
             {
-                var raw = GetDialogueMessage();
-                if (string.IsNullOrEmpty(raw))
+                var handler = CurrentMemoryHandler;
+                if (handler?.Reader.CanGetTalk() != true)
+                {
+                    LogTalkNotReady();
+                    return;
+                }
+
+                _talkUnavailableLogged = false;
+                TalkResult talk = handler.Reader.GetTalk();
+                if (!_talkObservationTracker.ShouldEnqueue(talk))
                 {
                     return;
                 }
 
-                if (ChatQueue.EnqueueDialogueIfNew(raw))
-                {
-                    Log.Debug("Enqueue new message: {@message}", raw);
-                }
+                ChatQueue.EnqueueDialogue(talk.Text);
+                Log.Debug(
+                    "Enqueued Talk observation. Source: {TalkSource}, Visible: {IsVisible}, " +
+                    "Speaker length: {SpeakerLength}, Text length: {TextLength}",
+                    talk.Source,
+                    talk.IsVisible,
+                    talk.Name.Length,
+                    talk.Text.Length);
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                Log.Information("Process lost");
+                Destruct();
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error in UpdateDialogue timer callback");
             }
-        }
-
-        private string GetDialogueMessage()
-        {
-            try
-            {
-                var handler = CurrentMemoryHandler;
-                if (handler == null)
-                {
-                    return "";
-                }
-
-                if (!handler.Scanner.Locations.ContainsKey("ALLMESSAGES"))
-                {
-                    LogDialogueAddressNotReady();
-                    return "";
-                }
-
-                _dialogueAddressUnavailableLogged = false;
-                var message = handler.GetString(handler.Scanner.Locations["ALLMESSAGES"], 0, 2048);
-                if (message != lastMessage)
-                {
-                    lastMessage = message;
-                    return message;
-                }
-            }
-            catch (System.ComponentModel.Win32Exception)
-            {
-                //MessageBox.Show(Localizer.GetString("app.exception.process.lost"));
-                Log.Information("Process lost");
-                Destruct();
-            }
-            return "";
         }
 
         [TraceMethod]
@@ -230,20 +221,13 @@ namespace IronworksTranslator.Services.FFXIV
                 _previousArrayIndex = 0;
                 _previousOffset = 0;
                 _chatLogUnavailableLogged = false;
-                _dialogueAddressUnavailableLogged = false;
+                _talkUnavailableLogged = false;
                 _resourceDiagnosticsLogged = false;
+                _talkObservationTracker.Reset();
 
                 CurrentMemoryHandler = SharlayanMemoryManager.Instance.AddHandler(configuration);
                 CurrentMemoryHandler.OnMemoryLocationsFound += OnMemoryLocationsFound;
                 _ = ObserveResourceInitializationAsync(CurrentMemoryHandler);
-                var signatures = new List<Signature>();
-                signatures.Add(new Signature
-                {
-                    Key = "ALLMESSAGES",
-                    PointerPath = HermesAddress.GetLatestAddress().Address
-                });
-                CurrentMemoryHandler.Scanner.LoadOffsets([.. signatures]);
-                ChatQueue.EnqueueDialogue("Dialogue window");
 
                 Log.Information(
                     "Attached {ProcessName}.exe ({GameLanguage}). Sharlayan cache: {CacheDirectory}",
@@ -293,11 +277,20 @@ namespace IronworksTranslator.Services.FFXIV
             }
         }
 
-        private void EnsureDialogueTimerStarted()
+        private void EnsureDialogueTimerStartedIfReady()
         {
+            var handler = CurrentMemoryHandler;
+            if (handler?.Reader.CanGetTalk() != true)
+            {
+                LogTalkNotReady();
+                return;
+            }
+
+            _talkUnavailableLogged = false;
             if (dialogueTimer == null)
             {
                 dialogueTimer = new Timer(UpdateDialogue, null, 0, dPeriod);
+                Log.Information("Talk polling started.");
             }
             else
             {
@@ -310,29 +303,26 @@ namespace IronworksTranslator.Services.FFXIV
             ConcurrentDictionary<string, MemoryLocation> memoryLocations,
             long processingTime)
         {
-            if (sender is MemoryHandler handler)
-            {
-                LogResourceDiagnosticsOnce(handler);
-            }
-
-            var hasChatLog = memoryLocations.ContainsKey(Signatures.CHATLOG_KEY);
-            var hasDialogue = memoryLocations.ContainsKey("ALLMESSAGES");
-            Log.Information(
-                "Sharlayan memory locations resolved in {ProcessingTime} ms. CHATLOG: {HasChatLog}, ALLMESSAGES: {HasDialogue}",
-                processingTime,
-                hasChatLog,
-                hasDialogue);
-
-            if (!hasChatLog)
+            if (sender is not MemoryHandler handler || !ReferenceEquals(handler, CurrentMemoryHandler))
             {
                 return;
             }
+
+            LogResourceDiagnosticsOnce(handler);
+            var hasChatLog = memoryLocations.ContainsKey(Signatures.CHATLOG_KEY);
+            var hasTalk = handler.Reader.CanGetTalk();
+            Log.Information(
+                "Sharlayan memory locations resolved in {ProcessingTime} ms. CHATLOG: {HasChatLog}, Talk: {HasTalk}",
+                processingTime,
+                hasChatLog,
+                hasTalk);
 
             lock (_timerLock)
             {
                 if (_hostStarted)
                 {
                     EnsureChatTimerStartedIfReady();
+                    EnsureDialogueTimerStartedIfReady();
                 }
             }
         }
@@ -345,6 +335,14 @@ namespace IronworksTranslator.Services.FFXIV
                 if (ReferenceEquals(handler, CurrentMemoryHandler))
                 {
                     LogResourceDiagnosticsOnce(handler);
+                    lock (_timerLock)
+                    {
+                        if (_hostStarted)
+                        {
+                            EnsureChatTimerStartedIfReady();
+                            EnsureDialogueTimerStartedIfReady();
+                        }
+                    }
                 }
             }
             catch (OperationCanceledException)
@@ -407,15 +405,15 @@ namespace IronworksTranslator.Services.FFXIV
             Log.Information("Waiting for Sharlayan CHATLOG memory location before starting chat polling.");
         }
 
-        private void LogDialogueAddressNotReady()
+        private void LogTalkNotReady()
         {
-            if (_dialogueAddressUnavailableLogged)
+            if (_talkUnavailableLogged)
             {
                 return;
             }
 
-            _dialogueAddressUnavailableLogged = true;
-            Log.Information("Waiting for Sharlayan ALLMESSAGES memory location before reading dialogue.");
+            _talkUnavailableLogged = true;
+            Log.Information("Waiting for Sharlayan Talk memory locations before starting dialogue polling.");
         }
 #pragma warning restore CS8602
     }

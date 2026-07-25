@@ -1,10 +1,10 @@
-# Hermes v2 / Sharlayan.Lite 9.1.2 upstream handoff
+# Hermes v2 / Sharlayan.Lite 9.1.2 → 9.1.4 upstream handoff
 
 작성일: 2026-07-25
 
 ## 문서 목적
 
-이 문서는 IronworksTranslator가 Hermes v2와 Sharlayan.Lite `9.1.2`를 소비할 때 필요한
+이 문서는 IronworksTranslator가 Hermes v2와 Sharlayan.Lite `9.1.4`를 소비할 때 필요한
 최종 upstream 계약, 검증된 범위 및 남은 consumer 작업을 전달한다. 구현 절차와 체크리스트는
 같은 디렉터리의 [`HERMES_V2_MIGRATION_PLAN.md`](HERMES_V2_MIGRATION_PLAN.md)를 따른다.
 
@@ -15,6 +15,8 @@
 - [Sharlayan 9.1.2 runtime 계획](https://github.com/sappho192/Sharlayan.Lite/blob/min-chat/docs/2026-07-22/2026-07-22-06-hermes-v2-runtime-plan.md)
 - [Sharlayan 9.1.2 release 기록](https://github.com/sappho192/Sharlayan.Lite/blob/min-chat/docs/2026-07-25/2026-07-25-hermes-v2-and-nuget-release.md)
 - [Sharlayan.Lite 9.1.2 on NuGet.org](https://www.nuget.org/packages/Sharlayan.Lite/9.1.2)
+- [Sharlayan.Lite 9.1.4 on NuGet.org](https://www.nuget.org/packages/Sharlayan.Lite/9.1.4)
+- [Sharlayan.Lite 9.1.4 production Actions run](https://github.com/sappho192/Sharlayan.Lite/actions/runs/30166550163)
 
 ## 인계 시점의 upstream 상태
 
@@ -32,12 +34,12 @@ workflow가 참조하는 입력과 repository/environment 설정을 읽기 전�
 
 ### Sharlayan.Lite
 
-- Phase 1 resource consumer package는 stable `9.1.2`다.
+- 최종 resource 및 Talk consumer package는 stable `9.1.4`다.
 - 지원 target에는 IronworksTranslator가 사용하는 `net10.0`이 포함된다.
 - `RemotePreferred`는 remote → verified cache → embedded 순서로 resource를 선택한다.
 - 원격 manifest와 cache는 strict validation을 통과해야 하며 실패하면 다음 source로 fallback한다.
 - embedded manifest는 handoff 시점의 Hermes live-verified production byte와 동기화되어 있다.
-- `9.1.2` package는 선택된 manifest revision에서 CHATLOG를 초기화한다.
+- `9.1.4` package는 선택된 manifest revision에서 CHATLOG와 Talk를 초기화한다.
 - `MemoryHandler.ResourceInfo`로 source, revision, FCS commit, validation 및 fallback 정보를
   확인할 수 있다.
 
@@ -50,11 +52,31 @@ NuGet에 발행된 `9.1.2`는 repository commit `1f1bc33`에서 패키징됐다.
 - `CanGetTalk()`, `GetTalk()`, `GetCurrentTalk()`은 존재하지 않는다.
 - `TalkResult`에는 `IsAvailable`, `Name`, `Text`만 있고 `Source`, `IsVisible`이 없다.
 - local nupkg SHA-512는 NuGet cache metadata와 일치하므로 cache 손상이 아니다.
-- NuGet V3에는 `8.0.1`과 `9.1.2`만 공개되어 있다.
+- 당시 NuGet V3에는 `8.0.1`과 `9.1.2`만 공개되어 있었다.
 
 따라서 `9.1.2`는 Phase 1 resource configuration에는 사용할 수 있지만 Phase 2 Talk API
-전환에는 사용할 수 없다. current Talk API를 포함하는 새 stable package를 별도 버전으로
-발행하기 전까지 IronworksTranslator Phase 2는 blocked다.
+전환에는 사용할 수 없었다. 이것이 당시 IronworksTranslator Phase 2를 중단한 역사적
+원인이다.
+
+### 2026-07-26 Sharlayan.Lite 9.1.4 해결
+
+current Talk API와 CHATLOG `StdVector` count 감소/reset 처리를 포함한 stable `9.1.4`가
+NuGet.org에 발행됐다.
+
+- package/source commit: `78d2eccb2025ef16786811b97aed8bbe30dc9552`
+- release record commit: `f00386b5f261932def13fd63f55fb4f7dfa8bdbe`
+- public repository-signed nupkg SHA-256:
+  `e310c00162d7775f84c66543a67a08410bb771143f58ce78b43251649e2b9d50`
+- target frameworks: `net462;net48;net6.0;net7.0;net8.0;net10.0`
+- package repository metadata는 위 package/source commit을 가리킨다.
+- `net10.0` DLL/PDB가 포함되고 불필요한 FFXIVClientStructs assembly는 없다.
+- NuGet.org 단일 source와 완전히 새로운 cache의 net10 consumer build/API contract가
+  통과했다.
+- upstream live reset 재검사는 420.1초 동안 신규 2,723건, cursor wrap 3회,
+  stderr/OnException/`Invalid chat entry size` 0건으로 통과했다.
+
+이에 따라 Phase 2 package blocker는 해결됐다. IronworksTranslator는 local project
+reference나 DLL 복사 없이 정식 `9.1.4` package만 사용한다.
 
 ## IronworksTranslator가 사용할 API
 
@@ -72,15 +94,14 @@ var configuration = new SharlayanConfiguration {
 
 `HermesV2LatestUri`는 현재 같은 값을 기본값으로 제공하지만, consumer 정책을 명확히 하기 위해
 IronworksTranslator에서 명시한다. 앱은 Hermes JSON을 직접 다운로드하거나 해석하지 않는다.
-`GameRegion`은 Sharlayan.Lite `9.1.2`에서 obsolete no-op이며 chat resource가
+`GameRegion`은 Sharlayan.Lite `9.1.2` 이후 obsolete no-op이며 chat resource가
 region-independent이므로 IronworksTranslator configuration에 전달하지 않는다.
 
 IronworksTranslator의 consumer 정책은 `RemotePreferred`로 고정한다. `EmbeddedOnly` 사용자
 설정과 수동 resource reload UI는 제공하지 않으며, 실행 중 선택된 revision은 handler 수명
 동안 유지한다. 사용자가 새 revision을 즉시 확인하려면 앱을 재시작한다.
 
-Talk 읽기 요구 계약이며, 다음 API는 `9.1.2` package가 아니라 새 stable package에서
-제공되어야 한다.
+Talk 읽기 요구 계약이며, 다음 API는 stable `9.1.4` package에서 제공된다.
 
 ```csharp
 if (handler.Reader.CanGetTalk()) {
@@ -121,11 +142,11 @@ artifact 및 공유 로그에는 source, visibility, 길이와 일치 여부만 
 - source checkout에서 CHATLOG와 Talk signature/location 초기화
 - source checkout에서 current Talk 화면 일치 및 다음 Talk로의 전환
 - source checkout에서 Talk 종료 후 `Last/not visible` fallback
-- Sharlayan.Lite `9.1.2` package 생성, 검증, NuGet 배포 및 신규 cache restore
+- Sharlayan.Lite `9.1.4` package 생성, 검증, NuGet 배포 및 신규 cache restore
 - `net10.0` 소비자 build
 
-위 목록은 source checkout의 Talk 검증과 공개 `9.1.2` package 검증을 합쳐 package Talk API를
-증명하지 않는다. `9.1.2` consumer compile은 Talk API 부재로 실패했다.
+공개 `9.1.2` consumer compile은 Talk API 부재로 실패했지만, `9.1.4` 신규 cache consumer
+build와 API contract 검증은 통과했다.
 
 Sharlayan.Lite `9.1.2`는 지인 테스트를 시작하기 위한 명시적 일회성 release waiver를
 포함한다. 일부 장시간·다중 client evidence가 미충족인 사실은 그대로 유지되며, 이 waiver를
@@ -133,7 +154,7 @@ Sharlayan.Lite `9.1.2`는 지인 테스트를 시작하기 위한 명시적 일�
 
 ## IronworksTranslator 작업 범위
 
-1. `Sharlayan.Lite`를 `9.1.2`로 갱신하고 restore/build한다.
+1. `Sharlayan.Lite`를 `9.1.4`로 갱신하고 완전히 새로운 NuGet cache에서 restore/build한다.
 2. `ResourceMode.RemotePreferred`와 cache directory를 설정한다.
 3. `HermesAddress.GetLatestAddress()`와 앱의 Hermes HTTP 요청을 제거한다.
 4. `ALLMESSAGES` custom signature와 raw `GetString(..., 2048)` polling을 제거한다.
@@ -149,12 +170,12 @@ Sharlayan.Lite `9.1.2`는 지인 테스트를 시작하기 위한 명시적 일�
 
 ## 완료 경계
 
-이 handoff가 증명하는 것은 Hermes와 Sharlayan resource provider가 IronworksTranslator
-Phase 1을 시작할 수 있는 상태라는 점이다. Phase 2는 새 stable Sharlayan package 발행이
-선행되어야 한다. 그 이후 다음 항목을 IronworksTranslator에서 별도로 완료해야 한다.
+이 handoff가 증명하는 것은 Hermes와 Sharlayan `9.1.4`가 IronworksTranslator Phase 2를
+진행할 수 있는 upstream 조건을 충족했다는 점이다. upstream smoke는 IronworksTranslator의
+release readiness를 대신하지 않는다. 다음 항목은 앱에서 별도로 완료해야 한다.
 
 - 기존 settings YAML의 `use_internal_address`를 값 mapping 없이 안전하게 제거
-- typed dialogue queue와 중복 추적기
+- typed dialogue queue
 - DialogueWindow의 `Speaker: Text` 표시
 - packaged-app fallback
 - 실제 게임에서 CHATLOG와 current Talk 동시 동작

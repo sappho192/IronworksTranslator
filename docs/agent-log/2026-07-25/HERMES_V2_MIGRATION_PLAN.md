@@ -71,11 +71,12 @@ tests/IronworksTranslator.Tests/Models/ChatQueueTests.cs
 
 ## 5. 확정된 upstream 기준
 
-2026-07-25 기준으로 Phase 1의 선행 조건은 충족됐지만, 2026-07-26 consumer compile에서
-Phase 2의 stable package 선행 조건이 충족되지 않았음이 확인됐다.
+2026-07-25 기준으로 Phase 1의 선행 조건이 충족됐다. 2026-07-26 consumer compile에서
+공개 `9.1.2`의 Talk API 누락이 확인돼 Phase 2가 일시 중단됐으나, 같은 날
+Sharlayan.Lite `9.1.4`가 발행되어 선행 조건이 해결됐다.
 
 - Hermes v2 production latest는 `live-verified` immutable manifest를 가리킨다.
-- Phase 1 resource provider에 사용할 stable package는 Sharlayan.Lite `9.1.2`다.
+- 최종 consumer package는 Sharlayan.Lite `9.1.4`다.
 - `RemotePreferred`는 remote → verified cache → embedded 순서로 fallback한다.
 - upstream source에서 CHATLOG와 Talk는 선택된 같은 manifest revision에서 초기화된다.
 - Phase 2에 필요한 source API는 `Reader.CanGetTalk()` / `Reader.GetTalk()`이다.
@@ -84,11 +85,22 @@ Phase 2의 stable package 선행 조건이 충족되지 않았음이 확인됐�
 - 선택된 resource source, revision, FCS commit 및 fallback reason은
   `MemoryHandler.ResourceInfo`에서 확인한다.
 
-NuGet의 Sharlayan.Lite `9.1.2`는 repository commit `1f1bc33`에서 패키징됐고 current Talk
-API가 추가된 `3e27261`보다 이전이다. 실제 `9.1.2` DLL은 `CanGetLastTalk()` /
-`GetLastTalk()`만 제공하고 `TalkResult.Source` 및 `TalkResult.IsVisible`을 제공하지 않는다.
-package SHA-512는 NuGet cache metadata와 일치하므로 local cache 손상이 아니다. Phase 2는
-Talk API를 포함하는 새 stable package가 발행될 때까지 진행하지 않는다.
+역사적 원인으로, NuGet의 Sharlayan.Lite `9.1.2`는 repository commit `1f1bc33`에서
+패키징됐고 current Talk API가 추가된 `3e27261`보다 이전이다. 실제 `9.1.2` DLL은
+`CanGetLastTalk()` / `GetLastTalk()`만 제공하고 `TalkResult.Source` 및
+`TalkResult.IsVisible`을 제공하지 않았다. package SHA-512는 NuGet cache metadata와
+일치했으므로 local cache 손상이 아니었다.
+
+해결된 stable `9.1.4`의 기준:
+
+- package/source commit: `78d2eccb2025ef16786811b97aed8bbe30dc9552`
+- release record commit: `f00386b5f261932def13fd63f55fb4f7dfa8bdbe`
+- public repository-signed nupkg SHA-256:
+  `e310c00162d7775f84c66543a67a08410bb771143f58ce78b43251649e2b9d50`
+- public API: `CanGetTalk()`, `GetTalk()`, `GetCurrentTalk()`, `GetLastTalk()` 및
+  `TalkResult.Source`, `IsVisible`, `IsAvailable`, `Name`, `Text`
+- `GetTalk()`은 current-first이며 current가 없거나 일시적으로 unreadable하면 LastTalk로
+  fallback한다.
 
 ## 6. 대상 구조
 
@@ -123,8 +135,8 @@ IronworksTranslator가 몰라야 하는 정보:
 ## 7. Sharlayan package 갱신
 
 Phase 1에서는 `src/IronworksTranslator/IronworksTranslator.csproj`의 `Sharlayan.Lite`
-dependency를 `9.1.2`로 올린다. Phase 2 전에 current Talk API를 포함하는 새 stable package
-version으로 다시 갱신해야 한다.
+dependency를 `9.1.2`로 올렸다. Phase 2에서는 current Talk API와 CHATLOG reset 수정이
+포함된 stable `9.1.4`로 갱신한다.
 
 검증 항목:
 
@@ -134,8 +146,9 @@ version으로 다시 갱신해야 한다.
 - package update가 기존 `ChatLogItem`, `ChatLogResult` 및 Reader 호출과 호환된다.
 - GitVersion과 Velopack versioning에는 별도 영향을 주지 않는다.
 
-Phase 1 commit은 NuGet.org의 stable `9.1.2`를 사용한다. 전체 migration의 최종 dependency는
-current Talk API를 포함하고 별도 버전으로 발행된 stable package여야 한다.
+Phase 1 commit은 NuGet.org의 stable `9.1.2`를 사용했다. 전체 migration의 최종 dependency는
+NuGet.org의 stable `9.1.4`다. local project reference, 임의 DLL 복사 및 reflection 기반
+consumer workaround는 사용하지 않는다.
 
 ## 8. Sharlayan configuration
 
@@ -171,7 +184,7 @@ var configuration = new SharlayanConfiguration {
 - 선택된 resource revision은 handler 수명 동안 고정한다.
 - 수동 resource reload 기능은 추가하지 않는다. 사용자가 새 revision을 즉시 확인하려면 앱을
   재시작해야 한다.
-- `GameRegion`은 Sharlayan.Lite `9.1.2`에서 obsolete no-op이며 chat resource가
+- `GameRegion`은 Sharlayan.Lite `9.1.2` 이후 obsolete no-op이며 chat resource가
   region-independent이므로 configuration에서 제거한다.
 
 ## 9. 기존 Hermes 코드 제거
@@ -507,41 +520,56 @@ FallbackReason
 
 남은 runtime 완료 조건:
 
-- [ ] 앱이 Hermes JSON을 직접 다운로드하지 않는다. Phase 2에서 legacy dialogue 경로와 함께 제거한다.
+- [x] Phase 2 runtime 경로에서 앱이 Hermes JSON을 직접 다운로드하지 않는다.
+  사용되지 않는 `HermesAddress` 파일 자체는 Phase 4에서 제거한다.
 - [ ] remote, cache 및 embedded 각 source에서 handler가 초기화된다.
 - [ ] 실제 게임에서 기존 CHATLOG polling이 유지된다.
 
 ### Phase 2: Talk API 전환
 
-상태: **upstream package blocker**
+상태: **코드 구현 및 자동 검증 완료, 앱 runtime gate 대기**
+
+역사적 blocker:
 
 - NuGet `9.1.2` repository commit: `1f1bc33`
 - current Talk API source commit: `3e27261`
-- NuGet V3에 공개된 버전: `8.0.1`, `9.1.2`
+- 당시 NuGet V3에 공개된 버전: `8.0.1`, `9.1.2`
 - consumer compile 결과: `Reader.CanGetTalk()`, `Reader.GetTalk()`,
   `TalkResult.Source`, `TalkResult.IsVisible` 없음
-- 필요한 조치: current Talk API를 포함하는 새 stable Sharlayan.Lite package 발행 및
-  신규 cache restore/API 검증
 - 금지: local project reference, 임의 DLL 복사 또는 reflection 기반 consumer workaround
 
-- [ ] `ALLMESSAGES` custom signature 제거
-- [ ] `GetString(..., 2048)` 제거
-- [ ] Sharlayan current-first `GetTalk()` 사용
-- [ ] attach baseline 처리
-- [ ] process reconnect reset
-- [ ] readiness와 one-time logging 갱신
-- [ ] `"Dialogue window"` sentinel 제거
+`9.1.4` 해결 및 consumer 검증:
+
+- 완전히 새로운 NuGet cache에서 NuGet.org package restore 통과
+- repository metadata commit
+  `78d2eccb2025ef16786811b97aed8bbe30dc9552` 일치
+- nupkg SHA-256
+  `e310c00162d7775f84c66543a67a08410bb771143f58ce78b43251649e2b9d50` 일치
+- `net10.0` Talk API contract reflection 확인
+- Debug build 경고 0개, 오류 0개
+- unit test 130개 통과
+- Debug output에 `Sharlayan.dll`만 있고 `FFXIVClientStructs` assembly 없음
+
+- [x] `ALLMESSAGES` custom signature 제거
+- [x] `GetString(..., 2048)` 제거
+- [x] Sharlayan current-first `GetTalk()` 사용
+- [x] attach baseline 처리
+- [x] process reconnect reset
+- [x] readiness와 one-time logging 갱신
+- [x] `"Dialogue window"` sentinel 제거
 
 완료 조건:
 
-- NPC Talk는 raw pointer 없이 읽힌다.
-- attach 시 기존 LastTalk가 신규 번역으로 들어오지 않는다.
-- Talk failure가 CHATLOG polling을 중단하지 않는다.
+- [x] 코드 경로에서 NPC Talk는 raw pointer 없이 읽힌다.
+- [x] tracker 단위 테스트에서 attach 시 기존 LastTalk가 신규 번역으로 들어오지 않는다.
+- [x] CHATLOG와 Talk readiness 및 timer 시작은 서로 독립적이다.
+- [ ] packaged app과 실제 게임에서 CHATLOG/Talk 동시 동작, process 종료 및 재연결을
+  검증한다. 이 항목은 Phase 5 release gate다.
 
 ### Phase 3: Typed dialogue pipeline
 
 - [ ] `DialogueEntry` 모델 추가
-- [ ] `TalkObservationTracker` 추가
+- [x] `TalkObservationTracker` 추가 및 Phase 2 baseline/reconnect 단위 테스트
 - [ ] dialogue queue를 typed entry로 변경
 - [ ] `LastMsg` 중복 상태 제거
 - [ ] DialogueWindow가 entry text를 번역하도록 변경
@@ -608,8 +636,8 @@ release 산출물 검증:
 
 ## 22. 배포 순서
 
-1. 완료된 upstream 기준인 Hermes v2 production과 Sharlayan.Lite `9.1.2`를 확인한다.
-2. IronworksTranslator feature branch에서 stable `9.1.2`로 통합한다.
+1. 완료된 upstream 기준인 Hermes v2 production과 Sharlayan.Lite `9.1.4`를 확인한다.
+2. IronworksTranslator feature branch에서 stable `9.1.4`로 통합한다.
 3. unit test, Debug/Release build 및 packaged-app fallback 검증을 수행한다.
 4. 실제 게임에서 current Talk, CHATLOG 및 process reconnect를 smoke test한다.
 5. IronworksTranslator release를 배포한다.
@@ -655,7 +683,7 @@ fallback한다. 일반 사용자에게 `EmbeddedOnly` 설정이나 UI를 제공�
 ## 25. 구현 전 확정 사항
 
 - [확정] Phase 1 Sharlayan.Lite package version: `9.1.2`
-- [미확정] Phase 2 이상 package version: current Talk API를 포함하는 새 stable version
+- [확정] Phase 2 이상 Sharlayan.Lite package version: `9.1.4`
 - [확정] resource configuration: `ResourceMode.RemotePreferred`,
   `HermesV2LatestUri`, `ResourceCacheDirectory`
 - [확정] Talk API: `CanGetTalk()` / current-first `GetTalk()`

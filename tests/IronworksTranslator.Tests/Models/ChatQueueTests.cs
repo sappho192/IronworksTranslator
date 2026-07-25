@@ -16,12 +16,12 @@ public class ChatQueueTests
     [Fact]
     public void EnqueueDialogueIfNew_AddsFirstMessageAndUpdatesLastMessage()
     {
-        var added = ChatQueue.EnqueueDialogueIfNew("Dialogue window");
+        var added = ChatQueue.EnqueueDialogueIfNew("First message");
 
         Assert.True(added);
-        Assert.Equal("Dialogue window", ChatQueue.LastMsg);
+        Assert.Equal("First message", ChatQueue.LastMsg);
         Assert.True(ChatQueue.rq.TryDequeue(out var queued));
-        Assert.Equal("Dialogue window", queued);
+        Assert.Equal("First message", queued);
     }
 
     [Fact]
