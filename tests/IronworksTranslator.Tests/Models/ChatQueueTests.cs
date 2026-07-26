@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using IronworksTranslator.Models;
+using IronworksTranslator.Models.Enums;
 using Sharlayan.Core;
 
 namespace IronworksTranslator.Tests.Models;
@@ -15,18 +16,19 @@ public class ChatQueueTests
     [Fact]
     public void EnqueueDialogue_PreservesSpeakerAndText()
     {
-        ChatQueue.EnqueueDialogue(new DialogueEntry("Alphinaud", "First message"));
+        ChatQueue.EnqueueDialogue(new DialogueEntry(DialogueKind.StandardTalk, "Alphinaud", "First message"));
 
         Assert.True(ChatQueue.TryDequeueDialogue(out var queued));
         Assert.NotNull(queued);
         Assert.Equal("Alphinaud", queued.Speaker);
         Assert.Equal("First message", queued.Text);
+        Assert.Equal(DialogueKind.StandardTalk, queued.Kind);
     }
 
     [Fact]
     public void EnqueueDialogue_NormalizesNullSpeaker()
     {
-        ChatQueue.EnqueueDialogue(new DialogueEntry(null, "Narration"));
+        ChatQueue.EnqueueDialogue(new DialogueEntry(DialogueKind.BattleTalk, null, "Narration"));
 
         Assert.True(ChatQueue.TryDequeueDialogue(out var queued));
         Assert.NotNull(queued);
@@ -37,8 +39,8 @@ public class ChatQueueTests
     [Fact]
     public void EnqueueDialogue_PreservesSameTextFromDifferentSpeakers()
     {
-        ChatQueue.EnqueueDialogue(new DialogueEntry("Alphinaud", "Same"));
-        ChatQueue.EnqueueDialogue(new DialogueEntry("Tataru", "Same"));
+        ChatQueue.EnqueueDialogue(new DialogueEntry(DialogueKind.StandardTalk, "Alphinaud", "Same"));
+        ChatQueue.EnqueueDialogue(new DialogueEntry(DialogueKind.BattleTalk, "Tataru", "Same"));
 
         Assert.True(ChatQueue.TryDequeueDialogue(out var first));
         Assert.True(ChatQueue.TryDequeueDialogue(out var second));
@@ -46,6 +48,8 @@ public class ChatQueueTests
         Assert.NotNull(second);
         Assert.Equal("Alphinaud", first.Speaker);
         Assert.Equal("Tataru", second.Speaker);
+        Assert.Equal(DialogueKind.StandardTalk, first.Kind);
+        Assert.Equal(DialogueKind.BattleTalk, second.Kind);
     }
 
     [Fact]
@@ -59,7 +63,8 @@ public class ChatQueueTests
     {
         for (var i = 0; i < 105; i++)
         {
-            ChatQueue.EnqueueDialogue(new DialogueEntry($"Speaker {i}", $"Message {i}"));
+            ChatQueue.EnqueueDialogue(
+                new DialogueEntry(DialogueKind.StandardTalk, $"Speaker {i}", $"Message {i}"));
         }
 
         Assert.Equal(100, ChatQueue.rq.Count);

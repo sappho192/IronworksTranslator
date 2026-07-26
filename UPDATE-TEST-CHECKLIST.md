@@ -236,7 +236,7 @@ Sharlayan upstream smoke는 IronworksTranslator의 release readiness를 대신�
 
 Package and resource checks:
 
-- [ ] Restore 결과와 publish 산출물이 `Sharlayan.Lite 9.1.4`를 사용한다.
+- [ ] Restore 결과와 publish 산출물이 `Sharlayan.Lite 9.2.0`을 사용한다.
 - [ ] Publish 및 Velopack package에 `FFXIVClientStructs`, `HermesAddress`,
   `latest/address.json`, local `address.json` 또는 `UseInternalAddress` consumer가 없다.
 - [ ] 새 Hermes cache에서 앱을 시작하면 `RemotePreferred`가 remote

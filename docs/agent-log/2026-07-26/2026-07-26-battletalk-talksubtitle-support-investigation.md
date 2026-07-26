@@ -2,6 +2,73 @@
 
 작성일: 2026-07-26
 
+## 0. 2026-07-26 구현 진행 업데이트
+
+사용자 결정으로 두 기능을 같은 release에 포함하는 구현을 시작했다. 이 절은 아래의 초기
+조사 결론보다 최신이며, 아직 production 또는 release readiness를 주장하지 않는다.
+
+- 고정 FCS commit: `ed2cd7049c4d84d9e2ccb3eb55245ea712b040f1`
+- 목표 Sharlayan package: `9.2.0`
+- 목표 IronworksTranslator package: `1.3.0-beta.4`
+- 2026-07-26 사용자 결정으로 재현 가능한 장면을 찾지 못한 `TalkSubtitle`은 이번
+  release에서 제외하고 후속 조사로 돌렸다.
+- Hermes v2는 기존 세 resource를 필수로 유지하고 `battleTalk`를 optional로 확장한다.
+- exact FCS assembly에서 addon, UI array, AgentHUD queue layout을 추출하는 deterministic
+  probe/generator 경로를 구현했다.
+
+실게임 BattleTalk spike에서 확인한 current-visible 계약:
+
+- `_BattleTalk` addon visibility와 BattleTalk NumberArray index 0의 zero/nonzero 상태가
+  화면 열림/닫힘과 일치했다.
+- NumberArray index 0은 boolean이 아니며 관찰한 style에 따라 여러 nonzero 값을 사용했다.
+- BattleTalk StringArray index 0은 name, index 1은 text와 일치했다.
+- 빠른 직접 교체에서는 addon visibility가 유지된 채 StringArray text가 다음 값으로
+  교체됐다.
+- AgentHUD queue는 다음 항목의 pending 순서를 진단하는 데 유용했지만 current-visible
+  runtime source로 사용하지 않는다.
+- addon AtkValues에는 current name/text 계약으로 사용할 값이 없었다.
+- NumberArray/StringArray `UpdateState`는 한 frame 수준으로 사라질 수 있어 sequence ID로
+  사용하지 않는다.
+
+Sharlayan candidate API 실게임 결과:
+
+- hidden baseline은 `IsAvailable=true`, `IsVisible=false`로 관찰됐다.
+- 빠른 교체 중 혼합 snapshot은 transient `IsAvailable=false`가 되었고, 다음 stable
+  name/text에서 `Sequence`가 증가했다.
+- close/reopen과 서로 다른 연속 text에서 Sequence가 단조 증가했다.
+- 180초 correlation 관찰에서 7개 표시 event를 읽었고, 같은 3개 발화 묶음이 다시
+  나타났을 때도 새 `Sequence` 범위로 증가했다.
+- BattleTalk-only 후보의 후속 관찰에서는 동일 speaker/text가 중간의 안정적인 hidden
+  상태를 경계로 연속 재표시됐고 `Sequence`가 4에서 5로 증가했다. raw addon visibility와
+  NumberArray state도 같은 close/reopen 경계를 보였다.
+- visible 상태를 유지한 채 완전히 동일한 speaker/text로 직접 교체되는 경우는 관찰하지
+  못했으므로 지원 증거는 visibility generation 또는 content change가 있는 실제 관찰
+  형태로 한정한다.
+- style 7 variant의 빠른 직접 교체에서는 queue에 다음 text가 pending으로 나타난 뒤
+  addon visibility를 유지한 채 StringArray text가 교체됐고 public `Sequence`가 8에서
+  9로 증가했다. queue는 이 상관관계의 진단 증거로만 사용하며 runtime source는 UI
+  arrays와 addon visibility로 유지한다.
+- 같은 관찰 구간의 CHATLOG에는 BattleTalk와 관련된 `NPCDialog`/`BossQuotes` 항목이
+  없었다. 이는 해당 구간의 중복 부재 증거이며 전체 event 종류의 중복 부재를 뜻하지 않는다.
+- 별도 300초 TalkSubtitle 관찰에서는 addon visibility가 두 차례 전환됐지만 text는
+  계속 비어 있었다. hidden/empty lifecycle 증거로만 기록하며 화면 text 일치 PASS로
+  판정하지 않는다.
+- 숫자형 CHATLOG code 판별 관찰에서 대사 항목이 별도로 나타났지만 당시 BattleTalk
+  text와 상관되지 않았다. source 간 text-only 중복 제거는 계속 도입하지 않는다.
+- BattleTalk-only Sharlayan 9.2.0 local package를 독립 NuGet cache에서 소비해
+  `1.3.0-beta.4` single-file publish를 만들었고, 임시 EXE는 `DialogueWindow`와 WatchDog를
+  시작한 뒤 정상 종료됐다. 이 시점의 Hermes production에는 아직 BattleTalk resource가
+  없으므로 packaged startup PASS이며 packaged BattleTalk 활성화 PASS는 아니다.
+- 실제 이름과 문장은 repository 문서, commit 및 영구 로그에 기록하지 않았다.
+
+현재 남은 BattleTalk release gate:
+
+- reconnect, CHATLOG `NPCDialog`/`BossQuotes` event correlation
+- Hermes production 승격, Sharlayan 9.2.0 package publish/fresh-cache restore
+- IronworksTranslator packaged Release 및 beta.3→beta.4 update/restart
+
+위 gate가 끝나기 전에는 Hermes production, NuGet 및 `1.3.0-beta.4`를 게시하지 않는다.
+
 ## 1. 조사 목적
 
 이 문서는 IronworksTranslator의 Hermes v2 마이그레이션 이후 `BattleTalk`와

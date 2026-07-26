@@ -121,6 +121,7 @@ public class ChatWindowViewModelHelperTests
         var entry = ChatWindowViewModel.CreateDialogueEntry(translation);
 
         Assert.NotNull(entry);
+        Assert.Equal(DialogueKind.ChatLog, entry.Kind);
         Assert.Equal("Alphinaud", entry.Speaker);
         Assert.Equal("어서 와.", entry.Text);
     }
