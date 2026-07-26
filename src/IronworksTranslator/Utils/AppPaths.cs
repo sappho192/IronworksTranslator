@@ -8,6 +8,9 @@ namespace IronworksTranslator.Utils
     public static class AppPaths
     {
         private const string AppFolderName = "IronworksTranslator";
+        // Increment this before shipping any persisted change that an older
+        // application may not deserialize. Never reuse an existing schema file.
+        internal const int SettingsSchemaVersion = 2;
 
         public static string RoamingAppDataDirectory { get; } = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -17,9 +20,13 @@ namespace IronworksTranslator.Utils
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             AppFolderName);
 
-        public static string SettingsFilePath { get; } = Path.Combine(
+        public static string LegacySettingsFilePath { get; } = Path.Combine(
             RoamingAppDataDirectory,
             "settings.yaml");
+
+        public static string SettingsFilePath { get; } = GetSettingsFilePath(
+            RoamingAppDataDirectory,
+            SettingsSchemaVersion);
 
         public static string LogsDirectory { get; } = Path.Combine(
             LocalAppDataDirectory,
@@ -73,9 +80,45 @@ namespace IronworksTranslator.Utils
 
             foreach (var baseDirectory in GetLegacyBaseDirectories())
             {
-                MigrateLegacyFile(Path.Combine(baseDirectory, "settings.yaml"), SettingsFilePath);
+                MigrateLegacyFile(Path.Combine(baseDirectory, "settings.yaml"), LegacySettingsFilePath);
                 MigrateLegacyMiLMMTModels(baseDirectory);
             }
+        }
+
+        public static string? FindSettingsMigrationSourcePath()
+        {
+            return FindSettingsMigrationSourcePath(
+                RoamingAppDataDirectory,
+                SettingsSchemaVersion);
+        }
+
+        internal static string GetSettingsFilePath(string directory, int schemaVersion)
+        {
+            if (schemaVersion < 2)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(schemaVersion),
+                    "Versioned settings schemas start at version 2.");
+            }
+
+            return Path.Combine(directory, $"settings.v{schemaVersion}.yaml");
+        }
+
+        internal static string? FindSettingsMigrationSourcePath(
+            string directory,
+            int currentSchemaVersion)
+        {
+            for (var schemaVersion = currentSchemaVersion - 1; schemaVersion >= 2; schemaVersion--)
+            {
+                var candidate = GetSettingsFilePath(directory, schemaVersion);
+                if (File.Exists(candidate))
+                {
+                    return candidate;
+                }
+            }
+
+            var legacyCandidate = Path.Combine(directory, "settings.yaml");
+            return File.Exists(legacyCandidate) ? legacyCandidate : null;
         }
 
         private static void MigrateLegacyMiLMMTModels(string baseDirectory)

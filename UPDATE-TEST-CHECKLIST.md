@@ -81,9 +81,10 @@ Expected result:
 - Accepting the terms writes:
 
 ```powershell
-$env:APPDATA\IronworksTranslator\settings.yaml
+$env:APPDATA\IronworksTranslator\settings.v2.yaml
 ```
 
+- Fresh installs do not need to create the unversioned legacy `settings.yaml`.
 - An encrypted `.iwlog` log file is created under:
 
 ```powershell
@@ -130,6 +131,8 @@ For portable migration:
 Expected result:
 
 - `settings.yaml` is copied to `%APPDATA%\IronworksTranslator\settings.yaml`.
+- The app imports that legacy file into `%APPDATA%\IronworksTranslator\settings.v2.yaml`.
+- The imported legacy `settings.yaml` remains available as a downgrade snapshot for older builds.
 - `data\model` is copied to `%LOCALAPPDATA%\IronworksTranslator\data\model` if the destination was empty.
 - Existing destination files are not overwritten.
 
@@ -204,6 +207,16 @@ Expected result:
 - Settings, logs, and model files are preserved.
 - Returning from Beta to Stable is manual: reinstall the latest Stable installer. Automatic Stable downgrade is not supported in this first Beta channel.
 
+Settings schema isolation check:
+
+1. Start with an older package and a populated unversioned `settings.yaml`.
+2. Launch the newer package and confirm it imports the settings into `settings.v2.yaml`.
+3. Confirm the legacy `settings.yaml` remains readable by the older package.
+4. Change settings in the newer package and confirm only `settings.v2.yaml` changes.
+5. Reinstall and launch the older package. Confirm it reaches the main window and update prompt using its preserved `settings.yaml`.
+6. Change settings in the older package and confirm `settings.v2.yaml` is unchanged.
+7. For every future incompatible settings change, increment `AppPaths.SettingsSchemaVersion`; never repurpose or overwrite an existing versioned settings file.
+
 ## 8. Post-Update Regression Checks
 
 After an update:
@@ -261,5 +274,15 @@ Do not publish the release if any of these fail:
 - Installed app cannot update from GitHub.
 - Settings or model files are deleted during update.
 - Update failure shows a crash instead of a recoverable error.
+- Fatal startup failure does not show an error dialog and terminate without leaving background processes.
 - The app writes user settings or logs into the install/current app folder.
 - Any required Hermes v2 or Sharlayan check in section 9 is incomplete or fails.
+
+Fatal startup check:
+
+1. Back up the test profile and introduce a deterministic invalid settings value.
+2. Launch the packaged app through `IronworksTranslator.Launcher.exe`.
+3. Confirm a startup failure dialog appears before the application exits.
+4. Confirm the dialog does not depend on successfully loaded settings or localization.
+5. Dismiss the dialog and confirm `IronworksTranslator.exe` exits with no watchdog or child window process left behind.
+6. Confirm the encrypted log contains the original startup exception and ends with complete readable frames.

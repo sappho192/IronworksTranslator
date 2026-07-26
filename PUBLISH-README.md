@@ -86,6 +86,23 @@ The model files are not part of the default app update package. The app stores d
 - The first Beta channel does not provide automatic downgrade back to Stable. Beta testers should reinstall the latest Stable installer to return to Stable.
 - The `1.2.0-beta.*` packages were reset before public use. Start the launcher-based Beta line at `1.2.1-beta.1`; do not rely on automatic updates from `1.2.0-beta.*`.
 
+## Settings Schema Compatibility
+
+Persisted settings files are isolated by schema version so reinstalling an older
+application does not make it parse settings written by a newer schema.
+
+- The unversioned `%APPDATA%\IronworksTranslator\settings.yaml` is the legacy
+  version 1 downgrade snapshot and must remain readable by released older builds.
+- Current settings use `settings.v{N}.yaml`, where `N` is
+  `AppPaths.SettingsSchemaVersion`.
+- A new schema imports the newest earlier snapshot once and then writes only its
+  own versioned file.
+- Previous schema files must not be overwritten after migration.
+- Increment `SettingsSchemaVersion` before shipping any persisted property or
+  value change that an older application may not deserialize.
+- Settings that can be represented safely may be normalized during import, but
+  compatibility must not rely on predicting every future enum or property value.
+
 ## Useful Options
 
 ```powershell

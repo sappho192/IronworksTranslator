@@ -82,8 +82,16 @@ namespace IronworksTranslator.Models.Settings
 
         public static void UpdateSettingsFile(IronworksSettings settings)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(AppPaths.SettingsFilePath)!);
-            File.WriteAllText(AppPaths.SettingsFilePath, SerializeSettings(settings));
+            WriteSettingsFile(
+                AppPaths.SettingsFilePath,
+                SerializeSettings(settings));
+        }
+
+        internal static void RepairLegacyV1SettingsSnapshotForBeta2(IronworksSettings settings)
+        {
+            WriteSettingsFile(
+                AppPaths.LegacySettingsFilePath,
+                SerializeLegacyV1Settings(settings));
         }
 
         internal static IronworksSettings DeserializeSettings(string settingsYaml)
@@ -101,6 +109,17 @@ namespace IronworksTranslator.Models.Settings
         {
             var serializer = new SerializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .WithTypeInspector(inspector => new SettingsTypeInspector(inspector))
+                .Build();
+
+            return serializer.Serialize(settings);
+        }
+
+        internal static string SerializeLegacyV1Settings(IronworksSettings settings)
+        {
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .WithTypeConverter(new LegacyV1SettingsYamlTypeConverter())
                 .WithTypeInspector(inspector => new SettingsTypeInspector(inspector))
                 .Build();
 
@@ -140,6 +159,25 @@ namespace IronworksTranslator.Models.Settings
                 .Replace("Ironworks_Ja_Ko", nameof(TranslatorEngine.MiLMMT))
                 .Replace("Ironworks Ja→Ko (사용 금지)", nameof(TranslatorEngine.MiLMMT))
                 .Replace("MiLLMT", nameof(TranslatorEngine.MiLMMT));
+        }
+
+        private static void WriteSettingsFile(string filePath, string contents)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+            var tempPath = $"{filePath}.{Guid.NewGuid():N}.tmp";
+
+            try
+            {
+                File.WriteAllText(tempPath, contents);
+                File.Move(tempPath, filePath, overwrite: true);
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
+                }
+            }
         }
 
         internal static void NormalizeSettings(IronworksSettings settings)

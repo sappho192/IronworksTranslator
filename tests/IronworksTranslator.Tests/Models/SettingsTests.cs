@@ -200,6 +200,103 @@ public class SettingsTests
         Assert.DoesNotContain("MiLLMT", normalized);
     }
 
+    [Theory]
+    [InlineData("MiLLMT", "MiLLMT_4B")]
+    [InlineData("MiLMMT", "MiLMMT_4B")]
+    public void DeserializeSettings_AcceptsLegacyAndCorrectedMiLMMTWireValues(
+        string engineValue,
+        string modelSizeValue)
+    {
+        var yaml = $$"""
+            ui_settings:
+              is_tos_displayed: true
+            chat_ui_settings:
+              font: KoPubWorld Dotum
+            translator_settings:
+              translator_engine: {{engineValue}}
+              milmmt_model_size: {{modelSizeValue}}
+              milmmt_quantization: Q4_K_M
+              local_model_device_priority: Cuda
+              local_model_device_priority_user_selected: true
+            channel_settings:
+              preset_name: Default
+            """;
+
+        var settings = IronworksSettings.DeserializeSettings(yaml);
+
+        Assert.Equal(TranslatorEngine.MiLMMT, settings.TranslatorSettings!.TranslatorEngine);
+        Assert.Equal(MiLMMTModelSize.MiLMMT_4B, settings.TranslatorSettings.MiLMMTModelSize);
+        Assert.Equal(MiLMMTQuantization.Q4_K_M, settings.TranslatorSettings.MiLMMTQuantization);
+        Assert.Equal(LocalModelDevicePriority.Cuda, settings.TranslatorSettings.LocalModelDevicePriority);
+        Assert.True(settings.TranslatorSettings.LocalModelDevicePriorityUserSelected);
+    }
+
+    [Fact]
+    public void SerializeSettings_UsesCurrentSchemaMiLMMTWireValues()
+    {
+        var settings = IronworksSettings.CreateDefault();
+        settings.TranslatorSettings!.TranslatorEngine = TranslatorEngine.MiLMMT;
+        settings.TranslatorSettings.MiLMMTModelSize = MiLMMTModelSize.MiLMMT_4B;
+        settings.TranslatorSettings.MiLMMTQuantization = MiLMMTQuantization.Q4_K_M;
+
+        var serialized = IronworksSettings.SerializeSettings(settings);
+
+        Assert.Contains("translator_engine: MiLMMT", serialized);
+        Assert.Contains("milmmt_model_size: MiLMMT_4B", serialized);
+        Assert.DoesNotContain("translator_engine: MiLLMT", serialized);
+        Assert.DoesNotContain("milmmt_model_size: MiLLMT_4B", serialized);
+    }
+
+    [Fact]
+    public void SerializeLegacyV1Settings_UsesBeta2MiLMMTWireValues()
+    {
+        var settings = IronworksSettings.CreateDefault();
+        settings.TranslatorSettings!.TranslatorEngine = TranslatorEngine.MiLMMT;
+        settings.TranslatorSettings.MiLMMTModelSize = MiLMMTModelSize.MiLMMT_4B;
+        settings.TranslatorSettings.MiLMMTQuantization = MiLMMTQuantization.Q4_K_M;
+
+        var serialized = IronworksSettings.SerializeLegacyV1Settings(settings);
+
+        Assert.Contains("translator_engine: MiLLMT", serialized);
+        Assert.Contains("milmmt_model_size: MiLLMT_4B", serialized);
+        Assert.DoesNotContain("translator_engine: MiLMMT", serialized);
+        Assert.DoesNotContain("milmmt_model_size: MiLMMT_4B", serialized);
+
+        var beta2Deserializer = new DeserializerBuilder()
+            .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .IgnoreUnmatchedProperties()
+            .Build();
+        var beta2Settings = beta2Deserializer.Deserialize<Beta2SettingsContract>(serialized);
+
+        Assert.Equal(
+            Beta2TranslatorEngine.MiLLMT,
+            beta2Settings.TranslatorSettings!.TranslatorEngine);
+        Assert.Equal(
+            Beta2MiLMMTModelSize.MiLLMT_4B,
+            beta2Settings.TranslatorSettings.MiLMMTModelSize);
+    }
+
+    [Fact]
+    public void SerializeLegacyV1Settings_FallsBackFromNewerModelValues()
+    {
+        var settings = IronworksSettings.CreateDefault();
+        settings.TranslatorSettings!.TranslatorEngine = TranslatorEngine.MiLMMT;
+        settings.TranslatorSettings.MiLMMTModelSize = MiLMMTModelSize.MiLMMT_1B_Compact;
+
+        var serialized = IronworksSettings.SerializeLegacyV1Settings(settings);
+        var beta2Deserializer = new DeserializerBuilder()
+            .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .IgnoreUnmatchedProperties()
+            .Build();
+        var beta2Settings = beta2Deserializer.Deserialize<Beta2SettingsContract>(serialized);
+
+        Assert.Contains("milmmt_model_size: MiLLMT_1B", serialized);
+        Assert.DoesNotContain("MiLMMT_1B_Compact", serialized);
+        Assert.Equal(
+            Beta2MiLMMTModelSize.MiLLMT_1B,
+            beta2Settings.TranslatorSettings!.MiLMMTModelSize);
+    }
+
     [Fact]
     public void SettingsDeserializer_IgnoresUnknownProperties()
     {
@@ -318,5 +415,32 @@ public class SettingsTests
         Assert.Equal(expectedEngines, engines);
         Assert.DoesNotContain("Ironworks_Ja_Ko", Enum.GetNames<TranslatorEngine>());
         Assert.Equal(2, (int)TranslatorEngine.MiLMMT);
+    }
+
+    private sealed class Beta2SettingsContract
+    {
+        public Beta2TranslatorSettings? TranslatorSettings { get; set; }
+    }
+
+    private sealed class Beta2TranslatorSettings
+    {
+        public Beta2TranslatorEngine TranslatorEngine { get; set; }
+
+        [YamlMember(Alias = "milmmt_model_size")]
+        public Beta2MiLMMTModelSize MiLMMTModelSize { get; set; }
+    }
+
+    private enum Beta2TranslatorEngine
+    {
+        Papago = 0,
+        DeepL_API = 1,
+        MiLLMT = 2,
+    }
+
+    private enum Beta2MiLMMTModelSize
+    {
+        MiLLMT_1B = 0,
+        MiLLMT_4B,
+        MiLLMT_12B,
     }
 }

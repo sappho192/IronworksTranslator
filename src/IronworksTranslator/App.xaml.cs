@@ -131,14 +131,13 @@ namespace IronworksTranslator
         /// <summary>
         /// Occurs when the application is loading.
         /// </summary>
-        private void OnStartup(object sender, StartupEventArgs e)
+        private async void OnStartup(object sender, StartupEventArgs e)
         {
-            InitLogger();
-            SetupUnhandledExceptionHandlers();
-
-            // Check if the _host is disposed
             try
             {
+                InitLogger();
+                SetupUnhandledExceptionHandlers();
+
                 _host.Value.Start();
                 var chatWindow = GetService<ChatWindow>();
                 chatWindow.Show();
@@ -147,8 +146,50 @@ namespace IronworksTranslator
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to start host.");
-                return;
+                Log.Fatal(ex, "Application startup failed; the application will exit.");
+                await StartupFailureHandler.HandleAsync(
+                    ShowStartupFailureMessage,
+                    () => StopHostOnceAsync("Application startup failure"),
+                    exitCode => Current.Shutdown(exitCode),
+                    (secondaryException, stage) =>
+                        Log.Error(
+                            secondaryException,
+                            "Secondary failure while handling application startup failure. Stage: {Stage}",
+                            stage));
+            }
+        }
+
+        private static void ShowStartupFailureMessage()
+        {
+            var title = GetLocalizedStringOrFallback(
+                "app.startup.failed.title",
+                "IronworksTranslator startup error");
+            var message = GetLocalizedStringOrFallback(
+                "app.startup.failed.description",
+                "IronworksTranslator could not start and will now close. " +
+                "Please report the most recent encrypted log file in the logs folder.");
+
+            MessageBox.Show(
+                message,
+                title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+
+        private static string GetLocalizedStringOrFallback(string key, string fallback)
+        {
+            try
+            {
+                var localized = Localizer.GetString(key);
+                return string.IsNullOrWhiteSpace(localized) ? fallback : localized;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(
+                    ex,
+                    "Failed to resolve localized startup failure text. ResourceKey: {ResourceKey}",
+                    key);
+                return fallback;
             }
         }
 
