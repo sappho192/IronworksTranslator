@@ -133,6 +133,8 @@ on supported hardware. CUDA must report a `CUDA*` buffer and Vulkan must report 
 
 For local update testing, build two different versions into the same `Releases` folder, install the older `Setup.exe`, then launch it and confirm it updates to the newer release.
 
+After the update package download succeeds, verify that the Velopack `Packages` directory retains only the newest full `.nupkg`. Older full packages, delta packages, and incomplete `.partial` downloads are removed automatically before restart; this cleanup does not remove `Setup.exe`, installed application files, settings, logs, or model data.
+
 For local Beta update testing, build two different Beta versions into `Releases\beta`, install the older `Sappho192.IronworksTranslator-beta-Setup.exe`, then launch it and confirm it updates to the newer Beta release.
 
 ## Why Not Visual Studio Publish?

@@ -175,6 +175,7 @@ Expected result:
 - Choosing `Download and restart` downloads the update.
 - The app exits, applies the update, restarts, and reports the new version.
 - The restart target is `IronworksTranslator.Launcher.exe`, which prompts for UAC and starts the real app.
+- After the update package download succeeds, the Velopack `Packages` directory retains only the newest full `.nupkg`; older full packages, delta packages, and incomplete `.partial` downloads are removed before restart.
 - Settings under `%APPDATA%\IronworksTranslator` are preserved.
 - Logs and model files under `%LOCALAPPDATA%\IronworksTranslator` are preserved.
 
@@ -222,6 +223,7 @@ Settings schema isolation check:
 After an update:
 
 - Open the app again and confirm no repeated update prompt appears for the same version.
+- Confirm that cleanup affects only the Velopack `Packages` directory; the downloaded `Setup.exe`, installed app files, settings, logs, and model files must remain untouched.
 - Toggle translator on/off.
 - Show/hide chat and dialogue windows.
 - Reset chat/dialogue window positions.
