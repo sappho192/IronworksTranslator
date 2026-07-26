@@ -5,6 +5,8 @@ using IronworksTranslator.Models.Translator;
 using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Aspect;
 using ObservableCollections;
+using Serilog;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Wpf.Ui;
@@ -21,6 +23,9 @@ namespace IronworksTranslator.ViewModels.Pages
 
         [ObservableProperty]
         private string _appVersion = string.Empty;
+
+        [ObservableProperty]
+        private string _logDirectorySize = "0B";
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
@@ -314,6 +319,90 @@ namespace IronworksTranslator.ViewModels.Pages
             }
 
             return informationalVersion.Split('+', 2)[0];
+        }
+
+        public void RefreshLogDirectorySize()
+        {
+            LogDirectorySize = FormatBytes(GetDirectorySize(AppPaths.LogsDirectory));
+        }
+
+        [RelayCommand]
+        [TraceMethod]
+        private void OnClearLogDirectory()
+        {
+            if (!Directory.Exists(AppPaths.LogsDirectory))
+            {
+                return;
+            }
+
+            string[] filePaths = Directory
+                .GetFiles(AppPaths.LogsDirectory, "*.*")
+                .Where(filePath =>
+                    string.Equals(Path.GetExtension(filePath), ".iwlog", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(Path.GetExtension(filePath), ".txt", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            foreach (string filePath in filePaths)
+            {
+                try
+                {
+                    File.Delete(filePath);
+                }
+                catch (IOException ex)
+                {
+                    Log.Error(ex, "Failed to delete log file {LogFile}.", filePath);
+                }
+            }
+
+            RefreshLogDirectorySize();
+        }
+
+        [RelayCommand]
+        [TraceMethod]
+        private void OnOpenLogDirectory()
+        {
+            Directory.CreateDirectory(AppPaths.LogsDirectory);
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                ArgumentList = { AppPaths.LogsDirectory },
+            });
+        }
+
+        private static long GetDirectorySize(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                return 0;
+            }
+
+            long size = 0;
+            DirectoryInfo dirInfo = new(path);
+
+            foreach (FileInfo fi in dirInfo.GetFiles("*", SearchOption.AllDirectories))
+            {
+                size += fi.Length;
+            }
+
+            return size;
+        }
+
+        internal static string FormatBytes(long bytes)
+        {
+            const int scale = 1024;
+            string[] orders = ["GB", "MB", "KB", "Bytes"];
+            long max = (long)Math.Pow(scale, orders.Length - 1);
+
+            foreach (string order in orders)
+            {
+                if (bytes >= max)
+                {
+                    return string.Format("{0:##.##}{1}", decimal.Divide(bytes, max), order);
+                }
+
+                max /= scale;
+            }
+
+            return "0B";
         }
 
         [RelayCommand]

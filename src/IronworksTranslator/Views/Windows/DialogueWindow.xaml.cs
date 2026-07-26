@@ -100,8 +100,18 @@ namespace IronworksTranslator.Views.Windows
                         }
                         if (!msg.Equals(string.Empty))
                         {
-                            var translated = Translate(msg, IronworksSettings.Instance.ChannelSettings.NpcDialog.MajorLanguage);
-                            var displayText = DialogueTextFormatter.Format(entry.Speaker, translated);
+                            var sourceLanguage =
+                                IronworksSettings.Instance.ChannelSettings.NpcDialog.MajorLanguage;
+                            var translated = Translate(msg, sourceLanguage);
+                            var translatedSpeaker = DialogueSpeakerTranslation.TranslateOrOriginal(
+                                entry.Speaker,
+                                speaker => Translate(speaker, sourceLanguage),
+                                ex => Log.Warning(
+                                    ex,
+                                    "Failed to translate dialogue speaker; using the original speaker."));
+                            var displayText = DialogueTextFormatter.Format(
+                                translatedSpeaker,
+                                translated);
 
                             Application.Current.Dispatcher.Invoke(() =>
                             {

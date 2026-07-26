@@ -16,6 +16,12 @@ namespace IronworksTranslator.Views.Pages
             InitializeComponent();
 
             Dispatcher.InvokeAsync(ViewModel.RunStartupPromptsAsync);
+            Loaded += DashboardPage_Loaded;
+        }
+
+        private async void DashboardPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            await ViewModel.LoadReleaseNotesAsync();
         }
 
         private void tsShowChatWindow_Click(object sender, RoutedEventArgs e)
