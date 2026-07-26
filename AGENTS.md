@@ -75,6 +75,29 @@ dotnet tool update --global vpk --version 1.2.0
 - Velopack 업데이트 흐름을 바꾸는 경우 `UPDATE-TEST-CHECKLIST.md`와 `PUBLISH-README.md`를 함께 확인하고 갱신하세요.
 - `WatchDogMain.exe`, fonts, embedded string resources, encrypted log public key는 앱 실행/배포에 필요한 자산입니다. csproj의 copy/resource 설정을 변경할 때 실제 publish 산출물을 확인하세요.
 
+### Sharlayan.Lite 패키지 provenance gate
+
+`Sharlayan.Lite`는 동일한 NuGet 버전으로도 로컬 feed의 이전 후보와 nuget.org의
+공식 패키지가 서로 다른 commit/DLL일 수 있습니다. 특히 Hermes/대사 reader 변경 뒤에는
+버전 번호만 확인해 release 입력을 신뢰하지 마세요.
+
+- 로컬 Sharlayan feed 또는 소스 빌드를 시험할 때는 반드시 전용 `NUGET_PACKAGES` cache를
+  사용합니다. 해당 cache로 Ironworks release를 build/publish하지 않습니다.
+- release 전에는 `dotnet nuget list source`로 local Sharlayan feed가 활성화되어 있지 않은지
+  확인하고, 새로 만든 전용 cache에서 nuget.org 공식 source만 사용해 restore합니다. 사용자
+  전역 cache를 재사용하거나 넓게 삭제하지 마세요.
+- restore 뒤 `<cache>\\sharlayan.lite\\<version>\\.nupkg.metadata`의 `source`가
+  `https://api.nuget.org/v3/index.json`이고, `contentHash`가 `project.assets.json`의
+  `Sharlayan.Lite/<version>` hash와 일치하는지 확인합니다. 새 패키지를 받았다면
+  해당 package의 `AssemblyInformationalVersion`/commit도 release 기록에 남깁니다.
+- `publish-release.ps1`도 같은 깨끗한 공식 cache를 사용하도록 `NUGET_PACKAGES`를 유지한
+  상태에서 실행합니다. 그 뒤 publish/Velopack에 포함된 `Sharlayan.dll`의 SHA-256과
+  `AssemblyInformationalVersion`을 그 cache의 `lib\\net10.0\\Sharlayan.dll`과 직접
+  대조합니다. 다르면 패키징과 게시를 중단하고 restore source/cache 오염부터 해결합니다.
+- 이 gate는 build/test 성공이나 `PackageReference` 버전 일치로 대체되지 않습니다. 공식
+  패키지 DLL을 포함한 실제 Release 앱으로 BattleTalk 등 변경된 capability의 smoke를 다시
+  통과해야 합니다.
+
 ## 작업 전 체크리스트
 
 - 시작할 때 `git status --short --branch`로 사용자 변경을 확인하고, 관련 없는 변경은 되돌리지 마세요.
