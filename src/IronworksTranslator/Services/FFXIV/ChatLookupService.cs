@@ -157,28 +157,15 @@ namespace IronworksTranslator.Services.FFXIV
             try
             {
                 var handler = CurrentMemoryHandler;
-                if (handler?.Reader.CanGetTalk() != true)
+                if (handler == null)
                 {
                     LogTalkNotReady();
                     return;
                 }
 
                 _talkUnavailableLogged = false;
-                TalkResult talk = handler.Reader.GetTalk();
-                if (!_talkObservationTracker.ShouldEnqueue(talk))
-                {
-                    return;
-                }
-
-                var dialogueEntry = new DialogueEntry(talk.Name, talk.Text);
-                ChatQueue.EnqueueDialogue(dialogueEntry);
-                Log.Debug(
-                    "Enqueued Talk observation. Source: {TalkSource}, Visible: {IsVisible}, " +
-                    "Speaker length: {SpeakerLength}, Text length: {TextLength}",
-                    talk.Source,
-                    talk.IsVisible,
-                    dialogueEntry.Speaker.Length,
-                    dialogueEntry.Text.Length);
+                PollStandardTalk(handler);
+                PollBattleTalk(handler);
             }
             catch (System.ComponentModel.Win32Exception)
             {
@@ -189,6 +176,81 @@ namespace IronworksTranslator.Services.FFXIV
             {
                 Log.Error(ex, "Error in UpdateDialogue timer callback");
             }
+        }
+
+        private void PollStandardTalk(MemoryHandler handler)
+        {
+            if (!handler.Reader.CanGetCurrentTalk())
+            {
+                return;
+            }
+
+            try
+            {
+                TalkResult talk = handler.Reader.GetCurrentTalk();
+                if (!_talkObservationTracker.ShouldEnqueue(talk))
+                {
+                    return;
+                }
+
+                EnqueueDialogue(DialogueKind.StandardTalk, talk.Name, talk.Text);
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "StandardTalk polling failed; other dialogue sources will continue.");
+            }
+        }
+
+        private void PollBattleTalk(MemoryHandler handler)
+        {
+            if (!handler.Reader.CanGetBattleTalk())
+            {
+                return;
+            }
+
+            try
+            {
+                BattleTalkResult battleTalk = handler.Reader.GetBattleTalk();
+                if (!_talkObservationTracker.ShouldEnqueue(battleTalk))
+                {
+                    return;
+                }
+
+                EnqueueDialogue(
+                    DialogueKind.BattleTalk,
+                    battleTalk.Name,
+                    battleTalk.Text,
+                    battleTalk.Sequence);
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "BattleTalk polling failed; other dialogue sources will continue.");
+            }
+        }
+
+        private static void EnqueueDialogue(
+            DialogueKind kind,
+            string? speaker,
+            string text,
+            long? sequence = null)
+        {
+            var dialogueEntry = new DialogueEntry(kind, speaker, text);
+            ChatQueue.EnqueueDialogue(dialogueEntry);
+            Log.Debug(
+                "Enqueued dialogue observation. Kind: {DialogueKind}, Sequence: {Sequence}, " +
+                "Speaker length: {SpeakerLength}, Text length: {TextLength}",
+                kind,
+                sequence,
+                dialogueEntry.Speaker.Length,
+                dialogueEntry.Text.Length);
         }
 
         [TraceMethod]
@@ -280,7 +342,10 @@ namespace IronworksTranslator.Services.FFXIV
         private void EnsureDialogueTimerStartedIfReady()
         {
             var handler = CurrentMemoryHandler;
-            if (handler?.Reader.CanGetTalk() != true)
+            if (handler == null
+                || !HasAnyDialogueCapability(
+                    handler.Reader.CanGetCurrentTalk(),
+                    handler.Reader.CanGetBattleTalk()))
             {
                 LogTalkNotReady();
                 return;
@@ -298,6 +363,13 @@ namespace IronworksTranslator.Services.FFXIV
             }
         }
 
+        internal static bool HasAnyDialogueCapability(
+            bool standardTalk,
+            bool battleTalk)
+        {
+            return standardTalk || battleTalk;
+        }
+
         private void OnMemoryLocationsFound(
             object sender,
             ConcurrentDictionary<string, MemoryLocation> memoryLocations,
@@ -310,12 +382,15 @@ namespace IronworksTranslator.Services.FFXIV
 
             LogResourceDiagnosticsOnce(handler);
             var hasChatLog = memoryLocations.ContainsKey(Signatures.CHATLOG_KEY);
-            var hasTalk = handler.Reader.CanGetTalk();
+            var hasTalk = handler.Reader.CanGetCurrentTalk();
+            var hasBattleTalk = handler.Reader.CanGetBattleTalk();
             Log.Information(
-                "Sharlayan memory locations resolved in {ProcessingTime} ms. CHATLOG: {HasChatLog}, Talk: {HasTalk}",
+                "Sharlayan memory locations resolved in {ProcessingTime} ms. CHATLOG: {HasChatLog}, " +
+                "StandardTalk: {HasTalk}, BattleTalk: {HasBattleTalk}",
                 processingTime,
                 hasChatLog,
-                hasTalk);
+                hasTalk,
+                hasBattleTalk);
 
             lock (_timerLock)
             {

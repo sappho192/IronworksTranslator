@@ -82,6 +82,31 @@ public class TalkObservationTrackerTests
         Assert.True(_tracker.ShouldEnqueue(Current("アルフィノ", "어서 와! 👋")));
     }
 
+    [Fact]
+    public void BattleTalk_UsesSequenceEvenWhenPairIsIdentical()
+    {
+        Assert.True(_tracker.ShouldEnqueue(new BattleTalkResult(true, true, "Voice", "Fear.", 10)));
+        Assert.False(_tracker.ShouldEnqueue(new BattleTalkResult(true, true, "Voice", "Fear.", 10)));
+        Assert.True(_tracker.ShouldEnqueue(new BattleTalkResult(true, true, "Voice", "Fear.", 11)));
+    }
+
+    [Fact]
+    public void DialogueSources_KeepIndependentBaselines()
+    {
+        Assert.True(_tracker.ShouldEnqueue(Current("Voice", "Same")));
+        Assert.True(_tracker.ShouldEnqueue(new BattleTalkResult(true, true, "Voice", "Same", 1)));
+    }
+
+    [Fact]
+    public void Reset_ClearsAllSourceBaselines()
+    {
+        Assert.True(_tracker.ShouldEnqueue(new BattleTalkResult(true, true, "Voice", "Same", 1)));
+
+        _tracker.Reset();
+
+        Assert.True(_tracker.ShouldEnqueue(new BattleTalkResult(true, true, "Voice", "Same", 1)));
+    }
+
     private static TalkResult Current(string speaker, string text)
     {
         return new TalkResult(true, speaker, text, TalkSource.Current, true);

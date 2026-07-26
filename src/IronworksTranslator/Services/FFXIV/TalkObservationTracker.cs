@@ -9,6 +9,8 @@ namespace IronworksTranslator.Services.FFXIV
         private bool _wasCurrentVisible;
         private string _speaker = string.Empty;
         private string _text = string.Empty;
+        private bool _hasBattleSequence;
+        private long _battleSequence;
 
         public bool ShouldEnqueue(TalkResult snapshot)
         {
@@ -42,6 +44,30 @@ namespace IronworksTranslator.Services.FFXIV
             }
         }
 
+        public bool ShouldEnqueue(BattleTalkResult snapshot)
+        {
+            ArgumentNullException.ThrowIfNull(snapshot);
+
+            lock (_syncRoot)
+            {
+                if (!snapshot.IsAvailable
+                    || !snapshot.IsVisible
+                    || string.IsNullOrEmpty(snapshot.Text))
+                {
+                    return false;
+                }
+
+                if (_hasBattleSequence && snapshot.Sequence == _battleSequence)
+                {
+                    return false;
+                }
+
+                _hasBattleSequence = true;
+                _battleSequence = snapshot.Sequence;
+                return true;
+            }
+        }
+
         public void Reset()
         {
             lock (_syncRoot)
@@ -50,6 +76,8 @@ namespace IronworksTranslator.Services.FFXIV
                 _wasCurrentVisible = false;
                 _speaker = string.Empty;
                 _text = string.Empty;
+                _hasBattleSequence = false;
+                _battleSequence = 0;
             }
         }
     }

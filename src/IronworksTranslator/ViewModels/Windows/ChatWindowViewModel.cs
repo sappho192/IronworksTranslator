@@ -522,7 +522,7 @@ namespace IronworksTranslator.ViewModels.Windows
             ArgumentNullException.ThrowIfNull(translation);
 
             return translation.TranslatedText is string translatedText
-                ? new DialogueEntry(translation.Author, translatedText)
+                ? new DialogueEntry(DialogueKind.ChatLog, translation.Author, translatedText)
                 : null;
         }
 
