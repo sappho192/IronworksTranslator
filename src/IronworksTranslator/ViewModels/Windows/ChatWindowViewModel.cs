@@ -241,6 +241,10 @@ namespace IronworksTranslator.ViewModels.Windows
                             author,
                             MiLMMTTranslationKind.Dialogue,
                             chatCancellation.Token);
+                    text.Author = await TranslateDialogueSpeakerAsync(
+                        text.Author,
+                        channel.MajorLanguage,
+                        chatCancellation.Token);
                     DialogueEntry? dialogueEntry = CreateDialogueEntry(text);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -442,6 +446,24 @@ namespace IronworksTranslator.ViewModels.Windows
             }
 
             return text;
+        }
+
+        private static async Task<string> TranslateDialogueSpeakerAsync(
+            string? speaker,
+            ClientLanguage sourceLanguage,
+            CancellationToken cancellationToken)
+        {
+            return await DialogueSpeakerTranslation.TranslateOrOriginalAsync(
+                speaker,
+                (value, token) => TranslateAsync(
+                    value,
+                    sourceLanguage,
+                    MiLMMTTranslationKind.Dialogue,
+                    token),
+                cancellationToken,
+                ex => Log.Warning(
+                    ex,
+                    "Failed to translate dialogue speaker; using the original speaker."));
         }
 
         private async Task<TranslationText> CreateCancellableChatTranslationTextAsync(
