@@ -78,6 +78,24 @@
                         <ui:TextBlock FontTypography="Subtitle" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.app_info}" />
                     </StackPanel>
                     <ui:TextBlock Margin="0,12,0,0" Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
+
+                    <StackPanel Margin="0,24,0,0" Orientation="Horizontal">
+                        <ui:SymbolIcon Margin="0,0,8,0" Symbol="DocumentFolder24" FontSize="24"/>
+                        <ui:TextBlock FontTypography="Subtitle" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.log.title}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                        <ui:TextBlock FontTypography="Body" Text="{i18n:StringLocalizer settings.general.log.size}"/>
+                        <ui:TextBlock FontTypography="Body" Text="{Binding ViewModel.LogDirectorySize}"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                        <ui:Button
+                            Content="{i18n:StringLocalizer settings.general.log.clear}"
+                            Command="{Binding ViewModel.ClearLogDirectoryCommand}"/>
+                        <ui:Button
+                            Margin="8,0,0,0"
+                            Content="{i18n:StringLocalizer settings.general.log.open}"
+                            Command="{Binding ViewModel.OpenLogDirectoryCommand}"/>
+                    </StackPanel>
                 </StackPanel>
             </ui:Card>
         </TabItem>

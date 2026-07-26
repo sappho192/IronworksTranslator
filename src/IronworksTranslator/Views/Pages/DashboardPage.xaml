@@ -20,11 +20,11 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="1.2*" />
-            <RowDefinition Height="2.2*" />
+            <RowDefinition Height="180" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid Margin="0,64,0,0" Grid.Row="0" VerticalAlignment="Top">
+        <Grid Margin="0,48,0,0" Grid.Row="0" VerticalAlignment="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="3*"/>
@@ -70,34 +70,64 @@
                             <ui:ToggleSwitch IsChecked="{Binding ViewModel.IsChildWindowResizable}"
                                 Command="{Binding ViewModel.ChildWindowResizableToggleCommand}" Margin="16,0,0,0"/>
                         </StackPanel>
+                        <ui:Button
+                            Margin="0,20,0,0"
+                            HorizontalAlignment="Stretch"
+                            Content="{i18n:StringLocalizer dashboard.chat.position.reset}"
+                            Command="{Binding ViewModel.ResetChatWindowPositionCommand}"/>
+                        <ui:Button
+                            Margin="0,8,0,0"
+                            HorizontalAlignment="Stretch"
+                            Content="{i18n:StringLocalizer dashboard.dialogue.position.reset}"
+                            Command="{Binding ViewModel.ResetDialogueWindowPositionCommand}"/>
                     </StackPanel>
                 </ui:Card>
             </Grid>
             <Grid Grid.Column="1">
-                <StackPanel Orientation="Vertical">
-                    <ui:Card VerticalAlignment="Top" Margin="16">
-                        <StackPanel Orientation="Vertical">
-                            <ui:Button Content="{i18n:StringLocalizer dashboard.chat.position.reset}"
-                                Command="{Binding ViewModel.ResetChatWindowPositionCommand}"/>
-                            <Border Height="16"/>
-                            <ui:Button Content="{i18n:StringLocalizer dashboard.dialogue.position.reset}"
-                                Command="{Binding ViewModel.ResetDialogueWindowPositionCommand}"/>
-                        </StackPanel>
-                    </ui:Card>
-                    <ui:Card VerticalAlignment="Top" Margin="16">
-                        <StackPanel Orientation="Vertical">
-                            <StackPanel Orientation="Horizontal">
-                                <ui:TextBlock FontTypography="Body" Text="{i18n:StringLocalizer dashboard.log.size}"/>
-                                <ui:TextBlock FontTypography="Body" Text="{Binding ViewModel.LogDirectorySize}"/>
-                            </StackPanel>
-                            <Border Height="8"/>
-                            <StackPanel Orientation="Horizontal">
-                                <ui:Button Content="{i18n:StringLocalizer dashboard.log.clear}" Command="{Binding ViewModel.ClearLogDirectoryCommand}"/>
-                                <ui:Button Margin="8,0,0,0" Content="{i18n:StringLocalizer dashboard.log.open}" Command="{Binding ViewModel.OpenLogDirectoryCommand}"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </ui:Card>                    
-                </StackPanel>
+                <ui:Card Margin="16" VerticalAlignment="Top">
+                    <StackPanel Orientation="Vertical">
+                        <ui:TextBlock
+                            FontTypography="Subtitle"
+                            Text="{Binding ViewModel.ReleaseNotesHeading}" />
+                        <ui:TextBlock
+                            Margin="0,8,0,0"
+                            FontTypography="Caption"
+                            Text="{Binding ViewModel.ReleaseNotesStatus}"
+                            TextWrapping="Wrap" />
+                        <ItemsControl
+                            Margin="0,4,0,0"
+                            ItemsSource="{Binding ViewModel.RecentReleaseNotes}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ui:Button
+                                        Margin="0,4,0,0"
+                                        Padding="12,6"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Stretch"
+                                        Command="{Binding DataContext.ViewModel.ShowReleaseNotesCommand, RelativeSource={RelativeSource AncestorType={x:Type Page}}}"
+                                        CommandParameter="{Binding}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <ui:TextBlock
+                                                Grid.Column="0"
+                                                Text="{Binding DisplayTitle}"
+                                                TextTrimming="CharacterEllipsis"
+                                                TextWrapping="NoWrap" />
+                                            <ui:TextBlock
+                                                Grid.Column="1"
+                                                Margin="12,0,0,0"
+                                                FontTypography="Caption"
+                                                Text="{Binding PublishedDateText}" />
+                                        </Grid>
+                                    </ui:Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ui:Card>
             </Grid>
         </Grid>
     </Grid>

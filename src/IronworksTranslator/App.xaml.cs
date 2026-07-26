@@ -68,6 +68,7 @@ namespace IronworksTranslator
                 // Service containing navigation, same as INavigationWindow... but without window
                 services.AddSingleton<INavigationService, NavigationService>();
                 services.AddSingleton<AppUpdateService>();
+                services.AddSingleton<GitHubReleaseNotesService>();
 
                 // Dialog manipulation
                 services.AddSingleton<IContentDialogService, ContentDialogService>();

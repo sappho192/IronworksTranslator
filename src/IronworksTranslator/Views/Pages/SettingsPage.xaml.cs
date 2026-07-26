@@ -722,6 +722,8 @@ namespace IronworksTranslator.Views.Pages
 
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
+            ViewModel.RefreshLogDirectorySize();
+
             if (_isResourcePollingActive)
             {
                 return;

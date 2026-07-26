@@ -22,4 +22,14 @@ public class SettingsViewModelTests
     {
         Assert.Null(SettingsViewModel.FormatDisplayVersion(informationalVersion));
     }
+
+    [Theory]
+    [InlineData(0, "0B")]
+    [InlineData(1, "1Bytes")]
+    [InlineData(1024, "1KB")]
+    [InlineData(1048576, "1MB")]
+    public void FormatBytes_UsesReadableUnits(long bytes, string expected)
+    {
+        Assert.Equal(expected, SettingsViewModel.FormatBytes(bytes));
+    }
 }
