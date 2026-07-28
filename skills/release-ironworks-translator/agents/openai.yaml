@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release IronworksTranslator"
+  short_description: "Build, validate, and publish app releases"
+  default_prompt: "Use $release-ironworks-translator to build, validate, and publish the next IronworksTranslator release."
