@@ -180,11 +180,13 @@ git push --atomic origin master refs/tags/<VERSION>
 gh release create <VERSION> `
   --repo sappho192/IronworksTranslator `
   --verify-tag `
-  --title "IronworksTranslator <VERSION>" `
+  --title "<VERSION>" `
   --notes-file "Releases\<VERSION>-release-notes.md" `
   <ASSET_PATHS>
 ```
 
+- Set the GitHub release title to the version value only, exactly matching `<VERSION>`.
+- Do not prefix or suffix the title with the app name. For example, use `2.0.1`, not `IronworksTranslator - 2.0.1` or `IronworksTranslator 2.0.1`.
 - Add `--prerelease` for Beta.
 - Do not use `--latest=false` for a normal Stable release.
 - If creation partially fails, inspect the existing release and uploaded assets before retrying. Do not create a duplicate or overwrite unexplained assets.
@@ -192,7 +194,7 @@ gh release create <VERSION> `
 ## 9. Verify the public release
 
 1. Query the release and require:
-   - correct tag and title;
+   - correct tag and a title exactly equal to the version value;
    - `isDraft=false`;
    - Stable `isPrerelease=false`, or Beta `isPrerelease=true`;
    - all expected assets in `uploaded` state with the expected sizes and digests.
