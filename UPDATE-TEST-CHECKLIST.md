@@ -238,12 +238,13 @@ Sharlayan upstream smoke는 IronworksTranslator의 release readiness를 대신�
 
 Package and resource checks:
 
-- [ ] Restore 결과와 publish 산출물이 `Sharlayan.Lite 9.2.0`을 사용한다.
+- [ ] Restore 결과와 publish 산출물이 `Sharlayan.Lite 9.2.1`을 사용한다.
 - [ ] Publish 및 Velopack package에 `FFXIVClientStructs`, `HermesAddress`,
   `latest/address.json`, local `address.json` 또는 `UseInternalAddress` consumer가 없다.
-- [ ] 새 Hermes cache에서 앱을 시작하면 `RemotePreferred`가 remote
-  `live-verified` revision을 선택하고 source와 revision을 진단 로그에 남긴다.
-- [ ] 기존 verified cache를 보존한 상태로 remote를 사용할 수 없게 만들면 cache fallback으로
+- [ ] 새 Hermes cache에서 앱을 시작하면 `RemotePreferred`가 remote `generated` 또는
+  기존 `live-verified` revision을 선택하고 source, revision, validation status를 진단 로그에
+  남긴다.
+- [ ] 기존 valid cache를 보존한 상태로 remote를 사용할 수 없게 만들면 cache fallback으로
   앱이 시작되고 CHATLOG와 Talk가 계속 동작한다.
 - [ ] 별도의 깨끗한 cache에서 remote를 사용할 수 없게 만들면 embedded fallback으로 앱이
   시작되고 CHATLOG와 Talk가 계속 동작한다.
