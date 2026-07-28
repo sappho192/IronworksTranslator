@@ -2,6 +2,7 @@
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Aspect;
+using Serilog;
 using System.IO;
 using Wpf.Ui.Appearance;
 using YamlDotNet.Serialization;
@@ -22,6 +23,7 @@ namespace IronworksTranslator.Models.Settings
         public static IronworksSettings CreateDefault()
         {
             var currentLocale = System.Globalization.CultureInfo.CurrentCulture.Name;
+            var localModelDevicePriority = LocalModelDevicePrioritySelector.GetDefaultPriority();
 
             return new IronworksSettings
             {
@@ -54,19 +56,21 @@ namespace IronworksTranslator.Models.Settings
                     ChatMargin = 0,
                     IsDraggable = true,
                     IsResizable = true,
-                    WindowOpacity = 1.0
+                    WindowOpacity = 1.0,
+                    ChatWindowOpacity = 1.0,
+                    DialogueWindowOpacity = 1.0
                 },
                 TranslatorSettings = new TranslatorSettings
                 {
                     ClientLanguage = ClientLanguage.Korean,
                     TranslatorEngine = TranslatorEngine.Papago,
-                    MiLMMTModelSize = MiLMMTModelSize.MiLLMT_1B,
+                    MiLMMTModelSize = MiLMMTModelSize.MiLMMT_1B,
                     MiLMMTQuantization = MiLMMTQuantization.Q8_0,
-                    LocalModelDevicePriority = LocalModelDevicePriority.Cuda,
+                    LocalModelDevicePriority = localModelDevicePriority,
+                    LocalModelDevicePriorityUserSelected = false,
                     DialogueTranslationMethod = DialogueTranslationMethod.MemorySearch,
                     DeeplApiKeys = [],
-                    DeeplAutoSourceLanguage = false,
-                    UseInternalAddress = false
+                    DeeplAutoSourceLanguage = false
                 },
                 ChannelSettings = new ChannelSettings
                 {
@@ -78,12 +82,48 @@ namespace IronworksTranslator.Models.Settings
 
         public static void UpdateSettingsFile(IronworksSettings settings)
         {
+            WriteSettingsFile(
+                AppPaths.SettingsFilePath,
+                SerializeSettings(settings));
+        }
+
+        internal static void RepairLegacyV1SettingsSnapshotForBeta2(IronworksSettings settings)
+        {
+            WriteSettingsFile(
+                AppPaths.LegacySettingsFilePath,
+                SerializeLegacyV1Settings(settings));
+        }
+
+        internal static IronworksSettings DeserializeSettings(string settingsYaml)
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .IgnoreUnmatchedProperties()
+                .Build();
+
+            return deserializer.Deserialize<IronworksSettings>(
+                NormalizeLegacySettingsYaml(settingsYaml));
+        }
+
+        internal static string SerializeSettings(IronworksSettings settings)
+        {
             var serializer = new SerializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .WithTypeInspector(inspector => new SettingsTypeInspector(inspector))
                 .Build();
-            Directory.CreateDirectory(Path.GetDirectoryName(AppPaths.SettingsFilePath)!);
-            File.WriteAllText(AppPaths.SettingsFilePath, serializer.Serialize(settings));
+
+            return serializer.Serialize(settings);
+        }
+
+        internal static string SerializeLegacyV1Settings(IronworksSettings settings)
+        {
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .WithTypeConverter(new LegacyV1SettingsYamlTypeConverter())
+                .WithTypeInspector(inspector => new SettingsTypeInspector(inspector))
+                .Build();
+
+            return serializer.Serialize(settings);
         }
 
         public static bool IsSettingsFileInValid(IronworksSettings settings)
@@ -102,12 +142,135 @@ namespace IronworksTranslator.Models.Settings
                 return true;
             }
 
+            NormalizeSettings(settings);
+
             if (!ChatUISettings.CheckSpecificFontExists(settings.ChatUiSettings, settings.ChatUiSettings.Font))
             {
                 return false;
             }
 
             return false;
+        }
+
+        internal static string NormalizeLegacySettingsYaml(string settingsYaml)
+        {
+            return settingsYaml
+                .Replace("MiLLMT_1B_Q4_K_M", nameof(TranslatorEngine.MiLMMT))
+                .Replace("Ironworks_Ja_Ko", nameof(TranslatorEngine.MiLMMT))
+                .Replace("Ironworks Ja→Ko (사용 금지)", nameof(TranslatorEngine.MiLMMT))
+                .Replace("MiLLMT", nameof(TranslatorEngine.MiLMMT));
+        }
+
+        private static void WriteSettingsFile(string filePath, string contents)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+            var tempPath = $"{filePath}.{Guid.NewGuid():N}.tmp";
+
+            try
+            {
+                File.WriteAllText(tempPath, contents);
+                File.Move(tempPath, filePath, overwrite: true);
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
+                }
+            }
+        }
+
+        internal static void NormalizeSettings(IronworksSettings settings)
+        {
+            NormalizeSettings(settings, LocalModelDevicePrioritySelector.GetDefaultPriority());
+        }
+
+        internal static void NormalizeSettings(
+            IronworksSettings settings,
+            LocalModelDevicePriority? recommendedDevicePriority)
+        {
+            var chatUiSettings = settings.ChatUiSettings!;
+            var translatorSettings = settings.TranslatorSettings!;
+
+            chatUiSettings.WindowOpacity = NormalizeOpacity(chatUiSettings.WindowOpacity, 1.0);
+            chatUiSettings.ChatWindowOpacity = NormalizeOpacity(chatUiSettings.ChatWindowOpacity, chatUiSettings.WindowOpacity);
+            chatUiSettings.DialogueWindowOpacity = NormalizeOpacity(chatUiSettings.DialogueWindowOpacity, chatUiSettings.WindowOpacity);
+
+            NormalizeTranslatorEngine(translatorSettings);
+            NormalizeMiLMMTModelProfile(translatorSettings);
+            NormalizeLocalModelDevicePriority(settings.TranslatorSettings!, recommendedDevicePriority);
+        }
+
+        private static void NormalizeTranslatorEngine(TranslatorSettings translatorSettings)
+        {
+            var engineValue = (int)translatorSettings.TranslatorEngine;
+            if (engineValue is 2 or 3)
+            {
+                translatorSettings.TranslatorEngine = TranslatorEngine.MiLMMT;
+                return;
+            }
+
+            if (!Enum.IsDefined(typeof(TranslatorEngine), translatorSettings.TranslatorEngine))
+            {
+                Log.Warning(
+                    "Unknown translator engine value {TranslatorEngine}. Falling back to Papago.",
+                    translatorSettings.TranslatorEngine);
+                translatorSettings.TranslatorEngine = TranslatorEngine.Papago;
+            }
+        }
+
+        private static void NormalizeLocalModelDevicePriority(
+            TranslatorSettings translatorSettings,
+            LocalModelDevicePriority? recommendedDevicePriority)
+        {
+            var resolvedPriority = LocalModelDevicePrioritySelector.ResolveStartupPriority(
+                translatorSettings.LocalModelDevicePriority,
+                translatorSettings.LocalModelDevicePriorityUserSelected,
+                recommendedDevicePriority);
+
+            if (translatorSettings.LocalModelDevicePriority == resolvedPriority)
+            {
+                return;
+            }
+
+            Log.Information(
+                "LocalModelDevicePriority normalized from {PreviousPriority} to {ResolvedPriority}.",
+                translatorSettings.LocalModelDevicePriority,
+                resolvedPriority);
+            translatorSettings.LocalModelDevicePriority = resolvedPriority;
+        }
+
+        private static void NormalizeMiLMMTModelProfile(TranslatorSettings translatorSettings)
+        {
+            if (IronworksTranslator.Models.Translator.MiLMMTModelProfiles.IsSupported(
+                translatorSettings.MiLMMTModelSize,
+                translatorSettings.MiLMMTQuantization))
+            {
+                return;
+            }
+
+            var fallbackSize = IronworksTranslator.Models.Translator.MiLMMTModelProfiles.GetFallbackModelSize(
+                translatorSettings.MiLMMTModelSize);
+            var fallbackQuantization = IronworksTranslator.Models.Translator.MiLMMTModelProfiles.GetDefaultQuantization(
+                fallbackSize);
+            Log.Information(
+                "MiLMMT model profile normalized from {PreviousSize} {PreviousQuantization} to {Size} {Quantization}.",
+                translatorSettings.MiLMMTModelSize,
+                translatorSettings.MiLMMTQuantization,
+                fallbackSize,
+                fallbackQuantization);
+            translatorSettings.MiLMMTModelSize = fallbackSize;
+            translatorSettings.MiLMMTQuantization = fallbackQuantization;
+        }
+
+        private static double NormalizeOpacity(double value, double fallback)
+        {
+            if (value <= 0 || value > 1.0)
+            {
+                return fallback;
+            }
+
+            return value;
         }
     }
 }

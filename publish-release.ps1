@@ -5,20 +5,29 @@ param(
     [switch]$SkipClean,
     [switch]$CreateZip,
     [switch]$SkipVelopack,
+    [ValidateSet("Stable", "Beta")]
+    [string]$ReleaseChannel = "Stable",
+    [string]$PrereleaseLabel = "",
     [string]$OutputDir = "publish",
     [string]$VelopackOutputDir = "Releases"
 )
 
 $ErrorActionPreference = "Stop"
+$solutionPath = "src\IronworksTranslator\IronworksTranslator.sln"
 $projectPath = "src\IronworksTranslator\IronworksTranslator.csproj"
+$launcherProjectPath = "src\IronworksTranslator.Launcher\IronworksTranslator.Launcher.csproj"
+$nativeProbeProjectPath = "tools\IronworksMiLMMTNativeProbe\IronworksMiLMMTNativeProbe.csproj"
 $iconPath = "src\IronworksTranslator\icon.ico"
 $velopackVersion = "1.2.0"
 $packId = "Sappho192.IronworksTranslator"
 $packTitle = "IronworksTranslator"
-$mainExe = "IronworksTranslator.exe"
-$channel = "win"
+$appExe = "IronworksTranslator.exe"
+$launcherExe = "IronworksTranslator.Launcher.exe"
+$nativeProbeExe = "IronworksMiLMMTNativeProbe.exe"
 $runtime = "win-x64"
-$framework = "net8.0-x64-desktop"
+$framework = "net10.0-x64-desktop"
+$channel = "win"
+$packVersion = $null
 
 function Assert-Success($message) {
     if ($LASTEXITCODE -ne 0) {
@@ -27,9 +36,36 @@ function Assert-Success($message) {
     }
 }
 
+if ($ReleaseChannel -eq "Beta") {
+    if ([string]::IsNullOrWhiteSpace($PrereleaseLabel)) {
+        Write-Error "Beta releases require -PrereleaseLabel, for example: -PrereleaseLabel beta.1"
+        exit 1
+    }
+
+    if ($PrereleaseLabel -notmatch '^beta\.[1-9][0-9]*$') {
+        Write-Error "Beta prerelease label must use the format beta.N, for example: beta.1"
+        exit 1
+    }
+
+    $channel = "beta"
+    if ((Split-Path -Leaf $VelopackOutputDir) -ne "beta") {
+        $VelopackOutputDir = Join-Path $VelopackOutputDir "beta"
+    }
+} elseif (-not [string]::IsNullOrWhiteSpace($PrereleaseLabel)) {
+    Write-Error "-PrereleaseLabel can only be used with -ReleaseChannel Beta"
+    exit 1
+}
+
+$releaseChannelBuildProperty = "/p:IronworksReleaseChannel=$ReleaseChannel"
+
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "IronworksTranslator Release Publisher" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Release channel: $ReleaseChannel ($channel)" -ForegroundColor Cyan
+if ($ReleaseChannel -eq "Beta") {
+    Write-Host "Prerelease label: $PrereleaseLabel" -ForegroundColor Cyan
+}
 Write-Host ""
 
 if (-not $SkipClean) {
@@ -45,6 +81,16 @@ if (-not $SkipClean) {
         Write-Host "  - Removed obj folder" -ForegroundColor Gray
     }
 
+    if (Test-Path "src\IronworksTranslator.Launcher\bin") {
+        Remove-Item "src\IronworksTranslator.Launcher\bin" -Recurse -Force
+        Write-Host "  - Removed launcher bin folder" -ForegroundColor Gray
+    }
+
+    if (Test-Path "src\IronworksTranslator.Launcher\obj") {
+        Remove-Item "src\IronworksTranslator.Launcher\obj" -Recurse -Force
+        Write-Host "  - Removed launcher obj folder" -ForegroundColor Gray
+    }
+
     Write-Host "  Clean completed." -ForegroundColor Green
 } else {
     Write-Host "[1/6] Skipping clean (--SkipClean specified)" -ForegroundColor Gray
@@ -52,14 +98,18 @@ if (-not $SkipClean) {
 Write-Host ""
 
 Write-Host "[2/6] Restoring NuGet packages..." -ForegroundColor Yellow
-dotnet restore $projectPath
+dotnet restore $solutionPath
 Assert-Success "Package restore failed!"
 Write-Host "  Restore completed." -ForegroundColor Green
 Write-Host ""
 
 Write-Host "[3/6] Building in Release configuration..." -ForegroundColor Yellow
-dotnet build $projectPath -c Release --no-restore
+dotnet build $projectPath -c Release --no-restore $releaseChannelBuildProperty
 Assert-Success "Build failed!"
+dotnet build $launcherProjectPath -c Release --no-restore
+Assert-Success "Launcher build failed!"
+dotnet build $nativeProbeProjectPath -c Release --no-restore
+Assert-Success "MiLMMT native probe build failed!"
 Write-Host "  Build completed." -ForegroundColor Green
 Write-Host ""
 
@@ -70,8 +120,13 @@ if (Test-Path $gitversionPath) {
     $version = $gitversion.MajorMinorPatch
     $fullVersion = $gitversion.InformationalVersion
     $assemblyVersion = $gitversion.AssemblySemVer
+    $packVersion = $version
+    if ($ReleaseChannel -eq "Beta") {
+        $packVersion = "$version-$PrereleaseLabel"
+    }
 
     Write-Host "  Version: $version" -ForegroundColor Green
+    Write-Host "  Package Version: $packVersion" -ForegroundColor Green
     Write-Host "  Assembly Version: $assemblyVersion" -ForegroundColor Green
     Write-Host "  Full Version: $fullVersion" -ForegroundColor Green
 } else {
@@ -80,34 +135,62 @@ if (Test-Path $gitversionPath) {
 }
 Write-Host ""
 
-Write-Host "[5/6] Publishing application (single-file, framework-dependent)..." -ForegroundColor Yellow
-$publishPath = Join-Path $OutputDir "IronworksTranslator ($version)"
+Write-Host "[5/6] Publishing application, launcher, and native probe (single-file, framework-dependent)..." -ForegroundColor Yellow
+$publishPath = Join-Path $OutputDir "IronworksTranslator ($packVersion)"
 dotnet publish $projectPath -c Release -o $publishPath `
+    $releaseChannelBuildProperty `
+    /p:IronworksPackageVersion=$packVersion `
     /p:PublishSingleFile=true `
     /p:RuntimeIdentifier=$runtime `
     /p:SelfContained=false
 Assert-Success "Publish failed!"
+dotnet publish $launcherProjectPath -c Release -o $publishPath `
+    /p:IronworksPackageVersion=$packVersion `
+    /p:PublishSingleFile=true `
+    /p:RuntimeIdentifier=$runtime `
+    /p:SelfContained=false
+Assert-Success "Launcher publish failed!"
+dotnet publish $nativeProbeProjectPath -c Release -o $publishPath `
+    /p:IronworksPackageVersion=$packVersion `
+    /p:PublishSingleFile=true `
+    /p:RuntimeIdentifier=$runtime `
+    /p:SelfContained=false
+Assert-Success "MiLMMT native probe publish failed!"
 Write-Host "  Published to: $publishPath" -ForegroundColor Green
 Write-Host ""
 
-$exePath = Join-Path $publishPath $mainExe
-if (Test-Path $exePath) {
-    $fileVersion = (Get-Item $exePath).VersionInfo.FileVersion
-    $productVersion = (Get-Item $exePath).VersionInfo.ProductVersion
-    $fileSize = [math]::Round((Get-Item $exePath).Length / 1MB, 2)
+$appExePath = Join-Path $publishPath $appExe
+$launcherExePath = Join-Path $publishPath $launcherExe
+$nativeProbeExePath = Join-Path $publishPath $nativeProbeExe
+if ((Test-Path $appExePath) -and (Test-Path $launcherExePath) -and (Test-Path $nativeProbeExePath)) {
+    $fileVersion = (Get-Item $appExePath).VersionInfo.FileVersion
+    $productVersion = (Get-Item $appExePath).VersionInfo.ProductVersion
+    $fileSize = [math]::Round((Get-Item $appExePath).Length / 1MB, 2)
+    $launcherFileVersion = (Get-Item $launcherExePath).VersionInfo.FileVersion
+    $launcherFileSize = [math]::Round((Get-Item $launcherExePath).Length / 1MB, 2)
+    $nativeProbeFileSize = [math]::Round((Get-Item $nativeProbeExePath).Length / 1MB, 2)
 
     Write-Host "Verification:" -ForegroundColor Cyan
-    Write-Host "  EXE File Version: $fileVersion" -ForegroundColor Green
-    Write-Host "  EXE Product Version: $productVersion" -ForegroundColor Green
-    Write-Host "  EXE Size: $fileSize MB" -ForegroundColor Green
+    Write-Host "  App EXE File Version: $fileVersion" -ForegroundColor Green
+    Write-Host "  App EXE Product Version: $productVersion" -ForegroundColor Green
+    Write-Host "  App EXE Size: $fileSize MB" -ForegroundColor Green
+    Write-Host "  Launcher EXE File Version: $launcherFileVersion" -ForegroundColor Green
+    Write-Host "  Launcher EXE Size: $launcherFileSize MB" -ForegroundColor Green
+    Write-Host "  MiLMMT native probe EXE Size: $nativeProbeFileSize MB" -ForegroundColor Green
 
     if ($fileVersion -like "$version.*") {
-        Write-Host "  Version is correct." -ForegroundColor Green
+        Write-Host "  App version is correct." -ForegroundColor Green
     } else {
-        Write-Warning "Version mismatch detected. Expected $version.*, got $fileVersion"
+        Write-Warning "App version mismatch detected. Expected $version.*, got $fileVersion"
+    }
+
+    if ($launcherFileVersion -like "$version.*") {
+        Write-Host "  Launcher version is correct." -ForegroundColor Green
+    } else {
+        Write-Warning "Launcher version mismatch detected. Expected $version.*, got $launcherFileVersion"
     }
 } else {
-    Write-Error "Could not find published EXE for verification: $exePath"
+    Write-Error "Could not find published EXEs for verification: $appExePath, $launcherExePath, $nativeProbeExePath"
     exit 1
 }
 Write-Host ""
@@ -122,9 +205,9 @@ if (-not $SkipVelopack) {
 
     vpk pack `
         --packId $packId `
-        --packVersion $version `
+        --packVersion $packVersion `
         --packDir $publishPath `
-        --mainExe $mainExe `
+        --mainExe $launcherExe `
         --packTitle $packTitle `
         --outputDir $VelopackOutputDir `
         --channel $channel `
@@ -140,7 +223,7 @@ Write-Host ""
 
 if ($CreateZip) {
     Write-Host "Creating legacy distribution ZIP..." -ForegroundColor Yellow
-    $zipPath = Join-Path $OutputDir "IronworksTranslator-v$version.zip"
+    $zipPath = Join-Path $OutputDir "IronworksTranslator-v$packVersion.zip"
 
     if (Test-Path $zipPath) {
         Remove-Item $zipPath -Force
@@ -158,6 +241,7 @@ Write-Host ""
 Write-Host "Publish output: $publishPath" -ForegroundColor White
 if (-not $SkipVelopack) {
     Write-Host "Velopack assets: $VelopackOutputDir" -ForegroundColor White
+    Write-Host "Velopack channel: $channel" -ForegroundColor White
 }
 if ($CreateZip) {
     Write-Host "Legacy ZIP file: $zipPath" -ForegroundColor White
@@ -165,6 +249,7 @@ if ($CreateZip) {
 Write-Host ""
 Write-Host "Usage examples:" -ForegroundColor Gray
 Write-Host "  .\publish-release.ps1" -ForegroundColor Gray
+Write-Host "  .\publish-release.ps1 -ReleaseChannel Beta -PrereleaseLabel beta.1" -ForegroundColor Gray
 Write-Host "  .\publish-release.ps1 -SkipClean" -ForegroundColor Gray
 Write-Host "  .\publish-release.ps1 -CreateZip" -ForegroundColor Gray
 Write-Host "  .\publish-release.ps1 -SkipVelopack" -ForegroundColor Gray

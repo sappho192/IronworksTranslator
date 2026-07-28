@@ -5,7 +5,10 @@ using IronworksTranslator.Models.Translator;
 using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Aspect;
 using ObservableCollections;
+using Serilog;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
@@ -20,6 +23,9 @@ namespace IronworksTranslator.ViewModels.Pages
 
         [ObservableProperty]
         private string _appVersion = string.Empty;
+
+        [ObservableProperty]
+        private string _logDirectorySize = "0B";
 
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
@@ -44,13 +50,23 @@ namespace IronworksTranslator.ViewModels.Pages
 
         private readonly LogScale _logScale = new(0.01, 1.0);
         [ObservableProperty]
-        private double _childWindowOpacityRaw = IronworksSettings.Instance.ChatUiSettings.WindowOpacity;
+        private double _chatWindowOpacityRaw = new LogScale(0.01, 1.0).Invert(IronworksSettings.Instance.ChatUiSettings.ChatWindowOpacity);
         [ObservableProperty]
         [NotifyPropertyChangedRecipients]
-        private double _childWindowOpacity = IronworksSettings.Instance.ChatUiSettings.WindowOpacity;
-        partial void OnChildWindowOpacityRawChanged(double value)
+        private double _chatWindowOpacity = IronworksSettings.Instance.ChatUiSettings.ChatWindowOpacity;
+        partial void OnChatWindowOpacityRawChanged(double value)
         {
-            ChildWindowOpacity = _logScale.Scale(ChildWindowOpacityRaw);
+            ChatWindowOpacity = _logScale.Scale(ChatWindowOpacityRaw);
+        }
+
+        [ObservableProperty]
+        private double _dialogueWindowOpacityRaw = new LogScale(0.01, 1.0).Invert(IronworksSettings.Instance.ChatUiSettings.DialogueWindowOpacity);
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private double _dialogueWindowOpacity = IronworksSettings.Instance.ChatUiSettings.DialogueWindowOpacity;
+        partial void OnDialogueWindowOpacityRawChanged(double value)
+        {
+            DialogueWindowOpacity = _logScale.Scale(DialogueWindowOpacityRaw);
         }
 
         [ObservableProperty]
@@ -74,11 +90,15 @@ namespace IronworksTranslator.ViewModels.Pages
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTModelDisplayName))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTDownloadSize))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTEstimatedMemory))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTSupportedLanguages))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTNote))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTModelStatus))]
         private MiLMMTModelSize _miLMMTModelSize = IronworksSettings.Instance.TranslatorSettings.MiLMMTModelSize;
         [ObservableProperty]
         private int _miLMMTModelSizeIndex = (int)IronworksSettings.Instance.TranslatorSettings.MiLMMTModelSize;
+        public IReadOnlyList<string> MiLMMTModelSizeOptions => MiLMMTModelProfiles.SelectableModelSizes
+            .Select(modelSize => IronworksTranslator.Helpers.Extensions.EnumExtension.GetDescription(modelSize))
+            .ToArray();
         partial void OnMiLMMTModelSizeChanged(MiLMMTModelSize value)
         {
             EnsureSupportedMiLMMTProfile();
@@ -91,6 +111,7 @@ namespace IronworksTranslator.ViewModels.Pages
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTModelDisplayName))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTDownloadSize))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTEstimatedMemory))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTSupportedLanguages))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTNote))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTModelStatus))]
         private MiLMMTQuantization _miLMMTQuantization = IronworksSettings.Instance.TranslatorSettings.MiLMMTQuantization;
@@ -124,6 +145,10 @@ namespace IronworksTranslator.ViewModels.Pages
             string.Format(
                 Localizer.GetString("settings.translator.engine.milmmt.estimated_memory"),
                 SelectedMiLMMTProfile.EstimatedMemoryGb);
+        public string SelectedMiLMMTSupportedLanguages =>
+            string.Format(
+                Localizer.GetString("settings.translator.engine.milmmt.supported_languages"),
+                SelectedMiLMMTProfile.SupportedLanguageNames);
         public string SelectedMiLMMTNote => Localizer.GetString(SelectedMiLMMTProfile.NoteKey);
         public string SelectedMiLMMTModelStatus => File.Exists(SelectedMiLMMTProfile.FilePath)
             ? Localizer.GetString("settings.translator.engine.milmmt.status.downloaded")
@@ -136,7 +161,14 @@ namespace IronworksTranslator.ViewModels.Pages
                 return;
             }
 
-            var fallbackQuantization = MiLMMTModelProfiles.GetDefaultQuantization(MiLMMTModelSize);
+            var fallbackModelSize = MiLMMTModelProfiles.GetFallbackModelSize(MiLMMTModelSize);
+            var fallbackQuantization = MiLMMTModelProfiles.GetDefaultQuantization(fallbackModelSize);
+            if (MiLMMTModelSize != fallbackModelSize)
+            {
+                MiLMMTModelSize = fallbackModelSize;
+                MiLMMTModelSizeIndex = (int)fallbackModelSize;
+            }
+
             if (MiLMMTQuantization != fallbackQuantization)
             {
                 MiLMMTQuantization = fallbackQuantization;
@@ -148,6 +180,13 @@ namespace IronworksTranslator.ViewModels.Pages
         private List<MiLMMTModelStorageItem> _miLMMTModelStorageItems =
             [];
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasRetiredMiLMMTModelStorageItems))]
+        private List<MiLMMTModelStorageItem> _retiredMiLMMTModelStorageItems =
+            [];
+
+        public bool HasRetiredMiLMMTModelStorageItems => RetiredMiLMMTModelStorageItems.Count > 0;
+
         private SystemResourceSnapshot? _lastSystemResourceSnapshot;
 
         public void RefreshMiLMMTProfileSummary()
@@ -156,15 +195,38 @@ namespace IronworksTranslator.ViewModels.Pages
             OnPropertyChanged(nameof(SelectedMiLMMTModelDisplayName));
             OnPropertyChanged(nameof(SelectedMiLMMTDownloadSize));
             OnPropertyChanged(nameof(SelectedMiLMMTEstimatedMemory));
+            OnPropertyChanged(nameof(SelectedMiLMMTSupportedLanguages));
             OnPropertyChanged(nameof(SelectedMiLMMTNote));
             OnPropertyChanged(nameof(SelectedMiLMMTModelStatus));
-            MiLMMTModelStorageItems = BuildMiLMMTModelStorageItems();
+            RefreshMiLMMTModelStorageItems();
         }
 
         public void UpdateMiLMMTResourceSnapshot(SystemResourceSnapshot snapshot)
         {
+            var isInitialSnapshot = _lastSystemResourceSnapshot == null;
+            var compatibilityChanged = MiLMMTModelStorageItem.HasCompatibilityChanged(
+                MiLMMTModelProfiles.All,
+                _lastSystemResourceSnapshot,
+                snapshot,
+                LocalModelDevicePriority);
             _lastSystemResourceSnapshot = snapshot;
+            if (compatibilityChanged)
+            {
+                if (isInitialSnapshot)
+                {
+                    RefreshMiLMMTModelStorageItems();
+                }
+                else
+                {
+                    MiLMMTModelStorageItems = BuildMiLMMTModelStorageItems();
+                }
+            }
+        }
+
+        private void RefreshMiLMMTModelStorageItems()
+        {
             MiLMMTModelStorageItems = BuildMiLMMTModelStorageItems();
+            RetiredMiLMMTModelStorageItems = BuildRetiredMiLMMTModelStorageItems();
         }
 
         private List<MiLMMTModelStorageItem> BuildMiLMMTModelStorageItems()
@@ -175,6 +237,13 @@ namespace IronworksTranslator.ViewModels.Pages
                     SelectedMiLMMTProfile,
                     _lastSystemResourceSnapshot,
                     LocalModelDevicePriority))
+                .ToList();
+        }
+
+        private static List<MiLMMTModelStorageItem> BuildRetiredMiLMMTModelStorageItems()
+        {
+            return MiLMMTModelProfiles.GetDownloadedRetiredProfiles(profile => File.Exists(profile.FilePath))
+                .Select(profile => MiLMMTModelStorageItem.FromProfile(profile))
                 .ToList();
         }
 
@@ -232,8 +301,108 @@ namespace IronworksTranslator.ViewModels.Pages
 
         private static string GetAssemblyVersion()
         {
-            return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3)
+            var assembly = Assembly.GetExecutingAssembly();
+            var informationalVersion = assembly
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                ?.InformationalVersion;
+
+            return FormatDisplayVersion(informationalVersion)
+                ?? assembly.GetName().Version?.ToString(3)
                 ?? string.Empty;
+        }
+
+        internal static string? FormatDisplayVersion(string? informationalVersion)
+        {
+            if (string.IsNullOrWhiteSpace(informationalVersion))
+            {
+                return null;
+            }
+
+            return informationalVersion.Split('+', 2)[0];
+        }
+
+        public void RefreshLogDirectorySize()
+        {
+            LogDirectorySize = FormatBytes(GetDirectorySize(AppPaths.LogsDirectory));
+        }
+
+        [RelayCommand]
+        [TraceMethod]
+        private void OnClearLogDirectory()
+        {
+            if (!Directory.Exists(AppPaths.LogsDirectory))
+            {
+                return;
+            }
+
+            string[] filePaths = Directory
+                .GetFiles(AppPaths.LogsDirectory, "*.*")
+                .Where(filePath =>
+                    string.Equals(Path.GetExtension(filePath), ".iwlog", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(Path.GetExtension(filePath), ".txt", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            foreach (string filePath in filePaths)
+            {
+                try
+                {
+                    File.Delete(filePath);
+                }
+                catch (IOException ex)
+                {
+                    Log.Error(ex, "Failed to delete log file {LogFile}.", filePath);
+                }
+            }
+
+            RefreshLogDirectorySize();
+        }
+
+        [RelayCommand]
+        [TraceMethod]
+        private void OnOpenLogDirectory()
+        {
+            Directory.CreateDirectory(AppPaths.LogsDirectory);
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                ArgumentList = { AppPaths.LogsDirectory },
+            });
+        }
+
+        private static long GetDirectorySize(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                return 0;
+            }
+
+            long size = 0;
+            DirectoryInfo dirInfo = new(path);
+
+            foreach (FileInfo fi in dirInfo.GetFiles("*", SearchOption.AllDirectories))
+            {
+                size += fi.Length;
+            }
+
+            return size;
+        }
+
+        internal static string FormatBytes(long bytes)
+        {
+            const int scale = 1024;
+            string[] orders = ["GB", "MB", "KB", "Bytes"];
+            long max = (long)Math.Pow(scale, orders.Length - 1);
+
+            foreach (string order in orders)
+            {
+                if (bytes >= max)
+                {
+                    return string.Format("{0:##.##}{1}", decimal.Divide(bytes, max), order);
+                }
+
+                max /= scale;
+            }
+
+            return "0B";
         }
 
         [RelayCommand]

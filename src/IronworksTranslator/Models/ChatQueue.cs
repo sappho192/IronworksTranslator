@@ -9,50 +9,32 @@ namespace IronworksTranslator.Models
         public static BlockingCollection<ChatLogItem> q = new (new ConcurrentQueue<ChatLogItem>(), boundedCapacity: 1000);
 
         // Dialogue messages with bounded capacity
-        public static ConcurrentQueue<string> rq = new() { };
+        public static ConcurrentQueue<DialogueEntry> rq = new();
         private const int MaxDialogueQueueSize = 100;
 
-        // Thread-safe access to dialogue queue and lastMsg
+        // Thread-safe access to the bounded dialogue queue
         private static readonly object _dialogueLock = new();
-        private static string _lastMsg = "";
 
-        public static string LastMsg
+        public static void EnqueueDialogue(DialogueEntry entry)
         {
-            get { lock (_dialogueLock) return _lastMsg; }
-            set { lock (_dialogueLock) _lastMsg = value; }
-        }
+            ArgumentNullException.ThrowIfNull(entry);
 
-        public static bool EnqueueDialogueIfNew(string message)
-        {
             lock (_dialogueLock)
             {
-                if (_lastMsg.Equals(message))
+                while (rq.Count >= MaxDialogueQueueSize && rq.TryDequeue(out _))
                 {
-                    return false;
                 }
 
-                EnqueueDialogueUnsafe(message);
-                _lastMsg = message;
-                return true;
+                rq.Enqueue(entry);
             }
         }
 
-        public static void EnqueueDialogue(string message)
+        public static bool TryDequeueDialogue(out DialogueEntry? entry)
         {
             lock (_dialogueLock)
             {
-                EnqueueDialogueUnsafe(message);
-                _lastMsg = message;
+                return rq.TryDequeue(out entry);
             }
-        }
-
-        private static void EnqueueDialogueUnsafe(string message)
-        {
-            while (rq.Count >= MaxDialogueQueueSize && rq.TryDequeue(out _))
-            {
-            }
-
-            rq.Enqueue(message);
         }
     }
 }

@@ -1,4 +1,5 @@
 using IronworksTranslator.Models.Enums;
+using IronworksTranslator.Models.Translator;
 using IronworksTranslator.ViewModels.Windows;
 using Sharlayan.Core;
 
@@ -103,5 +104,36 @@ public class ChatWindowViewModelHelperTests
             ClientLanguage.Japanese);
 
         Assert.Equal(ClientLanguage.Japanese, result);
+    }
+
+    [Fact]
+    public void CreateDialogueEntry_PreservesAuthorAsSpeaker()
+    {
+        var translation = new TranslationText(
+            "Welcome back.",
+            TranslationLanguageCode.English,
+            TranslationLanguageCode.Korean)
+        {
+            Author = "Alphinaud",
+            TranslatedText = "어서 와.",
+        };
+
+        var entry = ChatWindowViewModel.CreateDialogueEntry(translation);
+
+        Assert.NotNull(entry);
+        Assert.Equal(DialogueKind.ChatLog, entry.Kind);
+        Assert.Equal("Alphinaud", entry.Speaker);
+        Assert.Equal("어서 와.", entry.Text);
+    }
+
+    [Fact]
+    public void CreateDialogueEntry_WithoutTranslatedText_ReturnsNull()
+    {
+        var translation = new TranslationText(
+            "Welcome back.",
+            TranslationLanguageCode.English,
+            TranslationLanguageCode.Korean);
+
+        Assert.Null(ChatWindowViewModel.CreateDialogueEntry(translation));
     }
 }

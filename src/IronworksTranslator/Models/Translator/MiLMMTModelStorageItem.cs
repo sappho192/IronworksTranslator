@@ -4,6 +4,14 @@ using System.IO;
 
 namespace IronworksTranslator.Models.Translator
 {
+    internal enum MiLMMTResourceCompatibility
+    {
+        Unknown,
+        Insufficient,
+        Tight,
+        Comfortable,
+    }
+
     public sealed record MiLMMTModelStorageItem(
         MiLMMTModelProfile Profile,
         string InstalledSize,
@@ -38,9 +46,7 @@ namespace IronworksTranslator.Models.Translator
             var fileInfo = File.Exists(profile.FilePath)
                 ? new FileInfo(profile.FilePath)
                 : null;
-            var isSelected = selectedProfile != null
-                && profile.Size == selectedProfile.Size
-                && profile.Quantization == selectedProfile.Quantization;
+            var isSelected = profile == selectedProfile;
             var compatibilityHint = GetCompatibilityHint(profile, resourceSnapshot, devicePriority);
 
             return new MiLMMTModelStorageItem(
@@ -84,17 +90,50 @@ namespace IronworksTranslator.Models.Translator
                     targetDevice);
             }
 
-            var requiredBytes = (ulong)(profile.EstimatedMemoryGb * 1024d * 1024d * 1024d);
-            var comfortableReserveBytes = 4UL * 1024UL * 1024UL * 1024UL;
-            var key = availableBytes.Value >= requiredBytes + comfortableReserveBytes
-                ? "settings.translator.engine.milmmt.compatibility.comfortable"
-                : availableBytes.Value >= requiredBytes
-                    ? "settings.translator.engine.milmmt.compatibility.tight"
-                    : "settings.translator.engine.milmmt.compatibility.insufficient";
+            var key = GetCompatibility(profile, resourceSnapshot, devicePriority) switch
+            {
+                MiLMMTResourceCompatibility.Comfortable => "settings.translator.engine.milmmt.compatibility.comfortable",
+                MiLMMTResourceCompatibility.Tight => "settings.translator.engine.milmmt.compatibility.tight",
+                _ => "settings.translator.engine.milmmt.compatibility.insufficient",
+            };
 
             return string.Format(
                 Localizer.GetString(key),
                 targetDevice);
+        }
+
+        internal static MiLMMTResourceCompatibility GetCompatibility(
+            MiLMMTModelProfile profile,
+            SystemResourceSnapshot? resourceSnapshot,
+            LocalModelDevicePriority devicePriority)
+        {
+            var availableBytes = devicePriority == LocalModelDevicePriority.Cpu
+                ? resourceSnapshot?.AvailableRamBytes
+                : resourceSnapshot?.AvailableVramBytes;
+            if (availableBytes == null)
+            {
+                return MiLMMTResourceCompatibility.Unknown;
+            }
+
+            var requiredBytes = (ulong)(profile.EstimatedMemoryGb * 1024d * 1024d * 1024d);
+            var comfortableReserveBytes = 4UL * 1024UL * 1024UL * 1024UL;
+            return availableBytes.Value >= requiredBytes + comfortableReserveBytes
+                ? MiLMMTResourceCompatibility.Comfortable
+                : availableBytes.Value >= requiredBytes
+                    ? MiLMMTResourceCompatibility.Tight
+                    : MiLMMTResourceCompatibility.Insufficient;
+        }
+
+        internal static bool HasCompatibilityChanged(
+            IEnumerable<MiLMMTModelProfile> profiles,
+            SystemResourceSnapshot? previousSnapshot,
+            SystemResourceSnapshot currentSnapshot,
+            LocalModelDevicePriority devicePriority)
+        {
+            return previousSnapshot == null
+                || profiles.Any(profile =>
+                    GetCompatibility(profile, previousSnapshot, devicePriority)
+                    != GetCompatibility(profile, currentSnapshot, devicePriority));
         }
     }
 }

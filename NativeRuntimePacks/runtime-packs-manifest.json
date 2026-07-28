@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "product": "IronworksTranslator MiLMMT native runtime packs",
+  "managedLLamaSharpVersion": "0.27.0",
+  "runtimeIdentifier": "win-x64",
+  "sourceCommit": "3f7c29d318e317b63f54c558bc69803963d7d88c",
+  "modelProfile": "milmmt-gemma3-q4km",
+  "selectionPolicy": {
+    "chooseExactlyOneNativePackBeforeFirstLLamaSharpCall": true,
+    "recommendedPriority": [
+      "cuda",
+      "vulkan",
+      "cpu"
+    ],
+    "backendChangeRequiresProcessRestart": true,
+    "cudaForwardPtxIsNotReleaseSupport": true,
+    "vulkanLoaderIsBundled": false
+  },
+  "nativePacks": [
+    {
+      "backend": "cuda",
+      "relativeDirectory": "runtimes/win-x64/native/milmmt-cuda",
+      "llamaLibrary": "llama.dll",
+      "nativeManifestSha256": "3d6bdafe3e9acec17667e2cf8bb148bb4e677d9bba6675279db53c4481430082",
+      "sourceCommit": "3f7c29d318e317b63f54c558bc69803963d7d88c",
+      "expectedRevision": "3f7c29d318e317b63f54c558bc69803963d7d88c",
+      "runtimePrerequisite": "NVIDIA display driver (nvcuda.dll) and Microsoft Visual C++ v14 x64 Redistributable",
+      "nativeLibraries": [
+        {
+          "name": "llama.dll",
+          "bytes": 2064896,
+          "sha256": "39807fddc54cbf0a7f23ad7ff56ce9acf251ffdc7b733284f03c791314b9bff1"
+        },
+        {
+          "name": "ggml.dll",
+          "bytes": 67584,
+          "sha256": "187449b704100c008877d841128ebc30dc2e97bb4f01c37455b45db9c3786bf9"
+        },
+        {
+          "name": "ggml-base.dll",
+          "bytes": 617984,
+          "sha256": "6cf5fffec88c999e77fde24e90b0f31c2bae44c669ba8e05588e3dfec5209c1f"
+        },
+        {
+          "name": "ggml-cpu.dll",
+          "bytes": 881664,
+          "sha256": "62e0f5c547fe458e4d6f7b3ad25d17bbad13c3213b0994c757bf212a1aea95e2"
+        },
+        {
+          "name": "ggml-cuda.dll",
+          "bytes": 25134080,
+          "sha256": "7f5e3889be098ae1ef3c48efcf3ef1d5c81fc73dc8232aefdd0a6714939897ad"
+        }
+      ],
+      "cuda": {
+        "runtimeDependencyMode": "driver-only",
+        "exactNativeCubinArchitectures": [
+          "sm_120a",
+          "sm_61",
+          "sm_75",
+          "sm_86",
+          "sm_89"
+        ],
+        "forwardPtxArchitectures": [
+          "sm_120"
+        ],
+        "forwardPtxIsReleaseSupport": false
+      }
+    },
+    {
+      "backend": "vulkan",
+      "relativeDirectory": "runtimes/win-x64/native/milmmt-vulkan",
+      "llamaLibrary": "llama.dll",
+      "nativeManifestSha256": "66b868a2bb11c3be29ffd1543941eac5b33551ae774e8b50da00534e5f605651",
+      "sourceCommit": "3f7c29d318e317b63f54c558bc69803963d7d88c",
+      "expectedRevision": "3f7c29d318e317b63f54c558bc69803963d7d88c",
+      "runtimePrerequisite": "Vulkan 1.2+ driver/loader and Microsoft Visual C++ v14 x64 Redistributable",
+      "nativeLibraries": [
+        {
+          "name": "llama.dll",
+          "bytes": 2052608,
+          "sha256": "ae73bbfcb9b0fb15a3f3ddf632887ee7bcf2eafb26a5c9e876364d86148d4dde"
+        },
+        {
+          "name": "ggml.dll",
+          "bytes": 67584,
+          "sha256": "ee10adf4683ffd7505f2e72b8ce30215d03eb49e8c25aecc234c21154999250b"
+        },
+        {
+          "name": "ggml-base.dll",
+          "bytes": 616960,
+          "sha256": "7ba21b7c2078e535825d5f448608868a0915583300a341c9feacfb4e2a509542"
+        },
+        {
+          "name": "ggml-cpu.dll",
+          "bytes": 880640,
+          "sha256": "d2f2cb13cfecee7dd5bf6324e00f0e1bdb6f16f844e60f7c59a8c7c0336e2245"
+        },
+        {
+          "name": "ggml-vulkan.dll",
+          "bytes": 15007744,
+          "sha256": "facd2c783008713cd589a73712b205d0d629586bf91d78c94f5f72edc66b4243"
+        }
+      ],
+      "vulkan": {
+        "shaderProfile": "shader-profile.json",
+        "shaderProfileSha256": "ee7c9d8e059c9a0c89cb931a737f319f8f3e5a0a02629daed0b3541b0b9756fc",
+        "loaderIsBundled": false
+      }
+    }
+  ],
+  "deliveryFiles": [
+    {
+      "relativePath": "README.md",
+      "bytes": 6762,
+      "sha256": "28396d3d922b60dcd2b2e6ad2b2a30969826b6e666f111af078fcb3f878abafb"
+    },
+    {
+      "relativePath": "Verify-WindowsNativePackage.ps1",
+      "bytes": 12541,
+      "sha256": "8bbe91eb034389f0fdd381547a727be3aa9a3b97acf336e2ce81b672758ff663"
+    },
+    {
+      "relativePath": "Verify-IronworksTranslator-MiLMMT-RuntimePacks.ps1",
+      "bytes": 3754,
+      "sha256": "db433205cc7f32e820b54e32dedaf32e4ebcaead5c90c5b948b9099cc1c9fd72"
+    },
+    {
+      "relativePath": "LICENSES\\llama.cpp-MIT.txt",
+      "bytes": 1099,
+      "sha256": "bcd8ec749126d45cb06737d0690295d73df4b6e7e194205bcf91190368f27285"
+    }
+  ]
+}

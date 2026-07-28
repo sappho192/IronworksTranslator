@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <UseWPF>true</UseWPF>
     <StartupObject>IronworksTranslator.App</StartupObject>
@@ -22,6 +22,13 @@
     <AssemblyVersion Condition="'$(GitVersion_AssemblySemVer)' != ''">$(GitVersion_AssemblySemVer)</AssemblyVersion>
     <FileVersion Condition="'$(GitVersion_AssemblySemFileVer)' != ''">$(GitVersion_AssemblySemFileVer)</FileVersion>
     <InformationalVersion Condition="'$(GitVersion_InformationalVersion)' != ''">$(GitVersion_InformationalVersion)</InformationalVersion>
+    <InformationalVersion Condition="'$(IronworksPackageVersion)' != ''">$(IronworksPackageVersion)</InformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IronworksReleaseChannel Condition="'$(IronworksReleaseChannel)' == '' And '$(IRONWORKS_BETA)' != ''">Beta</IronworksReleaseChannel>
+    <IronworksReleaseChannel Condition="'$(IronworksReleaseChannel)' == ''">Stable</IronworksReleaseChannel>
+    <DefineConstants Condition="'$(IronworksReleaseChannel)' == 'Beta'">$(DefineConstants);IRONWORKS_BETA</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,44 +37,33 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="data\unidic-mecab-2.1.2_bin\AUTHORS">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\unidic-mecab-2.1.2_bin\BSD">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\unidic-mecab-2.1.2_bin\char.bin">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\unidic-mecab-2.1.2_bin\dicrc">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\unidic-mecab-2.1.2_bin\matrix.bin">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\unidic-mecab-2.1.2_bin\sys.dic">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="data\unidic-mecab-2.1.2_bin\unk.dic">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="icon.ico" />
     <Content Include="WatchDogMain.exe">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\..\NativeRuntimePacks\runtimes\win-x64\native\**\*">
+      <Link>runtimes\win-x64\native\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\..\NativeRuntimePacks\runtime-packs-manifest.json">
+      <Link>runtimes\win-x64\native\milmmt-runtime-packs-manifest.json</Link>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\..\NativeRuntimePacks\LICENSES\llama.cpp-MIT.txt">
+      <Link>LICENSES\llama.cpp-MIT.txt</Link>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="DeepL.net" Version="1.21.0" />
-    <PackageReference Include="EDMTranslator" Version="1.3.1" />
     <PackageReference Include="Egorozh.ColorPicker.WPF" Version="5.0.0" />
     <PackageReference Include="Egorozh.ColorPicker.WPF.Dialog" Version="5.0.0" />
     <PackageReference Include="GitVersion.MsBuild" Version="6.8.1">
@@ -79,8 +75,6 @@
     <PackageReference Include="Lepo.i18n.Wpf" Version="2.1.0" />
     <PackageReference Include="LLamaSharp" Version="0.27.0" />
     <PackageReference Include="LLamaSharp.Backend.Cpu" Version="0.27.0" />
-    <PackageReference Include="LLamaSharp.Backend.Cuda12" Version="0.27.0" />
-    <PackageReference Include="LLamaSharp.Backend.Vulkan" Version="0.27.0" />
     <PackageReference Include="MdXaml" Version="1.27.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
     <PackageReference Include="MrAdvice" Version="2.20.5" />
@@ -88,11 +82,8 @@
     <PackageReference Include="PuppeteerSharp" Version="20.2.6" />
     <PackageReference Include="Serilog" Version="4.3.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="Sharlayan.Lite" Version="8.0.1" />
-    <PackageReference Include="System.Management" Version="10.0.0" />
-    <PackageReference Include="System.Text.Json" Version="10.0.9" />
-    <PackageReference Include="Tokenizers.DotNet" Version="1.4.1" />
-    <PackageReference Include="Tokenizers.DotNet.runtime.win-x64" Version="1.4.1" />
+    <PackageReference Include="Sharlayan.Lite" Version="9.2.0" />
+    <PackageReference Include="System.Management" Version="10.0.9" />
     <PackageReference Include="WPF-UI" Version="3.1.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
@@ -103,13 +94,6 @@
 
   <ItemGroup>
     <None Remove="Assets\app-icon.png" />
-    <None Remove="data\unidic-mecab-2.1.2_bin\AUTHORS" />
-    <None Remove="data\unidic-mecab-2.1.2_bin\BSD" />
-    <None Remove="data\unidic-mecab-2.1.2_bin\char.bin" />
-    <None Remove="data\unidic-mecab-2.1.2_bin\dicrc" />
-    <None Remove="data\unidic-mecab-2.1.2_bin\matrix.bin" />
-    <None Remove="data\unidic-mecab-2.1.2_bin\sys.dic" />
-    <None Remove="data\unidic-mecab-2.1.2_bin\unk.dic" />
     <None Remove="Fonts\KoPubWorld Dotum Bold.ttf" />
     <None Remove="Fonts\KoPubWorld Dotum Light.ttf" />
     <None Remove="Fonts\KoPubWorld Dotum Medium.ttf" />
@@ -127,6 +111,7 @@
     <EmbeddedResource Include="Resources\Strings\ko-KR.yaml">
       <CopyToOutputDirectory></CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Crypto\log_public_key.pem" />
     <EmbeddedResource Include="Resources\Strings\terms-and-privacy-policy-en.md" />
     <EmbeddedResource Include="Resources\Strings\terms-and-privacy-policy-ko.md" />
   </ItemGroup>
@@ -146,21 +131,7 @@
 
   <Target Name="ExcludeNonWindowsRuntimeAssetsFromPublish" BeforeTargets="CopyFilesToPublishDirectory">
     <ItemGroup>
-      <NonWindowsRuntimePublishFiles Include="@(ResolvedFileToPublish)"
-        Condition="$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/android-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\android-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/browser-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\browser-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/ios-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\ios-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/linux-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\linux-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/maccatalyst-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\maccatalyst-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/osx-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\osx-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/unix-'))
-          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\unix-'))" />
+      <NonWindowsRuntimePublishFiles Include="@(ResolvedFileToPublish)" Condition="$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/android-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\android-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/browser-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\browser-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/ios-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\ios-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/linux-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\linux-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/maccatalyst-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\maccatalyst-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/osx-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\osx-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes/unix-'))&#xA;          Or $([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes\unix-'))" />
       <ResolvedFileToPublish Remove="@(NonWindowsRuntimePublishFiles)" />
     </ItemGroup>
   </Target>
@@ -184,6 +155,64 @@
       <NonWindowsRuntimeDirectories Include="$(PublishDir)runtimes\unix-*" />
     </ItemGroup>
     <RemoveDir Directories="@(NonWindowsRuntimeDirectories)" />
+  </Target>
+
+  <Target Name="ExcludeNonWinX64RuntimeAssetsFromBuild"
+          AfterTargets="ResolveLockFileCopyLocalFiles"
+          BeforeTargets="_CopyFilesMarkedCopyLocal">
+    <ItemGroup>
+      <NonWinX64RuntimeCopyLocalItems Include="@(ReferenceCopyLocalPaths)"
+                                         Condition="$([System.String]::Copy('%(ReferenceCopyLocalPaths.DestinationSubDirectory)').StartsWith('runtimes\')) And !$([System.String]::Copy('%(ReferenceCopyLocalPaths.DestinationSubDirectory)').StartsWith('runtimes\win-x64\'))" />
+      <ReferenceCopyLocalPaths Remove="@(NonWinX64RuntimeCopyLocalItems)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RemoveStaleNonWinX64RuntimeAssets" AfterTargets="Build">
+    <ItemGroup>
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\android-x86" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\browser-wasm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\ios-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\ios-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\iossimulator-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\iossimulator-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-musl-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-musl-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-musl-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\linux-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\maccatalyst-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\maccatalyst-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\osx-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\osx-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\unix" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\unix-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\unix-x64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\win" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\win-arm" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\win-arm64" />
+      <NonWinX64RuntimeDirectories Include="$(OutDir)runtimes\win-x86" />
+    </ItemGroup>
+    <RemoveDir Directories="@(NonWinX64RuntimeDirectories)" />
+  </Target>
+
+  <Target Name="BuildMiLMMTNativeProbe" BeforeTargets="Build" Condition="'$(RuntimeIdentifier)' == ''">
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\..\tools\IronworksMiLMMTNativeProbe\IronworksMiLMMTNativeProbe.csproj"
+             Targets="Build"
+             Properties="Configuration=$(Configuration)" />
+  </Target>
+
+  <Target Name="CopyMiLMMTNativeProbeBuildOutput" AfterTargets="Build" DependsOnTargets="BuildMiLMMTNativeProbe" Condition="'$(RuntimeIdentifier)' == ''">
+    <ItemGroup>
+      <MiLMMTNativeProbeBuildOutput Include="$(MSBuildProjectDirectory)\..\..\tools\IronworksMiLMMTNativeProbe\bin\$(Configuration)\net10.0\IronworksMiLMMTNativeProbe.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(MiLMMTNativeProbeBuildOutput)"
+          DestinationFolder="$(OutDir)"
+          SkipUnchangedFiles="true" />
   </Target>
 
 </Project>

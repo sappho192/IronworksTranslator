@@ -1,4 +1,5 @@
 ﻿using IronworksTranslator.Models.Settings;
+using IronworksTranslator.Models.ReleaseNotes;
 using IronworksTranslator.Services;
 using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
@@ -7,6 +8,7 @@ using IronworksTranslator.Views.Windows;
 using MdXaml;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
@@ -19,6 +21,9 @@ namespace IronworksTranslator.ViewModels.Pages
     public partial class DashboardViewModel : ObservableRecipient
     {
         private readonly AppUpdateService _appUpdateService;
+        private readonly GitHubReleaseNotesService _releaseNotesService;
+        private int _isLoadingReleaseNotes;
+        private int _releaseNotesLoaded;
 
         [ObservableProperty]
         private bool _isTranslatorActive = false;
@@ -43,12 +48,111 @@ namespace IronworksTranslator.ViewModels.Pages
 #pragma warning restore CS8602
 
         [ObservableProperty]
-        private string _logDirectorySize = "0B";
+        private string _releaseNotesStatus =
+            Localizer.GetString("dashboard.releases.loading");
 
-        public DashboardViewModel(AppUpdateService appUpdateService)
+        public ObservableCollection<GitHubReleaseNote> RecentReleaseNotes { get; } = [];
+
+        public string ReleaseNotesHeading => string.Format(
+            Localizer.GetString("dashboard.releases.title"),
+            BuildInfo.ReleaseChannel.DisplayName);
+
+        public DashboardViewModel(
+            AppUpdateService appUpdateService,
+            GitHubReleaseNotesService releaseNotesService)
         {
             _appUpdateService = appUpdateService;
-            UpdateLogFolderSize();
+            _releaseNotesService = releaseNotesService;
+        }
+
+        public async Task LoadReleaseNotesAsync(CancellationToken cancellationToken = default)
+        {
+            if (Volatile.Read(ref _releaseNotesLoaded) != 0
+                || Interlocked.Exchange(ref _isLoadingReleaseNotes, 1) != 0)
+            {
+                return;
+            }
+
+            ReleaseNotesStatus = Localizer.GetString("dashboard.releases.loading");
+            try
+            {
+                var releases = await _releaseNotesService.GetRecentAsync(
+                    BuildInfo.ReleaseChannel,
+                    cancellationToken);
+                RecentReleaseNotes.Clear();
+                foreach (var release in releases)
+                {
+                    RecentReleaseNotes.Add(release);
+                }
+
+                ReleaseNotesStatus = releases.Count == 0
+                    ? Localizer.GetString("dashboard.releases.empty")
+                    : string.Empty;
+                Volatile.Write(ref _releaseNotesLoaded, 1);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                ReleaseNotesStatus = string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to load recent GitHub release notes.");
+                ReleaseNotesStatus = Localizer.GetString("dashboard.releases.failed");
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _isLoadingReleaseNotes, 0);
+            }
+        }
+
+        [RelayCommand]
+        private async Task OnShowReleaseNotesAsync(GitHubReleaseNote? release)
+        {
+            if (release == null)
+            {
+                return;
+            }
+
+            var markdown = string.IsNullOrWhiteSpace(release.Body)
+                ? Localizer.GetString("dashboard.releases.no_notes")
+                : release.Body;
+            FlowDocument document;
+            try
+            {
+                document = new Markdown().Transform(markdown);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to render GitHub release notes as Markdown.");
+                document = new FlowDocument(new Paragraph(new Run(markdown)));
+            }
+
+            document.FontFamily = new System.Windows.Media.FontFamily("sans-serif");
+            document.ColumnWidth = double.PositiveInfinity;
+            document.PagePadding = new Thickness(0);
+            var releaseNotesViewer = new RichTextBox
+            {
+                Document = document,
+                Height = 440,
+                IsDocumentEnabled = true,
+                IsReadOnly = true,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            };
+            releaseNotesViewer.Loaded += (_, _) =>
+            {
+                releaseNotesViewer.CaretPosition = document.ContentStart;
+                releaseNotesViewer.ScrollToHome();
+            };
+            var messageBox = new Wpf.Ui.Controls.MessageBox
+            {
+                Title = release.DisplayTitle,
+                Width = 700,
+                Content = releaseNotesViewer,
+                CloseButtonText = Localizer.GetString("dashboard.releases.close"),
+            };
+
+            await messageBox.ShowDialogAsync();
         }
 
         [TraceMethod]
@@ -235,68 +339,5 @@ namespace IronworksTranslator.ViewModels.Pages
             WindowHelper.SetWindowPosition(dialogueWindow, WpfScreenHelper.Enum.WindowPositions.Center, Screen.PrimaryScreen);
         }
 
-        [TraceMethod]
-        [RelayCommand]
-        private void OnClearLogDirectory()
-        {
-            if (!Directory.Exists(AppPaths.LogsDirectory))
-            {
-                return;
-            }
-
-            string[] filePaths = Directory.GetFiles(AppPaths.LogsDirectory, "*.txt");
-            foreach (string filePath in filePaths)
-            {
-                try
-                {
-                    File.Delete(filePath);
-                }
-                catch (IOException ex)
-                {
-                    Log.Error($"{ex.Message}");
-                }
-            }
-
-            UpdateLogFolderSize();
-        }
-
-        private void UpdateLogFolderSize()
-        {
-            LogDirectorySize = FormatBytes(GetDirectorySize(AppPaths.LogsDirectory));
-        }
-
-        private static long GetDirectorySize(string path)
-        {
-            if (!Directory.Exists(path))
-            {
-                return 0;
-            }
-
-            long size = 0;
-            DirectoryInfo dirInfo = new(path);
-
-            foreach (FileInfo fi in dirInfo.GetFiles("*", SearchOption.AllDirectories))
-            {
-                size += fi.Length;
-            }
-
-            return size;
-        }
-
-        private static string FormatBytes(long bytes)
-        {
-            const int scale = 1024;
-            string[] orders = ["GB", "MB", "KB", "Bytes"];
-            long max = (long)Math.Pow(scale, orders.Length - 1);
-
-            foreach (string order in orders)
-            {
-                if (bytes > max)
-                    return string.Format("{0:##.##}{1}", decimal.Divide(bytes, max), order);
-
-                max /= scale;
-            }
-            return "0B";
-        }
     }
 }

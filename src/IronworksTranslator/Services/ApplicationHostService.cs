@@ -3,12 +3,11 @@ using IronworksTranslator.Utils;
 using IronworksTranslator.Views.Windows;
 using Microsoft.Extensions.Hosting;
 using Wpf.Ui;
-using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization;
 using System.IO;
 using Serilog;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Utils.Aspect;
+using IronworksTranslator.Utils.Translator;
 
 namespace IronworksTranslator.Services
 {
@@ -34,40 +33,76 @@ namespace IronworksTranslator.Services
             AppPaths.MigrateLegacyUserData();
 
             var settingsPath = AppPaths.SettingsFilePath;
-            if (!File.Exists(settingsPath))
+            var sourceSettingsPath = File.Exists(settingsPath)
+                ? settingsPath
+                : AppPaths.FindSettingsMigrationSourcePath();
+            var isNewSettingsSchema = sourceSettingsPath == null;
+            var isSettingsSchemaMigration = sourceSettingsPath != null &&
+                !string.Equals(
+                    sourceSettingsPath,
+                    settingsPath,
+                    StringComparison.OrdinalIgnoreCase);
+            var settingsWereReset = false;
+
+            IronworksSettings settings;
+            if (isNewSettingsSchema)
             {
-                var settings = IronworksSettings.CreateDefault();
-                settings.TranslatorSettings.InitializeCollectionListeners();
-                IronworksSettings.Instance = settings;
-                IronworksSettings.UpdateSettingsFile(settings);
+                settings = IronworksSettings.CreateDefault();
             }
             else
             {
-                var deserializer = new DeserializerBuilder()
-                                    .WithNamingConvention(UnderscoredNamingConvention.Instance)
-                                    .Build();
-                var settingsYaml = File.ReadAllText(settingsPath)
-                    .Replace("MiLLMT_1B_Q4_K_M", "MiLLMT");
-                var settings = deserializer.Deserialize<IronworksSettings>(
-                    settingsYaml
-                );
-                IronworksSettings.Instance = settings;
-                if (IronworksSettings.IsSettingsFileInValid(settings))
+                settings = IronworksSettings.DeserializeSettings(
+                    File.ReadAllText(sourceSettingsPath!));
+            }
+
+            IronworksSettings.Instance = settings;
+            if (IronworksSettings.IsSettingsFileInValid(settings))
+            {
+                Log.Error("Failed to load settings.");
+                if (MessageBox.Show(Localizer.GetString("app.settings.failed_to_load"), "Error", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
                 {
-                    Log.Error("Failed to load settings.");
-                    if (MessageBox.Show(Localizer.GetString("app.settings.failed_to_load"), "Error", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
-                    {
-                        settings = IronworksSettings.CreateDefault();
-                        IronworksSettings.Instance = settings;
-                        IronworksSettings.UpdateSettingsFile(settings);
-                    }
-                    else
-                    {
-                        App.RequestShutdown();
-                        return;
-                    }
+                    settings = IronworksSettings.CreateDefault();
+                    IronworksSettings.Instance = settings;
+                    settingsWereReset = true;
                 }
-                IronworksSettings.Instance.TranslatorSettings.InitializeCollectionListeners();
+                else
+                {
+                    App.RequestShutdown();
+                    return;
+                }
+            }
+
+            IronworksSettings.Instance.TranslatorSettings.InitializeCollectionListeners();
+
+            // Schema 2 repairs the unversioned file once because beta.3 already
+            // rewrote it with values that beta.2 cannot deserialize. Later
+            // schemas must leave every previous snapshot untouched.
+            var shouldRepairLegacyV1Snapshot = AppPaths.SettingsSchemaVersion == 2 &&
+                isSettingsSchemaMigration &&
+                string.Equals(
+                    sourceSettingsPath,
+                    AppPaths.LegacySettingsFilePath,
+                    StringComparison.OrdinalIgnoreCase);
+
+            // Repair the downgrade snapshot before creating the new schema file.
+            // If the following write fails, the next launch will retry migration
+            // from the already-compatible legacy snapshot.
+            if (shouldRepairLegacyV1Snapshot)
+            {
+                IronworksSettings.RepairLegacyV1SettingsSnapshotForBeta2(settings);
+            }
+
+            if (isNewSettingsSchema || isSettingsSchemaMigration || settingsWereReset)
+            {
+                IronworksSettings.UpdateSettingsFile(settings);
+            }
+
+            if (shouldRepairLegacyV1Snapshot)
+            {
+                Log.Information(
+                    "Migrated settings schema from {SourcePath} to {DestinationPath} and preserved a version 1 downgrade snapshot.",
+                    sourceSettingsPath,
+                    settingsPath);
             }
 
             ApplyAppLanguage();
@@ -90,6 +125,8 @@ namespace IronworksTranslator.Services
         /// <param name="cancellationToken">Indicates that the start process has been aborted.</param>
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            var miLMMTTranslator = _serviceProvider.GetService(typeof(MiLMMTTranslator)) as MiLMMTTranslator;
+            miLMMTTranslator?.ConfigureNativeBackendAtStartup();
             await HandleActivationAsync();
         }
 

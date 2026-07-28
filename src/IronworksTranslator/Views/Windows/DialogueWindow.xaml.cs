@@ -53,6 +53,7 @@ namespace IronworksTranslator.Views.Windows
             {
                 ResizeMode = ResizeMode.NoResize;
             }
+            ChangeDialogueFontSize(IronworksSettings.Instance.ChatUiSettings.DialogueFontSize);
 
             _resizeEndTimer.Interval = TimeSpan.FromMilliseconds(3000);
             _resizeEndTimer.Tick += ResizeEndTimer_Tick;
@@ -80,35 +81,42 @@ namespace IronworksTranslator.Views.Windows
 
             try
             {
-                if (!ChatQueue.rq.IsEmpty)
+                if (ChatQueue.TryDequeueDialogue(out DialogueEntry? entry))
                 {
-                    var result = ChatQueue.rq.TryDequeue(out string? msg);
-                    if (msg == null) return;
                     if (IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod == DialogueTranslationMethod.MemorySearch)
                     {
-                        if (result)
+                        var msg = entry.Text;
+                        msg = MyRegex1().Replace(msg, "[HQ]");
+                        msg = MyRegex2().Replace(msg, "⇒");
+                        msg = MyRegex3().Replace(msg, string.Empty);
+                        msg = MyRegex4().Replace(msg, string.Empty);
+                        if (msg.StartsWith('\u0002'))
                         {
-                            msg = MyRegex1().Replace(msg, "[HQ]");
-                            msg = MyRegex2().Replace(msg, "⇒");
-                            msg = MyRegex3().Replace(msg, string.Empty);
-                            msg = MyRegex4().Replace(msg, string.Empty);
-                            if (msg.StartsWith('\u0002'))
+                            var filter = regexItem.Match(msg);
+                            if (filter.Success)
                             {
-                                var filter = regexItem.Match(msg);
-                                if (filter.Success)
-                                {
-                                    msg = filter.Groups[1].Value;
-                                }
+                                msg = filter.Groups[1].Value;
                             }
-                            if (!msg.Equals(string.Empty))
-                            {
-                                var translated = Translate(msg, IronworksSettings.Instance.ChannelSettings.NpcDialog.MajorLanguage);
+                        }
+                        if (!msg.Equals(string.Empty))
+                        {
+                            var sourceLanguage =
+                                IronworksSettings.Instance.ChannelSettings.NpcDialog.MajorLanguage;
+                            var translated = Translate(msg, sourceLanguage);
+                            var translatedSpeaker = DialogueSpeakerTranslation.TranslateOrOriginal(
+                                entry.Speaker,
+                                speaker => Translate(speaker, sourceLanguage),
+                                ex => Log.Warning(
+                                    ex,
+                                    "Failed to translate dialogue speaker; using the original speaker."));
+                            var displayText = DialogueTextFormatter.Format(
+                                translatedSpeaker,
+                                translated);
 
-                                Application.Current.Dispatcher.Invoke(() =>
-                                {
-                                    AppendDialogueText(translated);
-                                });
-                            }
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                AppendDialogueText(displayText);
+                            });
                         }
                     }
                 }
@@ -124,16 +132,16 @@ namespace IronworksTranslator.Views.Windows
             }
         }
 
-        public void PushDialogueTextBox(string? dialogue)
+        public void PushDialogueTextBox(DialogueEntry? entry)
         {
-            if (dialogue == null) return;
+            if (entry == null) return;
             if (!Dispatcher.CheckAccess())
             {
-                Dispatcher.Invoke(() => PushDialogueTextBox(dialogue));
+                Dispatcher.Invoke(() => PushDialogueTextBox(entry));
                 return;
             }
 
-            AppendDialogueText(dialogue);
+            AppendDialogueText(DialogueTextFormatter.Format(entry.Speaker, entry.Text));
         }
 
         private void AppendDialogueText(string dialogue)
@@ -181,21 +189,17 @@ namespace IronworksTranslator.Views.Windows
                             (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
                         );
                     break;
-                case TranslatorEngine.Ironworks_Ja_Ko:
-                    result = App.GetService<IronworksJaKoTranslator>().Translate(
-                            input,
-                            (TranslationLanguageCode)channelLanguage,
-                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
-                        );
-                    break;
-                case TranslatorEngine.MiLLMT:
+                case TranslatorEngine.MiLMMT:
                     result = App.GetService<MiLMMTTranslator>().Translate(
                             input,
                             (TranslationLanguageCode)channelLanguage,
-                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage
+                            (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage,
+                            MiLMMTTranslationKind.Dialogue
                         );
                     break;
                 default:
+                    Log.Warning("Unknown translator engine {TranslatorEngine}. Returning original input.", switcher);
+                    result = input;
                     break;
             }
             Log.Information($"Translated {input}");

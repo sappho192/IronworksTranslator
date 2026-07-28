@@ -64,6 +64,10 @@ namespace IronworksTranslator.Models.Settings
         private LocalModelDevicePriority _localModelDevicePriority;
 
         [ObservableProperty]
+        [property: YamlMember(Alias = "local_model_device_priority_user_selected")]
+        private bool _localModelDevicePriorityUserSelected;
+
+        [ObservableProperty]
         [property: YamlMember(Alias = "dialogue_translation_method")]
         private DialogueTranslationMethod _dialogueTranslationMethod;
 
@@ -74,10 +78,6 @@ namespace IronworksTranslator.Models.Settings
         [ObservableProperty]
         [property: YamlMember(Alias = "deepl_auto_source_language")]
         private bool _deeplAutoSourceLanguage;
-
-        [ObservableProperty]
-        [property: YamlMember(Alias = "use_internal_address")]
-        private bool _useInternalAddress;
 
         [SaveSettingsOnChange]
         partial void OnClientLanguageChanged(ClientLanguage value)
@@ -114,7 +114,7 @@ namespace IronworksTranslator.Models.Settings
         [SaveSettingsOnChange]
         partial void OnMiLMMTModelSizeChanged(MiLMMTModelSize value)
         {
-            Log.Information("MiLLMTModelSize changed to {Value}", value);
+            Log.Information("MiLMMTModelSize changed to {Value}", value);
         }
 
         private void OnMiLMMTModelSizeMessage(object s, PropertyChangedMessage<MiLMMTModelSize> m)
@@ -130,7 +130,7 @@ namespace IronworksTranslator.Models.Settings
         [SaveSettingsOnChange]
         partial void OnMiLMMTQuantizationChanged(MiLMMTQuantization value)
         {
-            Log.Information("MiLLMTQuantization changed to {Value}", value);
+            Log.Information("MiLMMTQuantization changed to {Value}", value);
         }
 
         private void OnMiLMMTQuantizationMessage(object s, PropertyChangedMessage<MiLMMTQuantization> m)
@@ -154,6 +154,7 @@ namespace IronworksTranslator.Models.Settings
             switch (m.PropertyName)
             {
                 case nameof(SettingsViewModel.LocalModelDevicePriority):
+                    LocalModelDevicePriorityUserSelected = true;
                     LocalModelDevicePriority = m.NewValue;
                     break;
             }

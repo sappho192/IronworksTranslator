@@ -18,7 +18,7 @@ namespace IronworksTranslator.ViewModels.Windows
         [ObservableProperty]
         private bool _isResizable = IronworksSettings.Instance.ChatUiSettings.IsResizable;
         [ObservableProperty]
-        private double _windowOpacity = IronworksSettings.Instance.ChatUiSettings.WindowOpacity;
+        private double _windowOpacity = IronworksSettings.Instance.ChatUiSettings.DialogueWindowOpacity;
         [ObservableProperty]
         private double _width = IronworksSettings.Instance.UiSettings.DialogueWindowWidth;
         [ObservableProperty]
@@ -29,7 +29,7 @@ namespace IronworksTranslator.ViewModels.Windows
         {
             switch (message.PropertyName)
             {
-                case nameof(SettingsViewModel.ChildWindowOpacity):
+                case nameof(SettingsViewModel.DialogueWindowOpacity):
                     WindowOpacity = message.NewValue;
                     break;
             }

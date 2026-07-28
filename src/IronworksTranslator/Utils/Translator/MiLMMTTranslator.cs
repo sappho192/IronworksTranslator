@@ -13,46 +13,88 @@ namespace IronworksTranslator.Utils.Translator
 {
     public sealed class MiLMMTTranslator : TranslatorBase, IDisposable
     {
-        private const int ContextSize = 2048;
-        private const int GpuLayerCount = 99;
-        private const int BatchSize = 2048;
-        private const int UBatchSize = 512;
-        private const int MaxTokens = 512;
         private const int TimeoutSeconds = 30;
+        private const int TranslationCacheCapacity = 256;
 
         private static readonly string[] StopTokens = ["<end_of_turn>", "<eos>", "</s>"];
         private static readonly object NativeConfigLock = new();
+        private static readonly MiLMMTNativeBackendSession NativeBackendSession = new();
         private static bool isNativeConfigured;
         private static LocalModelDevicePriority? configuredDevicePriority;
 
         private readonly TranslationLanguageCode[] translationLanguages = [
             TranslationLanguageCode.Japanese,
             TranslationLanguageCode.English,
+            TranslationLanguageCode.German,
+            TranslationLanguageCode.French,
             TranslationLanguageCode.Korean
         ];
 
         private readonly SemaphoreSlim inferenceLock = new(1, 1);
+        private readonly BoundedTranslationCache<TranslationCacheKey> translationCache = new(
+            TranslationCacheCapacity,
+            TimeSpan.FromMinutes(5));
         private LLamaWeights? weights;
         private StatelessExecutor? executor;
         private string? loadedModelPath;
         private LocalModelDevicePriority? loadedDevicePriority;
+        private MiLMMTInferenceProfile? loadedInferenceProfile;
         private bool disposed;
 
         public override TranslationLanguageCode[] SupportedSourceLanguages => translationLanguages;
         public override TranslationLanguageCode[] SupportedTargetLanguages => translationLanguages;
+
+        internal void ConfigureNativeBackendAtStartup()
+        {
+            try
+            {
+                _ = ConfigureNativeLibrary(GetDevicePriority());
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to configure the MiLMMT native backend at startup.");
+            }
+        }
 
         public override string Translate(
             string input,
             TranslationLanguageCode sourceLanguage,
             TranslationLanguageCode targetLanguage)
         {
-            return TranslateAsync(input, sourceLanguage, targetLanguage).GetAwaiter().GetResult();
+            return Translate(
+                input,
+                sourceLanguage,
+                targetLanguage,
+                MiLMMTTranslationKind.Manual);
+        }
+
+        public string Translate(
+            string input,
+            TranslationLanguageCode sourceLanguage,
+            TranslationLanguageCode targetLanguage,
+            MiLMMTTranslationKind requestKind)
+        {
+            return TranslateAsync(input, sourceLanguage, targetLanguage, requestKind).GetAwaiter().GetResult();
         }
 
         public override async Task<string> TranslateAsync(
             string input,
             TranslationLanguageCode sourceLanguage,
             TranslationLanguageCode targetLanguage)
+        {
+            return await TranslateAsync(
+                input,
+                sourceLanguage,
+                targetLanguage,
+                MiLMMTTranslationKind.Manual);
+        }
+
+        public async Task<string> TranslateAsync(
+            string input,
+            TranslationLanguageCode sourceLanguage,
+            TranslationLanguageCode targetLanguage,
+            MiLMMTTranslationKind requestKind,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(input) || sourceLanguage == targetLanguage)
             {
@@ -61,34 +103,67 @@ namespace IronworksTranslator.Utils.Translator
 
             if (!SupportedSourceLanguages.Contains(sourceLanguage))
             {
-                Log.Error("Unsupported MiLLMT sourceLanguage: {SourceLanguage}", sourceLanguage);
+                Log.Error("Unsupported MiLMMT sourceLanguage: {SourceLanguage}", sourceLanguage);
                 return input;
             }
 
             if (!SupportedTargetLanguages.Contains(targetLanguage))
             {
-                Log.Error("Unsupported MiLLMT targetLanguage: {TargetLanguage}", targetLanguage);
+                Log.Error("Unsupported MiLMMT targetLanguage: {TargetLanguage}", targetLanguage);
                 return input;
             }
 
             var modelProfile = MiLMMTModelProfiles.GetCurrent();
-            if (!File.Exists(modelProfile.FilePath))
+            if (!modelProfile.Supports(sourceLanguage) || !modelProfile.Supports(targetLanguage))
             {
-                Log.Error("MiLLMT model file does not exist: {ModelPath}", modelProfile.FilePath);
+                Log.Warning(
+                    "MiLMMT model {ModelName} only supports {SupportedLanguages}; requested {SourceLanguage} -> {TargetLanguage}. Returning original input.",
+                    modelProfile.DisplayName,
+                    modelProfile.SupportedLanguageNames,
+                    sourceLanguage,
+                    targetLanguage);
                 return input;
             }
 
-            await inferenceLock.WaitAsync();
+            if (!File.Exists(modelProfile.FilePath))
+            {
+                Log.Error("MiLMMT model file does not exist: {ModelPath}", modelProfile.FilePath);
+                return input;
+            }
+
+            var inferenceProfile = MiLMMTInferenceProfile.GameSafe;
+            var maxTokens = inferenceProfile.GetMaxTokens(requestKind);
+            var cacheKey = new TranslationCacheKey(
+                modelProfile.Sha256,
+                sourceLanguage,
+                targetLanguage,
+                maxTokens,
+                NormalizeForCache(input));
+            if (translationCache.TryGet(cacheKey, out var cachedOutput))
+            {
+                return cachedOutput;
+            }
+
+            var lockAcquired = false;
             try
             {
-                if (!EnsureInitialized(modelProfile))
+                await inferenceLock.WaitAsync(cancellationToken);
+                lockAcquired = true;
+
+                if (translationCache.TryGet(cacheKey, out cachedOutput))
+                {
+                    return cachedOutput;
+                }
+
+                if (!EnsureInitialized(modelProfile, inferenceProfile))
                 {
                     return input;
                 }
 
                 var prompt = RenderPrompt(sourceLanguage, targetLanguage, input);
-                var inferenceParams = CreateInferenceParams();
-                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds));
+                var inferenceParams = CreateInferenceParams(maxTokens);
+                using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                timeout.CancelAfter(TimeSpan.FromSeconds(TimeoutSeconds));
                 var generated = new List<string>();
 
                 await foreach (var chunk in executor!.InferAsync(prompt, inferenceParams, timeout.Token))
@@ -97,29 +172,52 @@ namespace IronworksTranslator.Utils.Translator
                 }
 
                 var output = StripStops(string.Concat(generated)).Trim();
-                return string.IsNullOrWhiteSpace(output) ? input : output;
+                if (string.IsNullOrWhiteSpace(output))
+                {
+                    return input;
+                }
+
+                if (!string.Equals(output, input, StringComparison.Ordinal))
+                {
+                    translationCache.Set(cacheKey, output);
+                }
+
+                return output;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                Log.Debug(
+                    "MiLMMT {RequestKind} translation was cancelled before completion.",
+                    requestKind);
+                throw;
             }
             catch (Exception ex)
             {
                 Log.Error(
                     ex,
-                    "Error translating with MiLLMT. SourceLanguage: {SourceLanguage}, TargetLanguage: {TargetLanguage}",
+                    "Error translating with MiLMMT. SourceLanguage: {SourceLanguage}, TargetLanguage: {TargetLanguage}",
                     sourceLanguage,
                     targetLanguage);
                 return input;
             }
             finally
             {
-                inferenceLock.Release();
+                if (lockAcquired)
+                {
+                    inferenceLock.Release();
+                }
             }
         }
 
-        private bool EnsureInitialized(MiLMMTModelProfile modelProfile)
+        private bool EnsureInitialized(
+            MiLMMTModelProfile modelProfile,
+            MiLMMTInferenceProfile inferenceProfile)
         {
-            var devicePriority = GetDevicePriority();
+            var effectiveDevicePriority = ConfigureNativeLibrary(GetDevicePriority());
             if (executor != null
                 && loadedModelPath == modelProfile.FilePath
-                && loadedDevicePriority == devicePriority)
+                && loadedDevicePriority == effectiveDevicePriority
+                && loadedInferenceProfile == inferenceProfile)
             {
                 return true;
             }
@@ -127,15 +225,14 @@ namespace IronworksTranslator.Utils.Translator
             try
             {
                 UnloadModel();
-                var effectiveDevicePriority = ConfigureNativeLibrary(devicePriority);
                 var useGpu = effectiveDevicePriority is LocalModelDevicePriority.Cuda
                     or LocalModelDevicePriority.Vulkan;
                 var modelParams = new ModelParams(modelProfile.FilePath)
                 {
-                    ContextSize = ContextSize,
-                    GpuLayerCount = useGpu ? GpuLayerCount : 0,
-                    BatchSize = BatchSize,
-                    UBatchSize = UBatchSize,
+                    ContextSize = checked((uint)inferenceProfile.ContextSize),
+                    GpuLayerCount = useGpu ? inferenceProfile.GpuLayerCount : 0,
+                    BatchSize = checked((uint)inferenceProfile.BatchSize),
+                    UBatchSize = checked((uint)inferenceProfile.UBatchSize),
                 };
 
                 weights = LLamaWeights.LoadFromFile(modelParams);
@@ -146,15 +243,17 @@ namespace IronworksTranslator.Utils.Translator
 
                 loadedModelPath = modelProfile.FilePath;
                 loadedDevicePriority = effectiveDevicePriority;
+                loadedInferenceProfile = inferenceProfile;
                 Log.Information(
-                    "MiLLMT model loaded from {ModelPath}. DevicePriority: {DevicePriority}",
+                    "MiLMMT model loaded from {ModelPath}. DevicePriority: {DevicePriority}. InferenceProfile: {InferenceProfile}",
                     modelProfile.FilePath,
-                    effectiveDevicePriority);
+                    effectiveDevicePriority,
+                    inferenceProfile.Name);
                 return true;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to initialize MiLLMT model.");
+                Log.Error(ex, "Failed to initialize MiLMMT model.");
                 UnloadModel();
                 return false;
             }
@@ -166,11 +265,6 @@ namespace IronworksTranslator.Utils.Translator
             {
                 if (isNativeConfigured)
                 {
-                    if (devicePriority == LocalModelDevicePriority.Cpu)
-                    {
-                        return LocalModelDevicePriority.Cpu;
-                    }
-
                     if (configuredDevicePriority != devicePriority)
                     {
                         Log.Warning(
@@ -179,15 +273,36 @@ namespace IronworksTranslator.Utils.Translator
                             devicePriority);
                     }
 
-                    return configuredDevicePriority ?? devicePriority;
+                    return configuredDevicePriority ?? LocalModelDevicePriority.Cpu;
                 }
 
-                var config = NativeLibraryConfig.All
-                    .WithCuda(devicePriority == LocalModelDevicePriority.Cuda)
-                    .WithVulkan(devicePriority == LocalModelDevicePriority.Vulkan)
-                    .WithAutoFallback(true);
+                var selectedDevicePriority = NativeBackendSession.Select(
+                    devicePriority,
+                    System.Runtime.Intrinsics.X86.Avx2.IsSupported,
+                    MiLMMTNativeBackendSelector.ProbeGpuBackend);
 
-                config.WithLogCallback((level, message) =>
+                if (selectedDevicePriority is LocalModelDevicePriority.Cuda
+                    or LocalModelDevicePriority.Vulkan)
+                {
+                    var llamaPath = MiLMMTNativeBackendSelector.GetLlamaPath(
+                        selectedDevicePriority,
+                        AppContext.BaseDirectory);
+                    if (!File.Exists(llamaPath))
+                    {
+                        throw new FileNotFoundException("MiLMMT native runtime pack is missing.", llamaPath);
+                    }
+
+                    NativeLibraryConfig.LLama.WithLibrary(llamaPath);
+                }
+                else
+                {
+                    NativeLibraryConfig.All
+                        .WithCuda(false)
+                        .WithVulkan(false)
+                        .WithAutoFallback(false);
+                }
+
+                NativeLibraryConfig.All.WithLogCallback((level, message) =>
                 {
                     if (ShouldLogNativeMessage(level.ToString(), message))
                     {
@@ -195,9 +310,13 @@ namespace IronworksTranslator.Utils.Translator
                     }
                 });
 
-                configuredDevicePriority = devicePriority;
+                configuredDevicePriority = selectedDevicePriority;
                 isNativeConfigured = true;
-                return devicePriority;
+                Log.Information(
+                    "MiLMMT native backend configured as {SelectedDevicePriority} for requested {RequestedDevicePriority}.",
+                    selectedDevicePriority,
+                    devicePriority);
+                return selectedDevicePriority;
             }
         }
 
@@ -210,11 +329,11 @@ namespace IronworksTranslator.Utils.Translator
                 || message.Contains("Vulkan", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static InferenceParams CreateInferenceParams()
+        private static InferenceParams CreateInferenceParams(int maxTokens)
         {
             return new InferenceParams
             {
-                MaxTokens = MaxTokens,
+                MaxTokens = maxTokens,
                 AntiPrompts = StopTokens,
                 SamplingPipeline = new DefaultSamplingPipeline
                 {
@@ -254,8 +373,10 @@ namespace IronworksTranslator.Utils.Translator
             {
                 TranslationLanguageCode.Japanese => "Japanese",
                 TranslationLanguageCode.English => "English",
+                TranslationLanguageCode.German => "German",
+                TranslationLanguageCode.French => "French",
                 TranslationLanguageCode.Korean => "Korean",
-                _ => throw new ArgumentException($"Unsupported MiLLMT language: {language}", nameof(language)),
+                _ => throw new ArgumentException($"Unsupported MiLMMT language: {language}", nameof(language)),
             };
         }
 
@@ -271,6 +392,13 @@ namespace IronworksTranslator.Utils.Translator
             }
 
             return text;
+        }
+
+        internal static string NormalizeForCache(string input)
+        {
+            return string.Join(
+                ' ',
+                input.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
         }
 
         public void Dispose()
@@ -292,6 +420,14 @@ namespace IronworksTranslator.Utils.Translator
             executor = null;
             loadedModelPath = null;
             loadedDevicePriority = null;
+            loadedInferenceProfile = null;
         }
+
+        private readonly record struct TranslationCacheKey(
+            string ModelSha256,
+            TranslationLanguageCode SourceLanguage,
+            TranslationLanguageCode TargetLanguage,
+            int MaxTokens,
+            string NormalizedInput);
     }
 }

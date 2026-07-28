@@ -27,7 +27,7 @@ Windows 10 64bit 이상
 
 ## 요구 환경
 
-설치 프로그램이 필요한 경우 .NET 8 Desktop Runtime을 함께 설치합니다.
+설치 프로그램이 필요한 경우 .NET 10 Desktop Runtime을 함께 설치합니다.
 
 1. 파판14를 실행한다.
 2. IronworksTranslator를 실행한다.

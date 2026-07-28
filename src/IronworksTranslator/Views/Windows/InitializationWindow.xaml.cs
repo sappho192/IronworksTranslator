@@ -113,52 +113,13 @@ namespace IronworksTranslator.Views.Windows
                 ?? TranslatorEngine.Papago;
             switch (selectedEngine)
             {
-                case TranslatorEngine.Ironworks_Ja_Ko:
-                    PrepareIronworksJaKoModel();
-                    break;
-                case TranslatorEngine.MiLLMT:
+                case TranslatorEngine.MiLMMT:
                     PrepareMiLMMTModel(requestedMiLMMTProfile ?? MiLMMTModelProfiles.GetCurrent());
                     break;
                 default:
                     worker.ReportProgress(100);
                     break;
             }
-        }
-
-        private void PrepareIronworksJaKoModel()
-        {
-            (var encoderExists, var decoderExists) = IsModelExists();
-            worker.ReportProgress(30);
-            if (!encoderExists)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    txtProgress.Text = Localizer.GetString("downloader.worker.progress.download.ironworks.jako.encoder");
-                });
-                DownloadEncoderModel().GetAwaiter().GetResult();
-                worker.ReportProgress(60);
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    txtProgress.Text = Localizer.GetString("downloader.worker.progress.hash.model.encoder");
-                });
-                CheckEncoderModelIntegrity();
-            }
-            if (!decoderExists)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    txtProgress.Text = Localizer.GetString("downloader.worker.progress.download.ironworks.jako.decoder");
-                });
-                DownloadDecoderModel().GetAwaiter().GetResult();
-                worker.ReportProgress(90);
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    txtProgress.Text = Localizer.GetString("downloader.worker.progress.hash.model.decoder");
-                });
-                CheckDecoderModelIntegrity();
-            }
-
-            worker.ReportProgress(100);
         }
 
         private void PrepareMiLMMTModel(MiLMMTModelProfile profile)
@@ -184,76 +145,15 @@ namespace IronworksTranslator.Views.Windows
             worker.ReportProgress(100);
         }
 
-        private const string MODEL_ENCODER_URL = "https://huggingface.co/sappho192/aihub-ja-ko-translator/resolve/main/onnx/encoder_model.onnx";
-        private const string MODEL_DECODER_URL = "https://huggingface.co/sappho192/aihub-ja-ko-translator/resolve/main/onnx/decoder_model_merged.onnx";
-        private const string MODEL_ENCODER_HASH = "1e39281ac696b2919ae65fa81e71849e";
-        private const string MODEL_DECODER_HASH = "cee4c3c306fae640f6a11f9795ea4be3";
-        private const string MODEL_ENCODER_FILENAME = "encoder_model.onnx";
-        private const string MODEL_DECODER_FILENAME = "decoder_model_merged.onnx";
-        private static readonly string AihubJaKoModelDir = AppPaths.AihubJaKoModelDirectory;
-
-        [TraceMethod]
-        private void CheckEncoderModelIntegrity()
-        {
-            string encoderPath = Path.Combine(AihubJaKoModelDir, "encoder_model.onnx");
-            bool encoderIntegrity = false;
-            // Check encoder file
-            if (File.Exists(encoderPath))
-            {
-                if (CheckHash(encoderPath, MODEL_ENCODER_HASH))
-                {
-                    encoderIntegrity = true;
-                }
-            }
-
-            if (!encoderIntegrity)
-            {
-                MessageBox.Show(Localizer.GetString("downloader.error.encoder.hash"));
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    App.RequestShutdown();
-                });
-            }
-        }
-
-        [TraceMethod]
-        private void CheckDecoderModelIntegrity()
-        {
-            string decoderPath = Path.Combine(AihubJaKoModelDir, "decoder_model_merged.onnx");
-            bool decoderIntegrity = false;
-            if (File.Exists(decoderPath))
-            {
-                if (CheckHash(decoderPath, MODEL_DECODER_HASH))
-                {
-                    decoderIntegrity = true;
-                }
-            }
-            if (!decoderIntegrity)
-            {
-                MessageBox.Show(Localizer.GetString("downloader.error.decoder.hash"));
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    App.RequestShutdown();
-                });
-            }
-        }
-
-        [TraceMethod]
-        private async Task DownloadEncoderModel()
-        {
-            await DownloadModelAsync(MODEL_ENCODER_URL, AihubJaKoModelDir, MODEL_ENCODER_FILENAME);
-        }
-
-        [TraceMethod]
-        private async Task DownloadDecoderModel()
-        {
-            await DownloadModelAsync(MODEL_DECODER_URL, AihubJaKoModelDir, MODEL_DECODER_FILENAME);
-        }
-
         [TraceMethod]
         private async Task DownloadMiLMMTModel(MiLMMTModelProfile profile)
         {
-            await DownloadModelAsync(profile.DownloadUrl, profile.DirectoryPath, profile.FileName, profile.FileSize);
+            await DownloadModelAsync(
+                profile.DownloadUrl,
+                profile.DirectoryPath,
+                profile.FileName,
+                profile.FileSize,
+                profile.DisplayName);
         }
 
         [TraceMethod]
@@ -261,12 +161,14 @@ namespace IronworksTranslator.Views.Windows
             string url,
             string modelDirectory,
             string fileName,
-            long? expectedBytes = null)
+            long? expectedBytes = null,
+            string? displayName = null)
         {
             Directory.CreateDirectory(modelDirectory);
 
             var modelPath = Path.Combine(modelDirectory, fileName);
             var tempPath = $"{modelPath}.download";
+            var downloadDisplayName = displayName ?? fileName;
 
             if (File.Exists(tempPath))
             {
@@ -276,7 +178,7 @@ namespace IronworksTranslator.Views.Windows
             Application.Current.Dispatcher.Invoke(() =>
             {
                 pbDownloader.Value = 0;
-                txtDownloaderFilename.Text = fileName;
+                txtDownloaderFilename.Text = downloadDisplayName;
                 txtDownloaderBytes.Text = string.Empty;
             });
 
@@ -348,7 +250,7 @@ namespace IronworksTranslator.Views.Windows
             Application.Current.Dispatcher.Invoke(() =>
             {
                 pbDownloader.Value = 100;
-                txtDownloaderFilename.Text = fileName;
+                txtDownloaderFilename.Text = downloadDisplayName;
                 txtDownloaderBytes.Text = Localizer.GetString("downloader.worker.progress.download.complete");
             });
         }
@@ -356,33 +258,6 @@ namespace IronworksTranslator.Views.Windows
         private static double ToMiB(long bytes)
         {
             return bytes / 1024d / 1024d;
-        }
-
-        [TraceMethod]
-        private (bool, bool) IsModelExists()
-        {
-            string encoderPath = Path.Combine(AihubJaKoModelDir, "encoder_model.onnx");
-            string decoderPath = Path.Combine(AihubJaKoModelDir, "decoder_model_merged.onnx");
-            bool encoderExists = false;
-            bool decoderExists = false;
-
-            // Check encoder file
-            if (File.Exists(encoderPath))
-            {
-                if (CheckHash(encoderPath, MODEL_ENCODER_HASH))
-                {
-                    encoderExists = true;
-                }
-            }
-            if (File.Exists(decoderPath))
-            {
-                if (CheckHash(decoderPath, MODEL_DECODER_HASH))
-                {
-                    decoderExists = true;
-                }
-            }
-
-            return (encoderExists, decoderExists);
         }
 
         [TraceMethod]
@@ -419,23 +294,13 @@ namespace IronworksTranslator.Views.Windows
             if (fileInfo.Length != profile.FileSize)
             {
                 Log.Warning(
-                    "MiLLMT model size mismatch. Expected: {ExpectedSize}, Actual: {ActualSize}",
+                    "MiLMMT model size mismatch. Expected: {ExpectedSize}, Actual: {ActualSize}",
                     profile.FileSize,
                     fileInfo.Length);
                 return false;
             }
 
             return CheckSha256(profile.FilePath, profile.Sha256);
-        }
-
-        [TraceMethod]
-        private static bool CheckHash(string filePath, string hash)
-        {
-            using var md5 = MD5.Create();
-            using var stream = File.OpenRead(filePath);
-            var hashBytes = md5.ComputeHash(stream);
-            var hashStr = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
-            return hashStr == hash;
         }
 
         [TraceMethod]

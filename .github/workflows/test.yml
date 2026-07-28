@@ -13,11 +13,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # GitVersion needs the complete history when Actions builds a PR merge ref.
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 10.0.x
 
       - name: Restore
         run: dotnet restore src\IronworksTranslator\IronworksTranslator.sln

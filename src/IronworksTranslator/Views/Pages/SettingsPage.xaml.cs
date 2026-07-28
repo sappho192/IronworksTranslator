@@ -26,6 +26,9 @@ namespace IronworksTranslator.Views.Pages
         private LocalModelDevicePriority _previousLocalModelDevicePriority;
         private SystemResourceSnapshot? _lastSystemResourceSnapshot;
         private readonly DispatcherTimer resourceTimer;
+        private bool _isResourcePollingActive;
+        private bool _isResourceSnapshotInProgress;
+        private long _resourcePollingGeneration;
 
         public SettingsPage(SettingsViewModel viewModel)
         {
@@ -48,9 +51,9 @@ namespace IronworksTranslator.Views.Pages
             {
                 Interval = TimeSpan.FromSeconds(2),
             };
-            resourceTimer.Tick += (_, _) => UpdateResourceSnapshot();
-            resourceTimer.Start();
-            UpdateResourceSnapshot();
+            resourceTimer.Tick += ResourceTimer_Tick;
+            Loaded += SettingsPage_Loaded;
+            Unloaded += SettingsPage_Unloaded;
         }
 
         private void ChatFontSize_ValueChanged(object sender, RoutedEventArgs e)
@@ -318,14 +321,6 @@ namespace IronworksTranslator.Views.Pages
             if (comboBox == null) return;
 
             var selectedItem = ViewModel.TranslatorEngine;
-            if (selectedItem == Models.Enums.TranslatorEngine.Ironworks_Ja_Ko
-                && !ConfirmDeprecatedIronworksJaKo())
-            {
-                SelectTranslatorEngine(Models.Enums.TranslatorEngine.MiLLMT, comboBox);
-                UpdateTranslatorTooltip(ViewModel.TranslatorEngine);
-                EnsureLocalTranslatorModelReady(ViewModel.TranslatorEngine, comboBox);
-                return;
-            }
 
             if (selectedItem == Models.Enums.TranslatorEngine.DeepL_API)
             {
@@ -347,23 +342,17 @@ namespace IronworksTranslator.Views.Pages
             }
         }
 
-        private static bool ConfirmDeprecatedIronworksJaKo()
-        {
-            var result = System.Windows.MessageBox.Show(
-                Localizer.GetString("settings.translator.engine.jako.deprecated.confirm"),
-                Localizer.GetString("settings.translator.engine.jako.deprecated.title"),
-                System.Windows.MessageBoxButton.YesNo,
-                System.Windows.MessageBoxImage.Warning);
-
-            return result == System.Windows.MessageBoxResult.Yes;
-        }
-
         private void MiLMMTModelOption_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_isInitialized || _isChangingTranslatorSelection) return;
 
+            if (sender is ComboBox { Name: nameof(cbMiLMMTModelSize) })
+            {
+                TrySelectDownloadedMiLMMTProfileForSelectedSize();
+            }
+
             UpdateMiLMMTProfileSummary();
-            if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.MiLLMT)
+            if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.MiLMMT)
             {
                 EnsureLocalTranslatorModelReady(ViewModel.TranslatorEngine, cbTranslator);
             }
@@ -382,6 +371,7 @@ namespace IronworksTranslator.Views.Pages
             {
                 _previousLocalModelDevicePriority = selectedPriority;
                 ViewModel.RefreshMiLMMTProfileSummary();
+                ShowDevicePriorityRestartNotice();
                 return;
             }
 
@@ -400,6 +390,7 @@ namespace IronworksTranslator.Views.Pages
             {
                 _previousLocalModelDevicePriority = selectedPriority;
                 ViewModel.RefreshMiLMMTProfileSummary();
+                ShowDevicePriorityRestartNotice();
                 return;
             }
 
@@ -458,7 +449,7 @@ namespace IronworksTranslator.Views.Pages
                 return;
             }
 
-            var result = System.Windows.MessageBox.Show(
+            var result = ShowMiLMMTModelMessageBox(
                 string.Format(
                     Localizer.GetString("settings.translator.engine.milmmt.delete.confirm"),
                     profile.DisplayName),
@@ -482,19 +473,34 @@ namespace IronworksTranslator.Views.Pages
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(
+                ShowMiLMMTModelMessageBox(
                     string.Format(
                         Localizer.GetString("settings.translator.engine.milmmt.delete.failed"),
-                        ex.Message));
+                        ex.Message),
+                    Localizer.GetString("settings.translator.engine.milmmt.delete"),
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
             }
 
             UpdateMiLMMTProfileSummary();
         }
 
+        private System.Windows.MessageBoxResult ShowMiLMMTModelMessageBox(
+            string message,
+            string caption,
+            System.Windows.MessageBoxButton buttons,
+            System.Windows.MessageBoxImage image)
+        {
+            var owner = System.Windows.Window.GetWindow(this);
+            return owner == null
+                ? System.Windows.MessageBox.Show(message, caption, buttons, image)
+                : System.Windows.MessageBox.Show(owner, message, caption, buttons, image);
+        }
+
         private void SelectMiLMMTModel(MiLMMTModelProfile profile)
         {
             SelectMiLMMTProfile(profile, File.Exists(profile.FilePath));
-            if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.MiLLMT)
+            if (ViewModel.TranslatorEngine == Models.Enums.TranslatorEngine.MiLMMT)
             {
                 EnsureLocalTranslatorModelReady(ViewModel.TranslatorEngine, cbTranslator);
             }
@@ -521,7 +527,7 @@ namespace IronworksTranslator.Views.Pages
 
             if (result != System.Windows.MessageBoxResult.Yes)
             {
-                if (selectedItem == Models.Enums.TranslatorEngine.MiLLMT
+                if (selectedItem == Models.Enums.TranslatorEngine.MiLMMT
                     && TrySelectAvailableMiLMMTProfile())
                 {
                     UpdateTranslatorTooltip(selectedItem);
@@ -532,7 +538,7 @@ namespace IronworksTranslator.Views.Pages
                 return;
             }
 
-            var window = selectedItem == Models.Enums.TranslatorEngine.MiLLMT
+            var window = selectedItem == Models.Enums.TranslatorEngine.MiLMMT
                 ? new InitializationWindow(selectedItem, ViewModel.SelectedMiLMMTProfile)
                 : new InitializationWindow(selectedItem);
             window.ShowDialog();
@@ -566,25 +572,21 @@ namespace IronworksTranslator.Views.Pages
 
         private static bool RequiresLocalTranslatorModel(Models.Enums.TranslatorEngine selectedItem)
         {
-            return selectedItem is Models.Enums.TranslatorEngine.Ironworks_Ja_Ko
-                or Models.Enums.TranslatorEngine.MiLLMT;
+            return selectedItem is Models.Enums.TranslatorEngine.MiLMMT;
         }
 
         private bool LocalTranslatorModelExists(Models.Enums.TranslatorEngine selectedItem)
         {
             return selectedItem switch
             {
-                Models.Enums.TranslatorEngine.Ironworks_Ja_Ko =>
-                    File.Exists(Path.Combine(AppPaths.AihubJaKoModelDirectory, "encoder_model.onnx"))
-                    && File.Exists(Path.Combine(AppPaths.AihubJaKoModelDirectory, "decoder_model_merged.onnx")),
-                Models.Enums.TranslatorEngine.MiLLMT => File.Exists(ViewModel.SelectedMiLMMTProfile.FilePath),
+                Models.Enums.TranslatorEngine.MiLMMT => File.Exists(ViewModel.SelectedMiLMMTProfile.FilePath),
                 _ => true,
             };
         }
 
         private void UpdateTranslatorTooltip(Models.Enums.TranslatorEngine selectedItem)
         {
-            if (txtPapagoTooltip == null || txtJaKoTooltip == null || txtMiLMMTTooltip == null)
+            if (txtPapagoTooltip == null || txtMiLMMTTooltip == null)
             {
                 return;
             }
@@ -592,13 +594,10 @@ namespace IronworksTranslator.Views.Pages
             txtPapagoTooltip.Visibility = selectedItem == Models.Enums.TranslatorEngine.Papago
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-            txtJaKoTooltip.Visibility = selectedItem == Models.Enums.TranslatorEngine.Ironworks_Ja_Ko
+            txtMiLMMTTooltip.Visibility = selectedItem == Models.Enums.TranslatorEngine.MiLMMT
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-            txtMiLMMTTooltip.Visibility = selectedItem == Models.Enums.TranslatorEngine.MiLLMT
-                ? Visibility.Visible
-                : Visibility.Collapsed;
-            panelMiLMMTOptions.Visibility = selectedItem == Models.Enums.TranslatorEngine.MiLLMT
+            panelMiLMMTOptions.Visibility = selectedItem == Models.Enums.TranslatorEngine.MiLMMT
                 ? Visibility.Visible
                 : Visibility.Collapsed;
             UpdateMiLMMTProfileSummary();
@@ -608,6 +607,17 @@ namespace IronworksTranslator.Views.Pages
         {
             RememberCurrentMiLMMTProfileIfAvailable();
             ViewModel.RefreshMiLMMTProfileSummary();
+            UpdateRetiredMiLMMTModelsVisibility();
+        }
+
+        private void UpdateRetiredMiLMMTModelsVisibility()
+        {
+            if (panelRetiredMiLMMTModels != null)
+            {
+                panelRetiredMiLMMTModels.Visibility = ViewModel.HasRetiredMiLMMTModelStorageItems
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+            }
         }
 
         private void InitializeLastAvailableMiLMMTProfile()
@@ -642,6 +652,11 @@ namespace IronworksTranslator.Views.Pages
 
         private bool TrySelectAvailableMiLMMTProfile()
         {
+            if (TrySelectDownloadedMiLMMTProfileForSelectedSize())
+            {
+                return true;
+            }
+
             var lastProfile = MiLMMTModelProfiles.Get(
                 _lastAvailableMiLMMTModelSize,
                 _lastAvailableMiLMMTQuantization);
@@ -656,6 +671,27 @@ namespace IronworksTranslator.Views.Pages
             if (downloadedProfile == null)
             {
                 return false;
+            }
+
+            SelectMiLMMTProfile(downloadedProfile);
+            return true;
+        }
+
+        private bool TrySelectDownloadedMiLMMTProfileForSelectedSize()
+        {
+            var downloadedProfile = MiLMMTModelProfiles.FindPreferredAvailableProfile(
+                ViewModel.MiLMMTModelSize,
+                ViewModel.MiLMMTQuantization,
+                profile => File.Exists(profile.FilePath));
+            if (downloadedProfile == null)
+            {
+                return false;
+            }
+
+            if (downloadedProfile.Size == ViewModel.MiLMMTModelSize
+                && downloadedProfile.Quantization == ViewModel.MiLMMTQuantization)
+            {
+                return true;
             }
 
             SelectMiLMMTProfile(downloadedProfile);
@@ -684,16 +720,76 @@ namespace IronworksTranslator.Views.Pages
             }
         }
 
-        private void UpdateResourceSnapshot()
+        private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            ViewModel.RefreshLogDirectorySize();
+
+            if (_isResourcePollingActive)
+            {
+                return;
+            }
+
+            _isResourcePollingActive = true;
+            _resourcePollingGeneration++;
+            resourceTimer.Start();
+            _ = UpdateResourceSnapshotAsync();
+        }
+
+        private void SettingsPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _isResourcePollingActive = false;
+            _resourcePollingGeneration++;
+            resourceTimer.Stop();
+        }
+
+        private void ResourceTimer_Tick(object? sender, EventArgs e)
+        {
+            _ = UpdateResourceSnapshotAsync();
+        }
+
+        private async Task UpdateResourceSnapshotAsync()
+        {
+            if (!_isResourcePollingActive || _isResourceSnapshotInProgress)
+            {
+                return;
+            }
+
+            _isResourceSnapshotInProgress = true;
+            var pollingGeneration = _resourcePollingGeneration;
+            try
+            {
+                var snapshot = await Task.Run(SystemResourceMonitor.GetSnapshot);
+                if (!_isResourcePollingActive || pollingGeneration != _resourcePollingGeneration)
+                {
+                    return;
+                }
+
+                ApplyResourceSnapshot(snapshot);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Debug(ex, "Failed to update the local-model resource snapshot.");
+            }
+            finally
+            {
+                _isResourceSnapshotInProgress = false;
+                if (_isResourcePollingActive && pollingGeneration != _resourcePollingGeneration)
+                {
+                    _ = UpdateResourceSnapshotAsync();
+                }
+            }
+        }
+
+        private void ApplyResourceSnapshot(SystemResourceSnapshot snapshot)
         {
             if (txtRamUsage == null || txtVramUsage == null)
             {
                 return;
             }
 
-            var snapshot = SystemResourceMonitor.GetSnapshot();
             _lastSystemResourceSnapshot = snapshot;
             ViewModel.UpdateMiLMMTResourceSnapshot(snapshot);
+            UpdateRetiredMiLMMTModelsVisibility();
             txtVramAdapterName.Text = string.IsNullOrWhiteSpace(snapshot.VramAdapterName)
                 ? "GPU: N/A"
                 : $"GPU: {snapshot.VramAdapterName}";
@@ -748,24 +844,7 @@ namespace IronworksTranslator.Views.Pages
 
         private static LocalModelDevicePriority? GetRecommendedDevicePriority(string? adapterName)
         {
-            if (string.IsNullOrWhiteSpace(adapterName))
-            {
-                return null;
-            }
-
-            if (adapterName.Contains("NVIDIA", StringComparison.OrdinalIgnoreCase))
-            {
-                return LocalModelDevicePriority.Cuda;
-            }
-
-            if (adapterName.Contains("AMD", StringComparison.OrdinalIgnoreCase)
-                || adapterName.Contains("Radeon", StringComparison.OrdinalIgnoreCase)
-                || adapterName.Contains("Intel", StringComparison.OrdinalIgnoreCase))
-            {
-                return LocalModelDevicePriority.Vulkan;
-            }
-
-            return null;
+            return LocalModelDevicePrioritySelector.GetRecommendedPriority(adapterName);
         }
 
         private static string GetDevicePriorityLabel(LocalModelDevicePriority priority)
@@ -776,6 +855,15 @@ namespace IronworksTranslator.Views.Pages
                 LocalModelDevicePriority.Vulkan => "Vulkan",
                 _ => "CPU",
             };
+        }
+
+        private static void ShowDevicePriorityRestartNotice()
+        {
+            System.Windows.MessageBox.Show(
+                Localizer.GetString("settings.translator.engine.milmmt.device_restart.notice"),
+                Localizer.GetString("settings.translator.engine.milmmt.device_restart.title"),
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
         }
 
         private void RevertLocalModelDevicePriority(ComboBox comboBox)

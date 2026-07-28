@@ -87,6 +87,14 @@ namespace IronworksTranslator.Models.Settings
         [property: YamlMember(Alias = "window_opacity")]
         private double _windowOpacity;
 
+        [ObservableProperty]
+        [property: YamlMember(Alias = "chat_window_opacity")]
+        private double _chatWindowOpacity;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "dialogue_window_opacity")]
+        private double _dialogueWindowOpacity;
+
         [SaveSettingsOnChange]
         partial void OnChatboxFontSizeChanged(int value)
         {
@@ -127,6 +135,18 @@ namespace IronworksTranslator.Models.Settings
         partial void OnWindowOpacityChanged(double value)
         {
             //Log.Information($"WindowOpacity changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnChatWindowOpacityChanged(double value)
+        {
+            //Log.Information($"ChatWindowOpacity changed to {value}");
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnDialogueWindowOpacityChanged(double value)
+        {
+            //Log.Information($"DialogueWindowOpacity changed to {value}");
         }
 
         private void OnIntMessage(object recipient, PropertyChangedMessage<int> message)
@@ -172,8 +192,11 @@ namespace IronworksTranslator.Models.Settings
         {
             switch (message.PropertyName)
             {
-                case nameof(SettingsViewModel.ChildWindowOpacity):
-                    WindowOpacity = message.NewValue;
+                case nameof(SettingsViewModel.ChatWindowOpacity):
+                    ChatWindowOpacity = message.NewValue;
+                    break;
+                case nameof(SettingsViewModel.DialogueWindowOpacity):
+                    DialogueWindowOpacity = message.NewValue;
                     break;
             }
         }
