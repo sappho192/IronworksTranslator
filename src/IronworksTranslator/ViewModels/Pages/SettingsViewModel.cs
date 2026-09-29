@@ -20,6 +20,14 @@ namespace IronworksTranslator.ViewModels.Pages
     public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         private bool _isInitialized = false;
+        public TranslatorSettings ComposeSettings => IronworksSettings.Instance.TranslatorSettings!;
+        public ComposeViewModel.LanguageOption[] ComposeLanguages => ComposeViewModel.LanguageOptions;
+
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _showDialogueInChat = IronworksSettings.Instance.ChatUiSettings.ShowDialogueInChat;
+
 
         [ObservableProperty]
         private string _appVersion = string.Empty;

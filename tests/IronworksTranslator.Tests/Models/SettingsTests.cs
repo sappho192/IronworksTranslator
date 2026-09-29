@@ -1,3 +1,6 @@
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
+using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Models.Translator;
@@ -11,6 +14,23 @@ namespace IronworksTranslator.Tests.Models;
 public class SettingsTests
 {
     [Fact]
+    public void ComposeSettings_OldYamlDefaultsToCompactAndNewSettingsRoundTrip()
+    {
+        var deserializer = new DeserializerBuilder().Build();
+        var settings = deserializer.Deserialize<TranslatorSettings>("client_language: Korean");
+        Assert.False(settings.ComposeShowDetails);
+        Assert.Equal(TranslationLanguageCode.Korean, settings.ComposeSourceLanguage);
+        Assert.Equal(TranslationLanguageCode.Japanese, settings.ComposeTargetLanguage);
+        settings.ComposeSourceLanguage = TranslationLanguageCode.English;
+        settings.ComposeTargetLanguage = TranslationLanguageCode.French;
+        settings.ComposeShowDetails = true;
+        var restored = deserializer.Deserialize<TranslatorSettings>(new SerializerBuilder().Build().Serialize(settings));
+        Assert.True(restored.ComposeShowDetails);
+        Assert.Equal(TranslationLanguageCode.English, restored.ComposeSourceLanguage);
+        Assert.Equal(TranslationLanguageCode.French, restored.ComposeTargetLanguage);
+    }
+
+    [Fact]
     public void CreateDefault_InitializesExpectedSettings()
     {
         var settings = IronworksSettings.CreateDefault();
@@ -20,12 +40,46 @@ public class SettingsTests
         Assert.NotNull(settings.TranslatorSettings);
         Assert.NotNull(settings.ChannelSettings);
         Assert.False(settings.UiSettings!.IsTosDisplayed);
+        Assert.False(settings.ChatUiSettings.ShowDialogueInChat);
         Assert.Equal(ApplicationTheme.Light, settings.UiSettings.Theme);
         Assert.Equal(400, settings.UiSettings.ChatWindowWidth);
         Assert.Equal(200, settings.UiSettings.ChatWindowHeight);
         Assert.Equal(TranslatorEngine.Papago, settings.TranslatorSettings!.TranslatorEngine);
         Assert.Equal(MiLMMTModelSize.MiLMMT_1B, settings.TranslatorSettings.MiLMMTModelSize);
         Assert.Equal(MiLMMTQuantization.Q8_0, settings.TranslatorSettings.MiLMMTQuantization);
+    }
+
+    [Fact]
+    public void DialogueInChat_OldYamlDefaultsOffAndNewValueRoundTrips()
+    {
+        var deserializer = new DeserializerBuilder().Build();
+        var oldSettings = deserializer.Deserialize<ChatUISettings>("chatbox_font_size: 14");
+        Assert.False(oldSettings.ShowDialogueInChat);
+        var enabled = deserializer.Deserialize<ChatUISettings>("show_dialogue_in_chat: true");
+        Assert.True(enabled.ShowDialogueInChat);
+        var yaml = new SerializerBuilder().Build().Serialize(enabled);
+        Assert.Contains("show_dialogue_in_chat: true", yaml);
+        Assert.True(deserializer.Deserialize<ChatUISettings>(yaml).ShowDialogueInChat);
+    }
+
+    [Fact]
+    public void DialogueInChat_SettingsMessageUpdatesPersistedProperty()
+    {
+        var settings = new ChatUISettings();
+        try
+        {
+            WeakReferenceMessenger.Default.Send(new PropertyChangedMessage<bool>(
+                this, nameof(SettingsViewModel.ShowDialogueInChat), false, true));
+            Assert.True(settings.ShowDialogueInChat);
+            Assert.Contains("show_dialogue_in_chat: true", new SerializerBuilder().Build().Serialize(settings));
+            WeakReferenceMessenger.Default.Send(new PropertyChangedMessage<bool>(
+                this, nameof(SettingsViewModel.ShowDialogueInChat), true, false));
+            Assert.False(settings.ShowDialogueInChat);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(settings);
+        }
     }
 
     [Fact]

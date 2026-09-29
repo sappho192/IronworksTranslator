@@ -103,6 +103,7 @@
             <TabItem.Header>
                 <ui:TextBlock Text="{i18n:StringLocalizer settings.translator}" FontWeight="Bold" FontTypography="Caption"/>
             </TabItem.Header>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
             <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
                 <StackPanel Orientation="Vertical">
                     <ui:CardControl Icon="{ui:SymbolIcon LocalLanguage24}">
@@ -113,6 +114,24 @@
                                 SelectedValue="{Binding ViewModel.ClientLanguage, Converter={StaticResource ClientLanguageToStringConverter}}"
                                 SelectedIndex="{Binding ViewModel.ClientLanguageIndex}"/>
                     </ui:CardControl>
+                    <ui:CardControl>
+                        <ui:CardControl.Header>
+                            <TextBlock Text="{i18n:StringLocalizer compose.source}" />
+                        </ui:CardControl.Header>
+                        <ComboBox ItemsSource="{Binding ViewModel.ComposeLanguages}" DisplayMemberPath="Name" SelectedValuePath="Code"
+                                  SelectedValue="{Binding ViewModel.ComposeSettings.ComposeSourceLanguage, Mode=TwoWay}" />
+                    </ui:CardControl>
+                    <ui:CardControl>
+                        <ui:CardControl.Header>
+                            <TextBlock Text="{i18n:StringLocalizer compose.target}" />
+                        </ui:CardControl.Header>
+                        <ComboBox ItemsSource="{Binding ViewModel.ComposeLanguages}" DisplayMemberPath="Name" SelectedValuePath="Code"
+                                  SelectedValue="{Binding ViewModel.ComposeSettings.ComposeTargetLanguage, Mode=TwoWay}" />
+                    </ui:CardControl>
+                    <CheckBox Margin="0,8" Content="{i18n:StringLocalizer compose.details}"
+                              IsChecked="{Binding ViewModel.ComposeSettings.ComposeShowDetails, Mode=TwoWay}" />
+                    <CheckBox Margin="0,12,0,12" Content="{i18n:StringLocalizer settings.dialogue_in_chat}"
+                              IsChecked="{Binding ViewModel.ShowDialogueInChat, Mode=TwoWay}" />
                     <ui:CardControl Icon="{ui:SymbolIcon Search24}">
                         <ui:CardControl.Header>
                             <ui:TextBlock Text="{i18n:StringLocalizer settings.translator.dialogue.translation_method}" FontTypography="BodyStrong"/>
@@ -334,6 +353,7 @@
                     </ui:CardExpander>
                 </StackPanel>
             </ui:Card>
+            </ScrollViewer>
         </TabItem>
         <TabItem Name="ChatAppearance">
             <TabItem.Header>

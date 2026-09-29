@@ -277,7 +277,7 @@ namespace IronworksTranslator.ViewModels.Pages
         public void OnDialogueWindowVisibilityToggle()
         {
             var dialogueWindow = App.GetService<DialogueWindow>();
-            if (IsDialogueWindowVisible)
+            if (IsDialogueWindowVisible && IronworksSettings.Instance?.ChatUiSettings?.ShowDialogueInChat != true)
             {
                 dialogueWindow.Show();
             }

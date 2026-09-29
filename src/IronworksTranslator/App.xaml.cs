@@ -83,6 +83,7 @@ namespace IronworksTranslator
                 services.AddSingleton<DeveloperPage>();
                 services.AddSingleton<DeveloperViewModel>();
 #endif
+                services.AddSingleton<ComposeViewModel>();
                 services.AddSingleton<SettingsPage>();
                 services.AddSingleton<SettingsViewModel>();
 

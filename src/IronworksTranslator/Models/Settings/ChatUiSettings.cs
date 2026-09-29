@@ -95,6 +95,16 @@ namespace IronworksTranslator.Models.Settings
         [property: YamlMember(Alias = "dialogue_window_opacity")]
         private double _dialogueWindowOpacity;
 
+        [ObservableProperty]
+        [property: YamlMember(Alias = "show_dialogue_in_chat")]
+        private bool _showDialogueInChat;
+
+        [SaveSettingsOnChange]
+        partial void OnShowDialogueInChatChanged(bool value)
+        {
+            Log.Information("ShowDialogueInChat changed to {Value}", value);
+        }
+
         [SaveSettingsOnChange]
         partial void OnChatboxFontSizeChanged(int value)
         {
@@ -179,6 +189,9 @@ namespace IronworksTranslator.Models.Settings
         {
             switch (message.PropertyName)
             {
+                case nameof(SettingsViewModel.ShowDialogueInChat):
+                    ShowDialogueInChat = message.NewValue;
+                    break;
                 case nameof(DashboardViewModel.IsChildWindowDraggable):
                     IsDraggable = message.NewValue;
                     break;

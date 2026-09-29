@@ -103,6 +103,11 @@ application does not make it parse settings written by a newer schema.
 - Settings that can be represented safely may be normalized during import, but
   compatibility must not rely on predicting every future enum or property value.
 
+For 2.1.0, the settings schema is version 3 (`settings.v3.yaml`). On first
+startup, version 2 settings are imported without overwriting `settings.v2.yaml`.
+The new NPC display destination, manual translation languages, and expanded
+manual translation layout are saved only in the version 3 file.
+
 ## Useful Options
 
 ```powershell

@@ -196,6 +196,10 @@ namespace IronworksTranslator.Models.Settings
             chatUiSettings.ChatWindowOpacity = NormalizeOpacity(chatUiSettings.ChatWindowOpacity, chatUiSettings.WindowOpacity);
             chatUiSettings.DialogueWindowOpacity = NormalizeOpacity(chatUiSettings.DialogueWindowOpacity, chatUiSettings.WindowOpacity);
 
+            if (!Enum.IsDefined(translatorSettings.ComposeSourceLanguage))
+                translatorSettings.ComposeSourceLanguage = TranslationLanguageCode.Korean;
+            if (!Enum.IsDefined(translatorSettings.ComposeTargetLanguage))
+                translatorSettings.ComposeTargetLanguage = TranslationLanguageCode.Japanese;
             NormalizeTranslatorEngine(translatorSettings);
             NormalizeMiLMMTModelProfile(translatorSettings);
             NormalizeLocalModelDevicePriority(settings.TranslatorSettings!, recommendedDevicePriority);

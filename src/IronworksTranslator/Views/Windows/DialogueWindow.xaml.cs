@@ -38,7 +38,7 @@ namespace IronworksTranslator.Views.Windows
             InitializeComponent();
 
 #pragma warning disable CS8602
-            if (IronworksSettings.Instance.UiSettings.DialogueWindowVisible)
+            if (IronworksSettings.Instance.UiSettings.DialogueWindowVisible && !IronworksSettings.Instance.ChatUiSettings.ShowDialogueInChat)
             {
                 Show();
             }
@@ -60,6 +60,17 @@ namespace IronworksTranslator.Views.Windows
             _repositionEndTimer.Interval = TimeSpan.FromMilliseconds(3000);
             _repositionEndTimer.Tick += RepositionEndTimer_Tick;
 
+            IronworksSettings.Instance.ChatUiSettings.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(ChatUISettings.ShowDialogueInChat))
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        if (IronworksSettings.Instance.ChatUiSettings.ShowDialogueInChat) Hide();
+                        else if (IronworksSettings.Instance.UiSettings.DialogueWindowVisible) Show();
+                    });
+                }
+            };
             _isUiInitialized = true;
             chatboxTimer = new Timer(RefreshDialogueTextBox, null, 0, period);
             Log.Debug($"New RefreshChatbox timer with period {period}ms");
@@ -146,6 +157,11 @@ namespace IronworksTranslator.Views.Windows
 
         private void AppendDialogueText(string dialogue)
         {
+            if (IronworksSettings.Instance.ChatUiSettings.ShowDialogueInChat)
+            {
+                App.GetService<ChatWindowViewModel>().AddDialogue(dialogue);
+                return;
+            }
             tbDialogueTextBox.AppendText($"{Environment.NewLine}{Environment.NewLine}{dialogue}");
             TrimDialogueTextBox();
             tbDialogueTextBox.ScrollToEnd();

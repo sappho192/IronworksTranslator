@@ -12,14 +12,16 @@ namespace IronworksTranslator.Views.Windows
     public partial class ChatWindow : Window
     {
         public ChatWindowViewModel ViewModel { get; }
+        public ViewModels.Pages.ComposeViewModel Compose { get; }
         private readonly DispatcherTimer _resizeEndTimer = new();
         private readonly DispatcherTimer _repositionEndTimer = new();
         private readonly bool _isUiInitialized = false;
 
 #pragma warning disable CS8602
-        public ChatWindow(ChatWindowViewModel viewModel)
+        public ChatWindow(ChatWindowViewModel viewModel, ViewModels.Pages.ComposeViewModel compose)
         {
             ViewModel = viewModel;
+            Compose = compose;
             DataContext = this;
             Topmost = true;
 
@@ -79,6 +81,21 @@ namespace IronworksTranslator.Views.Windows
             IronworksSettings.Instance.UiSettings.ChatWindowHeight = Height;
         }
 #pragma warning restore CS8602
+
+        private async void ComposeInput_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key != System.Windows.Input.Key.Enter) return;
+            e.Handled = true;
+            if (!Compose.TranslateCommand.CanExecute(null)) return;
+            await Compose.TranslateCommand.ExecuteAsync(null);
+            if (!Compose.Settings.ComposeShowDetails && ComposeInput.IsKeyboardFocused)
+                ComposeInput.SelectAll();
+        }
+
+        private void ComposeArea_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+        }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {

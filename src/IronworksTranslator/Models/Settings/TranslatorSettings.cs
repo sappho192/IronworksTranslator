@@ -23,6 +23,25 @@ namespace IronworksTranslator.Models.Settings
             Messenger.Register<PropertyChangedMessage<bool>>(this, OnBoolMessage);
         }
 
+        [ObservableProperty]
+        [property: YamlMember(Alias = "compose_source_language")]
+        private TranslationLanguageCode _composeSourceLanguage = TranslationLanguageCode.Korean;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "compose_target_language")]
+        private TranslationLanguageCode _composeTargetLanguage = TranslationLanguageCode.Japanese;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "compose_show_details")]
+        private bool _composeShowDetails;
+
+        [SaveSettingsOnChange]
+        partial void OnComposeSourceLanguageChanged(TranslationLanguageCode value) { }
+        [SaveSettingsOnChange]
+        partial void OnComposeTargetLanguageChanged(TranslationLanguageCode value) { }
+        [SaveSettingsOnChange]
+        partial void OnComposeShowDetailsChanged(bool value) { }
+
         [TraceMethod]
         public void InitializeCollectionListeners()
         {

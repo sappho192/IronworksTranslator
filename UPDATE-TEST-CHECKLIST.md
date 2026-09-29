@@ -81,7 +81,7 @@ Expected result:
 - Accepting the terms writes:
 
 ```powershell
-$env:APPDATA\IronworksTranslator\settings.v2.yaml
+$env:APPDATA\IronworksTranslator\settings.v3.yaml
 ```
 
 - Fresh installs do not need to create the unversioned legacy `settings.yaml`.
@@ -131,7 +131,7 @@ For portable migration:
 Expected result:
 
 - `settings.yaml` is copied to `%APPDATA%\IronworksTranslator\settings.yaml`.
-- The app imports that legacy file into `%APPDATA%\IronworksTranslator\settings.v2.yaml`.
+- The app imports that legacy file into `%APPDATA%\IronworksTranslator\settings.v3.yaml`.
 - The imported legacy `settings.yaml` remains available as a downgrade snapshot for older builds.
 - `data\model` is copied to `%LOCALAPPDATA%\IronworksTranslator\data\model` if the destination was empty.
 - Existing destination files are not overwritten.
@@ -211,11 +211,11 @@ Expected result:
 Settings schema isolation check:
 
 1. Start with an older package and a populated unversioned `settings.yaml`.
-2. Launch the newer package and confirm it imports the settings into `settings.v2.yaml`.
+2. Launch the newer package and confirm it imports the settings into `settings.v3.yaml`.
 3. Confirm the legacy `settings.yaml` remains readable by the older package.
-4. Change settings in the newer package and confirm only `settings.v2.yaml` changes.
+4. Change settings in the newer package and confirm only `settings.v3.yaml` changes.
 5. Reinstall and launch the older package. Confirm it reaches the main window and update prompt using its preserved `settings.yaml`.
-6. Change settings in the older package and confirm `settings.v2.yaml` is unchanged.
+6. Change settings in the older package and confirm `settings.v3.yaml` is unchanged.
 7. For every future incompatible settings change, increment `AppPaths.SettingsSchemaVersion`; never repurpose or overwrite an existing versioned settings file.
 
 ## 8. Post-Update Regression Checks

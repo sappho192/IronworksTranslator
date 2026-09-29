@@ -501,6 +501,23 @@ namespace IronworksTranslator.ViewModels.Windows
             dispatcher.Invoke(action);
         }
 
+        public void AddDialogue(string dialogue)
+        {
+            InvokeOnUiThread(() =>
+            {
+                var settings = IronworksSettings.Instance;
+                ChatDocument.Blocks.Add(new Paragraph(new Run(dialogue))
+                {
+                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.ChannelSettings.NpcDialog.Color)),
+                    FontFamily = new FontFamily(settings.ChatUiSettings.Font),
+                    FontSize = settings.ChatUiSettings.ChatboxFontSize,
+                    Margin = new Thickness(0, 0, 0, settings.ChatUiSettings.ChatMargin)
+                });
+                Diet();
+                ScrollToEnd();
+            });
+        }
+
         public void AddMessage(TranslationText text, ChatChannel channel, string author = "")
         {
             if (!Application.Current.Dispatcher.CheckAccess())
