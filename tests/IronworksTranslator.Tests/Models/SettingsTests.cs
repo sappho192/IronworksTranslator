@@ -40,6 +40,9 @@ public class SettingsTests
         Assert.NotNull(settings.TranslatorSettings);
         Assert.NotNull(settings.ChannelSettings);
         Assert.False(settings.UiSettings!.IsTosDisplayed);
+        Assert.Equal(string.Empty, settings.UiSettings.LastReleaseNotesAppVersion);
+        Assert.True(settings.UiSettings.FollowGameWindow);
+        Assert.True(settings.UiSettings.HideTranslationWindowsFromAltTab);
         Assert.False(settings.ChatUiSettings.ShowDialogueInChat);
         Assert.Equal(ApplicationTheme.Light, settings.UiSettings.Theme);
         Assert.Equal(400, settings.UiSettings.ChatWindowWidth);
@@ -60,6 +63,67 @@ public class SettingsTests
         var yaml = new SerializerBuilder().Build().Serialize(enabled);
         Assert.Contains("show_dialogue_in_chat: true", yaml);
         Assert.True(deserializer.Deserialize<ChatUISettings>(yaml).ShowDialogueInChat);
+    }
+
+    [Fact]
+    public void ReleaseNotes_OldYamlDefaultsEmptyAndVersionRecordRoundTrips()
+    {
+        var deserializer = new DeserializerBuilder().Build();
+        var oldSettings = deserializer.Deserialize<UISettings>("is_tos_displayed: true");
+        try
+        {
+            Assert.Equal(string.Empty, oldSettings.LastReleaseNotesAppVersion);
+            oldSettings.LastReleaseNotesAppVersion = "2.2.0-beta.2";
+            var yaml = new SerializerBuilder().Build().Serialize(oldSettings);
+            Assert.Contains("last_release_notes_app_version: 2.2.0-beta.2", yaml);
+            var restored = deserializer.Deserialize<UISettings>(yaml);
+            try { Assert.Equal("2.2.0-beta.2", restored.LastReleaseNotesAppVersion); }
+            finally { WeakReferenceMessenger.Default.UnregisterAll(restored); }
+        }
+        finally { WeakReferenceMessenger.Default.UnregisterAll(oldSettings); }
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public void WindowBehavior_OldYamlDefaultsOnAndExplicitValuesRoundTrip(bool follow, bool hide)
+    {
+        var settings = IronworksSettings.DeserializeSettings("ui_settings:\n  theme: Light");
+        Assert.True(settings.UiSettings!.FollowGameWindow);
+        Assert.True(settings.UiSettings.HideTranslationWindowsFromAltTab);
+
+        settings.UiSettings.FollowGameWindow = follow;
+        settings.UiSettings.HideTranslationWindowsFromAltTab = hide;
+        var yaml = IronworksSettings.SerializeSettings(settings);
+        Assert.Contains($"follow_game_window: {follow.ToString().ToLowerInvariant()}", yaml);
+        Assert.Contains($"hide_translation_windows_from_alt_tab: {hide.ToString().ToLowerInvariant()}", yaml);
+        var restored = IronworksSettings.DeserializeSettings(yaml);
+        Assert.Equal(follow, restored.UiSettings!.FollowGameWindow);
+        Assert.Equal(hide, restored.UiSettings.HideTranslationWindowsFromAltTab);
+    }
+
+    [Fact]
+    public void WindowBehavior_MessengerUpdatesPersistedProperties()
+    {
+        var settings = new UISettings();
+        try
+        {
+            foreach (var enabled in new[] { false, true })
+            {
+                WeakReferenceMessenger.Default.Send(new PropertyChangedMessage<bool>(
+                    this, nameof(SettingsViewModel.FollowGameWindow), !enabled, enabled));
+                WeakReferenceMessenger.Default.Send(new PropertyChangedMessage<bool>(
+                    this, nameof(SettingsViewModel.HideTranslationWindowsFromAltTab), !enabled, enabled));
+                Assert.Equal(enabled, settings.FollowGameWindow);
+                Assert.Equal(enabled, settings.HideTranslationWindowsFromAltTab);
+            }
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(settings);
+        }
     }
 
     [Fact]

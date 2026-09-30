@@ -28,6 +28,14 @@ namespace IronworksTranslator.ViewModels.Pages
         [NotifyPropertyChangedRecipients]
         private bool _showDialogueInChat = IronworksSettings.Instance.ChatUiSettings.ShowDialogueInChat;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _followGameWindow = IronworksSettings.Instance.UiSettings.FollowGameWindow;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedRecipients]
+        private bool _hideTranslationWindowsFromAltTab = IronworksSettings.Instance.UiSettings.HideTranslationWindowsFromAltTab;
+
 
         [ObservableProperty]
         private string _appVersion = string.Empty;

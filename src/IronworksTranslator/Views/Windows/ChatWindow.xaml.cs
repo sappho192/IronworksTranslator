@@ -26,6 +26,7 @@ namespace IronworksTranslator.Views.Windows
             Topmost = true;
 
             InitializeComponent();
+            TranslationWindowAltTab.Attach(this, IronworksSettings.Instance!.UiSettings!);
             if (IronworksSettings.Instance.ChatUiSettings.IsResizable)
             {
                 ResizeMode = ResizeMode.CanResizeWithGrip;
@@ -112,7 +113,7 @@ namespace IronworksTranslator.Views.Windows
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
-            Hide();
+            TranslationWindowVisibility.SetVisible(this, false);
         }
 
         protected override void OnContentRendered(EventArgs e)

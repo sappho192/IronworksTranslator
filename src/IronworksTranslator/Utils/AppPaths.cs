@@ -10,7 +10,7 @@ namespace IronworksTranslator.Utils
         private const string AppFolderName = "IronworksTranslator";
         // Increment this before shipping any persisted change that an older
         // application may not deserialize. Never reuse an existing schema file.
-        internal const int SettingsSchemaVersion = 3;
+        internal const int SettingsSchemaVersion = 4;
 
         public static string RoamingAppDataDirectory { get; } = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),

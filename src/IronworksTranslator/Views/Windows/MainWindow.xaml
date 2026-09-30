@@ -6,13 +6,15 @@
     xmlns:local="clr-namespace:IronworksTranslator.Views.Windows"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:i18n="http://schemas.lepo.co/i18n/2022/xaml"
+    xmlns:utils_ui="clr-namespace:IronworksTranslator.Utils.UI"
     Title="{Binding ViewModel.ApplicationTitle, Mode=OneWay}"
     MinWidth="750"
     MinHeight="500"
     Width="900"
     Height="550"
     MaxWidth="1200"
-    MaxHeight="800"
+    MaxHeight="1600"
     d:DataContext="{d:DesignInstance local:MainWindow,
                                      IsDesignTimeCreatable=True}"
     d:DesignWidth="900"
@@ -47,6 +49,27 @@
             <ui:NavigationView.ContentOverlay>
                 <Grid>
                     <ui:SnackbarPresenter x:Name="SnackbarPresenter" />
+                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                            Margin="0,0,0,8" Padding="12,6" CornerRadius="16"
+                            IsHitTestVisible="False"
+                            Background="{DynamicResource CardBackground}"
+                            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=RootNavigation, Path=(utils_ui:NavigationScrollHint.HasMoreBelow)}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="ChevronDown20" FontSize="16"/>
+                            <ui:TextBlock Margin="8,0,0,0" FontTypography="Caption"
+                                          Text="{i18n:StringLocalizer main.scroll.more_below}"/>
+                        </StackPanel>
+                    </Border>
                 </Grid>
             </ui:NavigationView.ContentOverlay>
         </ui:NavigationView>

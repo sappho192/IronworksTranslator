@@ -4,6 +4,7 @@ using IronworksTranslator.Services;
 using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Aspect;
+using IronworksTranslator.Utils.UI;
 using IronworksTranslator.Views.Windows;
 using MdXaml;
 using Microsoft.Extensions.Hosting;
@@ -22,7 +23,8 @@ namespace IronworksTranslator.ViewModels.Pages
     {
         private readonly AppUpdateService _appUpdateService;
         private readonly GitHubReleaseNotesService _releaseNotesService;
-        private int _isLoadingReleaseNotes;
+        private readonly SemaphoreSlim _releaseNotesLoadLock = new(1, 1);
+        private readonly StartupReleaseNotesPrompt _startupReleaseNotesPrompt = new();
         private int _releaseNotesLoaded;
 
         [ObservableProperty]
@@ -67,15 +69,13 @@ namespace IronworksTranslator.ViewModels.Pages
 
         public async Task LoadReleaseNotesAsync(CancellationToken cancellationToken = default)
         {
-            if (Volatile.Read(ref _releaseNotesLoaded) != 0
-                || Interlocked.Exchange(ref _isLoadingReleaseNotes, 1) != 0)
-            {
-                return;
-            }
-
-            ReleaseNotesStatus = Localizer.GetString("dashboard.releases.loading");
+            await _releaseNotesLoadLock.WaitAsync(cancellationToken);
             try
             {
+                if (Volatile.Read(ref _releaseNotesLoaded) != 0)
+                    return;
+
+                ReleaseNotesStatus = Localizer.GetString("dashboard.releases.loading");
                 var releases = await _releaseNotesService.GetRecentAsync(
                     BuildInfo.ReleaseChannel,
                     cancellationToken);
@@ -101,7 +101,7 @@ namespace IronworksTranslator.ViewModels.Pages
             }
             finally
             {
-                Interlocked.Exchange(ref _isLoadingReleaseNotes, 0);
+                _releaseNotesLoadLock.Release();
             }
         }
 
@@ -173,6 +173,16 @@ namespace IronworksTranslator.ViewModels.Pages
                     return;
                 }
             }
+
+            await _startupReleaseNotesPrompt.ShowIfNeededAsync(
+                uiSettings,
+                BuildInfo.ReleaseVersion,
+                async () =>
+                {
+                    await LoadReleaseNotesAsync();
+                    return RecentReleaseNotes.FirstOrDefault();
+                },
+                OnShowReleaseNotesAsync);
 
             await _appUpdateService.CheckForUpdatesWithPromptAsync();
         }
@@ -279,11 +289,11 @@ namespace IronworksTranslator.ViewModels.Pages
             var dialogueWindow = App.GetService<DialogueWindow>();
             if (IsDialogueWindowVisible && IronworksSettings.Instance?.ChatUiSettings?.ShowDialogueInChat != true)
             {
-                dialogueWindow.Show();
+                TranslationWindowVisibility.SetVisible(dialogueWindow, true);
             }
             else
             {
-                dialogueWindow.Hide();
+                TranslationWindowVisibility.SetVisible(dialogueWindow, false);
             }
         }
 

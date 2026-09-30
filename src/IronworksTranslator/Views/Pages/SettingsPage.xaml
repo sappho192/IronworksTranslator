@@ -43,7 +43,14 @@
             <TabItem.Header>
                 <ui:TextBlock Text="{i18n:StringLocalizer settings.general}" FontWeight="Bold" FontTypography="Caption"/>
             </TabItem.Header>
-            <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" utils_ui:SettingsScrollViewer.ScrollOnMouseWheel="True">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+            <ui:Card Grid.Column="0" VerticalAlignment="Top" VerticalContentAlignment="Top">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Margin="0,0,8,0" Symbol="Color24" FontSize="24"/>
@@ -68,15 +75,54 @@
                         <ui:SymbolIcon Margin="0,0,8,0" Symbol="LocalLanguage24" FontSize="24"/>
                         <ui:TextBlock FontTypography="Subtitle" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.ui.language}" />
                     </StackPanel>
-                    <ui:TextBlock FontTypography="Caption" Text="{i18n:StringLocalizer settings.general.ui.language.comment}"/>
+                    <ui:TextBlock FontTypography="Caption" TextWrapping="Wrap" Text="{i18n:StringLocalizer settings.general.ui.language.comment}"/>
                     <ComboBox Margin="0,8,0,0" HorizontalAlignment="Left"
                         ItemsSource="{extensions:EnumToCollection EnumType={x:Type enums:AppLanguage}}"
                         SelectedValue="{Binding ViewModel.AppLanguage, Converter={StaticResource AppLanguageToStringConverter}}"
                         SelectedIndex="{Binding ViewModel.AppLanguageIndex}"/>
-                    <StackPanel Margin="0,24,0,0" Orientation="Horizontal">
+                </StackPanel>
+            </ui:Card>
+            <StackPanel Grid.Column="2">
+                <ui:Card VerticalContentAlignment="Top">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Margin="0,0,8,0" Symbol="AppGeneric24" FontSize="24"/>
-                        <ui:TextBlock FontTypography="Subtitle" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.app_info}" />
+                        <ui:TextBlock FontTypography="Subtitle" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.windows}"/>
                     </StackPanel>
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBlock Margin="0,0,12,0" VerticalAlignment="Center" TextWrapping="Wrap"
+                                      Text="{i18n:StringLocalizer settings.general.windows.follow_game}"/>
+                        <ui:ToggleSwitch Grid.Column="1" VerticalAlignment="Center"
+                            AutomationProperties.Name="{i18n:StringLocalizer settings.general.windows.follow_game}"
+                            IsChecked="{Binding ViewModel.FollowGameWindow, Mode=TwoWay}"/>
+                    </Grid>
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBlock Margin="0,0,12,0" VerticalAlignment="Center" TextWrapping="Wrap"
+                                      Text="{i18n:StringLocalizer settings.general.windows.main_only_alt_tab}"/>
+                        <ui:ToggleSwitch Grid.Column="1" VerticalAlignment="Center"
+                            AutomationProperties.Name="{i18n:StringLocalizer settings.general.windows.main_only_alt_tab}"
+                            IsChecked="{Binding ViewModel.HideTranslationWindowsFromAltTab, Mode=TwoWay}"/>
+                    </Grid>
+                </StackPanel>
+                </ui:Card>
+                <ui:Card Margin="0,16,0,0" VerticalContentAlignment="Top">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Margin="0,0,8,0" Symbol="AppGeneric24" FontSize="24"/>
+                        <ui:TextBlock Grid.Column="1" TextWrapping="Wrap" FontTypography="Subtitle" FontWeight="Medium" Text="{i18n:StringLocalizer settings.general.app_info}" />
+                    </Grid>
                     <ui:TextBlock Margin="0,12,0,0" Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
 
                     <StackPanel Margin="0,24,0,0" Orientation="Horizontal">
@@ -98,12 +144,15 @@
                     </StackPanel>
                 </StackPanel>
             </ui:Card>
+            </StackPanel>
+            </Grid>
+            </ScrollViewer>
         </TabItem>
         <TabItem Name="Translator">
             <TabItem.Header>
                 <ui:TextBlock Text="{i18n:StringLocalizer settings.translator}" FontWeight="Bold" FontTypography="Caption"/>
             </TabItem.Header>
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" utils_ui:SettingsScrollViewer.ScrollOnMouseWheel="True">
             <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
                 <StackPanel Orientation="Vertical">
                     <ui:CardControl Icon="{ui:SymbolIcon LocalLanguage24}">
@@ -359,6 +408,7 @@
             <TabItem.Header>
                 <ui:TextBlock Text="{i18n:StringLocalizer settings.ui.chat}" FontWeight="Bold" FontTypography="Caption"/>
             </TabItem.Header>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" utils_ui:SettingsScrollViewer.ScrollOnMouseWheel="True">
             <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
                 <StackPanel Orientation="Vertical">
                     <ui:CardControl Icon="{ui:SymbolIcon TextFont24}">
@@ -416,11 +466,13 @@
                     </ui:CardControl>
                 </StackPanel>
             </ui:Card>
+            </ScrollViewer>
         </TabItem>
         <TabItem Name="Channel">
             <TabItem.Header>
                 <ui:TextBlock Text="{i18n:StringLocalizer settings.channel}" FontWeight="Bold" FontTypography="Caption"/>
             </TabItem.Header>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" utils_ui:SettingsScrollViewer.ScrollOnMouseWheel="True">
             <ui:Card VerticalAlignment="Stretch" VerticalContentAlignment="Top">
                 <StackPanel Orientation="Vertical">
                     <ui:CardExpander>
@@ -922,6 +974,7 @@
                     </ui:CardExpander>
                 </StackPanel>
             </ui:Card>
+            </ScrollViewer>
         </TabItem>
     </TabControl>
 </Page>

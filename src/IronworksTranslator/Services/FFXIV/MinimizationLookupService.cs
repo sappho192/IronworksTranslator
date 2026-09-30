@@ -1,114 +1,108 @@
-﻿using IronworksTranslator.Views.Windows;
+using IronworksTranslator.Models.Settings;
+using IronworksTranslator.Utils.UI;
+using IronworksTranslator.Views.Windows;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using Wpf.Ui;
+using System.ComponentModel;
+using System.Windows.Threading;
 
 namespace IronworksTranslator.Services.FFXIV
 {
-    public class MinimizationLookupService : IHostedService, IDisposable
+    public sealed class MinimizationLookupService : IHostedService, IDisposable
     {
-        private Timer? minimizationTimer;
-        private const int period = 1000;
+        private readonly Dictionary<Window, AutomaticWindowState> _windowStates = new();
+        private DispatcherTimer? _timer;
+        private IntPtr _gameWindow;
+        private int _gameProcessId;
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            if (minimizationTimer == null)
+            if (_timer == null)
             {
-                minimizationTimer = new Timer(MinimizeWindow, null, 0, period);
+                // Dispatcher ticks cannot overlap or block host shutdown waiting for the UI.
+                _timer = new DispatcherTimer(DispatcherPriority.Background, Application.Current.Dispatcher)
+                {
+                    Interval = TimeSpan.FromMilliseconds(250)
+                };
+                _timer.Tick += OnTick;
             }
-            else
-            {
-                minimizationTimer.Change(0, period);
-            }
-
+            _timer.Start();
             return Task.CompletedTask;
         }
 
-        private void MinimizeWindow(object? state)
+        private void OnTick(object? sender, EventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            var settings = IronworksSettings.Instance?.UiSettings;
+            var lookup = App.GetServices<IHostedService>().OfType<ChatLookupService>().Single();
+            var gameProcessId = lookup.Attached ? lookup.GameProcessID : 0;
+            if (_gameProcessId != gameProcessId ||
+                NativeWindowMethods.GetProcessId(_gameWindow) != gameProcessId)
             {
-                var chatWindow = App.GetService<ChatWindow>();
-                var dialogueWindow = App.GetService<DialogueWindow>();
-                if (ApplicationIsActivated() || AppWindowIsFocused())
-                {
-                    if (chatWindow.WindowState != WindowState.Normal)
-                    {
-                        chatWindow.WindowState = WindowState.Normal;
-                    }
-                    if (dialogueWindow.WindowState != WindowState.Normal)
-                    {
-                        dialogueWindow.WindowState = WindowState.Normal;
-                    }
-                }
-                else
-                {
-                    if (chatWindow.WindowState != WindowState.Minimized)
-                    {
-                        chatWindow.WindowState = WindowState.Minimized;
-                    }
-                    if (dialogueWindow.WindowState != WindowState.Minimized)
-                    {
-                        dialogueWindow.WindowState = WindowState.Minimized;
-                    }
-                }
-            });
-        }
-
-        private static bool AppWindowIsFocused()
-        {
-            var chatWindow = App.GetService<ChatWindow>();
-            var dialogueWindow = App.GetService<DialogueWindow>();
-            var mainWindow = App.GetServices<INavigationWindow>().OfType<MainWindow>().Single();
-            if (chatWindow.IsActive || mainWindow.IsActive || dialogueWindow.IsActive)
-            {
-                return true;
+                _gameProcessId = gameProcessId;
+                _gameWindow = NativeWindowMethods.FindProcessWindow(gameProcessId);
             }
-            return false;
+            if (_gameWindow == IntPtr.Zero && gameProcessId > 0)
+            {
+                _gameWindow = NativeWindowMethods.FindProcessWindow(gameProcessId);
+            }
+
+            var action = GameWindowFollowPolicy.Decide(
+                settings?.FollowGameWindow == true,
+                _gameWindow != IntPtr.Zero,
+                NativeWindowMethods.IsIconic(_gameWindow),
+                NativeWindowMethods.GetProcessId(NativeWindowMethods.GetForegroundWindow()),
+                gameProcessId,
+                Environment.ProcessId);
+            if (action == GameWindowFollowAction.Keep) return;
+
+            // Polling must not construct or show disabled overlays.
+            foreach (var window in Application.Current.Windows.Cast<Window>()
+                .Where(window => window is MainWindow or ChatWindow or DialogueWindow).ToArray())
+            {
+                if (window is ChatWindow or DialogueWindow)
+                {
+                    TranslationWindowVisibility.SetSuppressed(window,
+                        action == GameWindowFollowAction.Minimize);
+                    continue;
+                }
+                if (!_windowStates.TryGetValue(window, out var state))
+                {
+                    state = new AutomaticWindowState();
+                    _windowStates.Add(window, state);
+                    window.Closed += (_, _) => _windowStates.Remove(window);
+                }
+
+                var nextState = state.Update(window.IsVisible, window.WindowState,
+                    action == GameWindowFollowAction.Minimize);
+                if (nextState.HasValue)
+                {
+                    try
+                    {
+                        NativeWindowMethods.SetWindowStateWithoutActivation(window, nextState.Value);
+                    }
+                    catch (Win32Exception ex)
+                    {
+                        Log.Warning(ex, "Failed to update automatic window state.");
+                    }
+                }
+            }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            minimizationTimer?.Change(Timeout.Infinite, 0);
+            Dispose();
             return Task.CompletedTask;
         }
 
         public void Dispose()
         {
+            if (_timer != null)
+            {
+                _timer.Stop();
+                _timer.Tick -= OnTick;
+                _timer = null;
+            }
             GC.SuppressFinalize(this);
-            minimizationTimer?.Dispose();
         }
-
-        /// <summary>Returns true if the current application has focus, false otherwise</summary>
-        public static bool ApplicationIsActivated()
-        {
-            var activatedHandle = GetForegroundWindow();
-            if (activatedHandle == IntPtr.Zero)
-            {
-                return false;       // No window is currently activated
-            }
-
-            var chatLookupService = App.GetServices<IHostedService>().OfType<ChatLookupService>().Single();
-            var procId = chatLookupService.GameProcessID;
-            var result = GetWindowThreadProcessId(activatedHandle, out int activeProcId);
-            if (result == 0)
-            {
-                return activeProcId == procId;
-            }
-            else
-            {
-                Log.Error("GetWindowThreadProcessId failed");
-                return false;
-            }
-        }
-
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
-        private static extern IntPtr GetForegroundWindow();
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using IronworksTranslator.Models.Settings;
 using IronworksTranslator.ViewModels.Windows;
+using IronworksTranslator.Utils.UI;
 using Serilog;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
@@ -25,6 +26,7 @@ namespace IronworksTranslator.Views.Windows
             SystemThemeWatcher.Watch(this);
 
             InitializeComponent();
+            NavigationScrollHint.Attach(RootNavigation);
 
             ApplicationThemeManager.Apply(IronworksSettings.Instance.UiSettings.Theme);
 

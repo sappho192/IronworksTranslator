@@ -108,6 +108,15 @@ startup, version 2 settings are imported without overwriting `settings.v2.yaml`.
 The new NPC display destination, manual translation languages, and expanded
 manual translation layout are saved only in the version 3 file.
 
+Version 2.2.0 uses schema 4 (`settings.v4.yaml`) to persist
+`ui_settings.last_release_notes_app_version`. It imports the latest earlier
+settings snapshot without modifying it. After startup terms are accepted,
+the newest release notes for the build's channel open automatically once per
+app version, before the update check. The displayed version is recorded only
+after the notes dialog closes successfully; failed or empty fetches are retried
+on a later launch. Release versions retain prerelease labels and omit build
+metadata, matching the packaged informational version.
+
 ## Useful Options
 
 ```powershell

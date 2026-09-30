@@ -20,4 +20,15 @@ public class BuildInfoTests
         Assert.Equal("win", channel.VelopackChannel);
         Assert.False(channel.IncludePrereleases);
     }
+
+    [Theory]
+    [InlineData("2.2.0", "2.2.0")]
+    [InlineData("2.2.0+Branch.master.Sha.abc123", "2.2.0")]
+    [InlineData("2.2.0-beta.2+Sha.abc123", "2.2.0-beta.2")]
+    [InlineData("", "2.1.0")]
+    [InlineData(null, "2.1.0")]
+    public void ReleaseVersion_IgnoresBuildMetadataAndKeepsPrerelease(string? informationalVersion, string expected)
+    {
+        Assert.Equal(expected, BuildInfo.GetReleaseVersion(informationalVersion, new Version(2, 1, 0, 0)));
+    }
 }

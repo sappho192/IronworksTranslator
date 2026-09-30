@@ -1,5 +1,6 @@
 ﻿using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.Views.Windows;
+using IronworksTranslator.Utils.UI;
 using Wpf.Ui.Controls;
 
 namespace IronworksTranslator.Views.Pages
@@ -31,11 +32,11 @@ namespace IronworksTranslator.Views.Pages
                 var chatWindow = App.GetService<ChatWindow>();
                 if (ui.IsChecked == true)
                 {
-                    chatWindow.Show();
+                    TranslationWindowVisibility.SetVisible(chatWindow, true);
                 }
                 else
                 {
-                    chatWindow.Hide();
+                    TranslationWindowVisibility.SetVisible(chatWindow, false);
                 }
             }
         }

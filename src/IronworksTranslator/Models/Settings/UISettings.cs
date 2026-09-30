@@ -24,6 +24,10 @@ namespace IronworksTranslator.Models.Settings
         private bool _isTosDisplayed;
 
         [ObservableProperty]
+        [property: YamlMember(Alias = "last_release_notes_app_version")]
+        private string _lastReleaseNotesAppVersion = string.Empty;
+
+        [ObservableProperty]
         [property: YamlMember(Alias = "theme")]
         private ApplicationTheme _theme;
 
@@ -34,6 +38,14 @@ namespace IronworksTranslator.Models.Settings
         [ObservableProperty]
         [property: YamlMember(Alias = "dialogue_window_visible")]
         private bool _dialogueWindowVisible;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "follow_game_window")]
+        private bool _followGameWindow = true;
+
+        [ObservableProperty]
+        [property: YamlMember(Alias = "hide_translation_windows_from_alt_tab")]
+        private bool _hideTranslationWindowsFromAltTab = true;
 
         [ObservableProperty]
         [property: YamlMember(Alias = "chat_window_width")]
@@ -82,6 +94,12 @@ namespace IronworksTranslator.Models.Settings
         }
 
         [SaveSettingsOnChange]
+        partial void OnLastReleaseNotesAppVersionChanged(string value)
+        {
+            Log.Information("Startup release notes displayed for app version {Version}", value);
+        }
+
+        [SaveSettingsOnChange]
         partial void OnThemeChanged(ApplicationTheme value)
         {
             Log.Information($"Theme changed to {value}");
@@ -126,7 +144,25 @@ namespace IronworksTranslator.Models.Settings
                 case nameof(DashboardViewModel.IsDialogueWindowVisible):
                     DialogueWindowVisible = m.NewValue;
                     break;
+                case nameof(SettingsViewModel.FollowGameWindow):
+                    FollowGameWindow = m.NewValue;
+                    break;
+                case nameof(SettingsViewModel.HideTranslationWindowsFromAltTab):
+                    HideTranslationWindowsFromAltTab = m.NewValue;
+                    break;
             }
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnFollowGameWindowChanged(bool value)
+        {
+            Log.Information("FollowGameWindow changed to {Value}", value);
+        }
+
+        [SaveSettingsOnChange]
+        partial void OnHideTranslationWindowsFromAltTabChanged(bool value)
+        {
+            Log.Information("HideTranslationWindowsFromAltTab changed to {Value}", value);
         }
 
         [SaveSettingsOnChange]

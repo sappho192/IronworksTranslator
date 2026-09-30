@@ -36,15 +36,16 @@ namespace IronworksTranslator.Views.Windows
             DataContext = this;
 
             InitializeComponent();
+            TranslationWindowAltTab.Attach(this, IronworksSettings.Instance!.UiSettings!);
 
 #pragma warning disable CS8602
             if (IronworksSettings.Instance.UiSettings.DialogueWindowVisible && !IronworksSettings.Instance.ChatUiSettings.ShowDialogueInChat)
             {
-                Show();
+                TranslationWindowVisibility.SetVisible(this, true);
             }
             else
             {
-                Hide();
+                TranslationWindowVisibility.SetVisible(this, false);
             }
             if (IronworksSettings.Instance.ChatUiSettings.IsResizable)
             {
@@ -66,8 +67,9 @@ namespace IronworksTranslator.Views.Windows
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        if (IronworksSettings.Instance.ChatUiSettings.ShowDialogueInChat) Hide();
-                        else if (IronworksSettings.Instance.UiSettings.DialogueWindowVisible) Show();
+                        TranslationWindowVisibility.SetVisible(this,
+                            !IronworksSettings.Instance.ChatUiSettings.ShowDialogueInChat &&
+                            IronworksSettings.Instance.UiSettings.DialogueWindowVisible);
                     });
                 }
             };
@@ -257,7 +259,7 @@ namespace IronworksTranslator.Views.Windows
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
-            Hide();
+            TranslationWindowVisibility.SetVisible(this, false);
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)

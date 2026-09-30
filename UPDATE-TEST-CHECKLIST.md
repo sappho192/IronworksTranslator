@@ -81,10 +81,11 @@ Expected result:
 - Accepting the terms writes:
 
 ```powershell
-$env:APPDATA\IronworksTranslator\settings.v3.yaml
+$env:APPDATA\IronworksTranslator\settings.v4.yaml
 ```
 
 - Fresh installs do not need to create the unversioned legacy `settings.yaml`.
+- After accepting the terms, the latest release notes for the current channel open once. Restarting the same version does not open them automatically again.
 - An encrypted `.iwlog` log file is created under:
 
 ```powershell
@@ -131,7 +132,7 @@ For portable migration:
 Expected result:
 
 - `settings.yaml` is copied to `%APPDATA%\IronworksTranslator\settings.yaml`.
-- The app imports that legacy file into `%APPDATA%\IronworksTranslator\settings.v3.yaml`.
+- The app imports that legacy file into `%APPDATA%\IronworksTranslator\settings.v4.yaml`.
 - The imported legacy `settings.yaml` remains available as a downgrade snapshot for older builds.
 - `data\model` is copied to `%LOCALAPPDATA%\IronworksTranslator\data\model` if the destination was empty.
 - Existing destination files are not overwritten.
@@ -175,6 +176,8 @@ Expected result:
 - Choosing `Download and restart` downloads the update.
 - The app exits, applies the update, restarts, and reports the new version.
 - The restart target is `IronworksTranslator.Launcher.exe`, which prompts for UAC and starts the real app.
+- The restarted app automatically opens the newest Stable release notes. Closing them and restarting the same app version does not open them again.
+- If release notes cannot be fetched on the first updated launch, normal startup continues and a later launch retries. An empty response must not mark the version as shown.
 - After the update package download succeeds, the Velopack `Packages` directory retains only the newest full `.nupkg`; older full packages, delta packages, and incomplete `.partial` downloads are removed before restart.
 - Settings under `%APPDATA%\IronworksTranslator` are preserved.
 - Logs and model files under `%LOCALAPPDATA%\IronworksTranslator` are preserved.
@@ -205,18 +208,20 @@ Expected result:
 - The Beta app offers the newer Beta update.
 - The app exits, applies the update, restarts, and reports the new Beta version.
 - The restarted launcher prompts for UAC and starts the real app as administrator.
+- The restarted app automatically opens the newest Beta release notes once for that prerelease version; a later Beta version opens them again. Stable notes and draft releases are excluded.
 - Settings, logs, and model files are preserved.
 - Returning from Beta to Stable is manual: reinstall the latest Stable installer. Automatic Stable downgrade is not supported in this first Beta channel.
 
 Settings schema isolation check:
 
 1. Start with an older package and a populated unversioned `settings.yaml`.
-2. Launch the newer package and confirm it imports the settings into `settings.v3.yaml`.
+2. Launch the newer package and confirm it imports the settings into `settings.v4.yaml`.
 3. Confirm the legacy `settings.yaml` remains readable by the older package.
-4. Change settings in the newer package and confirm only `settings.v3.yaml` changes.
+4. Change settings in the newer package and confirm only `settings.v4.yaml` changes.
 5. Reinstall and launch the older package. Confirm it reaches the main window and update prompt using its preserved `settings.yaml`.
-6. Change settings in the older package and confirm `settings.v3.yaml` is unchanged.
-7. For every future incompatible settings change, increment `AppPaths.SettingsSchemaVersion`; never repurpose or overwrite an existing versioned settings file.
+6. Change settings in the older package and confirm `settings.v4.yaml` is unchanged.
+7. Migrate a version 3 snapshot, confirm `settings.v3.yaml` remains unchanged, and confirm closing the automatic release notes dialog records `ui_settings.last_release_notes_app_version` in version 4 only.
+8. For every future incompatible settings change, increment `AppPaths.SettingsSchemaVersion`; never repurpose or overwrite an existing versioned settings file.
 
 ## 8. Post-Update Regression Checks
 

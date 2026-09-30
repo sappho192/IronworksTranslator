@@ -3,6 +3,7 @@ using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Logging;
 using IronworksTranslator.Utils.Translator;
+using IronworksTranslator.Utils.UI;
 using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.ViewModels.Windows;
 using IronworksTranslator.Views.Pages;
@@ -44,9 +45,7 @@ namespace IronworksTranslator
             {
                 services.AddHostedService<ApplicationHostService>();
                 services.AddHostedService<ChatLookupService>();
-//#if !DEBUG
-                //services.AddHostedService<MinimizationLookupService>();
-//#endif
+                services.AddHostedService<MinimizationLookupService>();
 
                 // Add i18n
                 services.AddStringLocalizer(b =>
@@ -142,7 +141,7 @@ namespace IronworksTranslator
 
                 _host.Value.Start();
                 var chatWindow = GetService<ChatWindow>();
-                chatWindow.Show();
+                TranslationWindowVisibility.SetVisible(chatWindow, true);
                 var dialogueWindow = GetService<DialogueWindow>();
                 BootWatchDog();
             }
