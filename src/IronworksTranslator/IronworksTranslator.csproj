@@ -84,7 +84,7 @@
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="Sharlayan.Lite" Version="9.2.1" />
     <PackageReference Include="System.Management" Version="10.0.9" />
-    <PackageReference Include="WPF-UI" Version="3.1.1" />
+    <PackageReference Include="WPF-UI" Version="4.3.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="WpfScreenHelper" Version="2.1.1" />
