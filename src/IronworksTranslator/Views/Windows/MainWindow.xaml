@@ -74,7 +74,7 @@
             </ui:NavigationView.ContentOverlay>
         </ui:NavigationView>
 
-        <ContentPresenter
+        <ui:ContentDialogHost
             x:Name="RootContentDialog"
             Grid.Row="0"
             Grid.RowSpan="2" />

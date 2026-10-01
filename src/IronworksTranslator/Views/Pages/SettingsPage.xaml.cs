@@ -10,6 +10,7 @@ using System.IO;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using Wpf.Ui;
+using Wpf.Ui.Abstractions.Controls;
 using Wpf.Ui.Controls;
 
 namespace IronworksTranslator.Views.Pages

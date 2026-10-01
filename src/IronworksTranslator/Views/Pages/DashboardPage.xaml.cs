@@ -1,6 +1,7 @@
 ﻿using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.Views.Windows;
 using IronworksTranslator.Utils.UI;
+using Wpf.Ui.Abstractions.Controls;
 using Wpf.Ui.Controls;
 
 namespace IronworksTranslator.Views.Pages
