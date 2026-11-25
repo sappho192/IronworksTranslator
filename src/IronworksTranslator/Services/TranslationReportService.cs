@@ -57,32 +57,40 @@ namespace IronworksTranslator.Services
                 TranslateDraftAsync,
                 isDeepLAvailable);
 
-            var content = new TranslationReportDialogContent(viewModel);
-            var dialogResult = await _contentDialogService.ShowSimpleDialogAsync(
-                new SimpleContentDialogCreateOptions
+            while (true)
+            {
+                var content = new TranslationReportDialogContent(viewModel);
+                var dialogResult = await _contentDialogService.ShowSimpleDialogAsync(
+                    new SimpleContentDialogCreateOptions
+                    {
+                        Title = Localizer.GetString("chat.report"),
+                        Content = content,
+                        PrimaryButtonText = Localizer.GetString("chat.report.primary"),
+                        CloseButtonText = Localizer.GetString("cancel"),
+                    },
+                    cancellationToken);
+
+                if (dialogResult != ContentDialogResult.Primary)
                 {
-                    Title = Localizer.GetString("chat.report"),
-                    Content = content,
-                    PrimaryButtonText = Localizer.GetString("chat.report.primary"),
-                    CloseButtonText = Localizer.GetString("cancel"),
-                },
-                cancellationToken);
+                    return;
+                }
 
-            if (dialogResult != ContentDialogResult.Primary)
-            {
-                return;
+                if (!viewModel.CanSubmit)
+                {
+                    viewModel.DraftStatusMessage = Localizer.GetString("chat.report.empty_change");
+                    continue;
+                }
+
+                var payload = viewModel.BuildRequest(BuildInfo.ReleaseVersion);
+                var result = await _biggsWorker.SubmitReportAsync(payload, cancellationToken);
+                if (result.IsSuccess)
+                {
+                    MessageBox.Show(Localizer.GetString("chat.report.send.success"));
+                    return;
+                }
+
+                viewModel.DraftStatusMessage = Localizer.GetString("chat.report.send.fail");
             }
-
-            if (!viewModel.CanSubmit)
-            {
-                MessageBox.Show(Localizer.GetString("chat.report.empty_change"));
-                return;
-            }
-
-            var payload = viewModel.BuildRequest(BuildInfo.ReleaseVersion);
-            var result = await _biggsWorker.SubmitReportAsync(payload, cancellationToken);
-            MessageBox.Show(Localizer.GetString(
-                result.IsSuccess ? "chat.report.send.success" : "chat.report.send.fail"));
         }
 
         private Task<string> TranslateDraftAsync(
