@@ -107,7 +107,8 @@ namespace IronworksTranslator.ViewModels.Dialogs
             StringComparison.Ordinal);
 
         public bool CanSubmit => !IsLoadingDraft
-            && (!string.Equals(SuggestedTranslation.Trim(), OriginalTranslation.Trim(), StringComparison.Ordinal)
+            && ((!string.IsNullOrWhiteSpace(SuggestedTranslation)
+                    && !string.Equals(SuggestedTranslation.Trim(), OriginalTranslation.Trim(), StringComparison.Ordinal))
                 || GlossaryHintParser.Parse(GlossaryHintText).Count > 0
                 || !string.IsNullOrWhiteSpace(Comment));
 

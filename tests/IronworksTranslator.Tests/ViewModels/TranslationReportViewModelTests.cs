@@ -20,6 +20,9 @@ public class TranslationReportViewModelTests
         Assert.False(vm.CanSubmit);
         Assert.False(vm.HasNpcSpeaker);
         Assert.Null(vm.OriginalNpcSpeaker);
+
+        vm.SuggestedTranslation = "   ";
+        Assert.False(vm.CanSubmit);
     }
 
     [Fact]
