@@ -1,6 +1,8 @@
 ﻿using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models;
 using IronworksTranslator.Models.Settings;
+using IronworksTranslator.Models.Translator;
+using IronworksTranslator.Services;
 using IronworksTranslator.ViewModels.Windows;
 using Serilog;
 using System.Text.RegularExpressions;
@@ -29,6 +31,7 @@ namespace IronworksTranslator.Views.Windows
 
         // Semaphore to ensure dialogue messages are processed sequentially
         private readonly SemaphoreSlim _translationSemaphore = new(1, 1);
+        private TranslationText? _lastDialogueText;
 
         public DialogueWindow(DialogueWindowViewModel viewModel)
         {
@@ -115,10 +118,11 @@ namespace IronworksTranslator.Views.Windows
                         {
                             var sourceLanguage =
                                 IronworksSettings.Instance.ChannelSettings.NpcDialog.MajorLanguage;
-                            var translated = Translate(msg, sourceLanguage);
+                            var engine = IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
+                            var translated = Translate(msg, sourceLanguage, engine);
                             var translatedSpeaker = DialogueSpeakerTranslation.TranslateOrOriginal(
                                 entry.Speaker,
-                                speaker => Translate(speaker, sourceLanguage),
+                                speaker => Translate(speaker, sourceLanguage, engine),
                                 ex => Log.Warning(
                                     ex,
                                     "Failed to translate dialogue speaker; using the original speaker."));
@@ -126,9 +130,21 @@ namespace IronworksTranslator.Views.Windows
                                 translatedSpeaker,
                                 translated);
 
+                            var dialogueText = new TranslationText(
+                                msg,
+                                (TranslationLanguageCode)sourceLanguage,
+                                (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
+                            {
+                                TranslatedText = translated,
+                                Author = translatedSpeaker,
+                                OriginalSpeaker = entry.Speaker,
+                                TranslationKind = MiLMMTTranslationKind.Dialogue,
+                            };
+                            ChatWindowViewModel.PopulateTranslationMetadata(dialogueText, engine);
+
                             Application.Current.Dispatcher.Invoke(() =>
                             {
-                                AppendDialogueText(displayText);
+                                AppendDialogueText(displayText, dialogueText);
                             });
                         }
                     }
@@ -145,28 +161,43 @@ namespace IronworksTranslator.Views.Windows
             }
         }
 
-        public void PushDialogueTextBox(DialogueEntry? entry)
+        public void PushDialogueTextBox(DialogueEntry? entry, TranslationText? translationText = null)
         {
             if (entry == null) return;
             if (!Dispatcher.CheckAccess())
             {
-                Dispatcher.Invoke(() => PushDialogueTextBox(entry));
+                Dispatcher.Invoke(() => PushDialogueTextBox(entry, translationText));
                 return;
             }
 
-            AppendDialogueText(DialogueTextFormatter.Format(entry.Speaker, entry.Text));
+            AppendDialogueText(DialogueTextFormatter.Format(entry.Speaker, entry.Text), translationText);
         }
 
-        private void AppendDialogueText(string dialogue)
+        private void AppendDialogueText(string dialogue, TranslationText? translationText = null)
         {
+            if (translationText != null)
+            {
+                _lastDialogueText = translationText;
+            }
+
             if (IronworksSettings.Instance.ChatUiSettings.ShowDialogueInChat)
             {
-                App.GetService<ChatWindowViewModel>().AddDialogue(dialogue);
+                App.GetService<ChatWindowViewModel>().AddDialogue(dialogue, translationText);
                 return;
             }
             tbDialogueTextBox.AppendText($"{Environment.NewLine}{Environment.NewLine}{dialogue}");
             TrimDialogueTextBox();
             tbDialogueTextBox.ScrollToEnd();
+        }
+
+        private async void ReportDialogue_Click(object sender, RoutedEventArgs e)
+        {
+            if (_lastDialogueText == null)
+            {
+                return;
+            }
+
+            await App.GetService<TranslationReportService>().ShowReportDialogAsync(_lastDialogueText);
         }
 
         private void TrimDialogueTextBox()

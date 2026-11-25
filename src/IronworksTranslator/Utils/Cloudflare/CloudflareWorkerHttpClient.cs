@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+using System.Net.Http;
+using System.Text.RegularExpressions;
 
 namespace IronworksTranslator.Utils.Cloudflare
 {
@@ -11,55 +12,52 @@ namespace IronworksTranslator.Utils.Cloudflare
             _httpClient = httpClient;
         }
 
-        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
+        public async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken = default)
         {
-            var response = await _httpClient.SendAsync(request);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
 
             if (!response.IsSuccessStatusCode && IsCloudflareWorkerError(response))
             {
-                throw new CloudflareWorkerException(
-                    GetErrorCodeFromResponse(response).GetAwaiter().GetResult(),
-                    GetErrorMessageFromResponse(response).GetAwaiter().GetResult());
+                var htmlContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                var errorCode = ParseErrorCode(htmlContent);
+                var errorMessage = ParseErrorMessage(htmlContent);
+                throw new CloudflareWorkerException(errorCode, errorMessage);
             }
 
             return response;
         }
 
-#pragma warning disable CS8602
-        private bool IsCloudflareWorkerError(HttpResponseMessage response)
+        private static bool IsCloudflareWorkerError(HttpResponseMessage response)
         {
-            // Check if the response contains Cloudflare-specific headers
-            return response.Headers.Contains("CF-RAY") &&
-                   response.Content.Headers.ContentType.MediaType == "text/html";
+            return response.Headers.Contains("CF-RAY")
+                && string.Equals(
+                    response.Content?.Headers?.ContentType?.MediaType,
+                    "text/html",
+                    StringComparison.OrdinalIgnoreCase);
         }
-#pragma warning restore CS8602
 
-        private async Task<int> GetErrorCodeFromResponse(HttpResponseMessage response)
+        private static int ParseErrorCode(string htmlContent)
         {
-            // Parse the HTML content to extract the error code
-            var htmlContent = await response.Content.ReadAsStringAsync();
-            var errorCodeMatch = System.Text.RegularExpressions.Regex.Match(htmlContent, @"<title>Error (\d+)</title>");
-
+            var errorCodeMatch = Regex.Match(htmlContent, @"<title>Error (\d+)</title>");
             if (errorCodeMatch.Success && int.TryParse(errorCodeMatch.Groups[1].Value, out var errorCode))
             {
                 return errorCode;
             }
 
-            throw new Exception("Unable to parse error code from Cloudflare Worker response");
+            throw new InvalidOperationException("Unable to parse error code from Cloudflare Worker response");
         }
 
-        private async Task<string> GetErrorMessageFromResponse(HttpResponseMessage response)
+        private static string ParseErrorMessage(string htmlContent)
         {
-            // Parse the HTML content to extract the error message
-            var htmlContent = await response.Content.ReadAsStringAsync();
-            var errorMessageMatch = System.Text.RegularExpressions.Regex.Match(htmlContent, @"<p class=""error-message"">(.*)</p>");
-
+            var errorMessageMatch = Regex.Match(htmlContent, @"<p class=""error-message"">(.*?)</p>", RegexOptions.Singleline);
             if (errorMessageMatch.Success)
             {
                 return errorMessageMatch.Groups[1].Value.Trim();
             }
 
-            throw new Exception("Unable to parse error message from Cloudflare Worker response");
+            throw new InvalidOperationException("Unable to parse error message from Cloudflare Worker response");
         }
     }
 }

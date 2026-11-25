@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:i18n="http://schemas.lepo.co/i18n/2022/xaml"
         xmlns:local="clr-namespace:IronworksTranslator.Views.Windows"
         xmlns:Behaviors="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:utils_ui="clr-namespace:IronworksTranslator.Utils.UI"
@@ -83,7 +84,14 @@
                  TextWrapping="Wrap" Name="tbDialogueTextBox" x:FieldModifier="public"
                  IsReadOnly="True"
                  Style="{StaticResource TransparentTextBoxStyle}"
-                 Text=""/>
+                 Text="">
+                <TextBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="{i18n:StringLocalizer chat.report}"
+                                  Click="ReportDialogue_Click"/>
+                    </ContextMenu>
+                </TextBox.ContextMenu>
+            </TextBox>
         </Grid>
     </Grid>
 </Window>

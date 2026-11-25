@@ -1,6 +1,7 @@
 ﻿using IronworksTranslator.Services;
 using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
+using IronworksTranslator.Utils.Cloudflare;
 using IronworksTranslator.Utils.Logging;
 using IronworksTranslator.Utils.Translator;
 using IronworksTranslator.Utils.UI;
@@ -98,6 +99,8 @@ namespace IronworksTranslator
                 services.AddSingleton<PapagoTranslator>();
                 services.AddSingleton<DeepLAPITranslator>();
                 services.AddSingleton<MiLMMTTranslator>();
+                services.AddSingleton<BiggsWorker>();
+                services.AddSingleton<TranslationReportService>();
             }).Build();
         }
 
