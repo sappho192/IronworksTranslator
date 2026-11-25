@@ -84,6 +84,7 @@
                  TextWrapping="Wrap" Name="tbDialogueTextBox" x:FieldModifier="public"
                  IsReadOnly="True"
                  Style="{StaticResource TransparentTextBoxStyle}"
+                 ContextMenuOpening="DialogueTextBox_ContextMenuOpening"
                  Text="">
                 <TextBox.ContextMenu>
                     <ContextMenu>

@@ -6,6 +6,8 @@ using IronworksTranslator.Services;
 using IronworksTranslator.ViewModels.Windows;
 using Serilog;
 using System.Text.RegularExpressions;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Threading;
 using WpfScreenHelper;
 using IronworksTranslator.Utils.Translator;
@@ -31,7 +33,10 @@ namespace IronworksTranslator.Views.Windows
 
         // Semaphore to ensure dialogue messages are processed sequentially
         private readonly SemaphoreSlim _translationSemaphore = new(1, 1);
-        private TranslationText? _lastDialogueText;
+        private readonly List<DialogueSpan> _dialogueSpans = [];
+        private TranslationText? _contextMenuTargetDialogue;
+
+        private readonly record struct DialogueSpan(int StartOffset, int EndOffset, TranslationText Text);
 
         public DialogueWindow(DialogueWindowViewModel viewModel)
         {
@@ -178,29 +183,64 @@ namespace IronworksTranslator.Views.Windows
 
         private void AppendDialogueText(string dialogue, TranslationText? translationText = null)
         {
-            if (translationText != null)
-            {
-                _lastDialogueText = translationText;
-            }
-
             if (IronworksSettings.Instance.ChatUiSettings.ShowDialogueInChat)
             {
                 App.GetService<ChatWindowViewModel>().AddDialogue(dialogue, translationText);
                 return;
             }
-            tbDialogueTextBox.AppendText($"{Environment.NewLine}{Environment.NewLine}{dialogue}");
+
+            var separator = $"{Environment.NewLine}{Environment.NewLine}";
+            var startOffset = tbDialogueTextBox.Text.Length + separator.Length;
+            tbDialogueTextBox.AppendText($"{separator}{dialogue}");
+            if (translationText != null)
+            {
+                _dialogueSpans.Add(new DialogueSpan(startOffset, startOffset + dialogue.Length, translationText));
+            }
+
             TrimDialogueTextBox();
             tbDialogueTextBox.ScrollToEnd();
         }
 
+        private void DialogueTextBox_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            _contextMenuTargetDialogue = ResolveDialogueAtPoint(Mouse.GetPosition(tbDialogueTextBox));
+            if (_contextMenuTargetDialogue == null)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private TranslationText? ResolveDialogueAtPoint(Point point)
+        {
+            if (_dialogueSpans.Count == 0)
+            {
+                return null;
+            }
+
+            var charIndex = tbDialogueTextBox.GetCharacterIndexFromPoint(point, snapToText: true);
+            if (charIndex >= 0)
+            {
+                for (var i = _dialogueSpans.Count - 1; i >= 0; i--)
+                {
+                    var span = _dialogueSpans[i];
+                    if (charIndex >= span.StartOffset && charIndex <= span.EndOffset)
+                    {
+                        return span.Text;
+                    }
+                }
+            }
+
+            return _dialogueSpans[^1].Text;
+        }
+
         private async void ReportDialogue_Click(object sender, RoutedEventArgs e)
         {
-            if (_lastDialogueText == null)
+            if (_contextMenuTargetDialogue == null)
             {
                 return;
             }
 
-            await App.GetService<TranslationReportService>().ShowReportDialogAsync(_lastDialogueText);
+            await App.GetService<TranslationReportService>().ShowReportDialogAsync(_contextMenuTargetDialogue);
         }
 
         private void TrimDialogueTextBox()
@@ -214,10 +254,31 @@ namespace IronworksTranslator.Views.Windows
             var trimStart = text.Length - MaxDialogueTextLength;
             var separator = $"{Environment.NewLine}{Environment.NewLine}";
             var nextSeparator = text.IndexOf(separator, trimStart, StringComparison.Ordinal);
-            tbDialogueTextBox.Text = nextSeparator >= 0
-                ? text[(nextSeparator + separator.Length)..]
-                : text[^MaxDialogueTextLength..];
+            var removedLength = nextSeparator >= 0
+                ? nextSeparator + separator.Length
+                : trimStart;
+            tbDialogueTextBox.Text = text[removedLength..];
             tbDialogueTextBox.CaretIndex = tbDialogueTextBox.Text.Length;
+
+            if (_dialogueSpans.Count > 0)
+            {
+                var updatedSpans = new List<DialogueSpan>(_dialogueSpans.Count);
+                foreach (var span in _dialogueSpans)
+                {
+                    if (span.EndOffset <= removedLength)
+                    {
+                        continue;
+                    }
+
+                    updatedSpans.Add(new DialogueSpan(
+                        Math.Max(0, span.StartOffset - removedLength),
+                        span.EndOffset - removedLength,
+                        span.Text));
+                }
+
+                _dialogueSpans.Clear();
+                _dialogueSpans.AddRange(updatedSpans);
+            }
         }
 
         private string Translate(string input, ClientLanguage channelLanguage, TranslatorEngine? translatorEngine = null)
