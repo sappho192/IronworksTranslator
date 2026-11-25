@@ -93,12 +93,14 @@ namespace IronworksTranslator.Services
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return engine switch
-            {
-                TranslatorEngine.Papago => _papagoTranslator.TranslateAsync(input, sourceLanguage, targetLanguage),
-                TranslatorEngine.DeepL_API => _deepLTranslator.TranslateAsync(input, sourceLanguage, targetLanguage),
-                _ => Task.FromResult(input),
-            };
+            return Task.Run(
+                () => engine switch
+                {
+                    TranslatorEngine.Papago => _papagoTranslator.TranslateAsync(input, sourceLanguage, targetLanguage),
+                    TranslatorEngine.DeepL_API => _deepLTranslator.TranslateAsync(input, sourceLanguage, targetLanguage),
+                    _ => Task.FromResult(input),
+                },
+                cancellationToken);
         }
     }
 }
