@@ -203,21 +203,23 @@ namespace IronworksTranslator.Views.Windows
 
         private void DialogueTextBox_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            _contextMenuTargetDialogue = ResolveDialogueAtPoint(Mouse.GetPosition(tbDialogueTextBox));
+            var charIndex = e.CursorLeft < 0 || e.CursorTop < 0
+                ? tbDialogueTextBox.CaretIndex
+                : tbDialogueTextBox.GetCharacterIndexFromPoint(Mouse.GetPosition(tbDialogueTextBox), snapToText: true);
+            _contextMenuTargetDialogue = ResolveDialogueAtIndex(charIndex);
             if (_contextMenuTargetDialogue == null)
             {
                 e.Handled = true;
             }
         }
 
-        private TranslationText? ResolveDialogueAtPoint(Point point)
+        private TranslationText? ResolveDialogueAtIndex(int charIndex)
         {
             if (_dialogueSpans.Count == 0)
             {
                 return null;
             }
 
-            var charIndex = tbDialogueTextBox.GetCharacterIndexFromPoint(point, snapToText: true);
             if (charIndex >= 0)
             {
                 for (var i = _dialogueSpans.Count - 1; i >= 0; i--)
