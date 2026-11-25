@@ -49,6 +49,8 @@ namespace IronworksTranslator.Services
                 mainWindow.Show();
             }
 
+            mainWindow.Activate();
+
             var isDeepLAvailable = IronworksSettings.Instance?.TranslatorSettings?.DeeplApiKeys?
                 .Any(key => !string.IsNullOrWhiteSpace(key)) == true;
 
