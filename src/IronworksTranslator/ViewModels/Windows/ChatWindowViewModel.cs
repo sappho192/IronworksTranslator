@@ -431,6 +431,9 @@ namespace IronworksTranslator.ViewModels.Windows
             if (!ContainsNativeLanguage(originalText))
             {
                 var engine = IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
+                var modelProfile = engine == TranslatorEngine.MiLMMT
+                    ? MiLMMTModelProfiles.GetCurrent()
+                    : null;
                 text.TranslatedText = await TranslateAsync(
                     originalText,
                     sourceLanguage,
@@ -438,18 +441,21 @@ namespace IronworksTranslator.ViewModels.Windows
                     cancellationToken,
                     engine);
                 cancellationToken.ThrowIfCancellationRequested();
-                PopulateTranslationMetadata(text, engine);
+                PopulateTranslationMetadata(text, engine, modelProfile);
             }
 
             return text;
         }
 
-        internal static void PopulateTranslationMetadata(TranslationText text, TranslatorEngine engine)
+        internal static void PopulateTranslationMetadata(
+            TranslationText text,
+            TranslatorEngine engine,
+            MiLMMTModelProfile? modelProfile = null)
         {
             text.Engine = engine;
             if (engine == TranslatorEngine.MiLMMT)
             {
-                var profile = MiLMMTModelProfiles.GetCurrent();
+                var profile = modelProfile ?? MiLMMTModelProfiles.GetCurrent();
                 text.ModelId = profile.FileName;
                 text.ModelSha256 = profile.Sha256;
             }
@@ -748,9 +754,12 @@ namespace IronworksTranslator.ViewModels.Windows
 
         private string ReTranslate(TranslationText tText, TranslatorEngine api)
         {
+            var modelProfile = api == TranslatorEngine.MiLMMT
+                ? MiLMMTModelProfiles.GetCurrent()
+                : null;
             string newMessage = Translate(tText.OriginalText, (ClientLanguage)tText.SourceLanguage, api);
             tText.TranslatedText = newMessage;
-            PopulateTranslationMetadata(tText, api);
+            PopulateTranslationMetadata(tText, api, modelProfile);
             string? translated = string.IsNullOrEmpty(tText.Author) ? newMessage : $"{tText.Author}: {newMessage}";
             return translated;
         }

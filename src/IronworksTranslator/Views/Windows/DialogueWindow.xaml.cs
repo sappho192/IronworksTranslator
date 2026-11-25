@@ -119,6 +119,9 @@ namespace IronworksTranslator.Views.Windows
                             var sourceLanguage =
                                 IronworksSettings.Instance.ChannelSettings.NpcDialog.MajorLanguage;
                             var engine = IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
+                            var modelProfile = engine == TranslatorEngine.MiLMMT
+                                ? MiLMMTModelProfiles.GetCurrent()
+                                : null;
                             var translated = Translate(msg, sourceLanguage, engine);
                             var translatedSpeaker = DialogueSpeakerTranslation.TranslateOrOriginal(
                                 entry.Speaker,
@@ -140,7 +143,7 @@ namespace IronworksTranslator.Views.Windows
                                 OriginalSpeaker = entry.Speaker,
                                 TranslationKind = MiLMMTTranslationKind.Dialogue,
                             };
-                            ChatWindowViewModel.PopulateTranslationMetadata(dialogueText, engine);
+                            ChatWindowViewModel.PopulateTranslationMetadata(dialogueText, engine, modelProfile);
 
                             Application.Current.Dispatcher.Invoke(() =>
                             {
