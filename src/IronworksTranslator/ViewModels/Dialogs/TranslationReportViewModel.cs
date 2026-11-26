@@ -65,7 +65,7 @@ namespace IronworksTranslator.ViewModels.Dialogs
             TranslatorEngine.MiLMMT => "MiLMMT",
             TranslatorEngine.Papago => "Papago",
             TranslatorEngine.DeepL_API => "DeepL (API)",
-            _ => "Unknown",
+            _ => _localize("chat.report.engine.unknown"),
         };
 
         public string? DeepLDraftToolTip => IsDeepLAvailable

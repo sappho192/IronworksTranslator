@@ -56,7 +56,48 @@ namespace IronworksTranslator.Utils.Cloudflare
                     return BiggsSubmitResult.Failed("Failed to resolve report endpoint.");
                 }
 
-                var requestUrl = $"{endpoint.url.TrimEnd('/')}/v2/reports";
+                var result = await PostReportAsync(endpoint, body, cancellationToken);
+                if (result.IsSuccess)
+                {
+                    return result;
+                }
+
+                // The cached endpoint lives for the whole app session, so a rotated pointer would
+                // otherwise strand running clients on the old worker. Drop it and re-read the pointer;
+                // retry once only when it now names a different worker, so a request the same
+                // worker rejected is never posted twice.
+                InvalidateEndpoint(endpoint);
+                var refreshed = await ResolveEndpointAsync(cancellationToken);
+                if (refreshed == null
+                    || string.IsNullOrWhiteSpace(refreshed.url)
+                    || IsSameEndpoint(refreshed, endpoint))
+                {
+                    return result;
+                }
+
+                Log.Information("Report endpoint changed after a failed submission; retrying on the new endpoint.");
+                return await PostReportAsync(refreshed, body, cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                return BiggsSubmitResult.Failed("Cancelled");
+            }
+            catch (Exception ex)
+            {
+                // e.g. an HttpClient timeout while reading the pointer.
+                Log.Error(ex, "BiggsWorker report submission failed.");
+                return BiggsSubmitResult.Failed(ex.Message);
+            }
+        }
+
+        private async Task<BiggsSubmitResult> PostReportAsync(
+            BiggsEndPoint endpoint,
+            BiggsReportRequest body,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var requestUrl = BuildReportUrl(endpoint);
                 using var request = new HttpRequestMessage(HttpMethod.Post, requestUrl)
                 {
                     Content = new StringContent(
@@ -80,15 +121,23 @@ namespace IronworksTranslator.Utils.Cloudflare
                 LogCloudflareWorkerError(ex);
                 return BiggsSubmitResult.Failed($"Cloudflare Worker Error {ex.ErrorCode}");
             }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                return BiggsSubmitResult.Failed("Cancelled");
-            }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
             {
                 Log.Error(ex, "BiggsWorker report submission failed.");
                 return BiggsSubmitResult.Failed(ex.Message);
             }
+        }
+
+        private static string BuildReportUrl(BiggsEndPoint endpoint) =>
+            $"{endpoint.url.TrimEnd('/')}/v2/reports";
+
+        private static bool IsSameEndpoint(BiggsEndPoint left, BiggsEndPoint right) =>
+            string.Equals(BuildReportUrl(left), BuildReportUrl(right), StringComparison.OrdinalIgnoreCase);
+
+        private void InvalidateEndpoint(BiggsEndPoint failed)
+        {
+            // Only clear the cache if no concurrent submission has already replaced it.
+            Interlocked.CompareExchange(ref _endpoint, null, failed);
         }
 
         private async Task<BiggsEndPoint?> ResolveEndpointAsync(CancellationToken cancellationToken)

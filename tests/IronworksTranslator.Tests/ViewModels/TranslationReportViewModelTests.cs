@@ -140,6 +140,20 @@ public class TranslationReportViewModelTests
         };
     }
 
+    [Fact]
+    public void EngineDisplayLabel_LocalizesMissingEngineMetadata()
+    {
+        var text = new TranslationText("暁の血盟の皆", TranslationLanguageCode.Japanese, TranslationLanguageCode.Korean)
+        {
+            TranslatedText = "새벽의 혈맹 모두",
+        };
+
+        var vm = CreateViewModel(text);
+
+        Assert.Null(vm.Engine);
+        Assert.Equal("chat.report.engine.unknown", vm.EngineDisplayLabel);
+    }
+
     private static TranslationReportViewModel CreateViewModel(
         TranslationText text,
         Func<TranslatorEngine, string, TranslationLanguageCode, TranslationLanguageCode, CancellationToken, Task<string>>? translateDraft = null,

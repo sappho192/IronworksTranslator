@@ -216,6 +216,7 @@ settings.game.chat.enabled_channels_list: "Read chat from following channel (Cli
 chat.report: "Report"
 chat.report.description: "By suggesting translation improvements, you agree to share the source text and your suggestion with developers. Player names are not sent; please check that the text contains no personal information."
 chat.report.engine: "Engine:"
+chat.report.engine.unknown: "Unknown"
 chat.report.npc_speaker: "NPC:"
 chat.report.original: "Original text"
 chat.report.translated: "Current translation"

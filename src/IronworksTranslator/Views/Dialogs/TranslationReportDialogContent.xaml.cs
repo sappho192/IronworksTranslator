@@ -13,9 +13,10 @@ namespace IronworksTranslator.Views.Dialogs
             Loaded += OnLoaded;
         }
 
-        // WPF-UI 4.x ContentDialog focuses the first focusable control in its content on load,
-        // which would be a read-only source box. Move focus to the editable suggestion so typing
-        // starts there and Enter inserts a newline instead of triggering the default (Primary) button.
+        // Start typing in the editable suggestion instead of wherever the dialog puts initial focus.
+        // The default (Primary) button takes Enter unless the focused control accepts returns, and
+        // WPF-UI 4.x (master since #92; this branch still pins 3.1.1) focuses the first focusable
+        // control in the content on load, which would be the read-only source box.
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             Loaded -= OnLoaded;

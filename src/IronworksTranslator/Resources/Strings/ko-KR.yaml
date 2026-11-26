@@ -216,6 +216,7 @@ settings.game.chat.enabled_channels_list: "TTS로 읽을 채널 목록 (클릭�
 chat.report: "번역 개선 제안하기"
 chat.report.description: "번역 개선을 제안하면 원문과 제안 내용이 개발자에게 공유됩니다. 플레이어 화자 이름은 전송되지 않으며, 원문에 닉네임 등 민감 정보가 없는지 확인 후 보내주세요."
 chat.report.engine: "번역 엔진:"
+chat.report.engine.unknown: "알 수 없음"
 chat.report.npc_speaker: "NPC:"
 chat.report.original: "채팅 원문"
 chat.report.translated: "현재 번역"

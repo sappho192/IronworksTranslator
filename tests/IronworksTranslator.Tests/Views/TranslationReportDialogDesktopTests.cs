@@ -85,20 +85,32 @@ public class TranslationReportDialogDesktopTests
                 Assert.True(nestedRanges.Count == 0,
                     "Nested scroll areas inside the report content: " + string.Join(", ", nestedRanges));
 
-                var textBoxes = FindVisualDescendants<TextBox>(content).ToList();
+                // Hidden controls (the collapsed comment box) cannot be under the pointer.
+                var textBoxes = FindVisualDescendants<TextBox>(content).Where(box => box.IsVisible).ToList();
+                Assert.Contains(textBoxes, box => !string.IsNullOrEmpty(box.Text));
                 var targets = new List<UIElement>(textBoxes)
                 {
-                    FindVisualDescendants<TextBlock>(content).First(),
-                    FindVisualDescendants<Button>(content).First(),
+                    FindVisualDescendants<TextBlock>(content).First(block => block.IsVisible),
+                    // Skip the text boxes' hidden template buttons (e.g. ClearButton).
+                    FindVisualDescendants<Button>(content).First(button => button.IsVisible),
                 };
                 foreach (var target in targets)
                 {
                     dialogViewer.ScrollToVerticalOffset(0);
                     PumpDispatcher();
-                    RaiseWheel(target, -120);
+                    // Start the wheel where real input starts: the innermost element under the
+                    // pointer. Over a text box with text that is inside its PART_ContentHost
+                    // scroller; over an empty one it is the WPF-UI placeholder beside it.
+                    var source = HitTestCenter(target);
+                    if (target is TextBox { Text.Length: > 0 })
+                    {
+                        Assert.True(HasScrollViewerBetween(source, target),
+                            $"Hit test over {DescribeOwner(target)} did not land inside its content scroller ({source.GetType().Name}).");
+                    }
+                    RaiseWheel(source, -120);
                     PumpDispatcher();
                     Assert.True(dialogViewer.VerticalOffset > 0,
-                        $"Wheel over {DescribeOwner(target)} did not scroll the dialog.");
+                        $"Wheel over {DescribeOwner(target)} (from {source.GetType().Name}) did not scroll the dialog.");
                 }
 
                 // The suggestion grows instead of scrolling internally, so the dialog scroller
@@ -139,6 +151,23 @@ public class TranslationReportDialogDesktopTests
                 window.Close();
             }
         });
+    }
+
+    private static UIElement HitTestCenter(UIElement target)
+    {
+        var center = new Point(target.RenderSize.Width / 2, target.RenderSize.Height / 2);
+        return target.InputHitTest(center) as UIElement
+            ?? throw new InvalidOperationException($"Nothing hit-testable at the center of {DescribeOwner(target)}.");
+    }
+
+    private static bool HasScrollViewerBetween(DependencyObject descendant, DependencyObject ancestor)
+    {
+        for (var current = descendant; current != null && !ReferenceEquals(current, ancestor);
+            current = VisualTreeHelper.GetParent(current))
+        {
+            if (current is ScrollViewer) return true;
+        }
+        return false;
     }
 
     private static void RaiseWheel(UIElement target, int delta)

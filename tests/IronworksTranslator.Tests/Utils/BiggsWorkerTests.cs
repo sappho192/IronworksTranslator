@@ -66,6 +66,83 @@ public class BiggsWorkerTests
     }
 
     [Fact]
+    public async Task SubmitReportAsync_ReResolvesRotatedEndpointAfterFailureAndRetriesOnce()
+    {
+        var requestedUrls = new List<string>();
+        var pointerReads = 0;
+
+        using var handler = new DelegateHttpMessageHandler((request, _) =>
+        {
+            var url = request.RequestUri!.ToString();
+            requestedUrls.Add(url);
+
+            if (url == "https://pointer.test/database.json")
+            {
+                var workerUrl = ++pointerReads == 1 ? "https://old-worker.test" : "https://new-worker.test";
+                return Task.FromResult(PointerResponse(workerUrl));
+            }
+
+            if (url == "https://old-worker.test/v2/reports")
+            {
+                throw new HttpRequestException("Old worker is gone.");
+            }
+
+            return Task.FromResult(url == "https://new-worker.test/v2/reports"
+                ? new HttpResponseMessage(HttpStatusCode.Created) { Content = new StringContent("""{"ok":true}""") }
+                : new HttpResponseMessage(HttpStatusCode.NotFound));
+        });
+
+        using var httpClient = new HttpClient(handler);
+        using var worker = new BiggsWorker(httpClient, "https://pointer.test/database.json");
+
+        var first = await worker.SubmitReportAsync(CreateSamplePayload(), TestContext.Current.CancellationToken);
+        var second = await worker.SubmitReportAsync(CreateSamplePayload(), TestContext.Current.CancellationToken);
+
+        Assert.True(first.IsSuccess);
+        Assert.True(second.IsSuccess);
+        Assert.Equal(
+            [
+                "https://pointer.test/database.json",
+                "https://old-worker.test/v2/reports",
+                "https://pointer.test/database.json",
+                "https://new-worker.test/v2/reports",
+                "https://new-worker.test/v2/reports",
+            ],
+            requestedUrls);
+    }
+
+    [Fact]
+    public async Task SubmitReportAsync_DoesNotRepostWhenPointerStillNamesFailedEndpoint()
+    {
+        var requestedUrls = new List<string>();
+
+        using var handler = new DelegateHttpMessageHandler((request, _) =>
+        {
+            var url = request.RequestUri!.ToString();
+            requestedUrls.Add(url);
+
+            return Task.FromResult(url == "https://pointer.test/database.json"
+                ? PointerResponse("https://worker.test")
+                : new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = new StringContent("""{"ok":false}""") });
+        });
+
+        using var httpClient = new HttpClient(handler);
+        using var worker = new BiggsWorker(httpClient, "https://pointer.test/database.json");
+
+        var result = await worker.SubmitReportAsync(CreateSamplePayload(), TestContext.Current.CancellationToken);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal("HTTP 400", result.ErrorMessage);
+        Assert.Equal(
+            [
+                "https://pointer.test/database.json",
+                "https://worker.test/v2/reports",
+                "https://pointer.test/database.json",
+            ],
+            requestedUrls);
+    }
+
+    [Fact]
     public async Task SubmitReportAsync_ReturnsFailedResultWhenEndpointDiscoveryFails()
     {
         using var handler = new DelegateHttpMessageHandler((_, _) =>
@@ -117,6 +194,13 @@ public class BiggsWorkerTests
         Assert.False(result.IsSuccess);
         Assert.Contains("1027", result.ErrorMessage);
     }
+
+    private static HttpResponseMessage PointerResponse(string workerUrl) =>
+        new(HttpStatusCode.OK)
+        {
+            Content = new StringContent(
+                $$"""{"endpoints":[{"name":"current","url":"{{workerUrl}}","protocol":"https","port":443}]}"""),
+        };
 
     private static BiggsReportRequest CreateSamplePayload()
     {
