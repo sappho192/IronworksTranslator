@@ -21,6 +21,8 @@ namespace IronworksTranslator.Views.Pages
         public SettingsViewModel ViewModel { get; }
         private bool _isInitialized;
         private bool _isChangingTranslatorSelection;
+        // The engine in effect before the current selection, restored when a local model cannot be prepared.
+        private Models.Enums.TranslatorEngine _lastAcceptedTranslatorEngine;
         private bool _isChangingDevicePrioritySelection;
         private MiLMMTModelSize _lastAvailableMiLMMTModelSize;
         private MiLMMTQuantization _lastAvailableMiLMMTQuantization;
@@ -46,7 +48,9 @@ namespace IronworksTranslator.Views.Pages
             _previousLocalModelDevicePriority = ViewModel.LocalModelDevicePriority;
             InitializeLastAvailableMiLMMTProfile();
             UpdateTranslatorTooltip(ViewModel.TranslatorEngine);
+            _lastAcceptedTranslatorEngine = ViewModel.TranslatorEngine;
             EnsureLocalTranslatorModelReady(ViewModel.TranslatorEngine, cbTranslator);
+            _lastAcceptedTranslatorEngine = ViewModel.TranslatorEngine;
 
             resourceTimer = new DispatcherTimer
             {
@@ -341,6 +345,8 @@ namespace IronworksTranslator.Views.Pages
                 UpdateTranslatorTooltip(selectedItem);
                 EnsureLocalTranslatorModelReady(selectedItem, comboBox);
             }
+
+            _lastAcceptedTranslatorEngine = ViewModel.TranslatorEngine;
         }
 
         private void MiLMMTModelOption_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -528,14 +534,7 @@ namespace IronworksTranslator.Views.Pages
 
             if (result != System.Windows.MessageBoxResult.Yes)
             {
-                if (selectedItem == Models.Enums.TranslatorEngine.MiLMMT
-                    && TrySelectAvailableMiLMMTProfile())
-                {
-                    UpdateTranslatorTooltip(selectedItem);
-                    return;
-                }
-
-                RevertTranslatorEngineToDefault(comboBox);
+                RestoreAvailableTranslatorSelection(selectedItem, comboBox);
                 return;
             }
 
@@ -543,8 +542,48 @@ namespace IronworksTranslator.Views.Pages
                 ? new InitializationWindow(selectedItem, ViewModel.SelectedMiLMMTProfile)
                 : new InitializationWindow(selectedItem);
             window.ShowDialog();
+            if (!window.Succeeded)
+            {
+                // A failed or cancelled download leaves no usable model, so recover as if it had been declined.
+                RestoreAvailableTranslatorSelection(selectedItem, comboBox);
+                UpdateMiLMMTProfileSummary();
+                return;
+            }
+
             UpdateMiLMMTProfileSummary();
             RememberCurrentMiLMMTProfileIfAvailable();
+        }
+
+        private void RestoreAvailableTranslatorSelection(
+            Models.Enums.TranslatorEngine selectedItem,
+            ComboBox comboBox)
+        {
+            if (selectedItem == Models.Enums.TranslatorEngine.MiLMMT
+                && TrySelectAvailableMiLMMTProfile())
+            {
+                UpdateTranslatorTooltip(selectedItem);
+                return;
+            }
+
+            // Go back to the engine the user had (e.g. DeepL) when it still works, instead of always Papago.
+            var previousEngine = _lastAcceptedTranslatorEngine;
+            if (previousEngine != selectedItem && IsTranslatorEngineUsable(previousEngine))
+            {
+                SelectTranslatorEngine(previousEngine, comboBox);
+                return;
+            }
+
+            RevertTranslatorEngineToDefault(comboBox);
+        }
+
+        private bool IsTranslatorEngineUsable(Models.Enums.TranslatorEngine engine)
+        {
+            if (engine == Models.Enums.TranslatorEngine.DeepL_API)
+            {
+                return IronworksSettings.Instance?.TranslatorSettings?.DeeplApiKeys?.Count > 0;
+            }
+
+            return !RequiresLocalTranslatorModel(engine) || LocalTranslatorModelExists(engine);
         }
 
         private void RevertTranslatorEngineToDefault(ComboBox comboBox)

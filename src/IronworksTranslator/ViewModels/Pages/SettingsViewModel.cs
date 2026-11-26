@@ -218,6 +218,37 @@ namespace IronworksTranslator.ViewModels.Pages
             RefreshMiLMMTModelStorageItems();
         }
 
+        /// <summary>
+        /// Applies an engine chosen by the automatic translator fallback so the settings page,
+        /// the saved settings and the running translators stay in sync. Call on the UI thread.
+        /// </summary>
+        [TraceMethod]
+        public void ApplyTranslatorFallback(TranslatorEngine engine, MiLMMTModelProfile? profile)
+        {
+            if (profile != null)
+            {
+                MiLMMTModelSize = profile.Size;
+                MiLMMTModelSizeIndex = (int)profile.Size;
+                MiLMMTQuantization = profile.Quantization;
+                MiLMMTQuantizationIndex = (int)profile.Quantization;
+            }
+
+            TranslatorEngine = engine;
+            TranslatorEngineIndex = (int)engine;
+
+            // The view model may already hold these values while the stored settings drifted,
+            // in which case no change message was broadcast. Write them through explicitly.
+            var translatorSettings = IronworksSettings.Instance.TranslatorSettings;
+            if (profile != null)
+            {
+                translatorSettings.MiLMMTModelSize = profile.Size;
+                translatorSettings.MiLMMTQuantization = profile.Quantization;
+            }
+            translatorSettings.TranslatorEngine = engine;
+
+            RefreshMiLMMTProfileSummary();
+        }
+
         public void UpdateMiLMMTResourceSnapshot(SystemResourceSnapshot snapshot)
         {
             var isInitialSnapshot = _lastSystemResourceSnapshot == null;

@@ -1,22 +1,57 @@
 ﻿using PuppeteerSharp;
+using Serilog;
 
 namespace IronworksTranslator.Utils
 {
-    public class WebBrowser : IDisposable
+    /// <summary>
+    /// A single headless Chromium page. Not thread-safe: callers must serialize access.
+    /// </summary>
+    public sealed class WebBrowser : IDisposable
     {
-        private Browser? browser;
-        private Page? webPage;
+        private static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromSeconds(15);
+
+        private IBrowser? browser;
+        private IPage? webPage;
         private readonly object lockObj = new();
         private bool disposed;
 
-        public WebBrowser()
+        private WebBrowser()
         {
-            InitWebBrowser();
         }
 
         ~WebBrowser()
         {
             Dispose();
+        }
+
+        public static async Task<WebBrowser> CreateAsync()
+        {
+            var webBrowser = new WebBrowser();
+            try
+            {
+                // DefaultBuildId will be updated when upgrading the PuppeteerSharp.
+                await new BrowserFetcher()
+                    .DownloadAsync(PuppeteerSharp.BrowserData.Chrome.DefaultBuildId)
+                    .ConfigureAwait(false);
+                webBrowser.browser = await Puppeteer.LaunchAsync(new LaunchOptions
+                {
+                    Args = [
+                        "--js-flags=\"--max-old-space-size=128\"" // Limits memory usage to 128MB
+                    ],
+                }).ConfigureAwait(false);
+                webBrowser.webPage = await webBrowser.browser.NewPageAsync().ConfigureAwait(false);
+                // Never wait forever: a page that never settles must fail instead of hanging translation.
+                webBrowser.webPage.DefaultTimeout = (int)DefaultOperationTimeout.TotalMilliseconds;
+                webBrowser.webPage.DefaultNavigationTimeout = (int)DefaultOperationTimeout.TotalMilliseconds;
+                return webBrowser;
+            }
+            catch
+            {
+                // The caller never receives this instance, so close the launched Chromium now
+                // instead of leaking it until the finalizer runs.
+                webBrowser.Dispose();
+                throw;
+            }
         }
 
         public void Dispose()
@@ -45,77 +80,83 @@ namespace IronworksTranslator.Utils
             GC.SuppressFinalize(this);
         }
 
-        public string Navigate(string url)
+        /// <summary>
+        /// Navigates and returns once the DOM is parsed. Pages with long-lived connections
+        /// (like Papago) never reach network idle, so callers should wait for a selector instead.
+        /// </summary>
+        public async Task NavigateAsync(string url, TimeSpan timeout)
         {
-            string content = string.Empty;
-            lock (lockObj)
+            await GetPage().GoToAsync(url, new NavigationOptions
             {
-                try
+                WaitUntil = [WaitUntilNavigation.DOMContentLoaded],
+                Timeout = (int)timeout.TotalMilliseconds,
+            }).ConfigureAwait(false);
+        }
+
+        public async Task<bool> WaitForSelectorAsync(string selector, TimeSpan timeout)
+        {
+            try
+            {
+                await GetPage().WaitForSelectorAsync(selector, new WaitForSelectorOptions
                 {
-                    var navigateTask = Task.Run(async () => await RequestNavigate(url));
-                    content = navigateTask.GetAwaiter().GetResult();
-                }
-                catch (Exception ex)
-                {
-                    content = ex.Message;
-                }
+                    Timeout = (int)timeout.TotalMilliseconds,
+                }).ConfigureAwait(false);
+                return true;
             }
-            return content;
-        }
-
-        public string EvaluateExpression(string expression)
-        {
-            string result = string.Empty;
-            lock (lockObj)
+            catch (WaitTaskTimeoutException)
             {
-                try
-                {
-                    var evaluateTask = Task.Run(async () => await RequestEvaluateExpression(expression));
-                    result = evaluateTask.GetAwaiter().GetResult() ?? string.Empty;
-                }
-                catch
-                {
-                    result = string.Empty;
-                }
+                return false;
             }
-            return result;
         }
 
-        private async Task<Browser> InitBrowser()
+        public async Task<string> EvaluateExpressionAsync(string expression)
         {
-            // DefaultBuildId will be updated when upgrading the PuppeteerSharp.
-            await new BrowserFetcher().DownloadAsync(PuppeteerSharp.BrowserData.Chrome.DefaultBuildId);
-            var _browser = await Puppeteer.LaunchAsync(new LaunchOptions
+            try
             {
-                Args = [
-                    "--js-flags=\"--max-old-space-size=128\"" // Limits memory usage to 128MB
-                ],
-            });
-            return (Browser)_browser; // Cast IBrowser to Browser
+                return await GetPage().EvaluateExpressionAsync<string?>(expression).ConfigureAwait(false)
+                    ?? string.Empty;
+            }
+            catch (Exception ex) when (ex is EvaluationFailedException or PuppeteerException)
+            {
+                // The page may be mid-navigation (execution context destroyed); treat as "nothing yet".
+                Log.Debug(ex, "Browser expression evaluation failed.");
+                return string.Empty;
+            }
         }
 
-        private void InitWebBrowser()
+        public Task<string> GetContentAsync()
         {
-            var browserTask = Task.Run(InitBrowser);
-            browser = browserTask.GetAwaiter().GetResult();
-            var pageTask = Task.Run(async () => await browser.NewPageAsync());
-            webPage = (Page)pageTask.GetAwaiter().GetResult(); // Cast IPage to Page
-            webPage.DefaultTimeout = 0;
+            return GetPage().GetContentAsync();
         }
 
-#pragma warning disable CS8602
-        private async Task<string> RequestNavigate(string url)
+        /// <summary>
+        /// Replaces the content of an editable element the way a user would (select all, delete, type),
+        /// so rich editors such as Lexical receive real input events.
+        /// </summary>
+        public async Task ReplaceEditorTextAsync(string selector, string text, TimeSpan timeout)
         {
-            await webPage.GoToAsync(url, WaitUntilNavigation.Networkidle2);
-            var content = await webPage.GetContentAsync();
-
-            return content;
+            var page = GetPage();
+            // Wait instead of querying once: client-side re-renders can briefly remove the element.
+            var editor = await page.WaitForSelectorAsync(selector, new WaitForSelectorOptions
+            {
+                Timeout = (int)timeout.TotalMilliseconds,
+            }).ConfigureAwait(false);
+            await editor.FocusAsync().ConfigureAwait(false);
+            await page.Keyboard.DownAsync("Control").ConfigureAwait(false);
+            await page.Keyboard.PressAsync("A").ConfigureAwait(false);
+            await page.Keyboard.UpAsync("Control").ConfigureAwait(false);
+            await page.Keyboard.PressAsync("Backspace").ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(text))
+            {
+                // Sends CDP Input.insertText, which inserts the whole string as one input event.
+                await page.Keyboard.SendCharacterAsync(text).ConfigureAwait(false);
+            }
         }
 
-        private async Task<string?> RequestEvaluateExpression(string expression)
+        private IPage GetPage()
         {
-            return await webPage.EvaluateExpressionAsync<string?>(expression);
+            ObjectDisposedException.ThrowIf(disposed, this);
+            return webPage ?? throw new InvalidOperationException("Browser page is not initialized.");
         }
-#pragma warning restore CS8602
     }
 }

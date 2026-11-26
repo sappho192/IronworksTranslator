@@ -14,6 +14,8 @@
         Title="InitializationWindow" Height="240" Width="340">
     <Grid>
         <StackPanel Orientation="Vertical" Margin="16">
+            <ui:TextBlock Name="txtFallbackNotice" Visibility="Collapsed" TextWrapping="Wrap"
+                TextAlignment="Center" FontSize="12" Margin="0,0,0,8"/>
             <ui:ProgressRing Width="30" Height="30" Name="prWorker" IsIndeterminate="True"/>
             <Border Height="8"/>
             <ProgressBar Name="pbWorker" Width="200" Height="30"/>

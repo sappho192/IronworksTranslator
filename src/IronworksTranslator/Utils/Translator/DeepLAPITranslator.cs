@@ -34,6 +34,7 @@ namespace IronworksTranslator.Utils.Translator
             {
                 if (!InitTranslator(testApi: true))
                 {
+                    ReportTranslationFailed();
                     return input;
                 }
             }
@@ -64,6 +65,7 @@ namespace IronworksTranslator.Utils.Translator
              */
             if (translator == null)
             {
+                ReportTranslationFailed();
                 return input;
             }
 
@@ -76,11 +78,14 @@ namespace IronworksTranslator.Utils.Translator
                             ? null : GetLanguageCode(sourceLanguage),
                     targetLanguageCode: GetLanguageCode(targetLanguage)
                 );
-                return translated.Result.Text;
+                var text = translated.Result.Text;
+                ReportTranslationSucceeded();
+                return text;
             }
             catch (Exception ex)
             {
                 Log.Error(ex.Message);
+                ReportTranslationFailed(ex);
                 return input;
             }
         }
@@ -90,9 +95,11 @@ namespace IronworksTranslator.Utils.Translator
         [TraceMethod]
         public bool InitTranslator(bool testApi = false)
         {
+            // Log only: this runs on the translation path, and a modal dialog per request would pile up
+            // during an outage and block the automatic engine fallback until the user dismisses it.
             if (IronworksSettings.Instance.TranslatorSettings.DeeplApiKeys.Count == 0)
             {
-                MessageBox.Show(Localizer.GetString("settings.translator.engine.deepl_api.not_exists"));
+                Log.Warning("DeepL translation requested, but no DeepL API key is configured.");
                 return false;
             }
 
@@ -113,9 +120,7 @@ namespace IronworksTranslator.Utils.Translator
                 }
                 catch (ArgumentException ex)
                 {
-                    string message = $"API Key: {apiKey}, {ex.Message}";
-                    Log.Error(message);
-                    MessageBox.Show(message);
+                    Log.Error(ex, "Invalid DeepL API key {ApiKey}", MaskApiKey(apiKey));
                     translator = null;
                     continue;
                 }
@@ -147,8 +152,7 @@ namespace IronworksTranslator.Utils.Translator
                 var usage = await translator.GetUsageAsync();
                 if (usage.AnyLimitReached)
                 {
-                    string message = $"{Localizer.GetString("settings.translator.engine.deepl_api.limit_reached")}: {apiKey}";
-                    MessageBox.Show(message);
+                    Log.Warning("DeepL API usage limit reached for key {ApiKey}", MaskApiKey(apiKey));
                     return false;
                 }
                 var capacity = usage.Character.Limit;
@@ -157,12 +161,23 @@ namespace IronworksTranslator.Utils.Translator
             }
             catch (AuthorizationException ex)
             {
-                string message = $"API Key: {apiKey}, {ex.Message}";
-                Log.Error(message);
-                MessageBox.Show(message);
+                Log.Error(ex, "DeepL API key {ApiKey} was rejected", MaskApiKey(apiKey));
                 return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// Keeps enough of the key to tell keys apart in logs without recording the secret.
+        /// </summary>
+        internal static string MaskApiKey(string? apiKey)
+        {
+            if (string.IsNullOrEmpty(apiKey) || apiKey.Length <= 8)
+            {
+                return "****";
+            }
+
+            return $"{apiKey[..4]}****{apiKey[^4..]}";
         }
 #pragma warning restore CS8602, CS8604
 
