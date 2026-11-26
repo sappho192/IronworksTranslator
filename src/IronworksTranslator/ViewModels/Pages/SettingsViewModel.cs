@@ -110,6 +110,7 @@ namespace IronworksTranslator.ViewModels.Pages
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTSupportedLanguages))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTNote))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTModelStatus))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTDownloadButtonVisibility))]
         private MiLMMTModelSize _miLMMTModelSize = IronworksSettings.Instance.TranslatorSettings.MiLMMTModelSize;
         [ObservableProperty]
         private int _miLMMTModelSizeIndex = (int)IronworksSettings.Instance.TranslatorSettings.MiLMMTModelSize;
@@ -131,6 +132,7 @@ namespace IronworksTranslator.ViewModels.Pages
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTSupportedLanguages))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTNote))]
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTModelStatus))]
+        [NotifyPropertyChangedFor(nameof(SelectedMiLMMTDownloadButtonVisibility))]
         private MiLMMTQuantization _miLMMTQuantization = IronworksSettings.Instance.TranslatorSettings.MiLMMTQuantization;
         [ObservableProperty]
         private int _miLMMTQuantizationIndex = (int)IronworksSettings.Instance.TranslatorSettings.MiLMMTQuantization;
@@ -167,9 +169,29 @@ namespace IronworksTranslator.ViewModels.Pages
                 Localizer.GetString("settings.translator.engine.milmmt.supported_languages"),
                 SelectedMiLMMTProfile.SupportedLanguageNames);
         public string SelectedMiLMMTNote => Localizer.GetString(SelectedMiLMMTProfile.NoteKey);
-        public string SelectedMiLMMTModelStatus => File.Exists(SelectedMiLMMTProfile.FilePath)
-            ? Localizer.GetString("settings.translator.engine.milmmt.status.downloaded")
-            : Localizer.GetString("settings.translator.engine.milmmt.status.not_downloaded");
+        public string SelectedMiLMMTModelStatus
+        {
+            get
+            {
+                if (File.Exists(SelectedMiLMMTProfile.FilePath))
+                {
+                    return Localizer.GetString("settings.translator.engine.milmmt.status.downloaded");
+                }
+
+                var fallback = MiLMMTModelProfiles.FindTemporaryFallbackProfile(
+                    SelectedMiLMMTProfile,
+                    profile => File.Exists(profile.FilePath));
+                return fallback != null
+                    ? string.Format(
+                        Localizer.GetString("settings.translator.engine.milmmt.status.fallback"),
+                        fallback.DisplayName)
+                    : Localizer.GetString("settings.translator.engine.milmmt.status.not_downloaded");
+            }
+        }
+
+        public Visibility SelectedMiLMMTDownloadButtonVisibility => File.Exists(SelectedMiLMMTProfile.FilePath)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
 
         private void EnsureSupportedMiLMMTProfile()
         {
@@ -215,6 +237,7 @@ namespace IronworksTranslator.ViewModels.Pages
             OnPropertyChanged(nameof(SelectedMiLMMTSupportedLanguages));
             OnPropertyChanged(nameof(SelectedMiLMMTNote));
             OnPropertyChanged(nameof(SelectedMiLMMTModelStatus));
+            OnPropertyChanged(nameof(SelectedMiLMMTDownloadButtonVisibility));
             RefreshMiLMMTModelStorageItems();
         }
 

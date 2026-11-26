@@ -182,17 +182,28 @@ public class SettingsTests
             MiLMMTModelSize.MiLMMT_1B,
             MiLMMTQuantization.Q4_K_M);
 
-        Assert.Equal("MiLMMT 1B Q4_K_M", standard.DisplayName);
+        Assert.Equal("MiLMMT 1B v1.0 Q4_K_M", standard.DisplayName);
         Assert.Equal(
-            "mradermacher/MiLMMT-46-1B-v0.1-GGUF",
+            "mradermacher/MiLMMT-46-1B-v1.0-GGUF",
             standard.Repository);
-        Assert.Equal("MiLMMT-46-1B-v0.1.Q4_K_M.gguf", standard.FileName);
-        Assert.Equal(1013675392, standard.FileSize);
+        Assert.Equal("MiLMMT-46-1B-v1.0.Q4_K_M.gguf", standard.FileName);
+        Assert.Equal(806057408, standard.FileSize);
         Assert.Equal(
-            "9d5c10855eb2688d453e3069e7b6dee1756fc834d738d2dc04318511993fd54f",
+            "74d38ba75108d455326e9deeaf9ab01bb266dfa665eae9c4aa84e84485d4fdf9",
             standard.Sha256);
+        Assert.EndsWith("milmmt-46-1b-v1.0", standard.DirectoryPath);
         Assert.True(standard.Supports(TranslationLanguageCode.German));
         Assert.True(standard.Supports(TranslationLanguageCode.French));
+
+        var legacyV01 = MiLMMTModelProfiles.Retired
+            .Where(profile => profile.AllowTemporaryFallback)
+            .ToArray();
+        Assert.Equal(5, legacyV01.Length);
+        Assert.All(legacyV01, profile =>
+        {
+            Assert.Contains("v0.1", profile.FileName);
+            Assert.Contains("v0.1", profile.DirectoryPath);
+        });
 
 #if DEBUG
         var compact = MiLMMTModelProfiles.Get(
@@ -209,21 +220,50 @@ public class SettingsTests
         Assert.True(compact.Supports(TranslationLanguageCode.Korean));
         Assert.False(compact.Supports(TranslationLanguageCode.German));
         Assert.Contains(MiLMMTModelSize.MiLMMT_1B_Compact, MiLMMTModelProfiles.SelectableModelSizes);
-        Assert.Empty(MiLMMTModelProfiles.Retired);
+        Assert.Equal(5, MiLMMTModelProfiles.Retired.Count);
 #else
-        var retired = Assert.Single(MiLMMTModelProfiles.Retired);
-        Assert.Equal(MiLMMTModelSize.MiLMMT_1B_Compact, retired.Size);
+        var retiredCompact = Assert.Single(
+            MiLMMTModelProfiles.Retired,
+            profile => profile.Size == MiLMMTModelSize.MiLMMT_1B_Compact);
         Assert.Equal(
             "milmmt-pruned-130k-bf16-imatrix-mix-late16-25-ffngateupq8-Q4_K_M.gguf",
-            retired.FileName);
+            retiredCompact.FileName);
+        Assert.False(retiredCompact.AllowTemporaryFallback);
         Assert.DoesNotContain(MiLMMTModelSize.MiLMMT_1B_Compact, MiLMMTModelProfiles.SelectableModelSizes);
         Assert.Equal(
             MiLMMTModelSize.MiLMMT_1B,
             MiLMMTModelProfiles.GetFallbackModelSize(MiLMMTModelSize.MiLMMT_1B_Compact));
         Assert.Equal(
-            new[] { retired },
-            MiLMMTModelProfiles.GetDownloadedRetiredProfiles(profile => profile == retired));
+            new[] { retiredCompact },
+            MiLMMTModelProfiles.GetDownloadedRetiredProfiles(profile => profile == retiredCompact));
 #endif
+    }
+
+    [Fact]
+    public void MiLMMTModelProfiles_ResolveEffectiveProfile_PrefersV10AndFallsBackToMatchingV01()
+    {
+        var target4BQ4 = MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_4B, MiLMMTQuantization.Q4_K_M);
+        var legacy1BQ8 = MiLMMTModelProfiles.Retired.Single(p =>
+            p.AllowTemporaryFallback && p.Size == MiLMMTModelSize.MiLMMT_1B && p.Quantization == MiLMMTQuantization.Q8_0);
+        var legacy4BQ4 = MiLMMTModelProfiles.Retired.Single(p =>
+            p.AllowTemporaryFallback && p.Size == MiLMMTModelSize.MiLMMT_4B && p.Quantization == MiLMMTQuantization.Q4_K_M);
+        var legacy4BQ8 = MiLMMTModelProfiles.Retired.Single(p =>
+            p.AllowTemporaryFallback && p.Size == MiLMMTModelSize.MiLMMT_4B && p.Quantization == MiLMMTQuantization.Q8_0);
+
+        Assert.Equal(
+            target4BQ4,
+            MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, p => p == target4BQ4 || p == legacy4BQ4));
+        Assert.Equal(
+            legacy4BQ4,
+            MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, p => p == legacy1BQ8 || p == legacy4BQ4 || p == legacy4BQ8));
+        Assert.Equal(
+            legacy4BQ8,
+            MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, p => p == legacy1BQ8 || p == legacy4BQ8));
+        Assert.Equal(
+            legacy1BQ8,
+            MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, p => p == legacy1BQ8));
+        Assert.Null(
+            MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, _ => false));
     }
 
     [Fact]

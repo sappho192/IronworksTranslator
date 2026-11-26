@@ -432,7 +432,7 @@ namespace IronworksTranslator.ViewModels.Windows
             {
                 var engine = IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
                 var modelProfile = engine == TranslatorEngine.MiLMMT
-                    ? MiLMMTModelProfiles.GetCurrent()
+                    ? MiLMMTModelProfiles.GetEffectiveCurrent()
                     : null;
                 text.TranslatedText = await TranslateAsync(
                     originalText,
@@ -455,7 +455,7 @@ namespace IronworksTranslator.ViewModels.Windows
             text.Engine = engine;
             if (engine == TranslatorEngine.MiLMMT)
             {
-                var profile = modelProfile ?? MiLMMTModelProfiles.GetCurrent();
+                var profile = modelProfile ?? MiLMMTModelProfiles.GetEffectiveCurrent();
                 text.ModelId = profile.FileName;
                 text.ModelSha256 = profile.Sha256;
             }
@@ -755,7 +755,7 @@ namespace IronworksTranslator.ViewModels.Windows
         private string ReTranslate(TranslationText tText, TranslatorEngine api)
         {
             var modelProfile = api == TranslatorEngine.MiLMMT
-                ? MiLMMTModelProfiles.GetCurrent()
+                ? MiLMMTModelProfiles.GetEffectiveCurrent()
                 : null;
             string newMessage = Translate(tText.OriginalText, (ClientLanguage)tText.SourceLanguage, api);
             tText.TranslatedText = newMessage;

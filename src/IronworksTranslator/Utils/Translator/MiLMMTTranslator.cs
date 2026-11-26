@@ -113,7 +113,16 @@ namespace IronworksTranslator.Utils.Translator
                 return input;
             }
 
-            var modelProfile = MiLMMTModelProfiles.GetCurrent();
+            var configuredProfile = MiLMMTModelProfiles.GetCurrent();
+            var modelProfile = MiLMMTModelProfiles.ResolveEffectiveProfile(
+                configuredProfile,
+                profile => File.Exists(profile.FilePath));
+            if (modelProfile == null)
+            {
+                Log.Error("MiLMMT model file does not exist: {ModelPath}", configuredProfile.FilePath);
+                return input;
+            }
+
             if (!modelProfile.Supports(sourceLanguage) || !modelProfile.Supports(targetLanguage))
             {
                 Log.Warning(
@@ -125,10 +134,13 @@ namespace IronworksTranslator.Utils.Translator
                 return input;
             }
 
-            if (!File.Exists(modelProfile.FilePath))
+            if (modelProfile != configuredProfile
+                && !string.Equals(loadedModelPath, modelProfile.FilePath, StringComparison.OrdinalIgnoreCase))
             {
-                Log.Error("MiLMMT model file does not exist: {ModelPath}", modelProfile.FilePath);
-                return input;
+                Log.Information(
+                    "Selected MiLMMT model {ConfiguredModel} is not downloaded yet; temporarily using installed fallback model {FallbackModel}.",
+                    configuredProfile.DisplayName,
+                    modelProfile.DisplayName);
             }
 
             var inferenceProfile = MiLMMTInferenceProfile.GameSafe;
@@ -399,6 +411,28 @@ namespace IronworksTranslator.Utils.Translator
             return string.Join(
                 ' ',
                 input.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        }
+
+        public async Task UnloadModelIfLoadedAsync(string filePath, CancellationToken cancellationToken = default)
+        {
+            if (disposed || string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            await inferenceLock.WaitAsync(cancellationToken);
+            try
+            {
+                if (string.Equals(loadedModelPath, filePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    Log.Information("Unloading MiLMMT model before file removal: {ModelPath}", filePath);
+                    UnloadModel();
+                }
+            }
+            finally
+            {
+                inferenceLock.Release();
+            }
         }
 
         public void Dispose()

@@ -125,7 +125,7 @@ namespace IronworksTranslator.Views.Windows
                                 IronworksSettings.Instance.ChannelSettings.NpcDialog.MajorLanguage;
                             var engine = IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
                             var modelProfile = engine == TranslatorEngine.MiLMMT
-                                ? MiLMMTModelProfiles.GetCurrent()
+                                ? MiLMMTModelProfiles.GetEffectiveCurrent()
                                 : null;
                             var translated = Translate(msg, sourceLanguage, engine);
                             var translatedSpeaker = DialogueSpeakerTranslation.TranslateOrOriginal(

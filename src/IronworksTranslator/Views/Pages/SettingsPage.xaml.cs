@@ -1,5 +1,7 @@
 ﻿using IronworksTranslator.Models.Settings;
+using IronworksTranslator.Services;
 using IronworksTranslator.Utils;
+using IronworksTranslator.Utils.Translator;
 using IronworksTranslator.Models.Translator;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.ViewModels.Pages;
@@ -49,7 +51,7 @@ namespace IronworksTranslator.Views.Pages
             InitializeLastAvailableMiLMMTProfile();
             UpdateTranslatorTooltip(ViewModel.TranslatorEngine);
             _lastAcceptedTranslatorEngine = ViewModel.TranslatorEngine;
-            EnsureLocalTranslatorModelReady(ViewModel.TranslatorEngine, cbTranslator);
+            EnsureLocalTranslatorModelReady(ViewModel.TranslatorEngine, cbTranslator, allowTemporaryFallback: true);
             _lastAcceptedTranslatorEngine = ViewModel.TranslatorEngine;
 
             resourceTimer = new DispatcherTimer
@@ -404,14 +406,19 @@ namespace IronworksTranslator.Views.Pages
             RevertLocalModelDevicePriority(comboBox);
         }
 
+        private void DownloadSelectedMiLMMTModel_Click(object sender, RoutedEventArgs e)
+        {
+            EnsureLocalTranslatorModelReady(Models.Enums.TranslatorEngine.MiLMMT, cbTranslator, allowTemporaryFallback: false);
+        }
+
         private void OpenSelectedMiLMMTModelDirectory_Click(object sender, RoutedEventArgs e)
         {
             OpenMiLMMTModelDirectory(ViewModel.SelectedMiLMMTProfile);
         }
 
-        private void DeleteSelectedMiLMMTModel_Click(object sender, RoutedEventArgs e)
+        private async void DeleteSelectedMiLMMTModel_Click(object sender, RoutedEventArgs e)
         {
-            DeleteMiLMMTModel(ViewModel.SelectedMiLMMTProfile);
+            await DeleteMiLMMTModelAsync(ViewModel.SelectedMiLMMTProfile);
         }
 
         private void SelectMiLMMTModel_Click(object sender, RoutedEventArgs e)
@@ -430,11 +437,11 @@ namespace IronworksTranslator.Views.Pages
             }
         }
 
-        private void DeleteMiLMMTModel_Click(object sender, RoutedEventArgs e)
+        private async void DeleteMiLMMTModel_Click(object sender, RoutedEventArgs e)
         {
             if ((sender as System.Windows.Controls.Button)?.Tag is MiLMMTModelStorageItem item)
             {
-                DeleteMiLMMTModel(item.Profile);
+                await DeleteMiLMMTModelAsync(item.Profile);
             }
         }
 
@@ -448,7 +455,7 @@ namespace IronworksTranslator.Views.Pages
             });
         }
 
-        private void DeleteMiLMMTModel(MiLMMTModelProfile profile)
+        private async Task DeleteMiLMMTModelAsync(MiLMMTModelProfile profile)
         {
             if (!File.Exists(profile.FilePath))
             {
@@ -471,12 +478,12 @@ namespace IronworksTranslator.Views.Pages
 
             try
             {
-                File.Delete(profile.FilePath);
-                var tempPath = $"{profile.FilePath}.download";
-                if (File.Exists(tempPath))
-                {
-                    File.Delete(tempPath);
-                }
+                var translator = App.GetService<MiLMMTTranslator>();
+                await StartupMiLMMTUpgradePrompt.DeleteModelFileAsync(
+                    profile,
+                    path => translator != null
+                        ? translator.UnloadModelIfLoadedAsync(path)
+                        : Task.CompletedTask);
             }
             catch (Exception ex)
             {
@@ -519,10 +526,19 @@ namespace IronworksTranslator.Views.Pages
 
         private void EnsureLocalTranslatorModelReady(
             Models.Enums.TranslatorEngine selectedItem,
-            ComboBox comboBox)
+            ComboBox comboBox,
+            bool allowTemporaryFallback = false)
         {
             if (!RequiresLocalTranslatorModel(selectedItem) || LocalTranslatorModelExists(selectedItem))
             {
+                return;
+            }
+
+            if (allowTemporaryFallback
+                && selectedItem == Models.Enums.TranslatorEngine.MiLMMT
+                && HasTemporaryMiLMMTFallback())
+            {
+                UpdateMiLMMTProfileSummary();
                 return;
             }
 
@@ -552,6 +568,56 @@ namespace IronworksTranslator.Views.Pages
 
             UpdateMiLMMTProfileSummary();
             RememberCurrentMiLMMTProfileIfAvailable();
+            if (selectedItem == Models.Enums.TranslatorEngine.MiLMMT)
+            {
+                _ = OfferLegacyMiLMMTCleanupAsync();
+            }
+        }
+
+        private async Task OfferLegacyMiLMMTCleanupAsync()
+        {
+            await StartupMiLMMTUpgradePrompt.PromptLegacyCleanupIfNeededAsync(
+                profile => File.Exists(profile.FilePath),
+                (legacyProfiles, totalBytes) =>
+                {
+                    var result = ShowMiLMMTModelMessageBox(
+                        string.Format(
+                            Localizer.GetString("milmmt.upgrade.cleanup.description"),
+                            legacyProfiles.Count,
+                            totalBytes / 1024d / 1024d / 1024d),
+                        Localizer.GetString("milmmt.upgrade.cleanup.title"),
+                        System.Windows.MessageBoxButton.YesNo,
+                        System.Windows.MessageBoxImage.Question);
+                    return Task.FromResult(result == System.Windows.MessageBoxResult.Yes);
+                },
+                async legacyProfiles =>
+                {
+                    var translator = App.GetService<MiLMMTTranslator>();
+                    foreach (var legacyProfile in legacyProfiles)
+                    {
+                        try
+                        {
+                            await StartupMiLMMTUpgradePrompt.DeleteModelFileAsync(
+                                legacyProfile,
+                                path => translator != null
+                                    ? translator.UnloadModelIfLoadedAsync(path)
+                                    : Task.CompletedTask);
+                        }
+                        catch (Exception ex)
+                        {
+                            Serilog.Log.Warning(ex, "Failed to delete legacy MiLMMT model file {ModelPath}.", legacyProfile.FilePath);
+                        }
+                    }
+
+                    UpdateMiLMMTProfileSummary();
+                });
+        }
+
+        private bool HasTemporaryMiLMMTFallback()
+        {
+            return MiLMMTModelProfiles.FindTemporaryFallbackProfile(
+                ViewModel.SelectedMiLMMTProfile,
+                profile => File.Exists(profile.FilePath)) != null;
         }
 
         private void RestoreAvailableTranslatorSelection(
@@ -565,11 +631,26 @@ namespace IronworksTranslator.Views.Pages
                 return;
             }
 
+            if (selectedItem == Models.Enums.TranslatorEngine.MiLMMT
+                && _lastAcceptedTranslatorEngine == Models.Enums.TranslatorEngine.MiLMMT
+                && HasTemporaryMiLMMTFallback())
+            {
+                UpdateTranslatorTooltip(selectedItem);
+                return;
+            }
+
             // Go back to the engine the user had (e.g. DeepL) when it still works, instead of always Papago.
             var previousEngine = _lastAcceptedTranslatorEngine;
             if (previousEngine != selectedItem && IsTranslatorEngineUsable(previousEngine))
             {
                 SelectTranslatorEngine(previousEngine, comboBox);
+                return;
+            }
+
+            if (selectedItem == Models.Enums.TranslatorEngine.MiLMMT
+                && HasTemporaryMiLMMTFallback())
+            {
+                UpdateTranslatorTooltip(selectedItem);
                 return;
             }
 
@@ -763,6 +844,7 @@ namespace IronworksTranslator.Views.Pages
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
             ViewModel.RefreshLogDirectorySize();
+            UpdateMiLMMTProfileSummary();
 
             if (_isResourcePollingActive)
             {

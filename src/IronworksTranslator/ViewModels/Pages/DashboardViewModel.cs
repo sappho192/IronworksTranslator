@@ -1,9 +1,12 @@
-﻿using IronworksTranslator.Models.Settings;
+﻿using IronworksTranslator.Models.Enums;
+using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Models.ReleaseNotes;
+using IronworksTranslator.Models.Translator;
 using IronworksTranslator.Services;
 using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Aspect;
+using IronworksTranslator.Utils.Translator;
 using IronworksTranslator.Utils.UI;
 using IronworksTranslator.Views.Windows;
 using MdXaml;
@@ -25,6 +28,7 @@ namespace IronworksTranslator.ViewModels.Pages
         private readonly GitHubReleaseNotesService _releaseNotesService;
         private readonly SemaphoreSlim _releaseNotesLoadLock = new(1, 1);
         private readonly StartupReleaseNotesPrompt _startupReleaseNotesPrompt = new();
+        private readonly StartupMiLMMTUpgradePrompt _startupMiLMMTUpgradePrompt = new();
         private int _releaseNotesLoaded;
 
         [ObservableProperty]
@@ -184,7 +188,142 @@ namespace IronworksTranslator.ViewModels.Pages
                 },
                 OnShowReleaseNotesAsync);
 
+            await RunStartupMiLMMTUpgradePromptAsync();
+
             await _appUpdateService.CheckForUpdatesWithPromptAsync();
+        }
+
+        private async Task RunStartupMiLMMTUpgradePromptAsync()
+        {
+            var translatorSettings = IronworksSettings.Instance?.TranslatorSettings;
+            if (translatorSettings == null)
+            {
+                return;
+            }
+
+            var targetProfile = MiLMMTModelProfiles.GetCurrent();
+            await _startupMiLMMTUpgradePrompt.RunIfNeededAsync(
+                translatorSettings.TranslatorEngine,
+                targetProfile,
+                profile => File.Exists(profile.FilePath),
+                ConfirmMiLMMTUpgradeFromLegacyAsync,
+                ConfirmMissingMiLMMTDownloadAsync,
+                DownloadMiLMMTModelForStartup,
+                ConfirmLegacyMiLMMTCleanupAsync,
+                DeleteLegacyMiLMMTModelsAsync,
+                FallbackToPapagoFromStartup);
+        }
+
+        private static async Task<bool> ConfirmMiLMMTUpgradeFromLegacyAsync(
+            MiLMMTModelProfile targetProfile,
+            IReadOnlyList<MiLMMTModelProfile> legacyProfiles)
+        {
+            var message = string.Format(
+                Localizer.GetString("milmmt.upgrade.description"),
+                targetProfile.DisplayName,
+                targetProfile.FileSize / 1024d / 1024d / 1024d);
+            var dialog = new Wpf.Ui.Controls.MessageBox
+            {
+                Title = Localizer.GetString("milmmt.upgrade.title"),
+                Content = new TextBlock
+                {
+                    Text = message,
+                    TextWrapping = TextWrapping.Wrap,
+                    MaxWidth = 420,
+                },
+                IsPrimaryButtonEnabled = true,
+                PrimaryButtonText = Localizer.GetString("milmmt.upgrade.download_now"),
+                CloseButtonText = Localizer.GetString("milmmt.upgrade.later"),
+            };
+
+            var result = await dialog.ShowDialogAsync();
+            return result == Wpf.Ui.Controls.MessageBoxResult.Primary;
+        }
+
+        private static async Task<bool> ConfirmMissingMiLMMTDownloadAsync(MiLMMTModelProfile targetProfile)
+        {
+            var message = string.Format(
+                Localizer.GetString("milmmt.missing.description"),
+                targetProfile.DisplayName,
+                targetProfile.FileSize / 1024d / 1024d / 1024d);
+            var dialog = new Wpf.Ui.Controls.MessageBox
+            {
+                Title = Localizer.GetString("settings.translator.engine"),
+                Content = new TextBlock
+                {
+                    Text = message,
+                    TextWrapping = TextWrapping.Wrap,
+                    MaxWidth = 420,
+                },
+                IsPrimaryButtonEnabled = true,
+                PrimaryButtonText = Localizer.GetString("milmmt.upgrade.download_now"),
+                CloseButtonText = Localizer.GetString("cancel"),
+            };
+
+            var result = await dialog.ShowDialogAsync();
+            return result == Wpf.Ui.Controls.MessageBoxResult.Primary;
+        }
+
+        private static bool DownloadMiLMMTModelForStartup(MiLMMTModelProfile targetProfile)
+        {
+            var window = new InitializationWindow(TranslatorEngine.MiLMMT, targetProfile);
+            window.ShowDialog();
+            var succeeded = window.Succeeded && File.Exists(targetProfile.FilePath);
+            App.GetService<SettingsViewModel>()?.RefreshMiLMMTProfileSummary();
+            return succeeded;
+        }
+
+        private static async Task<bool> ConfirmLegacyMiLMMTCleanupAsync(
+            IReadOnlyList<MiLMMTModelProfile> legacyProfiles,
+            long totalBytes)
+        {
+            var message = string.Format(
+                Localizer.GetString("milmmt.upgrade.cleanup.description"),
+                legacyProfiles.Count,
+                totalBytes / 1024d / 1024d / 1024d);
+            var dialog = new Wpf.Ui.Controls.MessageBox
+            {
+                Title = Localizer.GetString("milmmt.upgrade.cleanup.title"),
+                Content = new TextBlock
+                {
+                    Text = message,
+                    TextWrapping = TextWrapping.Wrap,
+                    MaxWidth = 420,
+                },
+                IsPrimaryButtonEnabled = true,
+                PrimaryButtonText = Localizer.GetString("settings.translator.engine.milmmt.delete"),
+                CloseButtonText = Localizer.GetString("milmmt.upgrade.cleanup.keep"),
+            };
+
+            var result = await dialog.ShowDialogAsync();
+            return result == Wpf.Ui.Controls.MessageBoxResult.Primary;
+        }
+
+        private static async Task DeleteLegacyMiLMMTModelsAsync(IReadOnlyList<MiLMMTModelProfile> legacyProfiles)
+        {
+            var translator = App.GetService<MiLMMTTranslator>();
+            foreach (var profile in legacyProfiles)
+            {
+                try
+                {
+                    await StartupMiLMMTUpgradePrompt.DeleteModelFileAsync(
+                        profile,
+                        path => translator != null
+                            ? translator.UnloadModelIfLoadedAsync(path)
+                            : Task.CompletedTask);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Failed to delete legacy MiLMMT model file {ModelPath}.", profile.FilePath);
+                }
+            }
+
+            App.GetService<SettingsViewModel>()?.RefreshMiLMMTProfileSummary();
+        }
+
+        private static void FallbackToPapagoFromStartup()
+        {
+            App.GetService<SettingsViewModel>()?.ApplyTranslatorFallback(TranslatorEngine.Papago, null);
         }
 
         [TraceMethod]

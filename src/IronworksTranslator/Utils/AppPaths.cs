@@ -46,11 +46,11 @@ namespace IronworksTranslator.Utils
 
         public static string MiLMMTModelDirectory { get; } = Path.Combine(
             ModelDirectory,
-            "milmmt-46-1b-v0.1");
+            "milmmt-46-1b-v1.0");
 
         public static string MiLMMTModelPath { get; } = Path.Combine(
             MiLMMTModelDirectory,
-            "MiLMMT-46-1B-v0.1.Q8_0.gguf");
+            "MiLMMT-46-1B-v1.0.Q8_0.gguf");
 
         public static string GetMiLMMTModelDirectory(MiLMMTModelSize modelSize)
         {
@@ -58,10 +58,10 @@ namespace IronworksTranslator.Utils
                 ModelDirectory,
                 modelSize switch
                 {
-                    MiLMMTModelSize.MiLMMT_4B => "milmmt-46-4b-v0.1",
-                    MiLMMTModelSize.MiLMMT_12B => "milmmt-46-12b-v0.1",
+                    MiLMMTModelSize.MiLMMT_4B => "milmmt-46-4b-v1.0",
+                    MiLMMTModelSize.MiLMMT_12B => "milmmt-46-12b-v1.0",
                     MiLMMTModelSize.MiLMMT_1B_Compact => "milmmt-46-1b-v0.1",
-                    _ => "milmmt-46-1b-v0.1",
+                    _ => "milmmt-46-1b-v1.0",
                 });
         }
 
@@ -123,10 +123,12 @@ namespace IronworksTranslator.Utils
 
         private static void MigrateLegacyMiLMMTModels(string baseDirectory)
         {
-            foreach (var profile in MiLMMTModelProfiles.AllKnown)
+            foreach (var directoryPath in MiLMMTModelProfiles.AllKnown
+                .Select(profile => profile.DirectoryPath)
+                .Distinct(StringComparer.OrdinalIgnoreCase))
             {
-                var sourceDirectory = Path.Combine(baseDirectory, "data", "model", Path.GetFileName(profile.DirectoryPath));
-                MigrateLegacyDirectory(sourceDirectory, profile.DirectoryPath);
+                var sourceDirectory = Path.Combine(baseDirectory, "data", "model", Path.GetFileName(directoryPath));
+                MigrateLegacyDirectory(sourceDirectory, directoryPath);
             }
         }
 

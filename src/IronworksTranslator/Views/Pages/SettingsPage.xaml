@@ -262,6 +262,10 @@
                                                     <ui:TextBlock Margin="0,2,0,0" Text="{Binding ViewModel.SelectedMiLMMTModelStatus}" FontTypography="Caption"/>
                                                     <ui:TextBlock Margin="0,8,0,0" Text="{Binding ViewModel.SelectedMiLMMTNote}" TextWrapping="Wrap" FontTypography="Caption"/>
                                                     <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                                                        <Button Margin="0,0,8,0"
+                                                            Content="{i18n:StringLocalizer settings.translator.engine.milmmt.download}"
+                                                            Visibility="{Binding ViewModel.SelectedMiLMMTDownloadButtonVisibility}"
+                                                            Click="DownloadSelectedMiLMMTModel_Click"/>
                                                         <Button Content="{i18n:StringLocalizer settings.translator.engine.milmmt.open_directory}"
                                                             Click="OpenSelectedMiLMMTModelDirectory_Click"/>
                                                         <Button Margin="8,0,0,0" Content="{i18n:StringLocalizer settings.translator.engine.milmmt.delete_selected}"
