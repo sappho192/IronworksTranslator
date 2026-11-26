@@ -36,7 +36,7 @@ downloader.error.milmmt.hash: "MiLMMT 모델 다운로드에 실패했습니다.
 translator.fallback.title: "번역 엔진 자동 전환"
 translator.fallback.switched.cloud: "{0} 번역이 연속으로 실패해서 번역 엔진을 {1}(으)로 바꿨습니다. 설정에서 다시 바꿀 수 있습니다."
 translator.fallback.switched.local: "Papago와 DeepL을 사용할 수 없어 번역 엔진을 로컬 모델({0})로 바꿨습니다. 설정에서 다시 바꿀 수 있습니다."
-translator.fallback.download.notice: "Papago와 DeepL을 사용할 수 없어 로컬 번역 모델을 받고 있습니다. 받는 동안에는 원문이 그대로 표시됩니다."
+translator.fallback.download.notice: "Papago와 DeepL을 사용할 수 없어 로컬 번역 모델을 준비하고 있습니다. 준비되는 동안에는 원문이 그대로 표시됩니다."
 translator.fallback.download.failed: "로컬 번역 모델을 받지 못했습니다. 인터넷 연결을 확인해주세요. {0}분 뒤에 다시 시도합니다."
 
 main.navigation.home: "대시보드"

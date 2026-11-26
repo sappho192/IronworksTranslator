@@ -34,15 +34,39 @@ public class PapagoTranslationSettlerTests
     }
 
     [Fact]
-    public void Observe_IgnoresEmptyTextAndEchoOfSource()
+    public void Observe_IgnoresEmptyText()
     {
-        var settler = new PapagoTranslationSettler("The quick brown fox.");
+        var settler = new PapagoTranslationSettler("ありがとう");
 
         Assert.Null(settler.Observe(null, Ms(0)));
         Assert.Null(settler.Observe("   ", Ms(500)));
-        Assert.Null(settler.Observe("The quick brown fox.", Ms(1000)));
-        Assert.Null(settler.Observe("The quick brown fox.", Ms(5000)));
+        Assert.Null(settler.Observe("", Ms(5000)));
         Assert.Null(settler.GetBestEffortResult());
+    }
+
+    [Fact]
+    public void Observe_AcceptsUnchangedTextAfterLongerStability()
+    {
+        // Papago echoes numbers, names and already-translated text; that is an answer, not a failure.
+        var settler = new PapagoTranslationSettler(
+            "12345",
+            stableWindow: Ms(300),
+            interimStableWindow: Ms(1500));
+
+        Assert.Null(settler.Observe("12345...", Ms(700)));
+        Assert.Null(settler.Observe("12345", Ms(1300)));
+        Assert.Null(settler.Observe("12345", Ms(1700)));
+
+        Assert.Equal("12345", settler.Observe("12345", Ms(2800)));
+    }
+
+    [Fact]
+    public void GetBestEffortResult_ReturnsUnchangedTextWhenThatIsAllPapagoShowed()
+    {
+        var settler = new PapagoTranslationSettler("Choco");
+        settler.Observe("Choco", Ms(800));
+
+        Assert.Equal("Choco", settler.GetBestEffortResult());
     }
 
     [Fact]

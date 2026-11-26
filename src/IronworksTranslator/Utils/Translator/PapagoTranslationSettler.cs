@@ -34,7 +34,7 @@ namespace IronworksTranslator.Utils.Translator
         public string? Observe(string? renderedText, TimeSpan elapsed)
         {
             var text = renderedText?.Trim() ?? string.Empty;
-            if (text.Length == 0 || PapagoTranslator.IsSameText(text, sourceText))
+            if (text.Length == 0)
             {
                 candidate = null;
                 return null;
@@ -47,11 +47,13 @@ namespace IronworksTranslator.Utils.Translator
                 return null;
             }
 
-            // Text ending with "..." may still be the interim result. When the source itself ends with "...",
-            // the final result can too, so only a long period without change proves it is final.
-            var window = text.EndsWith(InterimMarker, StringComparison.Ordinal)
-                ? interimStableWindow
-                : stableWindow;
+            // The caller clears the target before typing, so text equal to the source is Papago's real answer
+            // for numbers, names or text already in the target language, not a failure. Like text ending with
+            // "..." (possibly the interim result, or a final one when the source itself ends with "..."),
+            // only a long period without change proves it is final.
+            var isTentative = text.EndsWith(InterimMarker, StringComparison.Ordinal)
+                || PapagoTranslator.IsSameText(text, sourceText);
+            var window = isTentative ? interimStableWindow : stableWindow;
             return elapsed - candidateSince >= window ? text : null;
         }
 

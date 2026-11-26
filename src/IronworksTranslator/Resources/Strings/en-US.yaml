@@ -37,7 +37,7 @@ downloader.error.milmmt.hash: "Failed to download the MiLMMT model. Please launc
 translator.fallback.title: "Translator switched automatically"
 translator.fallback.switched.cloud: "{0} kept failing, so the translator was switched to {1}. You can change it back in Settings."
 translator.fallback.switched.local: "Papago and DeepL are unavailable, so the translator was switched to the local model ({0}). You can change it back in Settings."
-translator.fallback.download.notice: "Papago and DeepL are unavailable, so a local translation model is being downloaded. Original text is shown until it is ready."
+translator.fallback.download.notice: "Papago and DeepL are unavailable, so a local translation model is being prepared. Original text is shown until it is ready."
 translator.fallback.download.failed: "Could not download the local translation model. Please check your internet connection. It will be retried in {0} minutes."
 
 main.navigation.home: "Dashboard"

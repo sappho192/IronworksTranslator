@@ -67,7 +67,7 @@ namespace IronworksTranslator.Services
                     failureTracker.IsUnavailable,
                     translatorSettings.DeeplApiKeys?.Count ?? 0,
                     MiLMMTModelProfiles.GetCurrent(),
-                    profile => File.Exists(profile.FilePath));
+                    HasExpectedFileSize);
                 if (decision.Kind == TranslatorFallbackActionKind.None)
                 {
                     return;
@@ -95,8 +95,10 @@ namespace IronworksTranslator.Services
                 succeeded = decision.Kind switch
                 {
                     TranslatorFallbackActionKind.SwitchCloudEngine => SwitchEngine(failedEngine, decision.Engine!.Value, null),
-                    TranslatorFallbackActionKind.UseLocalModel => SwitchEngine(failedEngine, TranslatorEngine.MiLMMT, decision.Profile!),
-                    TranslatorFallbackActionKind.DownloadLocalModel => DownloadAndSwitch(failedEngine, decision.Profile!),
+                    // Both go through the model preparation window: it verifies the hash of an existing file
+                    // (a manual download can leave a broken one behind) and downloads a replacement if needed.
+                    TranslatorFallbackActionKind.UseLocalModel => PrepareModelAndSwitch(failedEngine, decision.Profile!),
+                    TranslatorFallbackActionKind.DownloadLocalModel => PrepareModelAndSwitch(failedEngine, decision.Profile!),
                     _ => false,
                 };
             }
@@ -117,7 +119,24 @@ namespace IronworksTranslator.Services
             }
         }
 
-        private static bool DownloadAndSwitch(TranslatorEngine failedEngine, MiLMMTModelProfile profile)
+        /// <summary>
+        /// Cheap pre-check used while choosing a model; the full hash check happens in <see cref="PrepareModelAndSwitch"/>.
+        /// </summary>
+        private static bool HasExpectedFileSize(MiLMMTModelProfile profile)
+        {
+            try
+            {
+                var file = new FileInfo(profile.FilePath);
+                return file.Exists && file.Length == profile.FileSize;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to inspect MiLMMT model file {Path}", profile.FilePath);
+                return false;
+            }
+        }
+
+        private static bool PrepareModelAndSwitch(TranslatorEngine failedEngine, MiLMMTModelProfile profile)
         {
             var window = new InitializationWindow(TranslatorEngine.MiLMMT, profile, isAutomaticFallback: true);
             window.ShowDialog();

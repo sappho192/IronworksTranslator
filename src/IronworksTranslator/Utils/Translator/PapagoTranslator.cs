@@ -330,7 +330,9 @@ namespace IronworksTranslator.Utils.Translator
                 await Task.Delay(PollInterval).ConfigureAwait(false);
             }
 
-            Log.Debug("Papago target editor was not cleared within {Timeout}.", TargetClearTimeout);
+            // Never continue with the previous result on screen: it could be accepted as this request's answer.
+            // Throwing marks the page for reload in RequestTranslate.
+            throw new TranslatorException($"Papago target editor was not cleared within {TargetClearTimeout}.");
         }
 
         private void DiscardPage(string languagePair)

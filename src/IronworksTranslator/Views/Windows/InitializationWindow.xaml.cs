@@ -370,6 +370,15 @@ namespace IronworksTranslator.Views.Windows
             if (!isInitialized)
             {
                 e.Cancel = true;
+                return;
+            }
+
+            // The automatic fallback is the only progress UI for its download. Closing it (e.g. Alt+F4) would
+            // report failure while the worker keeps downloading, so keep it open until the worker finishes.
+            // BackgroundWorker clears IsBusy before RunWorkerCompleted, so the window's own Close() still works.
+            if (isAutomaticFallback && worker.IsBusy)
+            {
+                e.Cancel = true;
             }
         }
     }
