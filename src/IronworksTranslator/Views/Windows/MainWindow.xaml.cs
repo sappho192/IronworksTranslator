@@ -3,6 +3,7 @@ using IronworksTranslator.ViewModels.Windows;
 using IronworksTranslator.Utils.UI;
 using Serilog;
 using Wpf.Ui;
+using Wpf.Ui.Abstractions;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 
@@ -15,7 +16,7 @@ namespace IronworksTranslator.Views.Windows
 
         public MainWindow(
             MainWindowViewModel viewModel,
-            IPageService pageService,
+            INavigationViewPageProvider pageService,
             INavigationService navigationService,
             IContentDialogService contentDialogService
         )
@@ -42,7 +43,7 @@ namespace IronworksTranslator.Views.Windows
 
         public bool Navigate(Type pageType) => RootNavigation.Navigate(pageType);
 
-        public void SetPageService(IPageService pageService) => RootNavigation.SetPageService(pageService);
+        public void SetPageService(INavigationViewPageProvider pageService) => RootNavigation.SetPageProviderService(pageService);
 
         public void ShowWindow() => Show();
 

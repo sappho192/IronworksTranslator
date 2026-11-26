@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Wpf.Ui;
+using Wpf.Ui.Abstractions.Controls;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 using Wpf.Ui.Extensions;
@@ -298,13 +299,15 @@ namespace IronworksTranslator.ViewModels.Pages
             EnsureSupportedMiLMMTProfile();
         }
 
-        public void OnNavigatedTo()
+        public Task OnNavigatedToAsync()
         {
             if (!_isInitialized)
                 InitializeViewModel();
+
+            return Task.CompletedTask;
         }
 
-        public void OnNavigatedFrom() { }
+        public Task OnNavigatedFromAsync() => Task.CompletedTask;
 
         [TraceMethod]
         private void InitializeViewModel()

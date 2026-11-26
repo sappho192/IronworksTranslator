@@ -20,6 +20,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Threading;
 using Wpf.Ui;
+using Wpf.Ui.Abstractions;
 
 namespace IronworksTranslator
 {
@@ -56,7 +57,7 @@ namespace IronworksTranslator
                 Localizer.ChangeLanguage("ko-KR");
 
                 // Page resolver service
-                services.AddSingleton<IPageService, PageService>();
+                services.AddSingleton<INavigationViewPageProvider, PageService>();
 
                 // Theme manipulation
                 services.AddSingleton<IThemeService, ThemeService>();

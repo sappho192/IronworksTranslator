@@ -3,6 +3,7 @@ using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Wpf.Ui.Abstractions.Controls;
 using Wpf.Ui.Controls;
 
 namespace IronworksTranslator.ViewModels.Pages

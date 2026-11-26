@@ -52,7 +52,7 @@
                     <Border HorizontalAlignment="Center" VerticalAlignment="Bottom"
                             Margin="0,0,0,8" Padding="12,6" CornerRadius="16"
                             IsHitTestVisible="False"
-                            Background="{DynamicResource CardBackground}"
+                            Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}"
                             BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1">
                         <Border.Style>
                             <Style TargetType="Border">
@@ -74,7 +74,7 @@
             </ui:NavigationView.ContentOverlay>
         </ui:NavigationView>
 
-        <ContentPresenter
+        <ui:ContentDialogHost
             x:Name="RootContentDialog"
             Grid.Row="0"
             Grid.RowSpan="2" />
