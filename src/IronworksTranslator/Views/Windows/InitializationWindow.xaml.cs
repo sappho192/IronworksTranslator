@@ -24,6 +24,12 @@ namespace IronworksTranslator.Views.Windows
         private readonly TranslatorEngine? requestedEngine;
         private readonly MiLMMTModelProfile? requestedMiLMMTProfile;
         private readonly bool isAutomaticFallback;
+        private readonly CancellationTokenSource downloadCancellation = new();
+
+        /// <summary>
+        /// A download that delivers no data for this long is treated as dead instead of waiting forever.
+        /// </summary>
+        internal static readonly TimeSpan DownloadStallTimeout = TimeSpan.FromSeconds(60);
 
         /// <summary>
         /// True when the requested model is ready. Only meaningful after the window closes.
@@ -165,7 +171,7 @@ namespace IronworksTranslator.Views.Windows
             {
                 txtProgress.Text = Localizer.GetString("downloader.worker.progress.download.milmmt");
             });
-            DownloadMiLMMTModel(profile).GetAwaiter().GetResult();
+            DownloadMiLMMTModel(profile, downloadCancellation.Token).GetAwaiter().GetResult();
             worker.ReportProgress(90);
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -176,12 +182,13 @@ namespace IronworksTranslator.Views.Windows
         }
 
         [TraceMethod]
-        private async Task DownloadMiLMMTModel(MiLMMTModelProfile profile)
+        private async Task DownloadMiLMMTModel(MiLMMTModelProfile profile, CancellationToken cancellationToken)
         {
             await DownloadModelAsync(
                 profile.DownloadUrl,
                 profile.DirectoryPath,
                 profile.FileName,
+                cancellationToken,
                 profile.FileSize,
                 profile.DisplayName);
         }
@@ -191,6 +198,7 @@ namespace IronworksTranslator.Views.Windows
             string url,
             string modelDirectory,
             string fileName,
+            CancellationToken cancellationToken,
             long? expectedBytes = null,
             string? displayName = null)
         {
@@ -214,11 +222,17 @@ namespace IronworksTranslator.Views.Windows
 
             try
             {
-                using var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                HttpResponseMessage response;
+                using (var headersTimeout = CreateStallTimeout(cancellationToken))
+                {
+                    response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, headersTimeout.Token);
+                }
+
+                using var responseScope = response;
                 response.EnsureSuccessStatusCode();
 
                 var totalBytes = response.Content.Headers.ContentLength ?? expectedBytes;
-                await using (var source = await response.Content.ReadAsStreamAsync())
+                await using (var source = await response.Content.ReadAsStreamAsync(cancellationToken))
                 await using (var destination = File.Create(tempPath))
                 {
                     var buffer = new byte[1024 * 1024];
@@ -226,9 +240,9 @@ namespace IronworksTranslator.Views.Windows
                     long downloadedBytes = 0;
                     int bytesRead;
 
-                    while ((bytesRead = await source.ReadAsync(buffer)) > 0)
+                    while ((bytesRead = await ReadWithStallTimeoutAsync(source, buffer, cancellationToken)) > 0)
                     {
-                        await destination.WriteAsync(buffer.AsMemory(0, bytesRead));
+                        await destination.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
                         downloadedBytes += bytesRead;
 
                         if (progressUpdateTimer.ElapsedMilliseconds < 100)
@@ -268,12 +282,15 @@ namespace IronworksTranslator.Views.Windows
 
                 File.Move(tempPath, modelPath);
             }
+            catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+            {
+                TryDeleteFile(tempPath);
+                throw new TimeoutException(
+                    $"Model download delivered no data for {DownloadStallTimeout.TotalSeconds:0} seconds: {url}", ex);
+            }
             catch
             {
-                if (File.Exists(tempPath))
-                {
-                    File.Delete(tempPath);
-                }
+                TryDeleteFile(tempPath);
                 throw;
             }
 
@@ -283,6 +300,22 @@ namespace IronworksTranslator.Views.Windows
                 txtDownloaderFilename.Text = downloadDisplayName;
                 txtDownloaderBytes.Text = Localizer.GetString("downloader.worker.progress.download.complete");
             });
+        }
+
+        private static CancellationTokenSource CreateStallTimeout(CancellationToken cancellationToken)
+        {
+            var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(DownloadStallTimeout);
+            return timeout;
+        }
+
+        private static async Task<int> ReadWithStallTimeoutAsync(
+            Stream source,
+            byte[] buffer,
+            CancellationToken cancellationToken)
+        {
+            using var readTimeout = CreateStallTimeout(cancellationToken);
+            return await source.ReadAsync(buffer.AsMemory(), readTimeout.Token);
         }
 
         private static double ToMiB(long bytes)
@@ -373,12 +406,18 @@ namespace IronworksTranslator.Views.Windows
                 return;
             }
 
-            // The automatic fallback is the only progress UI for its download. Closing it (e.g. Alt+F4) would
-            // report failure while the worker keeps downloading, so keep it open until the worker finishes.
-            // BackgroundWorker clears IsBusy before RunWorkerCompleted, so the window's own Close() still works.
+            // The automatic fallback is the only progress UI for its download. Closing it (e.g. Alt+F4) cancels
+            // the download, but the window stays open until the worker has unwound and removed the partial file;
+            // RunWorkerCompleted then closes it and reports failure. BackgroundWorker clears IsBusy before
+            // RunWorkerCompleted, so the window's own Close() still works.
             if (isAutomaticFallback && worker.IsBusy)
             {
                 e.Cancel = true;
+                if (!downloadCancellation.IsCancellationRequested)
+                {
+                    Log.Information("Automatic fallback model download was cancelled by the user.");
+                    downloadCancellation.Cancel();
+                }
             }
         }
     }
