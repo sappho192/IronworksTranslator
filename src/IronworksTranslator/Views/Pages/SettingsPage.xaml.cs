@@ -528,14 +528,7 @@ namespace IronworksTranslator.Views.Pages
 
             if (result != System.Windows.MessageBoxResult.Yes)
             {
-                if (selectedItem == Models.Enums.TranslatorEngine.MiLMMT
-                    && TrySelectAvailableMiLMMTProfile())
-                {
-                    UpdateTranslatorTooltip(selectedItem);
-                    return;
-                }
-
-                RevertTranslatorEngineToDefault(comboBox);
+                RestoreAvailableTranslatorSelection(selectedItem, comboBox);
                 return;
             }
 
@@ -543,8 +536,30 @@ namespace IronworksTranslator.Views.Pages
                 ? new InitializationWindow(selectedItem, ViewModel.SelectedMiLMMTProfile)
                 : new InitializationWindow(selectedItem);
             window.ShowDialog();
+            if (!window.Succeeded)
+            {
+                // A failed or cancelled download leaves no usable model, so recover as if it had been declined.
+                RestoreAvailableTranslatorSelection(selectedItem, comboBox);
+                UpdateMiLMMTProfileSummary();
+                return;
+            }
+
             UpdateMiLMMTProfileSummary();
             RememberCurrentMiLMMTProfileIfAvailable();
+        }
+
+        private void RestoreAvailableTranslatorSelection(
+            Models.Enums.TranslatorEngine selectedItem,
+            ComboBox comboBox)
+        {
+            if (selectedItem == Models.Enums.TranslatorEngine.MiLMMT
+                && TrySelectAvailableMiLMMTProfile())
+            {
+                UpdateTranslatorTooltip(selectedItem);
+                return;
+            }
+
+            RevertTranslatorEngineToDefault(comboBox);
         }
 
         private void RevertTranslatorEngineToDefault(ComboBox comboBox)

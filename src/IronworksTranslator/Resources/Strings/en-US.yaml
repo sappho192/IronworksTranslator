@@ -32,7 +32,6 @@ downloader.worker.progress.download.bytes.total: "{0:N1} MB / {1:N1} MB"
 downloader.worker.progress.download.bytes: "{0:N1} MB downloaded"
 downloader.worker.progress.download.complete: "Downloaded"
 downloader.error.initialization: "Initialization failed. Please check the log."
-downloader.error.milmmt.hash: "Failed to download the MiLMMT model. Please launch this program again."
 
 translator.fallback.title: "Translator switched automatically"
 translator.fallback.switched.cloud: "{0} kept failing, so the translator was switched to {1}. You can change it back in Settings."

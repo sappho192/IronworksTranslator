@@ -37,8 +37,9 @@ namespace IronworksTranslator.Views.Windows
         public bool Succeeded { get; private set; }
 
         /// <param name="isAutomaticFallback">
-        /// When true the download was started by the translator fallback instead of the user,
-        /// so failures are reported through <see cref="Succeeded"/> and never shut the app down.
+        /// When true the download was started by the translator fallback instead of the user, so the window
+        /// explains why and leaves reporting a failure to the caller. Either way, failures and cancellation are
+        /// reported through <see cref="Succeeded"/> and never shut the app down.
         /// </param>
         public InitializationWindow(
             TranslatorEngine? requestedEngine = null,
@@ -91,28 +92,32 @@ namespace IronworksTranslator.Views.Windows
 
         private void Worker_RunWorkerCompleted(object? sender, RunWorkerCompletedEventArgs e)
         {
-            if (e.Error != null && isAutomaticFallback)
+            // A close request during verification arrives after the download finished, so check it here too:
+            // a cancelled run must not report success even if the model turned out to be fine.
+            var cancelled = downloadCancellation.IsCancellationRequested;
+            if (e.Error != null || cancelled)
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    Log.Error(e.Error, "Automatic fallback model download failed.");
                     Succeeded = false;
-                    Close();
-                });
-                return;
-            }
+                    if (cancelled)
+                    {
+                        Log.Information("Model preparation was cancelled before it finished.");
+                    }
+                    else
+                    {
+                        Log.Error(e.Error, "Model preparation failed. Automatic fallback: {IsAutomaticFallback}", isAutomaticFallback);
+                    }
 
-            if (e.Error != null)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    Log.Error(e.Error, "Initialization failed.");
-                    txtProgress.Text = Localizer.GetString("downloader.error.initialization");
-                    txtDownloaderFilename.Text = e.Error.Message;
-                    txtDownloaderBytes.Text = string.Empty;
-                    prWorker.Visibility = Visibility.Collapsed;
-                    MessageBox.Show(Localizer.GetString("downloader.error.initialization"));
-                    App.RequestShutdown();
+                    // The window only opens in a running app (Settings or the fallback), so a failed download
+                    // is recoverable: the caller restores a usable engine instead of the app exiting.
+                    // The fallback reports its own failure, so only the user-started download needs a dialog here.
+                    if (!cancelled && !isAutomaticFallback)
+                    {
+                        MessageBox.Show(Localizer.GetString("downloader.error.initialization"));
+                    }
+
+                    Close();
                 });
                 return;
             }
@@ -172,6 +177,7 @@ namespace IronworksTranslator.Views.Windows
                 txtProgress.Text = Localizer.GetString("downloader.worker.progress.download.milmmt");
             });
             DownloadMiLMMTModel(profile, downloadCancellation.Token).GetAwaiter().GetResult();
+            downloadCancellation.Token.ThrowIfCancellationRequested();
             worker.ReportProgress(90);
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -340,20 +346,11 @@ namespace IronworksTranslator.Views.Windows
             var modelIntegrity = File.Exists(profile.FilePath)
                 && CheckMiLMMTModelFile(profile);
 
-            if (!modelIntegrity && isAutomaticFallback)
+            if (!modelIntegrity)
             {
                 TryDeleteFile(profile.FilePath);
                 throw new InvalidDataException(
                     $"Downloaded MiLMMT model failed the integrity check: {profile.FilePath}");
-            }
-
-            if (!modelIntegrity)
-            {
-                MessageBox.Show(Localizer.GetString("downloader.error.milmmt.hash"));
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    App.RequestShutdown();
-                });
             }
         }
 
@@ -406,16 +403,15 @@ namespace IronworksTranslator.Views.Windows
                 return;
             }
 
-            // The automatic fallback is the only progress UI for its download. Closing it (e.g. Alt+F4) cancels
-            // the download, but the window stays open until the worker has unwound and removed the partial file;
-            // RunWorkerCompleted then closes it and reports failure. BackgroundWorker clears IsBusy before
-            // RunWorkerCompleted, so the window's own Close() still works.
-            if (isAutomaticFallback && worker.IsBusy)
+            // Closing the window (e.g. Alt+F4) cancels the download, but the window stays open until the worker
+            // has unwound and removed the partial file; RunWorkerCompleted then closes it and reports failure.
+            // BackgroundWorker clears IsBusy before RunWorkerCompleted, so the window's own Close() still works.
+            if (worker.IsBusy)
             {
                 e.Cancel = true;
                 if (!downloadCancellation.IsCancellationRequested)
                 {
-                    Log.Information("Automatic fallback model download was cancelled by the user.");
+                    Log.Information("Model download was cancelled by the user.");
                     downloadCancellation.Cancel();
                 }
             }
