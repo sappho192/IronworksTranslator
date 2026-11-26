@@ -25,5 +25,22 @@ namespace IronworksTranslator.Views.Dialogs
                 SuggestedTranslationTextBox.CaretIndex = SuggestedTranslationTextBox.Text.Length;
             });
         }
+
+        // The comment box appears below the fold when expanded; scroll the dialog to it.
+        // The expander slides its content in with a render transform, so bring the expander's
+        // untransformed layout bounds into view rather than the still-animating text box.
+        private void CommentExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Expander expander)
+            {
+                return;
+            }
+
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
+            {
+                CommentTextBox.Focus();
+                expander.BringIntoView();
+            });
+        }
     }
 }
