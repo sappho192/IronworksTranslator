@@ -61,12 +61,13 @@ public class PapagoTranslationSettlerTests
     }
 
     [Fact]
-    public void GetBestEffortResult_ReturnsUnchangedTextWhenThatIsAllPapagoShowed()
+    public void GetBestEffortResult_RejectsUnsettledEchoOfSource()
     {
+        // An echo is only an answer once it is stable; an unsettled one may be a transient outage render.
         var settler = new PapagoTranslationSettler("Choco");
         settler.Observe("Choco", Ms(800));
 
-        Assert.Equal("Choco", settler.GetBestEffortResult());
+        Assert.Null(settler.GetBestEffortResult());
     }
 
     [Fact]

@@ -177,13 +177,6 @@ namespace IronworksTranslator.Views.Windows
                 txtProgress.Text = Localizer.GetString("downloader.worker.progress.download.milmmt");
             });
             DownloadMiLMMTModel(profile, downloadCancellation.Token).GetAwaiter().GetResult();
-            downloadCancellation.Token.ThrowIfCancellationRequested();
-            worker.ReportProgress(90);
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                txtProgress.Text = Localizer.GetString("downloader.worker.progress.hash.model.milmmt");
-            });
-            CheckMiLMMTModelIntegrity(profile);
             worker.ReportProgress(100);
         }
 
@@ -195,6 +188,15 @@ namespace IronworksTranslator.Views.Windows
                 profile.DirectoryPath,
                 profile.FileName,
                 cancellationToken,
+                downloadedPath =>
+                {
+                    worker.ReportProgress(90);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        txtProgress.Text = Localizer.GetString("downloader.worker.progress.hash.model.milmmt");
+                    });
+                    return CheckMiLMMTModelFile(profile, downloadedPath);
+                },
                 profile.FileSize,
                 profile.DisplayName);
         }
@@ -205,6 +207,7 @@ namespace IronworksTranslator.Views.Windows
             string modelDirectory,
             string fileName,
             CancellationToken cancellationToken,
+            Func<string, bool> verifyDownloadedFile,
             long? expectedBytes = null,
             string? displayName = null)
         {
@@ -281,6 +284,16 @@ namespace IronworksTranslator.Views.Windows
                     }
                 }
 
+                // Verify while the file is still at the temporary path: the installed path counts as a usable
+                // model elsewhere (e.g. Settings recovery), so only a verified file may ever be moved there.
+                if (!verifyDownloadedFile(tempPath))
+                {
+                    throw new InvalidDataException($"Downloaded model failed the integrity check: {url}");
+                }
+
+                // Cancelled before installing: discard the file (the catch below) instead of installing it.
+                cancellationToken.ThrowIfCancellationRequested();
+
                 if (File.Exists(modelPath))
                 {
                     File.Delete(modelPath);
@@ -337,21 +350,7 @@ namespace IronworksTranslator.Views.Windows
                 return false;
             }
 
-            return CheckMiLMMTModelFile(profile);
-        }
-
-        [TraceMethod]
-        private void CheckMiLMMTModelIntegrity(MiLMMTModelProfile profile)
-        {
-            var modelIntegrity = File.Exists(profile.FilePath)
-                && CheckMiLMMTModelFile(profile);
-
-            if (!modelIntegrity)
-            {
-                TryDeleteFile(profile.FilePath);
-                throw new InvalidDataException(
-                    $"Downloaded MiLMMT model failed the integrity check: {profile.FilePath}");
-            }
+            return CheckMiLMMTModelFile(profile, profile.FilePath);
         }
 
         private static void TryDeleteFile(string path)
@@ -370,9 +369,9 @@ namespace IronworksTranslator.Views.Windows
         }
 
         [TraceMethod]
-        private static bool CheckMiLMMTModelFile(MiLMMTModelProfile profile)
+        private static bool CheckMiLMMTModelFile(MiLMMTModelProfile profile, string filePath)
         {
-            var fileInfo = new FileInfo(profile.FilePath);
+            var fileInfo = new FileInfo(filePath);
             if (fileInfo.Length != profile.FileSize)
             {
                 Log.Warning(
@@ -382,7 +381,7 @@ namespace IronworksTranslator.Views.Windows
                 return false;
             }
 
-            return CheckSha256(profile.FilePath, profile.Sha256);
+            return CheckSha256(filePath, profile.Sha256);
         }
 
         [TraceMethod]

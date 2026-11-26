@@ -67,6 +67,13 @@ namespace IronworksTranslator.Utils.Translator
                 return null;
             }
 
+            // An echo of the source is only trusted once it stays unchanged (see Observe). One that never
+            // settled may be a transient render during an outage, so it must not count as a translation.
+            if (PapagoTranslator.IsSameText(candidate, sourceText))
+            {
+                return null;
+            }
+
             if (!candidate.EndsWith(InterimMarker, StringComparison.Ordinal)
                 || sourceText.TrimEnd().EndsWith(InterimMarker, StringComparison.Ordinal))
             {
