@@ -4,6 +4,7 @@ using Serilog;
 using HtmlAgilityPack;
 using IronworksTranslator.Models.Translator;
 using IronworksTranslator.Utils.Aspect;
+using PuppeteerSharp;
 using System.Diagnostics;
 using System.Net;
 
@@ -17,7 +18,7 @@ namespace IronworksTranslator.Utils.Translator
         private const string ReadySourceEditorSelector = "[data-testid=\"source-editor\"][data-lexical-editor=\"true\"]";
         private const int PageLoadAttempts = 2;
         private static readonly TimeSpan NavigationTimeout = TimeSpan.FromSeconds(20);
-        private static readonly TimeSpan EditorReadyTimeout = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan EditorReadyTimeout = TimeSpan.FromSeconds(5);
         private static readonly TimeSpan TargetClearTimeout = TimeSpan.FromSeconds(2);
         private static readonly TimeSpan TranslationTimeout = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan PollInterval = TimeSpan.FromMilliseconds(100);
@@ -174,7 +175,7 @@ namespace IronworksTranslator.Utils.Translator
             var page = await GetReadyPageAsync(languagePair, sk, tk).ConfigureAwait(false);
             try
             {
-                var translated = await TranslateOnPageAsync(page.Browser, sourceText).ConfigureAwait(false);
+                var translated = await TranslateOnPageAsync(page, sourceText).ConfigureAwait(false);
                 if (string.IsNullOrWhiteSpace(translated))
                 {
                     // The page may be stuck (e.g. a dropped connection); reload it before the next request.
@@ -185,7 +186,9 @@ namespace IronworksTranslator.Utils.Translator
             }
             catch
             {
-                DiscardPage(languagePair);
+                // Reload before the next request. If the browser itself is dead, the reload fails
+                // inside GetReadyPageAsync, which then discards it and starts a fresh one.
+                page.IsReady = false;
                 throw;
             }
         }
@@ -208,12 +211,28 @@ namespace IronworksTranslator.Utils.Translator
                 return page;
             }
 
-            var url = $"https://papago.naver.com/?sk={sk}&tk={tk}";
+            // Papago's current query format; the legacy sk/tk form is only kept alive by a redirect.
+            var url = $"https://papago.naver.com/?sl={sk}&tl={tk}";
             try
             {
                 for (var attempt = 1; attempt <= PageLoadAttempts; attempt++)
                 {
-                    await page.Browser.NavigateAsync(url, NavigationTimeout).ConfigureAwait(false);
+                    try
+                    {
+                        await page.Browser.NavigateAsync(url, NavigationTimeout).ConfigureAwait(false);
+                    }
+                    catch (NavigationException ex) when (attempt < PageLoadAttempts)
+                    {
+                        // Papago sometimes resets the connection for the document itself; retry like a dead page.
+                        Log.Warning(
+                            ex,
+                            "Papago page navigation failed. LanguagePair: {LanguagePair}, Attempt: {Attempt}/{Attempts}",
+                            languagePair,
+                            attempt,
+                            PageLoadAttempts);
+                        continue;
+                    }
+
                     if (await page.Browser.WaitForSelectorAsync(ReadySourceEditorSelector, EditorReadyTimeout).ConfigureAwait(false))
                     {
                         page.IsReady = true;
@@ -238,18 +257,27 @@ namespace IronworksTranslator.Utils.Translator
             throw new TranslatorException($"Papago page did not become ready for {languagePair}.");
         }
 
-        private static async Task<string> TranslateOnPageAsync(WebBrowser browser, string sourceText)
+        private static async Task<string> TranslateOnPageAsync(PapagoPage page, string sourceText)
         {
+            var browser = page.Browser;
+            // Papago can re-render (e.g. rewriting its URL) right after hydration, so re-check readiness
+            // before every request. If the editor does not come back, reload the page next time.
+            if (!await browser.WaitForSelectorAsync(ReadySourceEditorSelector, EditorReadyTimeout).ConfigureAwait(false))
+            {
+                page.IsReady = false;
+                throw new TranslatorException("Papago source editor disappeared.");
+            }
+
             // Clear first and wait until the previous result disappears, so it is never mistaken for this one.
-            await browser.ReplaceEditorTextAsync(SourceEditorSelector, string.Empty).ConfigureAwait(false);
+            await browser.ReplaceEditorTextAsync(SourceEditorSelector, string.Empty, EditorReadyTimeout).ConfigureAwait(false);
             await WaitForEmptyTargetAsync(browser).ConfigureAwait(false);
 
-            await browser.ReplaceEditorTextAsync(SourceEditorSelector, sourceText).ConfigureAwait(false);
+            await browser.ReplaceEditorTextAsync(SourceEditorSelector, sourceText, EditorReadyTimeout).ConfigureAwait(false);
             var typed = await browser.EvaluateExpressionAsync(ReadSourceEditorScript).ConfigureAwait(false);
             if (!IsSameText(typed, sourceText))
             {
                 Log.Warning("Papago source editor did not accept the text; retrying once.");
-                await browser.ReplaceEditorTextAsync(SourceEditorSelector, sourceText).ConfigureAwait(false);
+                await browser.ReplaceEditorTextAsync(SourceEditorSelector, sourceText, EditorReadyTimeout).ConfigureAwait(false);
             }
 
             var settler = new PapagoTranslationSettler(sourceText);

@@ -133,10 +133,15 @@ namespace IronworksTranslator.Utils
         /// Replaces the content of an editable element the way a user would (select all, delete, type),
         /// so rich editors such as Lexical receive real input events.
         /// </summary>
-        public async Task ReplaceEditorTextAsync(string selector, string text)
+        public async Task ReplaceEditorTextAsync(string selector, string text, TimeSpan timeout)
         {
             var page = GetPage();
-            await page.FocusAsync(selector).ConfigureAwait(false);
+            // Wait instead of querying once: client-side re-renders can briefly remove the element.
+            var editor = await page.WaitForSelectorAsync(selector, new WaitForSelectorOptions
+            {
+                Timeout = (int)timeout.TotalMilliseconds,
+            }).ConfigureAwait(false);
+            await editor.FocusAsync().ConfigureAwait(false);
             await page.Keyboard.DownAsync("Control").ConfigureAwait(false);
             await page.Keyboard.PressAsync("A").ConfigureAwait(false);
             await page.Keyboard.UpAsync("Control").ConfigureAwait(false);
