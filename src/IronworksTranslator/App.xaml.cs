@@ -96,7 +96,6 @@ namespace IronworksTranslator
                 services.AddSingleton<DialogueWindowViewModel>();
 
                 // Translator stuff
-                services.AddSingleton<WebBrowser>();
                 services.AddSingleton<PapagoTranslator>();
                 services.AddSingleton<DeepLAPITranslator>();
                 services.AddSingleton<MiLMMTTranslator>();
