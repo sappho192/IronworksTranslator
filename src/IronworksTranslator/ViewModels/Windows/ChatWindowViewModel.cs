@@ -2,14 +2,13 @@
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using IronworksTranslator.Helpers.Extensions;
 using IronworksTranslator.Models;
-using IronworksTranslator.Models.Cloudflare;
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Models.Translator;
+using IronworksTranslator.Services;
 using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.Utils;
 using IronworksTranslator.Utils.Aspect;
-using IronworksTranslator.Utils.Cloudflare;
 using IronworksTranslator.Utils.Translator;
 using IronworksTranslator.ViewModels.Pages;
 using IronworksTranslator.Views.Windows;
@@ -21,12 +20,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
-using Wpf.Ui.Extensions;
 using MenuItem = Wpf.Ui.Controls.MenuItem;
-using TextBlock = Wpf.Ui.Controls.TextBlock;
-using TextBox = Wpf.Ui.Controls.TextBox;
 
 namespace IronworksTranslator.ViewModels.Windows
 {
@@ -50,7 +44,7 @@ namespace IronworksTranslator.ViewModels.Windows
             ];
 
         private readonly DispatcherTimer chatboxTimer;
-        private readonly IContentDialogService _contentDialogService;
+        private readonly TranslationReportService _reportService;
 
         // Semaphore to ensure messages are processed sequentially
         private readonly SemaphoreSlim _translationSemaphore = new(1, 1);
@@ -61,9 +55,9 @@ namespace IronworksTranslator.ViewModels.Windows
         private const bool IsRetranslateUiEnabled = false;
 #endif
 
-        public ChatWindowViewModel(IContentDialogService contentDialogService)
+        public ChatWindowViewModel(TranslationReportService reportService)
         {
-            _contentDialogService = contentDialogService;
+            _reportService = reportService;
             ChatDocument = new FlowDocument();
             Messenger.Register<PropertyChangedMessage<double>>(this, OnDoubleMessage);
 
@@ -249,7 +243,7 @@ namespace IronworksTranslator.ViewModels.Windows
                     DialogueEntry? dialogueEntry = CreateDialogueEntry(text);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        App.GetService<DialogueWindow>().PushDialogueTextBox(dialogueEntry);
+                        App.GetService<DialogueWindow>().PushDialogueTextBox(dialogueEntry, text);
                     });
                 }
             }
@@ -430,19 +424,46 @@ namespace IronworksTranslator.ViewModels.Windows
                 (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
             {
                 Author = author,
+                OriginalSpeaker = requestKind == MiLMMTTranslationKind.Dialogue ? author : null,
+                TranslationKind = requestKind,
             };
 
             if (!ContainsNativeLanguage(originalText))
             {
+                var engine = IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
+                var modelProfile = engine == TranslatorEngine.MiLMMT
+                    ? MiLMMTModelProfiles.GetCurrent()
+                    : null;
                 text.TranslatedText = await TranslateAsync(
                     originalText,
                     sourceLanguage,
                     requestKind,
-                    cancellationToken);
+                    cancellationToken,
+                    engine);
                 cancellationToken.ThrowIfCancellationRequested();
+                PopulateTranslationMetadata(text, engine, modelProfile);
             }
 
             return text;
+        }
+
+        internal static void PopulateTranslationMetadata(
+            TranslationText text,
+            TranslatorEngine engine,
+            MiLMMTModelProfile? modelProfile = null)
+        {
+            text.Engine = engine;
+            if (engine == TranslatorEngine.MiLMMT)
+            {
+                var profile = modelProfile ?? MiLMMTModelProfiles.GetCurrent();
+                text.ModelId = profile.FileName;
+                text.ModelSha256 = profile.Sha256;
+            }
+            else
+            {
+                text.ModelId = null;
+                text.ModelSha256 = null;
+            }
         }
 
         private static async Task<string> TranslateDialogueSpeakerAsync(
@@ -501,18 +522,34 @@ namespace IronworksTranslator.ViewModels.Windows
             dispatcher.Invoke(action);
         }
 
-        public void AddDialogue(string dialogue)
+        public void AddDialogue(string dialogue, TranslationText? translationText = null)
         {
             InvokeOnUiThread(() =>
             {
                 var settings = IronworksSettings.Instance;
-                ChatDocument.Blocks.Add(new Paragraph(new Run(dialogue))
+                var paragraph = new Paragraph(new Run(dialogue))
                 {
                     Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.ChannelSettings.NpcDialog.Color)),
                     FontFamily = new FontFamily(settings.ChatUiSettings.Font),
                     FontSize = settings.ChatUiSettings.ChatboxFontSize,
                     Margin = new Thickness(0, 0, 0, settings.ChatUiSettings.ChatMargin)
-                });
+                };
+
+                if (translationText != null)
+                {
+                    var translationParagraph = new TranslationParagraph(paragraph, translationText);
+                    var contextMenu = new ContextMenu();
+                    var reportItem = new MenuItem
+                    {
+                        Header = Localizer.GetString("chat.report"),
+                        Tag = translationParagraph,
+                    };
+                    reportItem.Click += Report_Click;
+                    contextMenu.Items.Add(reportItem);
+                    paragraph.ContextMenu = contextMenu;
+                }
+
+                ChatDocument.Blocks.Add(paragraph);
                 Diet();
                 ScrollToEnd();
             });
@@ -546,9 +583,17 @@ namespace IronworksTranslator.ViewModels.Windows
             // Create and attach a custom context menu to the paragraph
             var contextMenu = new ContextMenu();
 
+            var menuItemReport = new MenuItem
+            {
+                Header = Localizer.GetString("chat.report"),
+                Tag = translationParagraph,
+            };
+            menuItemReport.Click += Report_Click;
+            contextMenu.Items.Add(menuItemReport);
+
             var menuItemReTranslate = new MenuItem
             {
-                Header = "Re-Translate",
+                Header = Localizer.GetString("chat.retranslate"),
                 IsEnabled = IsRetranslateUiEnabled
             };
             var menuItemPapago = new MenuItem
@@ -709,8 +754,13 @@ namespace IronworksTranslator.ViewModels.Windows
 
         private string ReTranslate(TranslationText tText, TranslatorEngine api)
         {
+            var modelProfile = api == TranslatorEngine.MiLMMT
+                ? MiLMMTModelProfiles.GetCurrent()
+                : null;
             string newMessage = Translate(tText.OriginalText, (ClientLanguage)tText.SourceLanguage, api);
-            string? translated = tText.Author == "" ? newMessage : $"{tText.Author}: {newMessage}";
+            tText.TranslatedText = newMessage;
+            PopulateTranslationMetadata(tText, api, modelProfile);
+            string? translated = string.IsNullOrEmpty(tText.Author) ? newMessage : $"{tText.Author}: {newMessage}";
             return translated;
         }
 
@@ -925,115 +975,9 @@ namespace IronworksTranslator.ViewModels.Windows
         [TraceMethod]
         private async Task DoReport(object sender)
         {
-            // Retrieve the Paragraph object from the Tag property of the MenuItem
             if (((MenuItem)sender).Tag is TranslationParagraph tParagraph)
             {
-                //string paragraphText = GetTextFromParagraph(tParagraph.Paragraph);
-                //MessageBox.Show($"Custom action triggered for paragraph: {paragraphText}");
-
-                var mainWindow = App.GetServices<INavigationWindow>().OfType<MainWindow>().Single();
-                // If the main window is minimized or hidden, show it
-                if (mainWindow.WindowState == WindowState.Minimized || mainWindow.Visibility != Visibility.Visible)
-                {
-                    mainWindow.WindowState = WindowState.Normal;
-                    mainWindow.Show();
-                }
-
-                StackPanel stackPanel = new()
-                {
-                    Orientation = Orientation.Vertical
-                };
-                stackPanel.Children.Add(new TextBlock
-                {
-                    Text = Localizer.GetString("chat.report.description"),
-                    FontTypography = FontTypography.Body,
-                    VerticalAlignment = VerticalAlignment.Center,
-                });
-                StackPanel chatPanel = new()
-                {
-                    Orientation = Orientation.Horizontal,
-                    Margin = new Thickness(0, 8, 0, 0)
-                };
-                chatPanel.Children.Add(new TextBlock
-                {
-                    Text = Localizer.GetString("chat.report.original"),
-                    VerticalAlignment = VerticalAlignment.Center,
-                    FontTypography = FontTypography.BodyStrong
-                });
-                chatPanel.Children.Add(new TextBlock
-                {
-                    Text = tParagraph.Text.OriginalText,
-                    VerticalAlignment = VerticalAlignment.Center,
-                });
-                StackPanel translatedPanel = new()
-                {
-                    Orientation = Orientation.Horizontal
-                };
-                translatedPanel.Children.Add(new TextBlock
-                {
-                    Text = Localizer.GetString("chat.report.translated"),
-                    VerticalAlignment = VerticalAlignment.Center,
-                    FontTypography = FontTypography.BodyStrong
-                });
-                translatedPanel.Children.Add(new TextBlock
-                {
-                    Text = tParagraph.Text.TranslatedText,
-                    VerticalAlignment = VerticalAlignment.Center,
-                });
-                stackPanel.Children.Add(chatPanel);
-                stackPanel.Children.Add(translatedPanel);
-                stackPanel.Children.Add(new TextBlock
-                {
-                    Text = Localizer.GetString("chat.report.comment"),
-                    FontTypography = FontTypography.BodyStrong,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Margin = new Thickness(0, 8, 0, 0),
-                });
-                var tbComment = new TextBox
-                {
-                    Text = "",
-                    TextWrapping = TextWrapping.Wrap,
-                    MinLines = 2,
-                    MaxLength = 300,
-                    Margin = new Thickness(0, 8, 0, 0),
-                    PlaceholderEnabled = true,
-                    PlaceholderText = Localizer.GetString("chat.report.comment.placeholder"),
-                };
-                stackPanel.Children.Add(tbComment);
-
-                ContentDialogResult dialogResult = await _contentDialogService.ShowSimpleDialogAsync(
-                    new SimpleContentDialogCreateOptions()
-                    {
-                        Title = Localizer.GetString("chat.report"),
-                        Content = stackPanel,
-                        PrimaryButtonText = Localizer.GetString("chat.report.primary"),
-                        CloseButtonText = Localizer.GetString("cancel"),
-                    }
-                );
-
-                var resultBool = dialogResult switch
-                {
-                    ContentDialogResult.Primary => true,
-                    ContentDialogResult.Secondary => false,
-                    _ => false
-                };
-
-                if (!resultBool)
-                    return;
-
-                string comment = tbComment.Text;
-
-                BiggsBody body = new()
-                {
-                    input_sentence = tParagraph.Text.OriginalText,
-                    input_language = tParagraph.Text.SourceLanguage.ToString(),
-                    output_sentence = tParagraph.Text.TranslatedText ?? "",
-                    output_language = tParagraph.Text.TargetLanguage.ToString(),
-                    timestamp = DateTime.UtcNow,
-                    comment = comment
-                };
-                BiggsWorker worker = new();
-                await worker.Insert(body);
+                await _reportService.ShowReportDialogAsync(tParagraph.Text);
             }
         }
 

@@ -1,9 +1,13 @@
 ﻿using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models;
 using IronworksTranslator.Models.Settings;
+using IronworksTranslator.Models.Translator;
+using IronworksTranslator.Services;
 using IronworksTranslator.ViewModels.Windows;
 using Serilog;
 using System.Text.RegularExpressions;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Threading;
 using WpfScreenHelper;
 using IronworksTranslator.Utils.Translator;
@@ -29,6 +33,10 @@ namespace IronworksTranslator.Views.Windows
 
         // Semaphore to ensure dialogue messages are processed sequentially
         private readonly SemaphoreSlim _translationSemaphore = new(1, 1);
+        private readonly List<DialogueSpan> _dialogueSpans = [];
+        private TranslationText? _contextMenuTargetDialogue;
+
+        private readonly record struct DialogueSpan(int StartOffset, int EndOffset, TranslationText Text);
 
         public DialogueWindow(DialogueWindowViewModel viewModel)
         {
@@ -115,10 +123,14 @@ namespace IronworksTranslator.Views.Windows
                         {
                             var sourceLanguage =
                                 IronworksSettings.Instance.ChannelSettings.NpcDialog.MajorLanguage;
-                            var translated = Translate(msg, sourceLanguage);
+                            var engine = IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
+                            var modelProfile = engine == TranslatorEngine.MiLMMT
+                                ? MiLMMTModelProfiles.GetCurrent()
+                                : null;
+                            var translated = Translate(msg, sourceLanguage, engine);
                             var translatedSpeaker = DialogueSpeakerTranslation.TranslateOrOriginal(
                                 entry.Speaker,
-                                speaker => Translate(speaker, sourceLanguage),
+                                speaker => Translate(speaker, sourceLanguage, engine),
                                 ex => Log.Warning(
                                     ex,
                                     "Failed to translate dialogue speaker; using the original speaker."));
@@ -126,9 +138,21 @@ namespace IronworksTranslator.Views.Windows
                                 translatedSpeaker,
                                 translated);
 
+                            var dialogueText = new TranslationText(
+                                msg,
+                                (TranslationLanguageCode)sourceLanguage,
+                                (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage)
+                            {
+                                TranslatedText = translated,
+                                Author = translatedSpeaker,
+                                OriginalSpeaker = entry.Speaker,
+                                TranslationKind = MiLMMTTranslationKind.Dialogue,
+                            };
+                            ChatWindowViewModel.PopulateTranslationMetadata(dialogueText, engine, modelProfile);
+
                             Application.Current.Dispatcher.Invoke(() =>
                             {
-                                AppendDialogueText(displayText);
+                                AppendDialogueText(displayText, dialogueText);
                             });
                         }
                     }
@@ -145,28 +169,80 @@ namespace IronworksTranslator.Views.Windows
             }
         }
 
-        public void PushDialogueTextBox(DialogueEntry? entry)
+        public void PushDialogueTextBox(DialogueEntry? entry, TranslationText? translationText = null)
         {
             if (entry == null) return;
             if (!Dispatcher.CheckAccess())
             {
-                Dispatcher.Invoke(() => PushDialogueTextBox(entry));
+                Dispatcher.Invoke(() => PushDialogueTextBox(entry, translationText));
                 return;
             }
 
-            AppendDialogueText(DialogueTextFormatter.Format(entry.Speaker, entry.Text));
+            AppendDialogueText(DialogueTextFormatter.Format(entry.Speaker, entry.Text), translationText);
         }
 
-        private void AppendDialogueText(string dialogue)
+        private void AppendDialogueText(string dialogue, TranslationText? translationText = null)
         {
             if (IronworksSettings.Instance.ChatUiSettings.ShowDialogueInChat)
             {
-                App.GetService<ChatWindowViewModel>().AddDialogue(dialogue);
+                App.GetService<ChatWindowViewModel>().AddDialogue(dialogue, translationText);
                 return;
             }
-            tbDialogueTextBox.AppendText($"{Environment.NewLine}{Environment.NewLine}{dialogue}");
+
+            var separator = $"{Environment.NewLine}{Environment.NewLine}";
+            var startOffset = tbDialogueTextBox.Text.Length + separator.Length;
+            tbDialogueTextBox.AppendText($"{separator}{dialogue}");
+            if (translationText != null)
+            {
+                _dialogueSpans.Add(new DialogueSpan(startOffset, startOffset + dialogue.Length, translationText));
+            }
+
             TrimDialogueTextBox();
             tbDialogueTextBox.ScrollToEnd();
+        }
+
+        private void DialogueTextBox_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            var charIndex = e.CursorLeft < 0 || e.CursorTop < 0
+                ? tbDialogueTextBox.CaretIndex
+                : tbDialogueTextBox.GetCharacterIndexFromPoint(Mouse.GetPosition(tbDialogueTextBox), snapToText: true);
+            _contextMenuTargetDialogue = ResolveDialogueAtIndex(charIndex);
+            if (_contextMenuTargetDialogue == null)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private TranslationText? ResolveDialogueAtIndex(int charIndex)
+        {
+            if (_dialogueSpans.Count == 0)
+            {
+                return null;
+            }
+
+            if (charIndex >= 0)
+            {
+                for (var i = _dialogueSpans.Count - 1; i >= 0; i--)
+                {
+                    var span = _dialogueSpans[i];
+                    if (charIndex >= span.StartOffset && charIndex <= span.EndOffset)
+                    {
+                        return span.Text;
+                    }
+                }
+            }
+
+            return _dialogueSpans[^1].Text;
+        }
+
+        private async void ReportDialogue_Click(object sender, RoutedEventArgs e)
+        {
+            if (_contextMenuTargetDialogue == null)
+            {
+                return;
+            }
+
+            await App.GetService<TranslationReportService>().ShowReportDialogAsync(_contextMenuTargetDialogue);
         }
 
         private void TrimDialogueTextBox()
@@ -180,10 +256,31 @@ namespace IronworksTranslator.Views.Windows
             var trimStart = text.Length - MaxDialogueTextLength;
             var separator = $"{Environment.NewLine}{Environment.NewLine}";
             var nextSeparator = text.IndexOf(separator, trimStart, StringComparison.Ordinal);
-            tbDialogueTextBox.Text = nextSeparator >= 0
-                ? text[(nextSeparator + separator.Length)..]
-                : text[^MaxDialogueTextLength..];
+            var removedLength = nextSeparator >= 0
+                ? nextSeparator + separator.Length
+                : trimStart;
+            tbDialogueTextBox.Text = text[removedLength..];
             tbDialogueTextBox.CaretIndex = tbDialogueTextBox.Text.Length;
+
+            if (_dialogueSpans.Count > 0)
+            {
+                var updatedSpans = new List<DialogueSpan>(_dialogueSpans.Count);
+                foreach (var span in _dialogueSpans)
+                {
+                    if (span.EndOffset <= removedLength)
+                    {
+                        continue;
+                    }
+
+                    updatedSpans.Add(new DialogueSpan(
+                        Math.Max(0, span.StartOffset - removedLength),
+                        span.EndOffset - removedLength,
+                        span.Text));
+                }
+
+                _dialogueSpans.Clear();
+                _dialogueSpans.AddRange(updatedSpans);
+            }
         }
 
         private string Translate(string input, ClientLanguage channelLanguage, TranslatorEngine? translatorEngine = null)
