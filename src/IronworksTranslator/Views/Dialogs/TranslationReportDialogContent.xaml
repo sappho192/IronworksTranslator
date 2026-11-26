@@ -9,7 +9,7 @@
         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="520">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="520" Focusable="False">
         <StackPanel Orientation="Vertical">
             <ui:TextBlock Text="{i18n:StringLocalizer chat.report.description}"
                           FontTypography="Caption"
@@ -87,7 +87,8 @@
                           Margin="0,0,0,4"
                           Visibility="{Binding HasDraftStatusMessage, Converter={StaticResource BoolToVisibility}}"/>
 
-            <ui:TextBox Text="{Binding SuggestedTranslation, UpdateSourceTrigger=PropertyChanged}"
+            <ui:TextBox x:Name="SuggestedTranslationTextBox"
+                        Text="{Binding SuggestedTranslation, UpdateSourceTrigger=PropertyChanged}"
                         TextWrapping="Wrap"
                         AcceptsReturn="True"
                         MinLines="2"
