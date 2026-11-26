@@ -69,9 +69,11 @@ namespace IronworksTranslator.Utils.Translator
                         sourceLanguage,
                         targetLanguage);
 
+                    ReportTranslationFailed();
                     return sentence;
                 }
 
+                ReportTranslationSucceeded();
                 Log.Debug(
                     "Papago translated. SourceLanguage: {SourceLanguage}, TargetLanguage: {TargetLanguage}, Source: {Source}, Result: {Result}",
                     sourceLanguage,
@@ -89,6 +91,7 @@ namespace IronworksTranslator.Utils.Translator
                     sourceLanguage,
                     targetLanguage);
 
+                ReportTranslationFailed(ex);
                 return sentence;
             }
         }

@@ -34,6 +34,7 @@ namespace IronworksTranslator.Utils.Translator
             {
                 if (!InitTranslator(testApi: true))
                 {
+                    ReportTranslationFailed();
                     return input;
                 }
             }
@@ -64,6 +65,7 @@ namespace IronworksTranslator.Utils.Translator
              */
             if (translator == null)
             {
+                ReportTranslationFailed();
                 return input;
             }
 
@@ -76,11 +78,14 @@ namespace IronworksTranslator.Utils.Translator
                             ? null : GetLanguageCode(sourceLanguage),
                     targetLanguageCode: GetLanguageCode(targetLanguage)
                 );
-                return translated.Result.Text;
+                var text = translated.Result.Text;
+                ReportTranslationSucceeded();
+                return text;
             }
             catch (Exception ex)
             {
                 Log.Error(ex.Message);
+                ReportTranslationFailed(ex);
                 return input;
             }
         }

@@ -100,6 +100,7 @@ namespace IronworksTranslator
                 services.AddSingleton<PapagoTranslator>();
                 services.AddSingleton<DeepLAPITranslator>();
                 services.AddSingleton<MiLMMTTranslator>();
+                services.AddSingleton<TranslatorFallbackService>();
                 services.AddSingleton<BiggsWorker>();
                 services.AddSingleton<TranslationReportService>();
             }).Build();
@@ -144,6 +145,8 @@ namespace IronworksTranslator
                 SetupUnhandledExceptionHandlers();
 
                 _host.Value.Start();
+                // Eagerly create the fallback service so it observes translator failures from the first request.
+                _ = GetService<TranslatorFallbackService>();
                 var chatWindow = GetService<ChatWindow>();
                 TranslationWindowVisibility.SetVisible(chatWindow, true);
                 var dialogueWindow = GetService<DialogueWindow>();
@@ -222,9 +225,12 @@ namespace IronworksTranslator
                     args.IsTerminating);
 
             // Catch exceptions from each AppDomain that uses a task scheduler for async operations.
+            // These surface on the finalizer thread long after the faulting task (e.g. PuppeteerSharp
+            // internals of a closed Chromium page) and never terminate the app once observed, so
+            // log them only. Showing a dialog per exception flooded users during a Papago outage.
             TaskScheduler.UnobservedTaskException += (sender, args) =>
             {
-                ShowUnhandledException(args.Exception, "TaskScheduler.UnobservedTaskException");
+                Log.Error(args.Exception, "TaskScheduler.UnobservedTaskException");
                 args.SetObserved();
             };
 

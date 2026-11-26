@@ -96,11 +96,21 @@ namespace IronworksTranslator.Utils
 
         private void InitWebBrowser()
         {
-            var browserTask = Task.Run(InitBrowser);
-            browser = browserTask.GetAwaiter().GetResult();
-            var pageTask = Task.Run(async () => await browser.NewPageAsync());
-            webPage = (Page)pageTask.GetAwaiter().GetResult(); // Cast IPage to Page
-            webPage.DefaultTimeout = 0;
+            try
+            {
+                var browserTask = Task.Run(InitBrowser);
+                browser = browserTask.GetAwaiter().GetResult();
+                var pageTask = Task.Run(async () => await browser.NewPageAsync());
+                webPage = (Page)pageTask.GetAwaiter().GetResult(); // Cast IPage to Page
+                webPage.DefaultTimeout = 0;
+            }
+            catch
+            {
+                // The constructor is about to throw, so the caller never receives this instance.
+                // Close the launched Chromium now instead of leaking it until the finalizer runs.
+                Dispose();
+                throw;
+            }
         }
 
 #pragma warning disable CS8602

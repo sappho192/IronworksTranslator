@@ -23,14 +23,32 @@ namespace IronworksTranslator.Views.Windows
         private readonly HttpClient httpClient = CreateHttpClient();
         private readonly TranslatorEngine? requestedEngine;
         private readonly MiLMMTModelProfile? requestedMiLMMTProfile;
+        private readonly bool isAutomaticFallback;
 
+        /// <summary>
+        /// True when the requested model is ready. Only meaningful after the window closes.
+        /// </summary>
+        public bool Succeeded { get; private set; }
+
+        /// <param name="isAutomaticFallback">
+        /// When true the download was started by the translator fallback instead of the user,
+        /// so failures are reported through <see cref="Succeeded"/> and never shut the app down.
+        /// </param>
         public InitializationWindow(
             TranslatorEngine? requestedEngine = null,
-            MiLMMTModelProfile? requestedMiLMMTProfile = null)
+            MiLMMTModelProfile? requestedMiLMMTProfile = null,
+            bool isAutomaticFallback = false)
         {
             this.requestedEngine = requestedEngine;
             this.requestedMiLMMTProfile = requestedMiLMMTProfile;
+            this.isAutomaticFallback = isAutomaticFallback;
             InitializeComponent();
+            if (isAutomaticFallback)
+            {
+                txtFallbackNotice.Text = Localizer.GetString("translator.fallback.download.notice");
+                txtFallbackNotice.Visibility = Visibility.Visible;
+                Height += 56;
+            }
             worker = new BackgroundWorker()
             {
                 WorkerReportsProgress = true,
@@ -67,6 +85,17 @@ namespace IronworksTranslator.Views.Windows
 
         private void Worker_RunWorkerCompleted(object? sender, RunWorkerCompletedEventArgs e)
         {
+            if (e.Error != null && isAutomaticFallback)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Log.Error(e.Error, "Automatic fallback model download failed.");
+                    Succeeded = false;
+                    Close();
+                });
+                return;
+            }
+
             if (e.Error != null)
             {
                 Application.Current.Dispatcher.Invoke(() =>
@@ -84,6 +113,7 @@ namespace IronworksTranslator.Views.Windows
 
             Application.Current.Dispatcher.Invoke(() =>
             {
+                Succeeded = true;
                 txtProgress.Text = Localizer.GetString("downloader.worker.progress.ready.complete");
                 prWorker.Visibility = Visibility.Collapsed;
             });
@@ -277,6 +307,13 @@ namespace IronworksTranslator.Views.Windows
             var modelIntegrity = File.Exists(profile.FilePath)
                 && CheckMiLMMTModelFile(profile);
 
+            if (!modelIntegrity && isAutomaticFallback)
+            {
+                TryDeleteFile(profile.FilePath);
+                throw new InvalidDataException(
+                    $"Downloaded MiLMMT model failed the integrity check: {profile.FilePath}");
+            }
+
             if (!modelIntegrity)
             {
                 MessageBox.Show(Localizer.GetString("downloader.error.milmmt.hash"));
@@ -284,6 +321,21 @@ namespace IronworksTranslator.Views.Windows
                 {
                     App.RequestShutdown();
                 });
+            }
+        }
+
+        private static void TryDeleteFile(string path)
+        {
+            try
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to delete file {Path}", path);
             }
         }
 
