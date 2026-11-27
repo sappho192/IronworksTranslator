@@ -131,6 +131,23 @@ GENERIC_DE_FR_STOPWORDS = frozenset({
     "ja", "nein", "oui", "non", "alle", "tous", "zurück", "retour", "fermer",
     "schließen", "start", "ende", "fin", "name", "nom", "zeit", "temps", "text", "texte",
 })
+# Common words that are valid NPC speaker names (kept in exact `npc_names`),
+# but should not trigger substring `Glossary:` prompt injection inside normal prose.
+NPC_SUBSTRING_EN_STOPWORDS = frozenset({
+    "amber", "angel", "april", "august", "baker", "black", "blaze", "brave",
+    "brook", "brother", "brown", "butler", "captain", "chief", "child", "clerk",
+    "crown", "devil", "doctor", "dream", "dreamer", "elder", "father", "first",
+    "fisher", "flame", "forest", "frost", "ghost", "golden", "grace", "grand",
+    "great", "green", "guard", "guide", "happy", "heart", "hunter", "junior",
+    "keeper", "knight", "leader", "light", "local", "lucky", "maiden", "major",
+    "master", "merry", "miner", "minor", "mother", "night", "noble", "officer",
+    "order", "pearl", "prince", "queen", "quiet", "raven", "river", "royal",
+    "runner", "saint", "scout", "second", "seeker", "senior", "shadow", "sharp",
+    "short", "silver", "singer", "sister", "small", "smith", "soldier", "spark",
+    "speaker", "spirit", "steel", "stone", "storm", "stranger", "sunny", "sweet",
+    "swift", "third", "tower", "traveler", "visitor", "voice", "waiter", "walker",
+    "wanderer", "watcher", "white", "worker", "writer", "youth",
+})
 
 
 @dataclass
@@ -294,6 +311,21 @@ def extract_datamining_terms(
     }
     entries: list[TermEntry] = []
 
+    # Identify proper-noun ENpcResident row IDs using English EXD metadata (Article == 1 and capitalized).
+    proper_npc_row_ids: set[str] = set()
+    en_npc_csv = resolve_lang_csv_dir(datamining_root, "en") / "ENpcResident.csv"
+    if en_npc_csv.exists():
+        en_npc_singular = load_csv_column(en_npc_csv, "Singular")
+        en_npc_article = load_csv_column(en_npc_csv, "Article")
+        proper_npc_row_ids = {
+            rid
+            for rid, article in en_npc_article.items()
+            if article == "1"
+            and rid in en_npc_singular
+            and en_npc_singular[rid].strip()
+            and en_npc_singular[rid].strip()[0].isupper()
+        }
+
     for spec in sheets:
         target_csv = lang_dirs[target_lang] / spec.filename
         if not target_csv.exists():
@@ -341,15 +373,28 @@ def extract_datamining_terms(
                     drop_counts[f"datamining:{reason}"] += 1
                     continue
 
+                include_runtime = spec.include_in_runtime
+                entry_tier = spec.tier
+                if spec.filename == "ENpcResident.csv" and row_id in proper_npc_row_ids:
+                    if src_lang == "ja":
+                        if len(src_clean) >= 3:
+                            include_runtime = True
+                            entry_tier = 3
+                    elif src_lang in ("en", "de", "fr"):
+                        has_compound_marker = any(ch in src_clean for ch in ("'", "-", " "))
+                        if (len(src_clean) >= 5 or has_compound_marker) and src_clean.casefold() not in NPC_SUBSTRING_EN_STOPWORDS:
+                            include_runtime = True
+                            entry_tier = 3
+
                 entries.append(
                     TermEntry(
                         pair=pair_key,
                         source=src_clean,
                         target=tgt_clean,
-                        tier=spec.tier,
+                        tier=entry_tier,
                         origin=origin,
                         category=spec.category,
-                        include_in_runtime=spec.include_in_runtime,
+                        include_in_runtime=include_runtime,
                     )
                 )
                 # For English proper-noun places starting with "The " (e.g. "The Mizzenmast"),
@@ -372,6 +417,86 @@ def extract_datamining_terms(
                             )
 
     return entries
+
+
+def extract_npc_names(
+    datamining_root: Path,
+    source_langs: Sequence[str],
+    target_lang: str,
+    drop_counts: Counter[str],
+) -> dict[str, dict[str, str]]:
+    """Extract exact-match NPC/BattleTalk speaker name lookup maps (`ENpcResident` > `BNpcName`)."""
+    lang_dirs = {
+        lang: resolve_lang_csv_dir(datamining_root, lang)
+        for lang in (*source_langs, target_lang)
+    }
+    raw_entries: list[TermEntry] = []
+    npc_sheets = (
+        ("ENpcResident.csv", 1, "npc_name"),
+        ("BNpcName.csv", 2, "bnpc_name"),
+    )
+
+    for filename, tier, category in npc_sheets:
+        target_csv = lang_dirs[target_lang] / filename
+        if not target_csv.exists():
+            continue
+        target_map = load_csv_column(target_csv, "Singular")
+        if not target_map:
+            continue
+
+        for src_lang in source_langs:
+            src_csv = lang_dirs[src_lang] / filename
+            if not src_csv.exists():
+                continue
+            src_map = load_csv_column(src_csv, "Singular")
+            pair_key = f"{LANG_CODE_TO_NAME[src_lang]}->{LANG_CODE_TO_NAME[target_lang]}"
+            origin = f"npc_names:{filename}"
+
+            for row_id, raw_src in src_map.items():
+                raw_tgt = target_map.get(row_id)
+                if not raw_tgt:
+                    continue
+                src_clean, src_drop = clean_exd_text(raw_src)
+                if src_drop:
+                    continue
+                tgt_clean, tgt_drop = clean_exd_text(raw_tgt)
+                if tgt_drop:
+                    continue
+                reason = validate_pair(
+                    src_lang,
+                    target_lang,
+                    src_clean,
+                    tgt_clean,
+                    max_source_len=48,
+                    max_target_len=48,
+                    min_ja_len=1,
+                    min_latin_len=2,
+                    disallow_sentence_punct=False,
+                    filter_generic_stopwords=False,
+                )
+                if reason:
+                    continue
+                raw_entries.append(
+                    TermEntry(
+                        pair=pair_key,
+                        source=src_clean,
+                        target=tgt_clean,
+                        tier=tier,
+                        origin=origin,
+                        category=category,
+                        include_in_runtime=True,
+                    )
+                )
+
+    winners, _ = merge_entries(raw_entries, drop_counts=drop_counts)
+    grouped: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    for entry in winners.values():
+        grouped[entry.pair].append((entry.source, entry.target))
+
+    result: dict[str, dict[str, str]] = {}
+    for pair_key in sorted(grouped.keys()):
+        result[pair_key] = dict(sorted(grouped[pair_key], key=lambda item: item[0]))
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -611,6 +736,7 @@ def extract_koala_xlsx(
     return entries
 
 
+
 def extract_jclient_terms_xlsx(xlsx_path: Path, drop_counts: Counter[str]) -> list[TermEntry]:
     """Parse 'FF14 J클라 게임 용어 정리' spreadsheet."""
     sheets = read_xlsx_sheets(xlsx_path)
@@ -679,6 +805,7 @@ def extract_jclient_terms_xlsx(xlsx_path: Path, drop_counts: Counter[str]) -> li
     return entries
 
 
+
 def extract_ff14_terms_md(md_path: Path, drop_counts: Counter[str]) -> list[TermEntry]:
     """Parse '파판 용어' markdown export (`Korean_gloss Japanese_term1 Japanese_term2 ...`)."""
     entries: list[TermEntry] = []
@@ -745,6 +872,7 @@ def extract_ff14_terms_md(md_path: Path, drop_counts: Counter[str]) -> list[Term
     return entries
 
 
+
 def extract_curated_community_json(curated_path: Path) -> list[TermEntry]:
     """Load hand-curated Tier-2 community glossary JSON."""
     data = json.loads(curated_path.read_text(encoding="utf-8"))
@@ -769,6 +897,7 @@ def extract_curated_community_json(curated_path: Path) -> list[TermEntry]:
     return entries
 
 
+
 def extract_user_overrides_json(override_path: Path) -> list[TermEntry]:
     """Load optional manual/curated overrides JSON (`{"pairs": {"Japanese->Korean": [{"source":..., "target":...}]}}`)."""
     data = json.loads(override_path.read_text(encoding="utf-8"))
@@ -790,6 +919,7 @@ def extract_user_overrides_json(override_path: Path) -> list[TermEntry]:
                     )
                 )
     return entries
+
 
 
 # ---------------------------------------------------------------------------
@@ -896,6 +1026,7 @@ def build_glossary_payload(
     version: str,
     runtime_only: bool,
     include_metadata: bool = False,
+    npc_names: dict[str, dict[str, str]] | None = None,
 ) -> dict:
     pairs_out: dict[str, list[dict]] = defaultdict(list)
     for entry in winners.values():
@@ -916,10 +1047,13 @@ def build_glossary_payload(
             key=lambda x: (-len(x["source"]), x["source"]),
         )
 
-    return {
+    payload: dict = {
         "version": version,
         "pairs": sorted_pairs,
     }
+    if npc_names:
+        payload["npc_names"] = npc_names
+    return payload
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -957,6 +1091,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.overrides_json and args.overrides_json.exists():
         all_entries.extend(extract_user_overrides_json(args.overrides_json))
+    npc_names: dict[str, dict[str, str]] = {}
     if args.datamining_dir:
         all_entries.extend(
             extract_datamining_terms(
@@ -965,6 +1100,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                 target_lang=args.target_lang,
                 drop_counts=drop_counts,
             )
+        )
+        npc_names = extract_npc_names(
+            args.datamining_dir,
+            source_langs=args.source_langs,
+            target_lang=args.target_lang,
+            drop_counts=drop_counts,
         )
     if args.community_curated_json and args.community_curated_json.exists():
         all_entries.extend(extract_curated_community_json(args.community_curated_json))
@@ -987,21 +1128,36 @@ def main(argv: Sequence[str] | None = None) -> int:
             seen_phrases.add(pk)
             unique_phrases.append(p)
 
-    runtime_payload = build_glossary_payload(winners, version=args.version, runtime_only=True, include_metadata=False)
-    full_payload = build_glossary_payload(winners, version=args.version, runtime_only=False, include_metadata=True)
+    runtime_payload = build_glossary_payload(
+        winners,
+        version=args.version,
+        runtime_only=True,
+        include_metadata=False,
+        npc_names=npc_names,
+    )
+    full_payload = build_glossary_payload(
+        winners,
+        version=args.version,
+        runtime_only=False,
+        include_metadata=True,
+        npc_names=npc_names,
+    )
 
     by_origin = Counter(e.origin for e in winners.values())
     by_tier = Counter(f"tier_{e.tier}" for e in winners.values())
     by_pair_runtime = {k: len(v) for k, v in runtime_payload["pairs"].items()}
     by_pair_full = {k: len(v) for k, v in full_payload["pairs"].items()}
+    by_pair_npc_names = {k: len(v) for k, v in npc_names.items()}
 
     report = {
         "version": args.version,
         "raw_candidates": len(all_entries),
         "unique_terms_full": len(winners),
         "unique_terms_runtime": sum(by_pair_runtime.values()),
+        "unique_npc_names": sum(by_pair_npc_names.values()),
         "community_phrase_pairs": len(unique_phrases),
         "by_pair_runtime": by_pair_runtime,
+        "by_pair_npc_names": by_pair_npc_names,
         "by_pair_full": by_pair_full,
         "by_tier_full": dict(sorted(by_tier.items())),
         "by_origin_full": dict(by_origin.most_common()),
@@ -1022,6 +1178,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     (args.out_dir / "glossary.runtime.json").write_text(
         json.dumps(runtime_payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    (args.out_dir / "glossary.runtime.min.json").write_text(
+        json.dumps(runtime_payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8"
+    )
     (args.out_dir / "glossary.full.json").write_text(
         json.dumps(full_payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
@@ -1036,6 +1195,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     print(
         f"Built glossary {args.version}: runtime={report['unique_terms_runtime']:,}, "
+        f"npc_names={report['unique_npc_names']:,}, "
         f"full={report['unique_terms_full']:,}, phrases={report['community_phrase_pairs']:,}, "
         f"conflicts={report['conflict_count']:,}"
     )

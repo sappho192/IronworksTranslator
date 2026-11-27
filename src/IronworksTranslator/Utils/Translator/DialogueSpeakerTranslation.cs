@@ -5,7 +5,8 @@ namespace IronworksTranslator.Utils.Translator
         internal static string TranslateOrOriginal(
             string? speaker,
             Func<string, string> translate,
-            Action<Exception>? onFailure = null)
+            Action<Exception>? onFailure = null,
+            Func<string, string?>? tryResolveOfficialName = null)
         {
             ArgumentNullException.ThrowIfNull(translate);
 
@@ -13,6 +14,15 @@ namespace IronworksTranslator.Utils.Translator
             if (original.Length == 0)
             {
                 return string.Empty;
+            }
+
+            if (tryResolveOfficialName != null)
+            {
+                var officialName = tryResolveOfficialName(original);
+                if (!string.IsNullOrWhiteSpace(officialName))
+                {
+                    return officialName.Trim();
+                }
             }
 
             try
@@ -33,7 +43,8 @@ namespace IronworksTranslator.Utils.Translator
             string? speaker,
             Func<string, CancellationToken, Task<string>> translate,
             CancellationToken cancellationToken,
-            Action<Exception>? onFailure = null)
+            Action<Exception>? onFailure = null,
+            Func<string, string?>? tryResolveOfficialName = null)
         {
             ArgumentNullException.ThrowIfNull(translate);
 
@@ -41,6 +52,15 @@ namespace IronworksTranslator.Utils.Translator
             if (original.Length == 0)
             {
                 return string.Empty;
+            }
+
+            if (tryResolveOfficialName != null)
+            {
+                var officialName = tryResolveOfficialName(original);
+                if (!string.IsNullOrWhiteSpace(officialName))
+                {
+                    return officialName.Trim();
+                }
             }
 
             try

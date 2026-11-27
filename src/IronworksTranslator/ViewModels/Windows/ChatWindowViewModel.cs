@@ -471,6 +471,8 @@ namespace IronworksTranslator.ViewModels.Windows
             ClientLanguage sourceLanguage,
             CancellationToken cancellationToken)
         {
+            var targetLanguage = (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage;
+            var glossaryService = App.GetService<MiLMMTGlossaryService>();
             return await DialogueSpeakerTranslation.TranslateOrOriginalAsync(
                 speaker,
                 (value, token) => TranslateAsync(
@@ -481,7 +483,15 @@ namespace IronworksTranslator.ViewModels.Windows
                 cancellationToken,
                 ex => Log.Warning(
                     ex,
-                    "Failed to translate dialogue speaker; using the original speaker."));
+                    "Failed to translate dialogue speaker; using the original speaker."),
+                value => glossaryService != null
+                    && glossaryService.TryResolveNpcName(
+                        (TranslationLanguageCode)sourceLanguage,
+                        targetLanguage,
+                        value,
+                        out var officialName)
+                        ? officialName
+                        : null);
         }
 
         internal static TranslationText CreateResolvedAutoTranslateText(

@@ -17,22 +17,30 @@ namespace IronworksTranslator.Utils.Translator
         public static MiLMMTGlossaryMatcher Empty { get; } = new(
             string.Empty,
             new Dictionary<(TranslationLanguageCode, TranslationLanguageCode), PairIndex>(),
+            new Dictionary<(TranslationLanguageCode, TranslationLanguageCode), Dictionary<string, string>>(),
+            0,
             0);
 
         private readonly IReadOnlyDictionary<(TranslationLanguageCode Source, TranslationLanguageCode Target), PairIndex> _indices;
+        private readonly IReadOnlyDictionary<(TranslationLanguageCode Source, TranslationLanguageCode Target), Dictionary<string, string>> _npcNames;
 
         private MiLMMTGlossaryMatcher(
             string version,
             IReadOnlyDictionary<(TranslationLanguageCode Source, TranslationLanguageCode Target), PairIndex> indices,
-            int termCount)
+            IReadOnlyDictionary<(TranslationLanguageCode Source, TranslationLanguageCode Target), Dictionary<string, string>> npcNames,
+            int termCount,
+            int npcNameCount)
         {
             Version = version;
             _indices = indices;
+            _npcNames = npcNames;
             TermCount = termCount;
+            NpcNameCount = npcNameCount;
         }
 
         public string Version { get; }
         public int TermCount { get; }
+        public int NpcNameCount { get; }
 
         public static bool TryFromJson(string json, out MiLMMTGlossaryMatcher matcher)
         {
@@ -115,7 +123,7 @@ namespace IronworksTranslator.Utils.Translator
                         continue;
                     }
 
-                    var matchKey = caseInsensitive ? source.ToLowerInvariant() : source;
+                    var matchKey = NormalizeApostrophes(caseInsensitive ? source.ToLowerInvariant() : source);
                     var prefix = matchKey[..2];
                     if (!buckets.TryGetValue(prefix, out var list))
                     {
@@ -146,7 +154,73 @@ namespace IronworksTranslator.Utils.Translator
                 }
             }
 
-            return new MiLMMTGlossaryMatcher(version, indices, totalTerms);
+            var npcNames = new Dictionary<(TranslationLanguageCode Source, TranslationLanguageCode Target), Dictionary<string, string>>();
+            var totalNpcNames = 0;
+
+            if (root.TryGetProperty("npc_names", out var npcNamesProp) && npcNamesProp.ValueKind == JsonValueKind.Object)
+            {
+                foreach (var pairProperty in npcNamesProp.EnumerateObject())
+                {
+                    if (!TryParsePairKey(pairProperty.Name, out var sourceLanguage, out var targetLanguage))
+                    {
+                        continue;
+                    }
+
+                    if (pairProperty.Value.ValueKind != JsonValueKind.Object)
+                    {
+                        continue;
+                    }
+
+                    var comparer = IsLatinScriptLanguage(sourceLanguage)
+                        ? StringComparer.OrdinalIgnoreCase
+                        : StringComparer.Ordinal;
+                    var map = new Dictionary<string, string>(comparer);
+
+                    foreach (var entry in pairProperty.Value.EnumerateObject())
+                    {
+                        if (entry.Value.ValueKind != JsonValueKind.String)
+                        {
+                            continue;
+                        }
+
+                        var source = NormalizeNpcLookupKey(entry.Name);
+                        var target = entry.Value.GetString()?.Trim();
+                        if (string.IsNullOrEmpty(source) || string.IsNullOrWhiteSpace(target))
+                        {
+                            continue;
+                        }
+
+                        map.TryAdd(source, target);
+                    }
+
+                    if (map.Count > 0)
+                    {
+                        npcNames[(sourceLanguage, targetLanguage)] = map;
+                        totalNpcNames += map.Count;
+                    }
+                }
+            }
+
+            return new MiLMMTGlossaryMatcher(version, indices, npcNames, totalTerms, totalNpcNames);
+        }
+
+        public bool TryResolveNpcName(
+            TranslationLanguageCode sourceLanguage,
+            TranslationLanguageCode targetLanguage,
+            string? speaker,
+            out string officialName)
+        {
+            officialName = string.Empty;
+            var key = NormalizeNpcLookupKey(speaker);
+            if (key.Length == 0
+                || !_npcNames.TryGetValue((sourceLanguage, targetLanguage), out var map)
+                || !map.TryGetValue(key, out var resolved))
+            {
+                return false;
+            }
+
+            officialName = resolved;
+            return true;
         }
 
         public IReadOnlyList<MiLMMTGlossaryTerm> Match(
@@ -163,7 +237,7 @@ namespace IronworksTranslator.Utils.Translator
                 return [];
             }
 
-            var haystack = pairIndex.CaseInsensitive ? input.ToLowerInvariant() : input;
+            var haystack = NormalizeApostrophes(pairIndex.CaseInsensitive ? input.ToLowerInvariant() : input);
             var candidates = new List<MatchCandidate>();
 
             for (var i = 0; i <= haystack.Length - 2; i++)
@@ -289,6 +363,32 @@ namespace IronworksTranslator.Utils.Translator
             return language is TranslationLanguageCode.English
                 or TranslationLanguageCode.German
                 or TranslationLanguageCode.French;
+        }
+
+        private static string NormalizeApostrophes(string text)
+        {
+            return text.IndexOfAny(['\u2019', '\u2018', '\uFF07']) >= 0
+                ? text.Replace('\u2019', '\'').Replace('\u2018', '\'').Replace('\uFF07', '\'')
+                : text;
+        }
+
+        private static string NormalizeNpcLookupKey(string? speaker)
+        {
+            if (string.IsNullOrWhiteSpace(speaker))
+            {
+                return string.Empty;
+            }
+
+            var trimmed = NormalizeApostrophes(speaker.Trim());
+            if (trimmed.IndexOf("  ", StringComparison.Ordinal) < 0
+                && trimmed.IndexOf('\t') < 0
+                && trimmed.IndexOf('\n') < 0
+                && trimmed.IndexOf('\r') < 0)
+            {
+                return trimmed;
+            }
+
+            return string.Join(' ', trimmed.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
         }
 
         private static bool IsLatinAlnum(char ch)

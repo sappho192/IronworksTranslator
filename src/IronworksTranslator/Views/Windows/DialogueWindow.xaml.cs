@@ -127,13 +127,24 @@ namespace IronworksTranslator.Views.Windows
                             var modelProfile = engine == TranslatorEngine.MiLMMT
                                 ? MiLMMTModelProfiles.GetEffectiveCurrent()
                                 : null;
+                            var targetLanguage =
+                                (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage;
+                            var glossaryService = App.GetService<MiLMMTGlossaryService>();
                             var translated = Translate(msg, sourceLanguage, engine);
                             var translatedSpeaker = DialogueSpeakerTranslation.TranslateOrOriginal(
                                 entry.Speaker,
                                 speaker => Translate(speaker, sourceLanguage, engine),
                                 ex => Log.Warning(
                                     ex,
-                                    "Failed to translate dialogue speaker; using the original speaker."));
+                                    "Failed to translate dialogue speaker; using the original speaker."),
+                                speaker => glossaryService != null
+                                    && glossaryService.TryResolveNpcName(
+                                        (TranslationLanguageCode)sourceLanguage,
+                                        targetLanguage,
+                                        speaker,
+                                        out var officialName)
+                                        ? officialName
+                                        : null);
                             var displayText = DialogueTextFormatter.Format(
                                 translatedSpeaker,
                                 translated);

@@ -78,4 +78,60 @@ public class DialogueSpeakerTranslationTests
                 (_, token) => Task.FromCanceled<string>(token),
                 cancellation.Token));
     }
+
+    [Fact]
+    public void TranslateOrOriginal_UsesOfficialNpcNameWithoutCallingTranslator()
+    {
+        var translatorCalled = false;
+
+        var result = DialogueSpeakerTranslation.TranslateOrOriginal(
+            "  Urianger  ",
+            _ =>
+            {
+                translatorCalled = true;
+                return "유리앙거";
+            },
+            tryResolveOfficialName: speaker => speaker == "Urianger" ? "위리앙제" : null);
+
+        Assert.False(translatorCalled);
+        Assert.Equal("위리앙제", result);
+    }
+
+    [Fact]
+    public async Task TranslateOrOriginalAsync_UsesOfficialNpcNameWithoutCallingTranslator()
+    {
+        var translatorCalled = false;
+
+        var result = await DialogueSpeakerTranslation.TranslateOrOriginalAsync(
+            "Urianger",
+            (_, _) =>
+            {
+                translatorCalled = true;
+                return Task.FromResult("유리앙거");
+            },
+            CancellationToken.None,
+            tryResolveOfficialName: speaker => speaker == "Urianger" ? "위리앙제" : null);
+
+        Assert.False(translatorCalled);
+        Assert.Equal("위리앙제", result);
+    }
+
+    [Fact]
+    public async Task TranslateOrOriginalAsync_FallsBackToTranslatorWhenOfficialNameMissing()
+    {
+        var translatorCalled = false;
+
+        var result = await DialogueSpeakerTranslation.TranslateOrOriginalAsync(
+            "Mysterious Stranger",
+            (_, _) =>
+            {
+                translatorCalled = true;
+                return Task.FromResult("수수께끼의 이방인");
+            },
+            CancellationToken.None,
+            tryResolveOfficialName: _ => null);
+
+        Assert.True(translatorCalled);
+        Assert.Equal("수수께끼의 이방인", result);
+    }
 }

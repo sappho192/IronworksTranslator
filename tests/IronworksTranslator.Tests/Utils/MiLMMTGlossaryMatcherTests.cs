@@ -116,4 +116,62 @@ public class MiLMMTGlossaryMatcherTests
         Assert.False(ok);
         Assert.Same(MiLMMTGlossaryMatcher.Empty, matcher);
     }
+
+    [Fact]
+    public void TryResolveNpcName_MatchesOfficialNamesWithCaseAndApostropheNormalization()
+    {
+        const string jsonWithNpcs = """
+            {
+              "version": "2026-11-27.3",
+              "pairs": {
+                "English->Korean": [
+                  { "source": "Y'shtola", "target": "야슈톨라" }
+                ]
+              },
+              "npc_names": {
+                "English->Korean": {
+                  "Urianger": "위리앙제",
+                  "Y'shtola": "야슈톨라",
+                  "Cid": "시드"
+                },
+                "Japanese->Korean": {
+                  "ウリエンジェ": "위리앙제"
+                }
+              }
+            }
+            """;
+
+        var matcher = MiLMMTGlossaryMatcher.FromJson(jsonWithNpcs);
+
+        Assert.Equal(4, matcher.NpcNameCount);
+        Assert.True(matcher.TryResolveNpcName(TranslationLanguageCode.English, TranslationLanguageCode.Korean, "Urianger", out var urianger));
+        Assert.Equal("위리앙제", urianger);
+
+        Assert.True(matcher.TryResolveNpcName(TranslationLanguageCode.English, TranslationLanguageCode.Korean, "  urianger  ", out var uriangerLower));
+        Assert.Equal("위리앙제", uriangerLower);
+
+        Assert.True(matcher.TryResolveNpcName(TranslationLanguageCode.English, TranslationLanguageCode.Korean, "Y\u2019shtola", out var yshtola));
+        Assert.Equal("야슈톨라", yshtola);
+
+        Assert.True(matcher.TryResolveNpcName(TranslationLanguageCode.English, TranslationLanguageCode.Korean, "Cid", out var cid));
+        Assert.Equal("시드", cid);
+
+        Assert.True(matcher.TryResolveNpcName(TranslationLanguageCode.Japanese, TranslationLanguageCode.Korean, "ウリエンジェ", out var jaUrianger));
+        Assert.Equal("위리앙제", jaUrianger);
+
+        Assert.False(matcher.TryResolveNpcName(TranslationLanguageCode.English, TranslationLanguageCode.Korean, "Unknown Adventurer", out _));
+
+        // Substring glossary matching also handles curly apostrophes.
+        var matches = matcher.Match(TranslationLanguageCode.English, TranslationLanguageCode.Korean, "Ask Y\u2019shtola about the aether.");
+        Assert.Equal([new MiLMMTGlossaryTerm("Y'shtola", "야슈톨라")], matches);
+    }
+
+    [Fact]
+    public void FromJson_WithoutNpcNames_RemainsBackwardsCompatible()
+    {
+        var matcher = MiLMMTGlossaryMatcher.FromJson(SampleGlossaryJson);
+
+        Assert.Equal(0, matcher.NpcNameCount);
+        Assert.False(matcher.TryResolveNpcName(TranslationLanguageCode.English, TranslationLanguageCode.Korean, "Urianger", out _));
+    }
 }
