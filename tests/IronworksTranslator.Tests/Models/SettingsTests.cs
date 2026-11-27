@@ -220,6 +220,10 @@ public class SettingsTests
         Assert.True(compact.Supports(TranslationLanguageCode.Korean));
         Assert.False(compact.Supports(TranslationLanguageCode.German));
         Assert.Contains(MiLMMTModelSize.MiLMMT_1B_Compact, MiLMMTModelProfiles.SelectableModelSizes);
+        Assert.Contains(MiLMMTModelSize.MiLMMT_1B_FFXIV, MiLMMTModelProfiles.SelectableModelSizes);
+        var ffxiv1b = MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_1B_FFXIV, MiLMMTQuantization.Q8_0);
+        Assert.True(ffxiv1b.SupportsGlossaryPrompt);
+        Assert.Equal(MiLMMTQuantization.Q8_0, MiLMMTModelProfiles.GetDefaultQuantization(MiLMMTModelSize.MiLMMT_1B_FFXIV));
         Assert.Equal(5, MiLMMTModelProfiles.Retired.Count);
 #else
         var retiredCompact = Assert.Single(

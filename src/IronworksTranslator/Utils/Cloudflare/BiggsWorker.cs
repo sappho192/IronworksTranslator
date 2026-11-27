@@ -1,12 +1,40 @@
 using IronworksTranslator.Models.Cloudflare;
 using IronworksTranslator.Utils.Aspect;
 using Serilog;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
 namespace IronworksTranslator.Utils.Cloudflare
 {
+    public enum BiggsGlossaryFetchStatus
+    {
+        Updated,
+        NotModified,
+        Failed,
+    }
+
+    public sealed record BiggsGlossaryFetchResult(
+        BiggsGlossaryFetchStatus Status,
+        string? JsonContent = null,
+        string? ETag = null,
+        string? Version = null,
+        string? ErrorMessage = null)
+    {
+        public bool IsSuccess => Status is BiggsGlossaryFetchStatus.Updated or BiggsGlossaryFetchStatus.NotModified;
+
+        public static BiggsGlossaryFetchResult Updated(string jsonContent, string? etag, string? version) =>
+            new(BiggsGlossaryFetchStatus.Updated, jsonContent, etag, version);
+
+        public static BiggsGlossaryFetchResult NotModified(string? etag, string? version) =>
+            new(BiggsGlossaryFetchStatus.NotModified, null, etag, version);
+
+        public static BiggsGlossaryFetchResult Failed(string errorMessage) =>
+            new(BiggsGlossaryFetchStatus.Failed, null, null, null, errorMessage);
+    }
+
     public class BiggsWorker : IDisposable
     {
         public const string DefaultPointerUrl = "https://hermes.sapphosound.com/database.json";
@@ -27,9 +55,13 @@ namespace IronworksTranslator.Utils.Cloudflare
         {
             if (httpClient == null)
             {
-                _httpClient = new HttpClient
+                var handler = new SocketsHttpHandler
                 {
-                    Timeout = TimeSpan.FromSeconds(15),
+                    AutomaticDecompression = DecompressionMethods.All,
+                };
+                _httpClient = new HttpClient(handler, disposeHandler: true)
+                {
+                    Timeout = TimeSpan.FromSeconds(20),
                 };
                 _ownsHttpClient = true;
             }
@@ -128,8 +160,105 @@ namespace IronworksTranslator.Utils.Cloudflare
             }
         }
 
+        [TraceMethod]
+        public async Task<BiggsGlossaryFetchResult> FetchGlossaryAsync(
+            string? ifNoneMatch = null,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var endpoint = await ResolveEndpointAsync(cancellationToken);
+                if (endpoint == null || string.IsNullOrWhiteSpace(endpoint.url))
+                {
+                    return BiggsGlossaryFetchResult.Failed("Failed to resolve glossary endpoint.");
+                }
+
+                var result = await GetGlossaryAsync(endpoint, ifNoneMatch, cancellationToken);
+                if (result.IsSuccess)
+                {
+                    return result;
+                }
+
+                InvalidateEndpoint(endpoint);
+                var refreshed = await ResolveEndpointAsync(cancellationToken);
+                if (refreshed == null
+                    || string.IsNullOrWhiteSpace(refreshed.url)
+                    || IsSameEndpoint(refreshed, endpoint))
+                {
+                    return result;
+                }
+
+                Log.Information("Glossary endpoint changed after a failed fetch; retrying on the new endpoint.");
+                return await GetGlossaryAsync(refreshed, ifNoneMatch, cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                return BiggsGlossaryFetchResult.Failed("Cancelled");
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "BiggsWorker glossary fetch failed.");
+                return BiggsGlossaryFetchResult.Failed(ex.Message);
+            }
+        }
+
+        private async Task<BiggsGlossaryFetchResult> GetGlossaryAsync(
+            BiggsEndPoint endpoint,
+            string? ifNoneMatch,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var requestUrl = BuildGlossaryUrl(endpoint);
+                using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+                if (!string.IsNullOrWhiteSpace(ifNoneMatch)
+                    && EntityTagHeaderValue.TryParse(ifNoneMatch.Trim(), out var parsedTag))
+                {
+                    request.Headers.IfNoneMatch.Add(parsedTag);
+                }
+
+                using var response = await _cloudflareClient.SendAsync(request, cancellationToken);
+                var etag = response.Headers.ETag?.ToString();
+                var version = response.Headers.TryGetValues("X-Glossary-Version", out var versionValues)
+                    ? versionValues.FirstOrDefault()?.Trim()
+                    : null;
+
+                if (response.StatusCode == HttpStatusCode.NotModified)
+                {
+                    return BiggsGlossaryFetchResult.NotModified(etag, version);
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var body = await response.Content.ReadAsStringAsync(cancellationToken);
+                    if (string.IsNullOrWhiteSpace(body))
+                    {
+                        return BiggsGlossaryFetchResult.Failed("Empty glossary response body.");
+                    }
+
+                    return BiggsGlossaryFetchResult.Updated(body, etag, version);
+                }
+
+                Log.Warning("BiggsWorker glossary fetch failed with {StatusCode}.", response.StatusCode);
+                return BiggsGlossaryFetchResult.Failed($"HTTP {(int)response.StatusCode}");
+            }
+            catch (CloudflareWorkerException ex)
+            {
+                LogCloudflareWorkerError(ex);
+                return BiggsGlossaryFetchResult.Failed($"Cloudflare Worker Error {ex.ErrorCode}");
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+            {
+                Log.Warning(ex, "BiggsWorker glossary fetch failed.");
+                return BiggsGlossaryFetchResult.Failed(ex.Message);
+            }
+        }
+
         private static string BuildReportUrl(BiggsEndPoint endpoint) =>
             $"{endpoint.url.TrimEnd('/')}/v2/reports";
+
+        private static string BuildGlossaryUrl(BiggsEndPoint endpoint) =>
+            $"{endpoint.url.TrimEnd('/')}/v2/glossary";
 
         private static bool IsSameEndpoint(BiggsEndPoint left, BiggsEndPoint right) =>
             string.Equals(BuildReportUrl(left), BuildReportUrl(right), StringComparison.OrdinalIgnoreCase);

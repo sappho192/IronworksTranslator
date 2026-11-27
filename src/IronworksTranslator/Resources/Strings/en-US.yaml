@@ -157,6 +157,8 @@ settings.translator.engine.milmmt.delete.failed: "Failed to delete model file: {
 settings.translator.engine.milmmt.note.1b.q4: "Fastest local option; choose it when speed is the priority."
 settings.translator.engine.milmmt.note.1b.compact: "Experimental compact model optimized for Korean, English, and Japanese. Available only in Debug builds."
 settings.translator.engine.milmmt.note.retired.1b.compact: "Debug-only 1B Compact model. It cannot be used for translation in the current build."
+settings.translator.engine.milmmt.note.1b.ffxiv: "Experimental 1B FFXIV fine-tuned model with automatic runtime glossary injection. Available only in Debug builds."
+settings.translator.engine.milmmt.note.retired.1b.ffxiv: "Debug-only 1B FFXIV experimental model. It cannot be used for translation in the current build."
 settings.translator.engine.milmmt.note.retired.v0_1: "Previous MiLMMT v0.1 model. Used temporarily if v1.0 is not downloaded yet; you can safely delete it after upgrading to v1.0."
 settings.translator.engine.milmmt.note.1b.q8: "Recommended default 1B higher precision option; still light enough for most systems."
 settings.translator.engine.milmmt.note.4b.q4: "Good quality target when VRAM headroom is available."

@@ -156,6 +156,8 @@ settings.translator.engine.milmmt.delete.failed: "모델 파일을 삭제하지 
 settings.translator.engine.milmmt.note.1b.q4: "가장 빠른 로컬 옵션입니다. 처리 속도를 우선할 때 선택하세요."
 settings.translator.engine.milmmt.note.1b.compact: "한국어·영어·일본어에 맞춰 경량화한 실험용 모델입니다. Debug 빌드에서만 사용할 수 있습니다."
 settings.translator.engine.milmmt.note.retired.1b.compact: "Debug 전용 1B Compact 모델입니다. 현재 빌드에서는 번역에 사용할 수 없습니다."
+settings.translator.engine.milmmt.note.1b.ffxiv: "FFXIV 런타임 용어집(Glossary)을 자동 주입하는 실험용 1B 파인튜닝 모델입니다. Debug 빌드에서만 사용할 수 있습니다."
+settings.translator.engine.milmmt.note.retired.1b.ffxiv: "Debug 전용 1B FFXIV 실험 모델입니다. 현재 빌드에서는 번역에 사용할 수 없습니다."
 settings.translator.engine.milmmt.note.retired.v0_1: "이전 MiLMMT v0.1 모델입니다. v1.0 모델이 아직 없는 동안 임시 폴백으로 사용되며, v1.0 전환 후에는 삭제할 수 있습니다."
 settings.translator.engine.milmmt.note.1b.q8: "기본값으로 권장하는 1B 고정밀 옵션입니다. 대부분의 시스템에서 부담이 작습니다."
 settings.translator.engine.milmmt.note.4b.q4: "VRAM 여유가 있을 때 품질을 높이기 좋은 선택입니다."

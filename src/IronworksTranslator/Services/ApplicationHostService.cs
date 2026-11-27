@@ -127,6 +127,21 @@ namespace IronworksTranslator.Services
         {
             var miLMMTTranslator = _serviceProvider.GetService(typeof(MiLMMTTranslator)) as MiLMMTTranslator;
             miLMMTTranslator?.ConfigureNativeBackendAtStartup();
+            if (_serviceProvider.GetService(typeof(MiLMMTGlossaryService)) is MiLMMTGlossaryService glossaryService)
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await glossaryService.RefreshAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning(ex, "Background MiLMMT glossary refresh failed at startup.");
+                    }
+                });
+            }
+
             await HandleActivationAsync();
         }
 

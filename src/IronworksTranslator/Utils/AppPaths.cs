@@ -40,6 +40,18 @@ namespace IronworksTranslator.Utils
             DataDirectory,
             "sharlayan");
 
+        public static string GlossaryDirectory { get; } = Path.Combine(
+            DataDirectory,
+            "glossary");
+
+        public static string GlossaryCacheFilePath { get; } = Path.Combine(
+            GlossaryDirectory,
+            "glossary.json");
+
+        public static string GlossaryMetaFilePath { get; } = Path.Combine(
+            GlossaryDirectory,
+            "glossary.meta.json");
+
         public static string ModelDirectory { get; } = Path.Combine(
             DataDirectory,
             "model");
@@ -61,6 +73,7 @@ namespace IronworksTranslator.Utils
                     MiLMMTModelSize.MiLMMT_4B => "milmmt-46-4b-v1.0",
                     MiLMMTModelSize.MiLMMT_12B => "milmmt-46-12b-v1.0",
                     MiLMMTModelSize.MiLMMT_1B_Compact => "milmmt-46-1b-v0.1",
+                    MiLMMTModelSize.MiLMMT_1B_FFXIV => "milmmt-46-1b-v1.0-ffxiv",
                     _ => "milmmt-46-1b-v1.0",
                 });
         }
@@ -72,6 +85,7 @@ namespace IronworksTranslator.Utils
             Directory.CreateDirectory(LogsDirectory);
             Directory.CreateDirectory(DataDirectory);
             Directory.CreateDirectory(SharlayanCacheDirectory);
+            Directory.CreateDirectory(GlossaryDirectory);
         }
 
         public static void MigrateLegacyUserData()

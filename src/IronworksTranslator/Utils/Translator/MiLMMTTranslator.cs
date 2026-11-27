@@ -1,6 +1,7 @@
 using IronworksTranslator.Models.Enums;
 using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Models.Translator;
+using IronworksTranslator.Services;
 using IronworksTranslator.Utils.Translators;
 using LLama;
 using LLama.Common;
@@ -8,6 +9,7 @@ using LLama.Native;
 using LLama.Sampling;
 using Serilog;
 using System.IO;
+using System.Text;
 
 namespace IronworksTranslator.Utils.Translator
 {
@@ -30,6 +32,7 @@ namespace IronworksTranslator.Utils.Translator
             TranslationLanguageCode.Korean
         ];
 
+        private readonly MiLMMTGlossaryService? glossaryService;
         private readonly SemaphoreSlim inferenceLock = new(1, 1);
         private readonly BoundedTranslationCache<TranslationCacheKey> translationCache = new(
             TranslationCacheCapacity,
@@ -40,6 +43,15 @@ namespace IronworksTranslator.Utils.Translator
         private LocalModelDevicePriority? loadedDevicePriority;
         private MiLMMTInferenceProfile? loadedInferenceProfile;
         private bool disposed;
+
+        public MiLMMTTranslator() : this(null)
+        {
+        }
+
+        public MiLMMTTranslator(MiLMMTGlossaryService? glossaryService)
+        {
+            this.glossaryService = glossaryService;
+        }
 
         public override TranslationLanguageCode[] SupportedSourceLanguages => translationLanguages;
         public override TranslationLanguageCode[] SupportedTargetLanguages => translationLanguages;
@@ -145,11 +157,16 @@ namespace IronworksTranslator.Utils.Translator
 
             var inferenceProfile = MiLMMTInferenceProfile.GameSafe;
             var maxTokens = inferenceProfile.GetMaxTokens(requestKind);
+            var glossaryMatcher = modelProfile.SupportsGlossaryPrompt
+                ? glossaryService?.CurrentMatcher
+                : null;
+            var glossaryVersion = glossaryMatcher?.Version ?? string.Empty;
             var cacheKey = new TranslationCacheKey(
                 modelProfile.Sha256,
                 sourceLanguage,
                 targetLanguage,
                 maxTokens,
+                glossaryVersion,
                 NormalizeForCache(input));
             if (translationCache.TryGet(cacheKey, out var cachedOutput))
             {
@@ -172,7 +189,20 @@ namespace IronworksTranslator.Utils.Translator
                     return input;
                 }
 
-                var prompt = RenderPrompt(sourceLanguage, targetLanguage, input);
+                var matchedTerms = glossaryMatcher != null
+                    ? glossaryMatcher.Match(sourceLanguage, targetLanguage, input)
+                    : [];
+                if (matchedTerms.Count > 0)
+                {
+                    Log.Debug(
+                        "MiLMMT glossary injected {MatchedCount} term(s) (version: {GlossaryVersion}) for {SourceLanguage} -> {TargetLanguage}.",
+                        matchedTerms.Count,
+                        glossaryVersion,
+                        sourceLanguage,
+                        targetLanguage);
+                }
+
+                var prompt = RenderPrompt(sourceLanguage, targetLanguage, input, matchedTerms);
                 var inferenceParams = CreateInferenceParams(maxTokens);
                 using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 timeout.CancelAfter(TimeSpan.FromSeconds(TimeoutSeconds));
@@ -341,7 +371,7 @@ namespace IronworksTranslator.Utils.Translator
                 || message.Contains("Vulkan", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static InferenceParams CreateInferenceParams(int maxTokens)
+        internal static InferenceParams CreateInferenceParams(int maxTokens)
         {
             return new InferenceParams
             {
@@ -353,6 +383,13 @@ namespace IronworksTranslator.Utils.Translator
                     TopK = 1,
                     TopP = 1.0f,
                     MinP = 0.0f,
+                    // Keep RepeatPenalty neutral (1.0) so prompt tokens like numbers/punctuation
+                    // are not distorted, while FrequencyPenalty over a short window terminates
+                    // greedy single-token repetition loops on short exclamations.
+                    RepeatPenalty = 1.0f,
+                    FrequencyPenalty = 0.30f,
+                    PresencePenalty = 0.0f,
+                    PenaltyCount = 16,
                     Seed = 1,
                 },
             };
@@ -369,14 +406,62 @@ namespace IronworksTranslator.Utils.Translator
             TranslationLanguageCode targetLanguage,
             string text)
         {
+            return RenderPrompt(sourceLanguage, targetLanguage, text, glossaryTerms: null);
+        }
+
+        internal static string RenderPrompt(
+            TranslationLanguageCode sourceLanguage,
+            TranslationLanguageCode targetLanguage,
+            string text,
+            IReadOnlyList<MiLMMTGlossaryTerm>? glossaryTerms)
+        {
             var sourceName = GetLanguageName(sourceLanguage);
             var targetName = GetLanguageName(targetLanguage);
             var trimmed = text.Trim();
 
-            return
+            var core =
                 $"Translate this from {sourceName} to {targetName}:\n" +
                 $"{sourceName}: {trimmed}\n" +
                 $"{targetName}:";
+
+            if (glossaryTerms == null || glossaryTerms.Count == 0)
+            {
+                return core;
+            }
+
+            var sb = new StringBuilder("Glossary:\n");
+            for (var i = 0; i < glossaryTerms.Count; i++)
+            {
+                var term = glossaryTerms[i];
+                if (i > 0)
+                {
+                    sb.Append('\n');
+                }
+
+                sb.Append(term.Source);
+                sb.Append(" => ");
+                sb.Append(term.Target);
+            }
+
+            sb.Append("\n\n");
+            sb.Append(core);
+            return sb.ToString();
+        }
+
+        internal static string BuildPromptForProfile(
+            MiLMMTModelProfile modelProfile,
+            TranslationLanguageCode sourceLanguage,
+            TranslationLanguageCode targetLanguage,
+            string text,
+            MiLMMTGlossaryMatcher? matcher)
+        {
+            if (!modelProfile.SupportsGlossaryPrompt || matcher == null)
+            {
+                return RenderPrompt(sourceLanguage, targetLanguage, text);
+            }
+
+            var matched = matcher.Match(sourceLanguage, targetLanguage, text);
+            return RenderPrompt(sourceLanguage, targetLanguage, text, matched);
         }
 
         private static string GetLanguageName(TranslationLanguageCode language)
@@ -462,6 +547,7 @@ namespace IronworksTranslator.Utils.Translator
             TranslationLanguageCode SourceLanguage,
             TranslationLanguageCode TargetLanguage,
             int MaxTokens,
+            string GlossaryVersion,
             string NormalizedInput);
     }
 }

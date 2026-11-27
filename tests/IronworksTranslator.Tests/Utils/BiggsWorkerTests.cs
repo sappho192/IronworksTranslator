@@ -195,6 +195,59 @@ public class BiggsWorkerTests
         Assert.Contains("1027", result.ErrorMessage);
     }
 
+    [Fact]
+    public async Task FetchGlossaryAsync_FetchesPayloadAndSupportsConditionalNotModified()
+    {
+        var requestedUrls = new List<string>();
+
+        using var handler = new DelegateHttpMessageHandler((request, _) =>
+        {
+            var url = request.RequestUri!.ToString();
+            requestedUrls.Add(url);
+
+            if (url == "https://pointer.test/database.json")
+            {
+                return Task.FromResult(PointerResponse("https://worker.test"));
+            }
+
+            if (url == "https://worker.test/v2/glossary")
+            {
+                var inm = request.Headers.IfNoneMatch.FirstOrDefault()?.ToString();
+                if (inm == "\"sha256:abc\"")
+                {
+                    var notMod = new HttpResponseMessage(HttpStatusCode.NotModified);
+                    notMod.Headers.ETag = new System.Net.Http.Headers.EntityTagHeaderValue("\"sha256:abc\"");
+                    return Task.FromResult(notMod);
+                }
+
+                var ok = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("""{"version":"2026-11-27.1","pairs":{}}"""),
+                };
+                ok.Headers.ETag = new System.Net.Http.Headers.EntityTagHeaderValue("\"sha256:abc\"");
+                ok.Headers.Add("X-Glossary-Version", "2026-11-27.1");
+                return Task.FromResult(ok);
+            }
+
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
+        });
+
+        using var httpClient = new HttpClient(handler);
+        using var worker = new BiggsWorker(httpClient, "https://pointer.test/database.json");
+
+        var first = await worker.FetchGlossaryAsync(null, TestContext.Current.CancellationToken);
+        Assert.Equal(BiggsGlossaryFetchStatus.Updated, first.Status);
+        Assert.Equal("\"sha256:abc\"", first.ETag);
+        Assert.Equal("2026-11-27.1", first.Version);
+        Assert.Contains("2026-11-27.1", first.JsonContent);
+
+        var second = await worker.FetchGlossaryAsync(first.ETag, TestContext.Current.CancellationToken);
+        Assert.Equal(BiggsGlossaryFetchStatus.NotModified, second.Status);
+        Assert.Equal(
+            ["https://pointer.test/database.json", "https://worker.test/v2/glossary", "https://worker.test/v2/glossary"],
+            requestedUrls);
+    }
+
     private static HttpResponseMessage PointerResponse(string workerUrl) =>
         new(HttpStatusCode.OK)
         {

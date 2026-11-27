@@ -96,11 +96,12 @@ namespace IronworksTranslator
                 services.AddSingleton<DialogueWindowViewModel>();
 
                 // Translator stuff
+                services.AddSingleton<BiggsWorker>();
+                services.AddSingleton<MiLMMTGlossaryService>();
                 services.AddSingleton<PapagoTranslator>();
                 services.AddSingleton<DeepLAPITranslator>();
                 services.AddSingleton<MiLMMTTranslator>();
                 services.AddSingleton<TranslatorFallbackService>();
-                services.AddSingleton<BiggsWorker>();
                 services.AddSingleton<TranslationReportService>();
             }).Build();
         }

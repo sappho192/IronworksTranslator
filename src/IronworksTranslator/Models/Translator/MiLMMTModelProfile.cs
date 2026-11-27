@@ -16,7 +16,8 @@ namespace IronworksTranslator.Models.Translator
         string NoteKey,
         string? DisplayNameOverride = null,
         string? DirectoryNameOverride = null,
-        bool AllowTemporaryFallback = false)
+        bool AllowTemporaryFallback = false,
+        bool SupportsGlossaryPrompt = false)
     {
         public string DisplayName => DisplayNameOverride ?? $"{SizeLabel} v1.0 {Quantization}";
         public string SizeLabel => Size switch
@@ -25,6 +26,7 @@ namespace IronworksTranslator.Models.Translator
             MiLMMTModelSize.MiLMMT_4B => "MiLMMT 4B",
             MiLMMTModelSize.MiLMMT_12B => "MiLMMT 12B",
             MiLMMTModelSize.MiLMMT_1B_Compact => "MiLMMT 1B Compact (Debug)",
+            MiLMMTModelSize.MiLMMT_1B_FFXIV => "MiLMMT 1B FFXIV (Debug)",
             _ => Size.ToString(),
         };
         public string DirectoryPath => DirectoryNameOverride != null
@@ -127,6 +129,32 @@ namespace IronworksTranslator.Models.Translator
                 "settings.translator.engine.milmmt.note.1b.compact",
                 "MiLMMT 1B Compact (Debug)",
                 "milmmt-46-1b-v0.1"),
+            new(
+                MiLMMTModelSize.MiLMMT_1B_FFXIV,
+                MiLMMTQuantization.Q8_0,
+                "sappho192/MiLMMT-46-1B-v1.0-ffxiv-GGUF",
+                "MiLMMT-46-1B-v1.0-ffxiv-r7-a65.Q8_0.gguf",
+                1069304608,
+                "c520ade5f4ebc82c0ddca705acca805d4a412e0b8af225fd286523d56e7ede84",
+                1.5,
+                AllLanguages,
+                "settings.translator.engine.milmmt.note.1b.ffxiv",
+                "MiLMMT 1B FFXIV r7-a65 Q8_0 (Debug)",
+                "milmmt-46-1b-v1.0-ffxiv",
+                SupportsGlossaryPrompt: true),
+            new(
+                MiLMMTModelSize.MiLMMT_1B_FFXIV,
+                MiLMMTQuantization.Q4_K_M,
+                "sappho192/MiLMMT-46-1B-v1.0-ffxiv-GGUF",
+                "MiLMMT-46-1B-v1.0-ffxiv-r7-a65.Q4_K_M.gguf",
+                806056480,
+                "c1dbcb27ed5ec0e3ed5693a9b49f89e29b68205f61fe5f2f57544d1c7f6cf13d",
+                1.2,
+                AllLanguages,
+                "settings.translator.engine.milmmt.note.1b.ffxiv",
+                "MiLMMT 1B FFXIV r7-a65 Q4_K_M (Debug)",
+                "milmmt-46-1b-v1.0-ffxiv",
+                SupportsGlossaryPrompt: true),
 #endif
         ];
 
@@ -210,6 +238,30 @@ namespace IronworksTranslator.Models.Translator
                 "settings.translator.engine.milmmt.note.retired.1b.compact",
                 "MiLMMT 1B Compact (Debug)",
                 "milmmt-46-1b-v0.1"),
+            new(
+                MiLMMTModelSize.MiLMMT_1B_FFXIV,
+                MiLMMTQuantization.Q8_0,
+                "sappho192/MiLMMT-46-1B-v1.0-ffxiv-GGUF",
+                "MiLMMT-46-1B-v1.0-ffxiv-r7-a65.Q8_0.gguf",
+                1069304608,
+                "c520ade5f4ebc82c0ddca705acca805d4a412e0b8af225fd286523d56e7ede84",
+                1.5,
+                AllLanguages,
+                "settings.translator.engine.milmmt.note.retired.1b.ffxiv",
+                "MiLMMT 1B FFXIV r7-a65 Q8_0 (Debug)",
+                "milmmt-46-1b-v1.0-ffxiv"),
+            new(
+                MiLMMTModelSize.MiLMMT_1B_FFXIV,
+                MiLMMTQuantization.Q4_K_M,
+                "sappho192/MiLMMT-46-1B-v1.0-ffxiv-GGUF",
+                "MiLMMT-46-1B-v1.0-ffxiv-r7-a65.Q4_K_M.gguf",
+                806056480,
+                "c1dbcb27ed5ec0e3ed5693a9b49f89e29b68205f61fe5f2f57544d1c7f6cf13d",
+                1.2,
+                AllLanguages,
+                "settings.translator.engine.milmmt.note.retired.1b.ffxiv",
+                "MiLMMT 1B FFXIV r7-a65 Q4_K_M (Debug)",
+                "milmmt-46-1b-v1.0-ffxiv"),
 #endif
         ];
 
@@ -223,6 +275,7 @@ namespace IronworksTranslator.Models.Translator
             MiLMMTModelSize.MiLMMT_12B,
 #if DEBUG
             MiLMMTModelSize.MiLMMT_1B_Compact,
+            MiLMMTModelSize.MiLMMT_1B_FFXIV,
 #endif
         ];
 
