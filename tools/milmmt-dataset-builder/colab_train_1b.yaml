@@ -1,0 +1,48 @@
+# LlamaFactory LoRA SFT configuration for MiLMMT-46-1B-v1.0 (Colab Pro+ A100/L4)
+# Verified against MiLMMT-46-1B-v1.0.Q8_0.gguf tokenizer:
+#   add_bos_token=false, no leading space after "{TargetName}:", eos_token="<eos>" (id=1)
+
+### Model
+model_name_or_path: xiaomi-research/MiLMMT-46-1B-v1.0
+trust_remote_code: true
+
+### Method
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.05
+lora_target: all
+
+### Dataset (register ironworks_sft_train / ironworks_sft_val in dataset_info.json)
+dataset: ironworks_sft_train
+eval_dataset: ironworks_sft_val
+template: empty
+add_special_tokens: false
+train_on_prompt: false
+cutoff_len: 1024
+overwrite_cache: true
+preprocessing_num_workers: 4
+
+### Output
+output_dir: /content/drive/MyDrive/ironworks-milmmt/checkpoints/milmmt-1b-v1.0-glossary-sft
+logging_steps: 20
+save_strategy: steps
+save_steps: 200
+eval_strategy: steps
+eval_steps: 200
+plot_loss: true
+overwrite_output_dir: true
+
+### Training (effective batch size = 64 on single A100/L4)
+per_device_train_batch_size: 8
+gradient_accumulation_steps: 8
+per_device_eval_batch_size: 8
+learning_rate: 5.0e-5
+num_train_epochs: 2.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.05
+bf16: true
+ddp_timeout: 180000000
+seed: 42
