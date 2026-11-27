@@ -25,6 +25,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
+from korean_style import (
+    KOREAN_SPEECH_STYLES,
+    KOREAN_SPEECH_STYLE_SET,
+    classify_korean_sentence_style,
+    infer_npc_dominant_style,
+)
+
 # ---------------------------------------------------------------------------
 # Language & schema configuration
 # ---------------------------------------------------------------------------
@@ -497,6 +504,237 @@ def extract_npc_names(
     for pair_key in sorted(grouped.keys()):
         result[pair_key] = dict(sorted(grouped[pair_key], key=lambda item: item[0]))
     return result
+
+
+RE_NPC_TOKEN_NORM = re.compile(r"[^A-Za-z0-9]")
+RE_QUEST_ALPHA_SEG = re.compile(r"^([A-Z]{3,})\d*$")
+RE_QUEST_SKIP_SEG = re.compile(r"^(?:Q|A|B|S|M|F|P|C|T)\d+$|^(?:SCENE|CUT|VOICE)\d*$")
+QUEST_SPEAKER_SKIP_WORDS = frozenset({
+    "TALK", "NONE", "MSG", "POP", "LOG", "END", "START", "YES", "NO",
+    "SELECT", "CHOICE", "SYSTEM", "ACTOR",
+})
+
+
+def _normalize_npc_token(name: str) -> str:
+    return RE_NPC_TOKEN_NORM.sub("", name).upper()
+
+
+def _extract_quest_speaker_token(key: str, known_tokens: set[str]) -> str | None:
+    if not key.startswith("TEXT_"):
+        return None
+    if any(x in key for x in ("_SEQ_", "_TODO_", "_Q1_", "_Q2_", "_Q3_", "_A1_", "_A2_", "_A3_", "_B1_", "_B2_")):
+        return None
+    parts = key.split("_")
+    if len(parts) < 4:
+        return None
+    alphas: list[str] = []
+    for p in parts[3:]:
+        if p.isdigit() or RE_QUEST_SKIP_SEG.match(p) or p in QUEST_SPEAKER_SKIP_WORDS:
+            continue
+        m = RE_QUEST_ALPHA_SEG.match(p)
+        if m:
+            alphas.append(m.group(1))
+    if not alphas:
+        return None
+    joined = "".join(alphas)
+    if joined in known_tokens:
+        return joined
+    for cand in (alphas[-1], alphas[0]):
+        if cand in known_tokens:
+            return cand
+    return None
+
+
+def load_npc_style_overrides(override_path: Path | None) -> dict[str, str]:
+    """Load curated English NPC name -> canonical Korean speech style overrides."""
+    if not override_path or not override_path.exists():
+        return {}
+    data = json.loads(override_path.read_text(encoding="utf-8"))
+    raw = data.get("styles", data) if isinstance(data, dict) else {}
+    out: dict[str, str] = {}
+    for npc_name, style in raw.items():
+        if not isinstance(npc_name, str) or not isinstance(style, str):
+            continue
+        style_clean = style.strip()
+        if style_clean not in KOREAN_SPEECH_STYLE_SET:
+            raise ValueError(f"Unknown Korean speech style '{style_clean}' for NPC '{npc_name}'")
+        out[normalize_space(npc_name)] = style_clean
+    return out
+
+
+def extract_npc_styles(
+    datamining_root: Path,
+    source_langs: Sequence[str],
+    target_lang: str,
+    *,
+    overrides_path: Path | None = None,
+    min_classified_lines: int = 10,
+) -> tuple[dict[str, dict[str, str]], dict[str, int]]:
+    """Infer per-NPC Korean speech-style lookup maps from official KR dialogue + curated overrides.
+
+    Only proper-noun named NPCs (`ENpcResident` `Article == 1` + capitalized English `Singular`,
+    plus curated overrides) are included so generic role names ('guard', 'merchant') never get
+    an arbitrary single persona.
+    """
+    if target_lang != "ko":
+        return {}, {}
+
+    ko_dir = resolve_lang_csv_dir(datamining_root, "ko")
+    en_dir = resolve_lang_csv_dir(datamining_root, "en")
+    en_npc_csv = en_dir / "ENpcResident.csv"
+    ko_npc_csv = ko_dir / "ENpcResident.csv"
+    if not (en_npc_csv.exists() and ko_npc_csv.exists()):
+        return {}, {}
+
+    en_singular = load_csv_column(en_npc_csv, "Singular")
+    en_article = load_csv_column(en_npc_csv, "Article")
+    ko_singular = load_csv_column(ko_npc_csv, "Singular")
+
+    overrides = load_npc_style_overrides(overrides_path)
+    override_cf = {k.casefold(): v for k, v in overrides.items()}
+
+    # Collect proper-noun NPC row IDs grouped by English name
+    row_ids_by_en_name: dict[str, list[str]] = defaultdict(list)
+    proper_en_names: set[str] = set()
+    for rid, raw_en in en_singular.items():
+        if rid not in ko_singular:
+            continue
+        en_clean, drop = clean_exd_text(raw_en)
+        if drop or not en_clean:
+            continue
+        is_proper = en_article.get(rid) == "1" and en_clean[0].isupper()
+        is_overridden = en_clean.casefold() in override_cf
+        if is_proper or is_overridden:
+            row_ids_by_en_name[en_clean].append(rid)
+            proper_en_names.add(en_clean)
+
+    # Map normalized quest token -> canonical English name
+    token_to_en_name: dict[str, str] = {}
+    for en_name in sorted(proper_en_names, key=lambda n: (n.casefold() not in override_cf, len(n), n)):
+        tok = _normalize_npc_token(en_name)
+        if len(tok) >= 3 and tok not in token_to_en_name:
+            token_to_en_name[tok] = en_name
+    known_tokens = set(token_to_en_name.keys())
+
+    # 1. Scan KR quest / cutscene / dungeon / raid / custom / content / opening CSVs
+    counts_by_en: dict[str, Counter[str]] = defaultdict(Counter)
+    for subdir in ("quest", "cut_scene", "custom", "content", "dungeon", "raid", "opening"):
+        sub_path = ko_dir / subdir
+        if not sub_path.is_dir():
+            continue
+        for csv_path in sorted(sub_path.rglob("*.csv")):
+            with csv_path.open("r", encoding="utf-8", errors="replace", newline="") as handle:
+                reader = csv.reader(handle)
+                next(reader, None)
+                for row in reader:
+                    if len(row) < 3 or not row[2]:
+                        continue
+                    tok = _extract_quest_speaker_token(row[1], known_tokens)
+                    if not tok:
+                        continue
+                    text = row[2]
+                    if "<" in text or "Player" in text:
+                        continue
+                    st = classify_korean_sentence_style(text)
+                    if st:
+                        counts_by_en[token_to_en_name[tok]][st] += 1
+
+    # 2. Scan ENpcBase -> DefaultTalk linkage
+    default_talk_csv = ko_dir / "DefaultTalk.csv"
+    enpc_base_csv = ko_dir / "ENpcBase.csv"
+    if default_talk_csv.exists() and enpc_base_csv.exists():
+        dt_styles: dict[str, list[str]] = {}
+        with default_talk_csv.open("r", encoding="utf-8", errors="replace", newline="") as handle:
+            reader = csv.reader(handle)
+            hdr = next(reader, [])
+            text_cols = [i for i, h in enumerate(hdr) if h.startswith("Text[")]
+            for row in reader:
+                if not row or not row[0].isdigit():
+                    continue
+                found: list[str] = []
+                for ci in text_cols:
+                    if ci < len(row) and row[ci] and "<" not in row[ci] and "Player" not in row[ci]:
+                        st = classify_korean_sentence_style(row[ci])
+                        if st:
+                            found.append(st)
+                if found:
+                    dt_styles[row[0]] = found
+
+        rid_to_proper_en: dict[str, str] = {}
+        for en_name, rids in row_ids_by_en_name.items():
+            for rid in rids:
+                rid_to_proper_en[rid] = en_name
+
+        with enpc_base_csv.open("r", encoding="utf-8", errors="replace", newline="") as handle:
+            reader = csv.reader(handle)
+            hdr = next(reader, [])
+            data_cols = [i for i, h in enumerate(hdr) if h.startswith("ENpcData[")]
+            for row in reader:
+                if not row or row[0] not in rid_to_proper_en:
+                    continue
+                en_name = rid_to_proper_en[row[0]]
+                for ci in data_cols:
+                    if ci < len(row) and row[ci] in dt_styles:
+                        for st in dt_styles[row[ci]]:
+                            counts_by_en[en_name][st] += 1
+
+    # 3. Infer dominant style per English proper-noun NPC and apply curated overrides
+    resolved_en: dict[str, tuple[str, int, bool]] = {}  # en_name -> (style, evidence_count, is_override)
+    for en_name in proper_en_names:
+        cnt = counts_by_en.get(en_name)
+        evidence = sum(cnt.values()) if cnt else 0
+        if en_name.casefold() in override_cf:
+            resolved_en[en_name] = (override_cf[en_name.casefold()], max(evidence, 1), True)
+            continue
+        if cnt:
+            inferred = infer_npc_dominant_style(cnt, min_classified=min_classified_lines)
+            if inferred:
+                resolved_en[en_name] = (inferred, evidence, False)
+
+    # Also keep curated overrides even if English name was not found in ENpcResident (defensive)
+    for ov_name, ov_style in overrides.items():
+        if not any(k.casefold() == ov_name.casefold() for k in resolved_en):
+            resolved_en[ov_name] = (ov_style, 1, True)
+
+    # 4. Project resolved styles across requested source languages via ENpcResident row IDs
+    lang_singular_maps: dict[str, dict[str, str]] = {}
+    for src_lang in source_langs:
+        if src_lang == "en":
+            lang_singular_maps[src_lang] = en_singular
+        else:
+            p = resolve_lang_csv_dir(datamining_root, src_lang) / "ENpcResident.csv"
+            lang_singular_maps[src_lang] = load_csv_column(p, "Singular") if p.exists() else {}
+
+    npc_styles: dict[str, dict[str, str]] = {}
+    for src_lang in source_langs:
+        pair_key = f"{LANG_CODE_TO_NAME[src_lang]}->{LANG_CODE_TO_NAME[target_lang]}"
+        src_map = lang_singular_maps[src_lang]
+        # Track best (is_override, evidence) per normalized source speaker name
+        best_for_src: dict[str, tuple[str, str, bool, int]] = {}  # key_cf -> (display_name, style, is_ov, evidence)
+
+        for en_name, (style, evidence, is_ov) in resolved_en.items():
+            rids = row_ids_by_en_name.get(en_name, [])
+            names_in_lang: set[str] = set()
+            if src_lang == "en":
+                names_in_lang.add(en_name)
+            for rid in rids:
+                raw_name = src_map.get(rid, "")
+                cleaned, drop = clean_exd_text(raw_name)
+                if not drop and cleaned:
+                    names_in_lang.add(cleaned)
+            for name in names_in_lang:
+                k = name if src_lang == "ja" else name.casefold()
+                prev = best_for_src.get(k)
+                if prev is None or (is_ov, evidence) > (prev[2], prev[3]):
+                    best_for_src[k] = (name, style, is_ov, evidence)
+
+        if best_for_src:
+            npc_styles[pair_key] = dict(
+                sorted((v[0], v[1]) for v in best_for_src.values())
+            )
+
+    style_dist = Counter(v[0] for v in resolved_en.values())
+    return npc_styles, {st: style_dist.get(st, 0) for st in KOREAN_SPEECH_STYLES}
 
 
 # ---------------------------------------------------------------------------
@@ -1027,6 +1265,7 @@ def build_glossary_payload(
     runtime_only: bool,
     include_metadata: bool = False,
     npc_names: dict[str, dict[str, str]] | None = None,
+    npc_styles: dict[str, dict[str, str]] | None = None,
 ) -> dict:
     pairs_out: dict[str, list[dict]] = defaultdict(list)
     for entry in winners.values():
@@ -1053,6 +1292,8 @@ def build_glossary_payload(
     }
     if npc_names:
         payload["npc_names"] = npc_names
+    if npc_styles:
+        payload["npc_styles"] = npc_styles
     return payload
 
 
@@ -1068,6 +1309,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--jclient-xlsx", type=Path, help="(Draft) Exported J클라 게임 용어 정리 .xlsx file.")
     parser.add_argument("--ff14-terms-md", type=Path, help="(Draft) Exported '파판 용어' .md file.")
     parser.add_argument("--overrides-json", type=Path, help="Optional Tier-0 curated overrides .json file.")
+    parser.add_argument(
+        "--npc-style-overrides-json",
+        type=Path,
+        default=Path(__file__).parent / "npc_style_overrides.json",
+        help="Curated NPC speech-style overrides JSON.",
+    )
     parser.add_argument(
         "--source-langs",
         nargs="+",
@@ -1092,6 +1339,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.overrides_json and args.overrides_json.exists():
         all_entries.extend(extract_user_overrides_json(args.overrides_json))
     npc_names: dict[str, dict[str, str]] = {}
+    npc_styles: dict[str, dict[str, str]] = {}
+    npc_style_dist: dict[str, int] = {}
     if args.datamining_dir:
         all_entries.extend(
             extract_datamining_terms(
@@ -1106,6 +1355,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             source_langs=args.source_langs,
             target_lang=args.target_lang,
             drop_counts=drop_counts,
+        )
+        npc_styles, npc_style_dist = extract_npc_styles(
+            args.datamining_dir,
+            source_langs=args.source_langs,
+            target_lang=args.target_lang,
+            overrides_path=args.npc_style_overrides_json,
         )
     if args.community_curated_json and args.community_curated_json.exists():
         all_entries.extend(extract_curated_community_json(args.community_curated_json))
@@ -1134,6 +1389,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         runtime_only=True,
         include_metadata=False,
         npc_names=npc_names,
+        npc_styles=npc_styles,
     )
     full_payload = build_glossary_payload(
         winners,
@@ -1141,6 +1397,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         runtime_only=False,
         include_metadata=True,
         npc_names=npc_names,
+        npc_styles=npc_styles,
     )
 
     by_origin = Counter(e.origin for e in winners.values())
@@ -1148,6 +1405,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     by_pair_runtime = {k: len(v) for k, v in runtime_payload["pairs"].items()}
     by_pair_full = {k: len(v) for k, v in full_payload["pairs"].items()}
     by_pair_npc_names = {k: len(v) for k, v in npc_names.items()}
+    by_pair_npc_styles = {k: len(v) for k, v in npc_styles.items()}
 
     report = {
         "version": args.version,
@@ -1155,9 +1413,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         "unique_terms_full": len(winners),
         "unique_terms_runtime": sum(by_pair_runtime.values()),
         "unique_npc_names": sum(by_pair_npc_names.values()),
+        "unique_npc_styles": sum(by_pair_npc_styles.values()),
+        "npc_style_distribution_en": npc_style_dist,
         "community_phrase_pairs": len(unique_phrases),
         "by_pair_runtime": by_pair_runtime,
         "by_pair_npc_names": by_pair_npc_names,
+        "by_pair_npc_styles": by_pair_npc_styles,
         "by_pair_full": by_pair_full,
         "by_tier_full": dict(sorted(by_tier.items())),
         "by_origin_full": dict(by_origin.most_common()),
@@ -1195,7 +1456,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     print(
         f"Built glossary {args.version}: runtime={report['unique_terms_runtime']:,}, "
-        f"npc_names={report['unique_npc_names']:,}, "
+        f"npc_names={report['unique_npc_names']:,}, npc_styles={report['unique_npc_styles']:,}, "
         f"full={report['unique_terms_full']:,}, phrases={report['community_phrase_pairs']:,}, "
         f"conflicts={report['conflict_count']:,}"
     )

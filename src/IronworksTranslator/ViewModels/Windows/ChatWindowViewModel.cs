@@ -439,7 +439,8 @@ namespace IronworksTranslator.ViewModels.Windows
                     sourceLanguage,
                     requestKind,
                     cancellationToken,
-                    engine);
+                    engine,
+                    speakerName: requestKind == MiLMMTTranslationKind.Dialogue ? author : null);
                 cancellationToken.ThrowIfCancellationRequested();
                 PopulateTranslationMetadata(text, engine, modelProfile);
             }
@@ -846,7 +847,8 @@ namespace IronworksTranslator.ViewModels.Windows
             ClientLanguage channelLanguage,
             MiLMMTTranslationKind requestKind,
             CancellationToken cancellationToken,
-            TranslatorEngine? translatorEngine = null)
+            TranslatorEngine? translatorEngine = null,
+            string? speakerName = null)
         {
             Log.Information("Translating {Input}", input);
             var switcher = translatorEngine ?? IronworksSettings.Instance.TranslatorSettings.TranslatorEngine;
@@ -867,7 +869,8 @@ namespace IronworksTranslator.ViewModels.Windows
                     sourceLanguage,
                     targetLanguage,
                     requestKind,
-                    cancellationToken),
+                    cancellationToken,
+                    speakerName),
                 _ => input,
             };
 

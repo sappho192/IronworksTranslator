@@ -84,9 +84,16 @@ namespace IronworksTranslator.Utils.Translator
             string input,
             TranslationLanguageCode sourceLanguage,
             TranslationLanguageCode targetLanguage,
-            MiLMMTTranslationKind requestKind)
+            MiLMMTTranslationKind requestKind,
+            string? speakerName = null)
         {
-            return TranslateAsync(input, sourceLanguage, targetLanguage, requestKind).GetAwaiter().GetResult();
+            return TranslateAsync(
+                input,
+                sourceLanguage,
+                targetLanguage,
+                requestKind,
+                cancellationToken: default,
+                speakerName: speakerName).GetAwaiter().GetResult();
         }
 
         public override async Task<string> TranslateAsync(
@@ -106,7 +113,8 @@ namespace IronworksTranslator.Utils.Translator
             TranslationLanguageCode sourceLanguage,
             TranslationLanguageCode targetLanguage,
             MiLMMTTranslationKind requestKind,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            string? speakerName = null)
         {
             if (string.IsNullOrWhiteSpace(input) || sourceLanguage == targetLanguage)
             {
@@ -157,16 +165,27 @@ namespace IronworksTranslator.Utils.Translator
 
             var inferenceProfile = MiLMMTInferenceProfile.GameSafe;
             var maxTokens = inferenceProfile.GetMaxTokens(requestKind);
+            var activeMatcher = glossaryService?.CurrentMatcher;
             var glossaryMatcher = modelProfile.SupportsGlossaryPrompt
-                ? glossaryService?.CurrentMatcher
+                ? activeMatcher
                 : null;
-            var glossaryVersion = glossaryMatcher?.Version ?? string.Empty;
+            var styleHint = ResolveNpcStyleHint(
+                modelProfile,
+                requestKind,
+                sourceLanguage,
+                targetLanguage,
+                speakerName,
+                activeMatcher);
+            var glossaryVersion = glossaryMatcher?.Version
+                ?? (styleHint != null ? activeMatcher?.Version : null)
+                ?? string.Empty;
             var cacheKey = new TranslationCacheKey(
                 modelProfile.Sha256,
                 sourceLanguage,
                 targetLanguage,
                 maxTokens,
                 glossaryVersion,
+                styleHint ?? string.Empty,
                 NormalizeForCache(input));
             if (translationCache.TryGet(cacheKey, out var cachedOutput))
             {
@@ -192,17 +211,18 @@ namespace IronworksTranslator.Utils.Translator
                 var matchedTerms = glossaryMatcher != null
                     ? glossaryMatcher.Match(sourceLanguage, targetLanguage, input)
                     : [];
-                if (matchedTerms.Count > 0)
+                if (matchedTerms.Count > 0 || styleHint != null)
                 {
                     Log.Debug(
-                        "MiLMMT glossary injected {MatchedCount} term(s) (version: {GlossaryVersion}) for {SourceLanguage} -> {TargetLanguage}.",
+                        "MiLMMT prompt conditioning: {MatchedCount} glossary term(s), style='{StyleHint}' (version: {GlossaryVersion}) for {SourceLanguage} -> {TargetLanguage}.",
                         matchedTerms.Count,
+                        styleHint ?? string.Empty,
                         glossaryVersion,
                         sourceLanguage,
                         targetLanguage);
                 }
 
-                var prompt = RenderPrompt(sourceLanguage, targetLanguage, input, matchedTerms);
+                var prompt = RenderPrompt(sourceLanguage, targetLanguage, input, matchedTerms, styleHint);
                 var inferenceParams = CreateInferenceParams(maxTokens);
                 using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 timeout.CancelAfter(TimeSpan.FromSeconds(TimeoutSeconds));
@@ -413,7 +433,8 @@ namespace IronworksTranslator.Utils.Translator
             TranslationLanguageCode sourceLanguage,
             TranslationLanguageCode targetLanguage,
             string text,
-            IReadOnlyList<MiLMMTGlossaryTerm>? glossaryTerms)
+            IReadOnlyList<MiLMMTGlossaryTerm>? glossaryTerms,
+            string? styleHint = null)
         {
             var sourceName = GetLanguageName(sourceLanguage);
             var targetName = GetLanguageName(targetLanguage);
@@ -424,23 +445,39 @@ namespace IronworksTranslator.Utils.Translator
                 $"{sourceName}: {trimmed}\n" +
                 $"{targetName}:";
 
-            if (glossaryTerms == null || glossaryTerms.Count == 0)
+            var trimmedStyle = string.IsNullOrWhiteSpace(styleHint) ? null : styleHint.Trim();
+            var hasGlossary = glossaryTerms != null && glossaryTerms.Count > 0;
+            if (trimmedStyle == null && !hasGlossary)
             {
                 return core;
             }
 
-            var sb = new StringBuilder("Glossary:\n");
-            for (var i = 0; i < glossaryTerms.Count; i++)
+            var sb = new StringBuilder();
+            if (trimmedStyle != null)
             {
-                var term = glossaryTerms[i];
-                if (i > 0)
+                sb.Append("Style: ");
+                sb.Append(trimmedStyle);
+                if (hasGlossary)
                 {
                     sb.Append('\n');
                 }
+            }
 
-                sb.Append(term.Source);
-                sb.Append(" => ");
-                sb.Append(term.Target);
+            if (hasGlossary)
+            {
+                sb.Append("Glossary:\n");
+                for (var i = 0; i < glossaryTerms!.Count; i++)
+                {
+                    var term = glossaryTerms[i];
+                    if (i > 0)
+                    {
+                        sb.Append('\n');
+                    }
+
+                    sb.Append(term.Source);
+                    sb.Append(" => ");
+                    sb.Append(term.Target);
+                }
             }
 
             sb.Append("\n\n");
@@ -448,20 +485,60 @@ namespace IronworksTranslator.Utils.Translator
             return sb.ToString();
         }
 
+        internal static bool ShouldApplyNpcStyle(
+            MiLMMTModelProfile modelProfile,
+            MiLMMTTranslationKind requestKind,
+            TranslationLanguageCode sourceLanguage,
+            TranslationLanguageCode targetLanguage)
+        {
+            return modelProfile.SupportsStylePrompt
+                && requestKind == MiLMMTTranslationKind.Dialogue
+                && targetLanguage == TranslationLanguageCode.Korean
+                && sourceLanguage is TranslationLanguageCode.English
+                    or TranslationLanguageCode.German
+                    or TranslationLanguageCode.French;
+        }
+
+        internal static string? ResolveNpcStyleHint(
+            MiLMMTModelProfile modelProfile,
+            MiLMMTTranslationKind requestKind,
+            TranslationLanguageCode sourceLanguage,
+            TranslationLanguageCode targetLanguage,
+            string? speakerName,
+            MiLMMTGlossaryMatcher? matcher)
+        {
+            if (matcher == null
+                || string.IsNullOrWhiteSpace(speakerName)
+                || !ShouldApplyNpcStyle(modelProfile, requestKind, sourceLanguage, targetLanguage))
+            {
+                return null;
+            }
+
+            return matcher.TryResolveNpcStyle(sourceLanguage, targetLanguage, speakerName, out var style)
+                ? style
+                : null;
+        }
+
         internal static string BuildPromptForProfile(
             MiLMMTModelProfile modelProfile,
             TranslationLanguageCode sourceLanguage,
             TranslationLanguageCode targetLanguage,
             string text,
-            MiLMMTGlossaryMatcher? matcher)
+            MiLMMTGlossaryMatcher? matcher,
+            string? speakerName = null,
+            MiLMMTTranslationKind requestKind = MiLMMTTranslationKind.Manual)
         {
-            if (!modelProfile.SupportsGlossaryPrompt || matcher == null)
-            {
-                return RenderPrompt(sourceLanguage, targetLanguage, text);
-            }
-
-            var matched = matcher.Match(sourceLanguage, targetLanguage, text);
-            return RenderPrompt(sourceLanguage, targetLanguage, text, matched);
+            var matched = modelProfile.SupportsGlossaryPrompt && matcher != null
+                ? matcher.Match(sourceLanguage, targetLanguage, text)
+                : null;
+            var styleHint = ResolveNpcStyleHint(
+                modelProfile,
+                requestKind,
+                sourceLanguage,
+                targetLanguage,
+                speakerName,
+                matcher);
+            return RenderPrompt(sourceLanguage, targetLanguage, text, matched, styleHint);
         }
 
         private static string GetLanguageName(TranslationLanguageCode language)
@@ -548,6 +625,7 @@ namespace IronworksTranslator.Utils.Translator
             TranslationLanguageCode TargetLanguage,
             int MaxTokens,
             string GlossaryVersion,
+            string StyleHint,
             string NormalizedInput);
     }
 }

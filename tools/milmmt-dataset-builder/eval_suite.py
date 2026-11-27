@@ -22,11 +22,49 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-from build_sft_dataset import render_prompt
+from build_sft_dataset import (
+    KOREAN_SPEECH_STYLES,
+    classify_korean_sentence_style,
+    render_prompt,
+)
 from eval_gguf import RE_KANA, RE_LOOP, query_completion
 
 RE_HANGUL = re.compile(r"[\uAC00-\uD7A3]")
 RE_LATIN = re.compile(r"[A-Za-z]")
+STYLE_LEAK_TOKENS = ("Style:", "하십시오체", "해요체", "애교 존댓말", "해라체", "하게체", "하오체", "고어체")
+UNPROMPTED_BLEED_STYLES = frozenset({"애교 존댓말", "고어체", "하오체"})
+
+STYLE_CONTROL_CASES: list[dict[str, Any]] = [
+    {"id": "st_01", "sl": "English", "dl": "Korean", "src": "We must depart at once.", "gl": []},
+    {"id": "st_02", "sl": "English", "dl": "Korean", "src": "Thank you for coming all this way.", "gl": []},
+    {"id": "st_03", "sl": "English", "dl": "Korean", "src": "Are you ready for what lies ahead?", "gl": []},
+    {"id": "st_04", "sl": "English", "dl": "Korean", "src": "Wait here until I return with the others.", "gl": []},
+    {"id": "st_05", "sl": "English", "dl": "Korean", "src": "I have never seen anything quite like this before.", "gl": []},
+    {"id": "st_06", "sl": "English", "dl": "Korean", "src": "Do not worry, we will find a way through this together.", "gl": []},
+    {"id": "st_07", "sl": "English", "dl": "Korean", "src": "Something feels strangely quiet around here.", "gl": []},
+    # Joint Style + Glossary composition cases
+    {
+        "id": "st_08_gl",
+        "sl": "English",
+        "dl": "Korean",
+        "src": "Please return to the Waking Sands as soon as possible.",
+        "gl": [("Waking Sands", "모래의 집")],
+    },
+    {
+        "id": "st_09_gl",
+        "sl": "English",
+        "dl": "Korean",
+        "src": "The ship to Limsa Lominsa will leave shortly.",
+        "gl": [("Limsa Lominsa", "림사 로민사")],
+    },
+    {
+        "id": "st_10_gl",
+        "sl": "English",
+        "dl": "Korean",
+        "src": "Meet me by the Aetheryte plaza when you are finished.",
+        "gl": [("Aetheryte", "에테라이트")],
+    },
+]
 
 DISTRACTOR_CASES: list[dict[str, Any]] = [
     {"sl": "Japanese", "dl": "Korean", "src": "今日は天気がとてもいいですね。", "gl": [("踊り子", "무도가"), ("レストエリア", "휴식 지역")]},
@@ -195,6 +233,7 @@ def main() -> int:
     parser.add_argument("--server-bin", type=Path, default=Path(r"D:\REPO\llama.cpp\build\bin\Release\llama-server.exe"))
     parser.add_argument("--model", type=Path, required=True)
     parser.add_argument("--port", type=int, default=18935)
+    parser.add_argument("--eval-style", action="store_true", help="Run Gate 5: Counterfactual Style Control (10x8=80 prompts) and unprompted bleed check.")
     parser.add_argument("--out-json", type=Path, required=True)
     args = parser.parse_args()
 
@@ -289,6 +328,82 @@ def main() -> int:
             short_trunc += int(trunc)
             short_rows.append({"src": c["src"], "out": out, "tokens": toks, "loop": loop, "trunc": trunc})
 
+        # 5. Optional Counterfactual Style Control (10 sentences x 8 Korean styles = 80 prompts)
+        style_rows = []
+        style_summary: dict[str, Any] = {}
+        if args.eval_style:
+            st_hits = 0
+            st_total = 0
+            st_leaks = 0
+            st_loops = 0
+            st_drifts = 0
+            st_gl_hits = 0
+            st_gl_total = 0
+            per_style_hits: dict[str, int] = {st: 0 for st in KOREAN_SPEECH_STYLES}
+            per_style_total: dict[str, int] = {st: 0 for st in KOREAN_SPEECH_STYLES}
+
+            for c in STYLE_CONTROL_CASES:
+                for st in KOREAN_SPEECH_STYLES:
+                    p = render_prompt(c["sl"], c["dl"], c["src"], c["gl"], style=st)
+                    out, toks = query_completion(args.port, p, 96)
+                    detected = classify_korean_sentence_style(out)
+                    ok_style = detected == st
+                    leak = any(tok in out for tok in STYLE_LEAK_TOKENS)
+                    loop = bool(RE_LOOP.search(out))
+                    drift = check_drift(c["dl"], out)
+
+                    st_total += 1
+                    per_style_total[st] += 1
+                    if ok_style:
+                        st_hits += 1
+                        per_style_hits[st] += 1
+                    st_leaks += int(leak)
+                    st_loops += int(loop)
+                    st_drifts += int(drift)
+
+                    gl_ok = True
+                    for _, tgt in c["gl"]:
+                        st_gl_total += 1
+                        if has_term(out, tgt):
+                            st_gl_hits += 1
+                        else:
+                            gl_ok = False
+
+                    style_rows.append({
+                        "id": c["id"],
+                        "src": c["src"],
+                        "requested_style": st,
+                        "detected_style": detected,
+                        "ok_style": ok_style,
+                        "gl": c["gl"],
+                        "ok_gl": gl_ok,
+                        "leak": leak,
+                        "loop": loop,
+                        "drift": drift,
+                        "out": out,
+                        "tokens": toks,
+                    })
+
+            gen_ko_bleed = sum(
+                1
+                for r in gen_rows
+                if r["dir"].endswith("->Korean")
+                and classify_korean_sentence_style(r["out"]) in UNPROMPTED_BLEED_STYLES
+            )
+            style_summary = {
+                "style_control_hits": f"{st_hits}/{st_total}",
+                "style_control_rate": round(st_hits / max(st_total, 1), 4),
+                "style_per_register": {
+                    st: f"{per_style_hits[st]}/{per_style_total[st]}"
+                    for st in KOREAN_SPEECH_STYLES
+                },
+                "style_joint_glossary_hits": f"{st_gl_hits}/{st_gl_total}",
+                "style_tag_leaks": st_leaks,
+                "style_loops": st_loops,
+                "style_drifts": st_drifts,
+                "general_unprompted_style_bleed": gen_ko_bleed,
+            }
+
         report = {
             "model": args.model.name,
             "summary": {
@@ -306,11 +421,13 @@ def main() -> int:
                 "short_total": len(SHORT_LOOP_CASES),
                 "short_loops": short_loops,
                 "short_truncated": short_trunc,
+                **style_summary,
             },
             "distractor": dist_rows,
             "counterfactual": cf_rows,
             "general": gen_rows,
             "short_loop": short_rows,
+            **({"style_control": style_rows} if args.eval_style else {}),
         }
         args.out_json.parent.mkdir(parents=True, exist_ok=True)
         args.out_json.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

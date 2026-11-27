@@ -26,8 +26,27 @@ class BuildSftDatasetTests(unittest.TestCase):
             "Glossary:\nLimsa Lominsa => 림사 로민사\n\n"
             "Translate this from English to Korean:\nEnglish: Welcome to Limsa Lominsa!\nKorean:",
         )
+        style_only = render_prompt("en", "ko", "We must depart at once.", style="하십시오체")
+        self.assertEqual(
+            style_only,
+            "Style: 하십시오체\n\n"
+            "Translate this from English to Korean:\nEnglish: We must depart at once.\nKorean:",
+        )
+        style_and_gl = render_prompt(
+            "en",
+            "ko",
+            "Return to the Waking Sands.",
+            [("Waking Sands", "모래의 집")],
+            style="해요체",
+        )
+        self.assertEqual(
+            style_and_gl,
+            "Style: 해요체\nGlossary:\nWaking Sands => 모래의 집\n\n"
+            "Translate this from English to Korean:\nEnglish: Return to the Waking Sands.\nKorean:",
+        )
 
     def test_clean_dialogue_text_strips_benign_tags_and_rejects_complex_se_tags(self):
+        self.assertEqual(clean_dialogue_text("(-???-)어서 와라."), "어서 와라.")
         self.assertEqual(clean_dialogue_text("<Emphasis>リムサ</Emphasis>へようこそ"), "リムサへようこそ")
         self.assertIsNone(clean_dialogue_text("<If(PlayerParameter(4))>A<Else/>B</If>"))
         self.assertIsNone(clean_dialogue_text("テスト用テキスト"))

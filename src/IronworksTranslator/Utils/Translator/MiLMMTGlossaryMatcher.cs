@@ -18,29 +18,37 @@ namespace IronworksTranslator.Utils.Translator
             string.Empty,
             new Dictionary<(TranslationLanguageCode, TranslationLanguageCode), PairIndex>(),
             new Dictionary<(TranslationLanguageCode, TranslationLanguageCode), Dictionary<string, string>>(),
+            new Dictionary<(TranslationLanguageCode, TranslationLanguageCode), Dictionary<string, string>>(),
+            0,
             0,
             0);
 
         private readonly IReadOnlyDictionary<(TranslationLanguageCode Source, TranslationLanguageCode Target), PairIndex> _indices;
         private readonly IReadOnlyDictionary<(TranslationLanguageCode Source, TranslationLanguageCode Target), Dictionary<string, string>> _npcNames;
+        private readonly IReadOnlyDictionary<(TranslationLanguageCode Source, TranslationLanguageCode Target), Dictionary<string, string>> _npcStyles;
 
         private MiLMMTGlossaryMatcher(
             string version,
             IReadOnlyDictionary<(TranslationLanguageCode Source, TranslationLanguageCode Target), PairIndex> indices,
             IReadOnlyDictionary<(TranslationLanguageCode Source, TranslationLanguageCode Target), Dictionary<string, string>> npcNames,
+            IReadOnlyDictionary<(TranslationLanguageCode Source, TranslationLanguageCode Target), Dictionary<string, string>> npcStyles,
             int termCount,
-            int npcNameCount)
+            int npcNameCount,
+            int npcStyleCount)
         {
             Version = version;
             _indices = indices;
             _npcNames = npcNames;
+            _npcStyles = npcStyles;
             TermCount = termCount;
             NpcNameCount = npcNameCount;
+            NpcStyleCount = npcStyleCount;
         }
 
         public string Version { get; }
         public int TermCount { get; }
         public int NpcNameCount { get; }
+        public int NpcStyleCount { get; }
 
         public static bool TryFromJson(string json, out MiLMMTGlossaryMatcher matcher)
         {
@@ -154,54 +162,66 @@ namespace IronworksTranslator.Utils.Translator
                 }
             }
 
-            var npcNames = new Dictionary<(TranslationLanguageCode Source, TranslationLanguageCode Target), Dictionary<string, string>>();
-            var totalNpcNames = 0;
+            var (npcNames, totalNpcNames) = ParseNpcLookupMaps(root, "npc_names");
+            var (npcStyles, totalNpcStyles) = ParseNpcLookupMaps(root, "npc_styles");
 
-            if (root.TryGetProperty("npc_names", out var npcNamesProp) && npcNamesProp.ValueKind == JsonValueKind.Object)
+            return new MiLMMTGlossaryMatcher(version, indices, npcNames, npcStyles, totalTerms, totalNpcNames, totalNpcStyles);
+        }
+
+        private static (Dictionary<(TranslationLanguageCode Source, TranslationLanguageCode Target), Dictionary<string, string>> Maps, int TotalCount) ParseNpcLookupMaps(
+            JsonElement root,
+            string propertyName)
+        {
+            var maps = new Dictionary<(TranslationLanguageCode Source, TranslationLanguageCode Target), Dictionary<string, string>>();
+            var totalCount = 0;
+
+            if (!root.TryGetProperty(propertyName, out var sectionProp) || sectionProp.ValueKind != JsonValueKind.Object)
             {
-                foreach (var pairProperty in npcNamesProp.EnumerateObject())
+                return (maps, totalCount);
+            }
+
+            foreach (var pairProperty in sectionProp.EnumerateObject())
+            {
+                if (!TryParsePairKey(pairProperty.Name, out var sourceLanguage, out var targetLanguage))
                 {
-                    if (!TryParsePairKey(pairProperty.Name, out var sourceLanguage, out var targetLanguage))
+                    continue;
+                }
+
+                if (pairProperty.Value.ValueKind != JsonValueKind.Object)
+                {
+                    continue;
+                }
+
+                var comparer = IsLatinScriptLanguage(sourceLanguage)
+                    ? StringComparer.OrdinalIgnoreCase
+                    : StringComparer.Ordinal;
+                var map = new Dictionary<string, string>(comparer);
+
+                foreach (var entry in pairProperty.Value.EnumerateObject())
+                {
+                    if (entry.Value.ValueKind != JsonValueKind.String)
                     {
                         continue;
                     }
 
-                    if (pairProperty.Value.ValueKind != JsonValueKind.Object)
+                    var source = NormalizeNpcLookupKey(entry.Name);
+                    var target = entry.Value.GetString()?.Trim();
+                    if (string.IsNullOrEmpty(source) || string.IsNullOrWhiteSpace(target))
                     {
                         continue;
                     }
 
-                    var comparer = IsLatinScriptLanguage(sourceLanguage)
-                        ? StringComparer.OrdinalIgnoreCase
-                        : StringComparer.Ordinal;
-                    var map = new Dictionary<string, string>(comparer);
+                    map.TryAdd(source, target);
+                }
 
-                    foreach (var entry in pairProperty.Value.EnumerateObject())
-                    {
-                        if (entry.Value.ValueKind != JsonValueKind.String)
-                        {
-                            continue;
-                        }
-
-                        var source = NormalizeNpcLookupKey(entry.Name);
-                        var target = entry.Value.GetString()?.Trim();
-                        if (string.IsNullOrEmpty(source) || string.IsNullOrWhiteSpace(target))
-                        {
-                            continue;
-                        }
-
-                        map.TryAdd(source, target);
-                    }
-
-                    if (map.Count > 0)
-                    {
-                        npcNames[(sourceLanguage, targetLanguage)] = map;
-                        totalNpcNames += map.Count;
-                    }
+                if (map.Count > 0)
+                {
+                    maps[(sourceLanguage, targetLanguage)] = map;
+                    totalCount += map.Count;
                 }
             }
 
-            return new MiLMMTGlossaryMatcher(version, indices, npcNames, totalTerms, totalNpcNames);
+            return (maps, totalCount);
         }
 
         public bool TryResolveNpcName(
@@ -220,6 +240,25 @@ namespace IronworksTranslator.Utils.Translator
             }
 
             officialName = resolved;
+            return true;
+        }
+
+        public bool TryResolveNpcStyle(
+            TranslationLanguageCode sourceLanguage,
+            TranslationLanguageCode targetLanguage,
+            string? speaker,
+            out string speechStyle)
+        {
+            speechStyle = string.Empty;
+            var key = NormalizeNpcLookupKey(speaker);
+            if (key.Length == 0
+                || !_npcStyles.TryGetValue((sourceLanguage, targetLanguage), out var map)
+                || !map.TryGetValue(key, out var resolved))
+            {
+                return false;
+            }
+
+            speechStyle = resolved;
             return true;
         }
 
@@ -367,8 +406,8 @@ namespace IronworksTranslator.Utils.Translator
 
         private static string NormalizeApostrophes(string text)
         {
-            return text.IndexOfAny(['\u2019', '\u2018', '\uFF07']) >= 0
-                ? text.Replace('\u2019', '\'').Replace('\u2018', '\'').Replace('\uFF07', '\'')
+            return text.IndexOfAny(['\u2019', '\u2018', '\uFF07', '\uFF1A']) >= 0
+                ? text.Replace('\u2019', '\'').Replace('\u2018', '\'').Replace('\uFF07', '\'').Replace('\uFF1A', ':')
                 : text;
         }
 

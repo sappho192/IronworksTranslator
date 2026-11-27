@@ -27,6 +27,7 @@ import hashlib
 import json
 import random
 import re
+import sys
 import unicodedata
 import xml.etree.ElementTree as ET
 import zipfile
@@ -34,6 +35,15 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Sequence
+
+# Share the exact 8-way Korean speech-style classifier with build_glossary.py
+_GLOSSARY_BUILDER_DIR = Path(__file__).resolve().parent.parent / "milmmt-glossary-builder"
+if str(_GLOSSARY_BUILDER_DIR) not in sys.path:
+    sys.path.insert(0, str(_GLOSSARY_BUILDER_DIR))
+from korean_style import (  # noqa: E402
+    KOREAN_SPEECH_STYLES,
+    classify_korean_sentence_style,
+)
 
 LANG_CODE_TO_NAME: dict[str, str] = {
     "ja": "Japanese",
@@ -73,6 +83,19 @@ RE_DANGLING_KO_PARTICLE = re.compile(r"^(?:은|는|이|가|을|를|의|에서|�
 RE_REPEAT_RUN = re.compile(r"(.)\1{4,}")
 RE_ONLY_SYMBOLS = re.compile(r"^[\W\d_]+$")
 RE_BRACKET_WRAP = re.compile(r"^【(.+)】$")
+RE_INLINE_SPEAKER_PREFIX = re.compile(r"^\(-[^)]+-\)\s*")
+
+# Axis 4 (NPC Speech-Style) language weights: heavily weighted toward Latin->KO (runtime target)
+# while retaining JA->KO for cross-lingual richness on rare Korean registers.
+STYLE_PAIR_WEIGHTS: dict[tuple[str, str], float] = {
+    ("en", "ko"): 0.55,
+    ("ja", "ko"): 0.25,
+    ("de", "ko"): 0.10,
+    ("fr", "ko"): 0.10,
+}
+
+# Styles that must only be emitted when explicitly requested via `Style:` (prevents unprompted tone bleed)
+STYLE_GATED_ONLY: frozenset[str] = frozenset({"애교 존댓말", "고어체", "하오체"})
 
 
 # ---------------------------------------------------------------------------
@@ -112,6 +135,7 @@ def render_prompt(
     target_language: str,
     text: str,
     glossary_terms: Sequence[tuple[str, str]] = (),
+    style: str | None = None,
 ) -> str:
     """Render exact MiLMMT prompt (verified byte-for-byte against MiLMMTTranslator.RenderPrompt)."""
     src_name = LANG_CODE_TO_NAME.get(source_language, source_language)
@@ -122,10 +146,15 @@ def render_prompt(
         f"{src_name}: {trimmed}\n"
         f"{dst_name}:"
     )
-    if not glossary_terms:
+    header_parts: list[str] = []
+    if style and style.strip():
+        header_parts.append(f"Style: {style.strip()}")
+    if glossary_terms:
+        gl_lines = "\n".join(f"{s} => {t}" for s, t in glossary_terms)
+        header_parts.append(f"Glossary:\n{gl_lines}")
+    if not header_parts:
         return core
-    gl_lines = "\n".join(f"{s} => {t}" for s, t in glossary_terms)
-    return f"Glossary:\n{gl_lines}\n\n{core}"
+    return "\n".join(header_parts) + f"\n\n{core}"
 
 
 def clean_dialogue_text(raw: str) -> str | None:
@@ -133,6 +162,7 @@ def clean_dialogue_text(raw: str) -> str | None:
     if not raw or not raw.strip():
         return None
     text = raw.replace("\r\n", " ").replace("\n", " ")
+    text = RE_INLINE_SPEAKER_PREFIX.sub("", text)
     text = RE_BENIGN_SE_TAG.sub("", text)
     if RE_ANY_SE_TAG.search(text):
         return None
@@ -149,8 +179,8 @@ def clean_dialogue_text(raw: str) -> str | None:
         return None
     if RE_DANGLING_JA_PARTICLE.match(text) or RE_DANGLING_KO_PARTICLE.match(text):
         return None
-    # Reject oxidizer literal "Player" placeholder leaking into Japanese/Korean text
-    if "Player" in text and (RE_KANA.search(text) or RE_HANGUL.search(text)):
+    # Reject oxidizer literal "Player" placeholder in any language
+    if re.search(r"\bPlayer\b", text):
         return None
     return text
 
@@ -524,6 +554,85 @@ def load_quest_and_cutscene_pool(
     return sampled_rows
 
 
+def load_style_balanced_dialogue_pool(
+    datamining_root: Path,
+    langs: Sequence[str],
+    rng: random.Random,
+    max_per_style_per_lang: int = 3000,
+) -> dict[tuple[str, str, str], list[tuple[str, str, str]]]:
+    """Scan all aligned quest/cutscene/custom dialogue files and bucket clean parallel lines by Korean style.
+
+    Returns {(src_lang, 'ko', style): [(src_text, ko_text, origin), ...]}.
+    Scanning all files ensures rare registers (애교 존댓말, 고어체, 하오체, 하게체) are captured completely.
+    """
+    ko_dir = resolve_lang_csv_dir(datamining_root, "ko")
+    lang_dirs = {lang: resolve_lang_csv_dir(datamining_root, lang) for lang in langs}
+    src_langs = [l for l in langs if l != "ko"]
+
+    rel_files: list[str] = []
+    for sub in ("quest", "cut_scene", "custom"):
+        sub_ko = ko_dir / sub
+        if not sub_ko.exists():
+            continue
+        for p in sorted(sub_ko.rglob("*.csv")):
+            rel_files.append(str(p.relative_to(ko_dir)))
+    rng.shuffle(rel_files)
+
+    buckets: dict[tuple[str, str, str], list[tuple[str, str, str]]] = defaultdict(list)
+    rare_styles = {"애교 존댓말", "고어체", "하오체", "하게체"}
+
+    for rel in rel_files:
+        ko_fp = ko_dir / rel
+        ko_styled: dict[str, tuple[str, str]] = {}  # rid -> (clean_ko, style)
+        with ko_fp.open("r", encoding="utf-8", errors="replace", newline="") as handle:
+            reader = csv.reader(handle)
+            hdr = next(reader, [])
+            ci = hdr.index("Text") if "Text" in hdr else (2 if len(hdr) > 2 else 1)
+            for row in reader:
+                if not row or len(row) <= ci or not row[ci]:
+                    continue
+                if len(row) > 1 and ("_SEQ_" in row[1] or "_TODO_" in row[1]):
+                    continue
+                ck = clean_dialogue_text(row[ci])
+                if not ck or len(ck) < 6:
+                    continue
+                st = classify_korean_sentence_style(ck)
+                if not st:
+                    continue
+                # Stop collecting common styles once every source language bucket is saturated
+                if st not in rare_styles and all(
+                    len(buckets[(sl, "ko", st)]) >= max_per_style_per_lang for sl in src_langs
+                ):
+                    continue
+                ko_styled[row[0]] = (ck, st)
+
+        if not ko_styled:
+            continue
+
+        origin = f"style_{rel.split(chr(92))[0].split('/')[0]}"
+        for sl in src_langs:
+            src_fp = lang_dirs[sl] / rel
+            if not src_fp.exists():
+                continue
+            with src_fp.open("r", encoding="utf-8", errors="replace", newline="") as handle:
+                reader = csv.reader(handle)
+                hdr = next(reader, [])
+                ci = hdr.index("Text") if "Text" in hdr else (2 if len(hdr) > 2 else 1)
+                for row in reader:
+                    if not row or row[0] not in ko_styled or len(row) <= ci or not row[ci]:
+                        continue
+                    ck, st = ko_styled[row[0]]
+                    bkey = (sl, "ko", st)
+                    if st not in rare_styles and len(buckets[bkey]) >= max_per_style_per_lang:
+                        continue
+                    cs = clean_dialogue_text(row[ci])
+                    if not cs or not is_valid_parallel(sl, "ko", cs, ck):
+                        continue
+                    buckets[bkey].append((cs, ck, origin))
+
+    return buckets
+
+
 def load_koala_chat_phrases(koala_xlsx: Path | None) -> list[tuple[str, str]]:
     """Extract clean JA->KO conversational lines from Koala's 🟡소통 sheet (filtering unprompted apologies)."""
     if not koala_xlsx or not koala_xlsx.exists():
@@ -660,6 +769,7 @@ class BuiltSample:
     origin: str
     glossary_mode: str  # "matched" | "counterfactual" | "distractor" | "empty"
     source_hash: str
+    style: str = ""
 
 
 def build_dataset(
@@ -674,6 +784,8 @@ def build_dataset(
     total_samples: int,
     val_size: int,
     seed: int,
+    enable_style_axis: bool = False,
+    style_backtranslated_jsonl: Path | None = None,
 ) -> tuple[list[BuiltSample], list[BuiltSample], dict[str, Any]]:
     rng = random.Random(seed)
     guard = EvalLeakageGuard(eval_jsonl)
@@ -696,8 +808,11 @@ def build_dataset(
     for filename, col, origin, to_axis1, to_axis2 in sheet_configs:
         rows = load_aligned_sheet_rows(datamining_dir, filename, col, langs)
         for row in rows:
+            ko_style = classify_korean_sentence_style(row["ko"]) if enable_style_axis else None
             for src_l, dst_l in PAIR_WEIGHTS:
                 if src_l not in row or dst_l not in row:
+                    continue
+                if enable_style_axis and dst_l == "ko" and ko_style in STYLE_GATED_ONLY:
                     continue
                 s, t = row[src_l], row[dst_l]
                 if not is_valid_parallel(src_l, dst_l, s, t):
@@ -710,8 +825,11 @@ def build_dataset(
     # Stratified quest / cutscene / custom dialogues for Axis 1 (and short ones for Axis 2)
     quest_rows = load_quest_and_cutscene_pool(datamining_dir, langs, rng)
     for row in quest_rows:
+        ko_style = classify_korean_sentence_style(row["ko"]) if enable_style_axis else None
         for src_l, dst_l in PAIR_WEIGHTS:
             if src_l not in row or dst_l not in row:
+                continue
+            if enable_style_axis and dst_l == "ko" and ko_style in STYLE_GATED_ONLY:
                 continue
             s, t = row[src_l], row[dst_l]
             if not is_valid_parallel(src_l, dst_l, s, t):
@@ -738,13 +856,21 @@ def build_dataset(
             replay_pools[key].append((rec["source_text"], rec["target_text"], rec["origin"]))
 
     has_replay = sum(len(v) for v in replay_pools.values()) > 0
-    axis1_ratio = 0.55 if has_replay else 0.68
-    axis2_ratio = 0.25 if has_replay else 0.32
-    axis3_ratio = 0.20 if has_replay else 0.0
+    if enable_style_axis:
+        axis1_ratio = 0.34 if has_replay else 0.40
+        axis2_ratio = 0.16 if has_replay else 0.20
+        axis4_ratio = 0.32 if has_replay else 0.40
+        axis3_ratio = 0.18 if has_replay else 0.0
+    else:
+        axis1_ratio = 0.55 if has_replay else 0.68
+        axis2_ratio = 0.25 if has_replay else 0.32
+        axis4_ratio = 0.0
+        axis3_ratio = 0.20 if has_replay else 0.0
 
     target_axis1 = int(total_samples * axis1_ratio)
     target_axis2 = int(total_samples * axis2_ratio)
-    target_axis3 = total_samples - target_axis1 - target_axis2 if has_replay else 0
+    target_axis4 = int(total_samples * axis4_ratio) if enable_style_axis else 0
+    target_axis3 = total_samples - target_axis1 - target_axis2 - target_axis4 if has_replay else 0
 
     built: list[BuiltSample] = []
     seen_hashes: set[str] = set()
@@ -759,6 +885,7 @@ def build_dataset(
         origin: str,
         forced_mode: str,
         precomputed_matches: list[tuple[str, str, str]] | None = None,
+        style: str | None = None,
     ) -> bool:
         nonlocal leaked_skipped
         sh = pair_hash(src_l, dst_l, src)
@@ -804,7 +931,7 @@ def build_dataset(
         else:
             mode = "empty"
 
-        prompt = render_prompt(src_l, dst_l, src, glossary_terms)
+        prompt = render_prompt(src_l, dst_l, src, glossary_terms, style=style)
         seen_hashes.add(sh)
         built.append(
             BuiltSample(
@@ -815,9 +942,108 @@ def build_dataset(
                 origin=origin,
                 glossary_mode=mode,
                 source_hash=sh,
+                style=style or "",
             )
         )
         return True
+
+    # --- Build Axis 4 FIRST (when enabled) so rare Korean styles get first pick without hash starvation ---
+    if enable_style_axis and target_axis4 > 0:
+        if style_backtranslated_jsonl and style_backtranslated_jsonl.exists():
+            # v0.2-r2: Use 1:1 semantically aligned on-policy back-translations for EN/DE/FR -> KO
+            # and direct 1:1 official JA -> KO quest dialogue (eliminates FFXIV EN transcreation drift).
+            style_buckets: dict[tuple[str, str, str], list[tuple[str, str, str]]] = defaultdict(list)
+            ja_only_buckets = load_style_balanced_dialogue_pool(datamining_dir, ("ja", "ko"), rng)
+            for bkey, items in ja_only_buckets.items():
+                style_buckets[bkey].extend(items)
+            for line in style_backtranslated_jsonl.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                rec = json.loads(line)
+                sl = NAME_TO_LANG_CODE.get(rec.get("source_language", ""), rec.get("source_language", ""))
+                dl = NAME_TO_LANG_CODE.get(rec.get("target_language", ""), rec.get("target_language", ""))
+                src = str(rec.get("source_text", "")).strip()
+                dst = str(rec.get("target_text", "")).strip()
+                st = str(rec.get("style", "")).strip()
+                orig = str(rec.get("origin", "style_backtranslated"))
+                if dl == "ko" and sl in ("en", "de", "fr") and st and is_valid_parallel(sl, dl, src, dst):
+                    if classify_korean_sentence_style(dst) == st:
+                        style_buckets[(sl, dl, st)].append((src, dst, orig))
+        else:
+            style_buckets = load_style_balanced_dialogue_pool(datamining_dir, langs, rng)
+        per_style_total = max(1, target_axis4 // len(KOREAN_SPEECH_STYLES))
+        for style_name in KOREAN_SPEECH_STYLES:
+            # First allocate per-pair quotas, then spill any shortfall (e.g. EN->KO Tataru ~680) to sibling langs
+            pair_quotas = {
+                pair_k: max(1, int(per_style_total * w))
+                for pair_k, w in STYLE_PAIR_WEIGHTS.items()
+            }
+            added_for_style = 0
+            leftover_pools: list[tuple[str, str, list[tuple[str, str, str]]]] = []
+
+            for (src_l, dst_l), quota in pair_quotas.items():
+                pool = list(style_buckets.get((src_l, dst_l, style_name), []))
+                rng.shuffle(pool)
+                q_gl_total = int(quota * 0.40)
+                q_cf = int(q_gl_total * 0.25)
+                q_dist = int(quota * 0.10)
+                q_emp = quota - q_gl_total - q_dist
+                c_cf = c_m = c_dist = c_emp = 0
+                unused: list[tuple[str, str, str]] = []
+
+                for s, t, orig in pool:
+                    if (c_cf + c_m) >= q_gl_total and c_dist >= q_dist and c_emp >= q_emp:
+                        unused.append((s, t, orig))
+                        continue
+                    verified = matcher.find_verified_matches(src_l, dst_l, s, t, limit=6)
+                    if verified and (c_cf + c_m) < q_gl_total:
+                        mode_req = "counterfactual" if c_cf < q_cf else "matched"
+                        if try_add_sample(src_l, dst_l, s, t, "axis4_npc_style", orig, mode_req, verified, style=style_name):
+                            if built[-1].glossary_mode == "counterfactual":
+                                c_cf += 1
+                            else:
+                                c_m += 1
+                            added_for_style += 1
+                            continue
+                    if c_dist < q_dist:
+                        if try_add_sample(src_l, dst_l, s, t, "axis4_npc_style", orig, "distractor", verified or [], style=style_name):
+                            c_dist += 1
+                            added_for_style += 1
+                            continue
+                    if c_emp < q_emp:
+                        if try_add_sample(src_l, dst_l, s, t, "axis4_npc_style", orig, "empty", [], style=style_name):
+                            c_emp += 1
+                            added_for_style += 1
+                            continue
+                    unused.append((s, t, orig))
+
+                # Fill remaining glossary quota from unused if matched hits were sparse
+                still_unused: list[tuple[str, str, str]] = []
+                for s, t, orig in unused:
+                    if (c_cf + c_m + c_dist + c_emp) < quota:
+                        if try_add_sample(src_l, dst_l, s, t, "axis4_npc_style", orig, "empty", [], style=style_name):
+                            c_emp += 1
+                            added_for_style += 1
+                            continue
+                    still_unused.append((s, t, orig))
+                if still_unused:
+                    leftover_pools.append((src_l, dst_l, still_unused))
+
+            # Spillover fill across sibling languages if EN->KO alone had fewer than target (e.g. 애교 존댓말)
+            if added_for_style < per_style_total and leftover_pools:
+                flat_leftovers: list[tuple[str, str, str, str, str]] = []
+                for sl, dl, items in leftover_pools:
+                    for s, t, orig in items:
+                        flat_leftovers.append((sl, dl, s, t, orig))
+                rng.shuffle(flat_leftovers)
+                for sl, dl, s, t, orig in flat_leftovers:
+                    if added_for_style >= per_style_total:
+                        break
+                    verified = matcher.find_verified_matches(sl, dl, s, t, limit=6) if rng.random() < 0.35 else []
+                    mode_req = "matched" if verified else "empty"
+                    if try_add_sample(sl, dl, s, t, "axis4_npc_style", orig, mode_req, verified, style=style_name):
+                        added_for_style += 1
 
     # --- Build Axis 1 (FFXIV Glossary-Conditioned with explicit 65/20/15 mode quotas) ---
     for (src_l, dst_l), weight in PAIR_WEIGHTS.items():
@@ -933,9 +1159,11 @@ def build_dataset(
         "leaked_eval_skipped": leaked_skipped,
         "eval_overlap_verified": 0,
         "has_replay_axis3": has_replay,
+        "enable_style_axis": enable_style_axis,
         "by_axis": dict(Counter(s.axis for s in built)),
         "by_pair": dict(Counter(s.pair for s in built).most_common()),
         "by_glossary_mode": dict(Counter(s.glossary_mode for s in built)),
+        "by_style": dict(Counter(s.style for s in built if s.style)),
         "by_origin": dict(Counter(s.origin for s in built).most_common()),
     }
     return train_samples, val_samples, stats
@@ -958,6 +1186,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--eval-jsonl", type=Path)
     parser.add_argument("--replay-jsonl", type=Path, help="Optional general on-policy replay JSONL (Axis 3).")
     parser.add_argument("--extra-colloquial-jsonl", type=Path, help="Optional extra colloquial chat JSONL (Axis 2).")
+    parser.add_argument("--enable-style-axis", action="store_true", help="Enable v0.2 Axis 4 (8-way Korean NPC speech-style conditioning).")
+    parser.add_argument("--style-backtranslated-jsonl", type=Path, help="Optional 1:1 on-policy back-translated EN/DE/FR->KO JSONL for Axis 4.")
     parser.add_argument("--total-samples", type=int, default=22000)
     parser.add_argument("--val-size", type=int, default=500)
     parser.add_argument("--seed", type=int, default=42)
@@ -975,6 +1205,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         total_samples=args.total_samples,
         val_size=args.val_size,
         seed=args.seed,
+        enable_style_axis=args.enable_style_axis,
+        style_backtranslated_jsonl=args.style_backtranslated_jsonl,
     )
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
@@ -986,9 +1218,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     print(
         f"Built SFT dataset -> {args.out_dir}\n"
         f"  train={stats['train_count']:,}, val={stats['val_count']:,}, "
-        f"leaked_skipped={stats['leaked_eval_skipped']}, has_replay={stats['has_replay_axis3']}\n"
+        f"leaked_skipped={stats['leaked_eval_skipped']}, has_replay={stats['has_replay_axis3']}, "
+        f"style_axis={stats['enable_style_axis']}\n"
         f"  by_axis={stats['by_axis']}\n"
-        f"  by_glossary_mode={stats['by_glossary_mode']}"
+        f"  by_glossary_mode={stats['by_glossary_mode']}\n"
+        f"  by_style={stats['by_style']}"
     )
     return 0
 

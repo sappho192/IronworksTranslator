@@ -130,7 +130,7 @@ namespace IronworksTranslator.Views.Windows
                             var targetLanguage =
                                 (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage;
                             var glossaryService = App.GetService<MiLMMTGlossaryService>();
-                            var translated = Translate(msg, sourceLanguage, engine);
+                            var translated = Translate(msg, sourceLanguage, engine, entry.Speaker);
                             var translatedSpeaker = DialogueSpeakerTranslation.TranslateOrOriginal(
                                 entry.Speaker,
                                 speaker => Translate(speaker, sourceLanguage, engine),
@@ -294,7 +294,11 @@ namespace IronworksTranslator.Views.Windows
             }
         }
 
-        private string Translate(string input, ClientLanguage channelLanguage, TranslatorEngine? translatorEngine = null)
+        private string Translate(
+            string input,
+            ClientLanguage channelLanguage,
+            TranslatorEngine? translatorEngine = null,
+            string? speakerName = null)
         {
             Log.Information($"Translating {input}");
             string result = string.Empty;
@@ -320,7 +324,8 @@ namespace IronworksTranslator.Views.Windows
                             input,
                             (TranslationLanguageCode)channelLanguage,
                             (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage,
-                            MiLMMTTranslationKind.Dialogue
+                            MiLMMTTranslationKind.Dialogue,
+                            speakerName
                         );
                     break;
                 default:

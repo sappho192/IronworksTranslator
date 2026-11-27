@@ -13,9 +13,16 @@ from build_glossary import (
     extract_curated_community_json,
     extract_datamining_terms,
     extract_ff14_terms_md,
+    extract_npc_styles,
+    load_npc_style_overrides,
     merge_entries,
     split_ja_variants,
     validate_pair,
+)
+from korean_style import (
+    KOREAN_SPEECH_STYLE_SET,
+    classify_korean_sentence_style,
+    infer_npc_dominant_style,
 )
 
 
@@ -144,6 +151,62 @@ class BuildGlossaryTests(unittest.TestCase):
         self.assertEqual(len(sources), len(set(sources)), "Duplicate sources found in community_curated.json")
         banned = {"捨てる", "落ちる", "ドマ式麻雀", "D1", "D2", "H1", "H2", "IN", "EW", "様子見"}
         self.assertTrue(banned.isdisjoint(sources))
+
+    def test_korean_style_classifier_all_8_registers(self):
+        self.assertEqual(classify_korean_sentence_style("북녘 땅은 잠시 평안을 얻었습니다."), "하십시오체")
+        self.assertEqual(classify_korean_sentence_style("가져오신 재료를 저에게 맡겨주십시오."), "하십시오체")
+        self.assertEqual(classify_korean_sentence_style("다들 조심해요! 공격이 옵니다!"), "하십시오체")
+        self.assertEqual(classify_korean_sentence_style("요즘 정보를 모으고 있어요."), "해요체")
+        self.assertEqual(classify_korean_sentence_style("지금 바로 돌의 집으로 와주셨으면 합니당!"), "애교 존댓말")
+        self.assertEqual(classify_korean_sentence_style("빨리 가자, 늦겠어!"), "반말")
+        self.assertEqual(classify_korean_sentence_style("앞으로 펼쳐질 일에 대한 준비는 되어 있나?"), "반말")
+        self.assertEqual(classify_korean_sentence_style("자, 그럼 출발해볼까!"), "반말")
+        self.assertEqual(classify_korean_sentence_style("그 여로에 나도 동행하도록 하지. 흥미롭군."), "해라체")
+        self.assertEqual(classify_korean_sentence_style("그러한 이유로 모진 태도를 보였던 걸세."), "하게체")
+        self.assertEqual(classify_korean_sentence_style("그럼, 먼저 출발하겠네."), "하게체")
+        self.assertEqual(classify_korean_sentence_style("정말로 하늘을 난단 말이오?"), "하오체")
+        self.assertEqual(classify_korean_sentence_style("어서 이리로 오시오."), "하오체")
+        self.assertEqual(classify_korean_sentence_style("짐은 울다하 제17대 국왕 나나모 울 나모이니라."), "고어체")
+        # Common noun false positives rejected
+        self.assertIsNone(classify_korean_sentence_style("여기가 약속 장소"))
+
+    def test_npc_style_overrides_and_extraction(self):
+        overrides = load_npc_style_overrides(Path(__file__).parent / "npc_style_overrides.json")
+        self.assertGreaterEqual(len(overrides), 35)
+        self.assertEqual(overrides["Tataru"], "애교 존댓말")
+        self.assertEqual(overrides["Y'shtola"], "해요체")
+        self.assertEqual(overrides["Urianger"], "하십시오체")
+        self.assertEqual(overrides["Gosetsu"], "하오체")
+        self.assertEqual(overrides["Nanamo Ul Namo"], "고어체")
+        for st in overrides.values():
+            self.assertIn(st, KOREAN_SPEECH_STYLE_SET)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for rel, content in [
+                ("csv/en/ENpcResident.csv", "#,Singular,Article\n100,Y'shtola,1\n101,guard,0\n"),
+                ("csv/ja/ENpcResident.csv", "#,Singular\n100,ヤ・シュトラ\n101,衛兵\n"),
+                ("csv/ko/csv/ENpcResident.csv", "#,Singular\n100,야슈톨라\n101,위병\n"),
+                ("csv/ko/csv/ClassJob.csv", "#,Name\n0,\n"),
+                (
+                    "csv/ko/csv/quest/000/Q001.csv",
+                    "#,Key,Text\n"
+                    + "\n".join(f"{i},TEXT_Q001_00001_YSHTOLA_000_{i},조심해서 돌아오세요." for i in range(12))
+                    + "\n"
+                    + "\n".join(f"{i+20},TEXT_Q001_00001_GUARD_000_{i},멈추십시오." for i in range(12))
+                    + "\n",
+                ),
+            ]:
+                p = root / rel
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text(content, encoding="utf-8")
+
+            styles, dist = extract_npc_styles(root, ("en", "ja"), "ko", overrides_path=None)
+            self.assertEqual(styles["English->Korean"]["Y'shtola"], "해요체")
+            self.assertEqual(styles["Japanese->Korean"]["ヤ・シュトラ"], "해요체")
+            # Generic non-proper NPC ('guard', Article=0) must be excluded
+            self.assertNotIn("guard", styles["English->Korean"])
+            self.assertEqual(dist["해요체"], 1)
 
 
 if __name__ == "__main__":

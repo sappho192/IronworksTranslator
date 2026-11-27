@@ -47,6 +47,8 @@ namespace IronworksTranslator.Services
 
         public int NpcNameCount => CurrentMatcher.NpcNameCount;
 
+        public int NpcStyleCount => CurrentMatcher.NpcStyleCount;
+
         public IReadOnlyList<MiLMMTGlossaryTerm> Match(
             TranslationLanguageCode sourceLanguage,
             TranslationLanguageCode targetLanguage,
@@ -63,6 +65,15 @@ namespace IronworksTranslator.Services
             out string officialName)
         {
             return CurrentMatcher.TryResolveNpcName(sourceLanguage, targetLanguage, speaker, out officialName);
+        }
+
+        public bool TryResolveNpcStyle(
+            TranslationLanguageCode sourceLanguage,
+            TranslationLanguageCode targetLanguage,
+            string? speaker,
+            out string speechStyle)
+        {
+            return CurrentMatcher.TryResolveNpcStyle(sourceLanguage, targetLanguage, speaker, out speechStyle);
         }
 
         public async Task<bool> RefreshAsync(CancellationToken cancellationToken = default)
@@ -113,10 +124,11 @@ namespace IronworksTranslator.Services
                 _cachedETag = result.ETag;
                 Volatile.Write(ref _matcher, parsedMatcher);
                 Log.Information(
-                    "MiLMMT glossary updated to version '{Version}' ({TermCount} terms, {NpcNameCount} NPC names).",
+                    "MiLMMT glossary updated to version '{Version}' ({TermCount} terms, {NpcNameCount} NPC names, {NpcStyleCount} NPC styles).",
                     parsedMatcher.Version,
                     parsedMatcher.TermCount,
-                    parsedMatcher.NpcNameCount);
+                    parsedMatcher.NpcNameCount,
+                    parsedMatcher.NpcStyleCount);
                 return true;
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -161,10 +173,11 @@ namespace IronworksTranslator.Services
                 {
                     Volatile.Write(ref _matcher, parsedMatcher);
                     Log.Information(
-                        "Loaded cached MiLMMT glossary version '{Version}' ({TermCount} terms, {NpcNameCount} NPC names).",
+                        "Loaded cached MiLMMT glossary version '{Version}' ({TermCount} terms, {NpcNameCount} NPC names, {NpcStyleCount} NPC styles).",
                         parsedMatcher.Version,
                         parsedMatcher.TermCount,
-                        parsedMatcher.NpcNameCount);
+                        parsedMatcher.NpcNameCount,
+                        parsedMatcher.NpcStyleCount);
                 }
                 else
                 {

@@ -123,4 +123,118 @@ public class MiLMMTTranslatorTests
             matcher);
         Assert.StartsWith("Glossary:\n踊り子 => 무도가\n\nTranslate this from Japanese to Korean:", glossaryPrompt);
     }
+
+    [Fact]
+    public void RenderPrompt_WithStyleHint_MatchesVerifiedV02SftFormat()
+    {
+        var styleOnly = MiLMMTTranslator.RenderPrompt(
+            TranslationLanguageCode.English,
+            TranslationLanguageCode.Korean,
+            "We must depart at once.",
+            glossaryTerms: null,
+            styleHint: "하십시오체");
+        Assert.Equal(
+            "Style: 하십시오체\n\nTranslate this from English to Korean:\nEnglish: We must depart at once.\nKorean:",
+            styleOnly);
+
+        var styleAndGlossary = MiLMMTTranslator.RenderPrompt(
+            TranslationLanguageCode.English,
+            TranslationLanguageCode.Korean,
+            "Return to the Waking Sands.",
+            [new MiLMMTGlossaryTerm("Waking Sands", "모래의 집")],
+            styleHint: "해요체");
+        Assert.Equal(
+            "Style: 해요체\nGlossary:\nWaking Sands => 모래의 집\n\nTranslate this from English to Korean:\nEnglish: Return to the Waking Sands.\nKorean:",
+            styleAndGlossary);
+    }
+
+    [Fact]
+    public void BuildPromptForProfile_AppliesNpcStyleOnlyForLatinToKoreanDialogueOnStyleCapableProfiles()
+    {
+        var matcher = MiLMMTGlossaryMatcher.FromJson("""
+            {
+              "version": "2026-11-27.4",
+              "pairs": {
+                "English->Korean": [
+                  { "source": "Waking Sands", "target": "모래의 집" }
+                ]
+              },
+              "npc_styles": {
+                "English->Korean": {
+                  "Y'shtola": "해요체",
+                  "Tataru": "애교 존댓말"
+                },
+                "German->Korean": {
+                  "Y'shtola": "해요체"
+                },
+                "Japanese->Korean": {
+                  "ヤ・シュトラ": "해요체"
+                }
+              }
+            }
+            """);
+
+        var v01Profile = MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_4B, MiLMMTQuantization.Q4_K_M) with
+        {
+            SupportsGlossaryPrompt = true,
+            SupportsStylePrompt = false,
+        };
+        var v02Profile = v01Profile with { SupportsStylePrompt = true };
+
+        // v0.1 profile must never emit Style:
+        var v01Prompt = MiLMMTTranslator.BuildPromptForProfile(
+            v01Profile,
+            TranslationLanguageCode.English,
+            TranslationLanguageCode.Korean,
+            "Return to the Waking Sands.",
+            matcher,
+            speakerName: "Y'shtola",
+            requestKind: MiLMMTTranslationKind.Dialogue);
+        Assert.DoesNotContain("Style:", v01Prompt);
+        Assert.StartsWith("Glossary:\nWaking Sands => 모래의 집\n\n", v01Prompt);
+
+        // v0.2 profile injects Style: + Glossary: for EN->KO Dialogue
+        var v02EnPrompt = MiLMMTTranslator.BuildPromptForProfile(
+            v02Profile,
+            TranslationLanguageCode.English,
+            TranslationLanguageCode.Korean,
+            "Return to the Waking Sands.",
+            matcher,
+            speakerName: "Y'shtola",
+            requestKind: MiLMMTTranslationKind.Dialogue);
+        Assert.StartsWith("Style: 해요체\nGlossary:\nWaking Sands => 모래의 집\n\n", v02EnPrompt);
+
+        // v0.2 profile injects Style: alone for DE->KO Dialogue without glossary match
+        var v02DePrompt = MiLMMTTranslator.BuildPromptForProfile(
+            v02Profile,
+            TranslationLanguageCode.German,
+            TranslationLanguageCode.Korean,
+            "Wir müssen sofort aufbrechen.",
+            matcher,
+            speakerName: "Y'shtola",
+            requestKind: MiLMMTTranslationKind.Dialogue);
+        Assert.StartsWith("Style: 해요체\n\nTranslate this from German to Korean:", v02DePrompt);
+
+        // JA->KO Dialogue must NOT inject Style: (preserves Japanese source nuance)
+        var v02JaPrompt = MiLMMTTranslator.BuildPromptForProfile(
+            v02Profile,
+            TranslationLanguageCode.Japanese,
+            TranslationLanguageCode.Korean,
+            "砂の家へ戻りましょう。",
+            matcher,
+            speakerName: "ヤ・シュトラ",
+            requestKind: MiLMMTTranslationKind.Dialogue);
+        Assert.DoesNotContain("Style:", v02JaPrompt);
+
+        // Non-Dialogue (Chat) must NOT inject Style:
+        var v02ChatPrompt = MiLMMTTranslator.BuildPromptForProfile(
+            v02Profile,
+            TranslationLanguageCode.English,
+            TranslationLanguageCode.Korean,
+            "Hello everyone!",
+            matcher,
+            speakerName: "Tataru",
+            requestKind: MiLMMTTranslationKind.Chat);
+        Assert.DoesNotContain("Style:", v02ChatPrompt);
+    }
 }

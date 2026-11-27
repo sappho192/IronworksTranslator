@@ -172,6 +172,66 @@ public class MiLMMTGlossaryMatcherTests
         var matcher = MiLMMTGlossaryMatcher.FromJson(SampleGlossaryJson);
 
         Assert.Equal(0, matcher.NpcNameCount);
+        Assert.Equal(0, matcher.NpcStyleCount);
         Assert.False(matcher.TryResolveNpcName(TranslationLanguageCode.English, TranslationLanguageCode.Korean, "Urianger", out _));
+        Assert.False(matcher.TryResolveNpcStyle(TranslationLanguageCode.English, TranslationLanguageCode.Korean, "Y'shtola", out _));
+    }
+
+    [Fact]
+    public void TryResolveNpcStyle_MatchesSpeechStylesWithCaseAndApostropheNormalization()
+    {
+        const string jsonWithStyles = """
+            {
+              "version": "2026-11-27.4",
+              "pairs": {},
+              "npc_styles": {
+                "English->Korean": {
+                  "Y'shtola": "해요체",
+                  "Urianger": "하십시오체",
+                  "Tataru": "애교 존댓말",
+                  "Gosetsu": "하오체"
+                },
+                "German->Korean": {
+                  "Y'shtola": "해요체"
+                }
+              }
+            }
+            """;
+
+        var matcher = MiLMMTGlossaryMatcher.FromJson(jsonWithStyles);
+
+        Assert.Equal(5, matcher.NpcStyleCount);
+        Assert.True(matcher.TryResolveNpcStyle(TranslationLanguageCode.English, TranslationLanguageCode.Korean, "Y\u2019shtola", out var yshtolaStyle));
+        Assert.Equal("해요체", yshtolaStyle);
+        Assert.True(matcher.TryResolveNpcStyle(TranslationLanguageCode.English, TranslationLanguageCode.Korean, "  urianger ", out var uriangerStyle));
+        Assert.Equal("하십시오체", uriangerStyle);
+        Assert.True(matcher.TryResolveNpcStyle(TranslationLanguageCode.English, TranslationLanguageCode.Korean, "Tataru", out var tataruStyle));
+        Assert.Equal("애교 존댓말", tataruStyle);
+        Assert.False(matcher.TryResolveNpcStyle(TranslationLanguageCode.English, TranslationLanguageCode.Korean, "Unknown NPC", out _));
+    }
+
+    [Fact]
+    public void Match_NormalizesFullwidthColonForJapaneseDutyNames()
+    {
+        const string jsonWithColon = """
+            {
+              "version": "2026-11-28.1",
+              "pairs": {
+                "Japanese->Korean": [
+                  { "source": "至天の座アルカディア:ヘビー級", "target": "지천의 좌 아르카디아: 헤비급" }
+                ]
+              }
+            }
+            """;
+
+        var matcher = MiLMMTGlossaryMatcher.FromJson(jsonWithColon);
+        var matches = matcher.Match(
+            TranslationLanguageCode.Japanese,
+            TranslationLanguageCode.Korean,
+            "至天の座アルカディア：ヘビー級に行きます！");
+
+        Assert.Equal(
+            [new MiLMMTGlossaryTerm("至天の座アルカディア:ヘビー級", "지천의 좌 아르카디아: 헤비급")],
+            matches);
     }
 }
