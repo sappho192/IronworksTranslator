@@ -16,7 +16,7 @@ namespace IronworksTranslator.Models.Enums
         [Description("MiLMMT 1B Compact (Debug)")]
         MiLMMT_1B_Compact,
 
-        [Description("MiLMMT 1B FFXIV (Debug)")]
-        MiLMMT_1B_FFXIV,
+        [Description("Ironworks Translator 1B v0.1 (Debug)")]
+        Ironworks_1B,
     }
 }

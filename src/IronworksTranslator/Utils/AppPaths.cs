@@ -73,7 +73,7 @@ namespace IronworksTranslator.Utils
                     MiLMMTModelSize.MiLMMT_4B => "milmmt-46-4b-v1.0",
                     MiLMMTModelSize.MiLMMT_12B => "milmmt-46-12b-v1.0",
                     MiLMMTModelSize.MiLMMT_1B_Compact => "milmmt-46-1b-v0.1",
-                    MiLMMTModelSize.MiLMMT_1B_FFXIV => "milmmt-46-1b-v1.0-ffxiv",
+                    MiLMMTModelSize.Ironworks_1B => "ironworks-translator-1b-v0.1",
                     _ => "milmmt-46-1b-v1.0",
                 });
         }

@@ -22,7 +22,14 @@ def main() -> int:
     parser.add_argument("--outfile", type=Path, required=True)
     parser.add_argument("--outtype", default="bf16", choices=["bf16", "f16", "f32", "q8_0"])
     parser.add_argument("--llama-cpp-dir", type=Path, default=Path(r"D:\REPO\llama.cpp"))
-    parser.add_argument("--model-name", default="MiLMMT-46-1B-v1.0-ffxiv")
+    parser.add_argument("--model-name", default="Ironworks Translator 1B v0.1")
+    parser.add_argument("--basename", default="ironworks-translator")
+    parser.add_argument("--version", default="v0.1")
+    parser.add_argument("--size-label", default="1B")
+    parser.add_argument("--base-model-name", default="MiLMMT-46-1B-v1.0")
+    parser.add_argument("--base-model-org", default="Xiaomi Research")
+    parser.add_argument("--base-model-repo", default="https://huggingface.co/xiaomi-research/MiLMMT-46-1B-v1.0")
+    parser.add_argument("--license", default="gemma")
     args = parser.parse_args()
 
     sys.path.insert(0, str(args.llama_cpp_dir / "gguf-py"))
@@ -50,6 +57,18 @@ def main() -> int:
 
     class MiLMMTGemma3Model(Gemma3Model):
         model_arch = gguf.MODEL_ARCH.GEMMA3
+
+        def set_gguf_parameters(self):
+            super().set_gguf_parameters()
+            self.gguf_writer.add_string(gguf.Keys.General.BASENAME, args.basename)
+            self.gguf_writer.add_string(gguf.Keys.General.VERSION, args.version)
+            self.gguf_writer.add_string(gguf.Keys.General.SIZE_LABEL, args.size_label)
+            self.gguf_writer.add_string(gguf.Keys.General.LICENSE, args.license)
+            self.gguf_writer.add_array(gguf.Keys.General.TAGS, ["translation", "ffxiv", "glossary"])
+            self.gguf_writer.add_uint32("general.base_model.count", 1)
+            self.gguf_writer.add_string("general.base_model.0.name", args.base_model_name)
+            self.gguf_writer.add_string("general.base_model.0.organization", args.base_model_org)
+            self.gguf_writer.add_string("general.base_model.0.repo_url", args.base_model_repo)
 
         def set_vocab(self):
             self.gguf_writer.add_tokenizer_model(ref_model)

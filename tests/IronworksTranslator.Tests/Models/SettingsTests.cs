@@ -220,10 +220,12 @@ public class SettingsTests
         Assert.True(compact.Supports(TranslationLanguageCode.Korean));
         Assert.False(compact.Supports(TranslationLanguageCode.German));
         Assert.Contains(MiLMMTModelSize.MiLMMT_1B_Compact, MiLMMTModelProfiles.SelectableModelSizes);
-        Assert.Contains(MiLMMTModelSize.MiLMMT_1B_FFXIV, MiLMMTModelProfiles.SelectableModelSizes);
-        var ffxiv1b = MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_1B_FFXIV, MiLMMTQuantization.Q8_0);
-        Assert.True(ffxiv1b.SupportsGlossaryPrompt);
-        Assert.Equal(MiLMMTQuantization.Q8_0, MiLMMTModelProfiles.GetDefaultQuantization(MiLMMTModelSize.MiLMMT_1B_FFXIV));
+        Assert.Contains(MiLMMTModelSize.Ironworks_1B, MiLMMTModelProfiles.SelectableModelSizes);
+        var ironworks1b = MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_1B, MiLMMTQuantization.Q8_0);
+        Assert.True(ironworks1b.SupportsGlossaryPrompt);
+        Assert.Equal("sappho192/ironworks-translator-1b-v0.1", ironworks1b.Repository);
+        Assert.Equal("ironworks-translator-1b-v0.1.Q8_0.gguf", ironworks1b.FileName);
+        Assert.Equal(MiLMMTQuantization.Q8_0, MiLMMTModelProfiles.GetDefaultQuantization(MiLMMTModelSize.Ironworks_1B));
         Assert.Equal(5, MiLMMTModelProfiles.Retired.Count);
 #else
         var retiredCompact = Assert.Single(
