@@ -18,5 +18,8 @@ namespace IronworksTranslator.Models.Enums
 
         [Description("Ironworks Translator 1B v0.1 (Debug)")]
         Ironworks_1B,
+
+        [Description("Ironworks Translator 4B v0.1 (Debug)")]
+        Ironworks_4B,
     }
 }

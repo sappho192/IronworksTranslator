@@ -227,6 +227,7 @@ def main() -> int:
         base_model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
         base_model.enable_input_require_grads()
 
+    exclude_modules = ["vision_tower", "multi_modal_projector"] if hasattr(base_model, "vision_tower") or hasattr(getattr(base_model, "model", None), "vision_tower") else None
     lora_cfg = LoraConfig(
         r=args.lora_r,
         lora_alpha=args.lora_alpha,
@@ -234,6 +235,7 @@ def main() -> int:
         bias="none",
         task_type="CAUSAL_LM",
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+        exclude_modules=exclude_modules,
     )
     model = get_peft_model(base_model, lora_cfg)
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)

@@ -123,7 +123,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         for (src_lang, dst_lang), weight in PAIR_WEIGHTS.items():
             quota = max(50, int(args.total_samples * weight))
             sources = load_source_sentences(src_lang, quota, seed=args.seed)
-            print(f"Generating {len(sources)} replay pairs for {src_lang} -> {dst_lang}...")
+            print(f"Generating {len(sources)} replay pairs for {src_lang} -> {dst_lang}...", flush=True)
 
             for i in range(0, len(sources), args.batch_size):
                 batch_src = sources[i : i + args.batch_size]
@@ -138,7 +138,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 with torch.no_grad():
                     gen = model.generate(
                         **enc,
-                        max_new_tokens=192,
+                        max_new_tokens=160,
                         do_sample=False,
                         eos_token_id=tokenizer.eos_token_id,
                         pad_token_id=tokenizer.pad_token_id,
@@ -157,6 +157,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                     }
                     out_f.write(json.dumps(rec, ensure_ascii=False) + "\n")
                     written += 1
+                if (i // args.batch_size + 1) % 10 == 0 or (i + args.batch_size) >= len(sources):
+                    out_f.flush()
+                    print(f"  {src_lang}->{dst_lang}: {min(i + args.batch_size, len(sources))}/{len(sources)} (total={written})", flush=True)
 
     print(f"Wrote {written:,} general replay records -> {args.out_jsonl}")
     return 0
