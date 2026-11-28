@@ -391,7 +391,19 @@ class FastGlossaryMatcher:
                     if idx > 0 and hay[idx - 1].isalnum():
                         continue
                     if end < len(hay) and hay[end].isalnum():
-                        continue
+                        if src_lang == "en" and len(needle) >= 4:
+                            if hay[end] == "s" and (end + 1 == len(hay) or not hay[end + 1].isalnum()):
+                                end += 1
+                            elif (
+                                hay[end : end + 2] == "es"
+                                and (end + 2 == len(hay) or not hay[end + 2].isalnum())
+                                and needle[-1] in ("s", "x", "z", "h")
+                            ):
+                                end += 2
+                            else:
+                                continue
+                        else:
+                            continue
                 elif src_lang == "ja":
                     if _is_katakana(needle[0]) and idx > 0 and _is_katakana(hay[idx - 1]):
                         continue

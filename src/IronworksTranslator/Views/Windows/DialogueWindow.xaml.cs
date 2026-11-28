@@ -3,9 +3,9 @@ using IronworksTranslator.Models;
 using IronworksTranslator.Models.Settings;
 using IronworksTranslator.Models.Translator;
 using IronworksTranslator.Services;
+using IronworksTranslator.Services.FFXIV;
 using IronworksTranslator.ViewModels.Windows;
 using Serilog;
-using System.Text.RegularExpressions;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -28,7 +28,6 @@ namespace IronworksTranslator.Views.Windows
         private readonly Timer chatboxTimer;
         private const int period = 500;
         private const int MaxDialogueTextLength = 30000;
-        private static readonly Regex regexItem = MyRegex();
         private readonly bool _isUiInitialized = false;
 
         // Semaphore to ensure dialogue messages are processed sequentially
@@ -106,19 +105,8 @@ namespace IronworksTranslator.Views.Windows
                 {
                     if (IronworksSettings.Instance.TranslatorSettings.DialogueTranslationMethod == DialogueTranslationMethod.MemorySearch)
                     {
-                        var msg = entry.Text;
-                        msg = MyRegex1().Replace(msg, "[HQ]");
-                        msg = MyRegex2().Replace(msg, "⇒");
-                        msg = MyRegex3().Replace(msg, string.Empty);
-                        msg = MyRegex4().Replace(msg, string.Empty);
-                        if (msg.StartsWith('\u0002'))
-                        {
-                            var filter = regexItem.Match(msg);
-                            if (filter.Success)
-                            {
-                                msg = filter.Groups[1].Value;
-                            }
-                        }
+                        var msg = FfxivTextSanitizer.SanitizeDialogueText(entry.Text);
+                        var speaker = FfxivTextSanitizer.SanitizeSpeaker(entry.Speaker);
                         if (!msg.Equals(string.Empty))
                         {
                             var sourceLanguage =
@@ -130,18 +118,18 @@ namespace IronworksTranslator.Views.Windows
                             var targetLanguage =
                                 (TranslationLanguageCode)IronworksSettings.Instance.TranslatorSettings.ClientLanguage;
                             var glossaryService = App.GetService<MiLMMTGlossaryService>();
-                            var translated = Translate(msg, sourceLanguage, engine, entry.Speaker);
+                            var translated = Translate(msg, sourceLanguage, engine, speaker);
                             var translatedSpeaker = DialogueSpeakerTranslation.TranslateOrOriginal(
-                                entry.Speaker,
-                                speaker => Translate(speaker, sourceLanguage, engine),
+                                speaker,
+                                speakerName => Translate(speakerName, sourceLanguage, engine),
                                 ex => Log.Warning(
                                     ex,
                                     "Failed to translate dialogue speaker; using the original speaker."),
-                                speaker => glossaryService != null
+                                speakerName => glossaryService != null
                                     && glossaryService.TryResolveNpcName(
                                         (TranslationLanguageCode)sourceLanguage,
                                         targetLanguage,
-                                        speaker,
+                                        speakerName,
                                         out var officialName)
                                         ? officialName
                                         : null);
@@ -156,7 +144,7 @@ namespace IronworksTranslator.Views.Windows
                             {
                                 TranslatedText = translated,
                                 Author = translatedSpeaker,
-                                OriginalSpeaker = entry.Speaker,
+                                OriginalSpeaker = speaker,
                                 TranslationKind = MiLMMTTranslationKind.Dialogue,
                             };
                             ChatWindowViewModel.PopulateTranslationMetadata(dialogueText, engine, modelProfile);
@@ -403,17 +391,6 @@ namespace IronworksTranslator.Views.Windows
                 mainWindow.Top = windowTop;
             }
         }
-
-        [GeneratedRegex(@"&\u0003(.*)\u0002I\u0002")]
-        private static partial Regex MyRegex();
-        [GeneratedRegex(@"\uE03C")]
-        private static partial Regex MyRegex1();
-        [GeneratedRegex(@"\uE06F")]
-        private static partial Regex MyRegex2();
-        [GeneratedRegex(@"\uE0BB")]
-        private static partial Regex MyRegex3();
-        [GeneratedRegex(@"\uFFFD")]
-        private static partial Regex MyRegex4();
 #pragma warning restore CS8602
     }
 }

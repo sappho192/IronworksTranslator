@@ -158,6 +158,47 @@ REVERSE_EXTENDED_CATEGORIES = frozenset({
     "status", "trait", "ui_command", "general_action",
 })
 RE_REVERSE_NOISY_TARGET = re.compile(r"(?:コンテンツ名は|「[^」]+」)")
+# Latin-script UI/status/weather/completion categories where bare single words are overwhelmingly
+# ordinary prose words (e.g. "Excellent" -> "최고품질", "Ready" -> "훈련 가능", "Fever" -> "정신 바이러스")
+# and hijack normal NPC dialogue. Multi-word terms remain in runtime; curated single-word FFXIV terms
+# live in community_curated.json.
+LATIN_NOISY_SINGLE_WORD_CATEGORIES = frozenset({
+    "addon_ui",
+    "completion",
+    "status",
+    "trait",
+    "ui_command",
+    "general_action",
+    "weather",
+})
+
+# Common English dictionary words that exist as FFXIV PlaceName rows (or article-stripped "The ..."
+# aliases) and cause severe false-positive overrides in ordinary English dialogue (e.g. "stern faces"
+# matching "Stern => 위층", "in silence" matching "Silence => 고요한 얼음 동굴").
+PLACE_NAME_EN_STOPWORDS = frozenset({
+    "abacus", "amity", "approach", "armory", "arsenal", "articulation", "asylum", "atelier",
+    "atrium", "auction", "backroom", "ballroom", "barber", "baron", "barracks", "barrel",
+    "basement", "bastion", "bedrock", "beehive", "belfry", "bellows", "beyond", "blanch",
+    "bonfire", "brick", "bridge", "bridges", "bruise", "bunker", "buttress", "canopy",
+    "capitol", "cellar", "cenotaph", "chancel", "chantry", "chisel", "choler", "cleric",
+    "clutch", "coliseum", "confessional", "contempt", "corridor", "crater", "creation",
+    "crick", "daggers", "darker", "depths", "derrick", "descent", "dilemma", "dungeon",
+    "dungeons", "echelon", "eddies", "emergent", "enlightenment", "entropy", "exit",
+    "flagship", "flurry", "foyer", "fringes", "fumarole", "furnace", "gallery", "gangway",
+    "gauntlet", "goblet", "guidance", "gullet", "halo", "hangar", "harmony", "helix",
+    "hemlock", "horizon", "insides", "insight", "knot", "knowable", "ladder", "ladle",
+    "landing", "library", "lonely", "lunar", "mainstay", "manifest", "mattock", "mirror",
+    "mist", "mosaic", "mourn", "myth", "oblivion", "orchard", "outsides", "parapet",
+    "passage", "pendants", "pillars", "pitch", "playroom", "plenty", "porter", "proof",
+    "pylons", "raid", "repairs", "repurposement", "reunion", "ribbons", "rooftop", "rookery",
+    "rostrum", "rotunda", "ruiner", "scabbard", "scales", "schism", "scree", "seedbed",
+    "sentinel", "serenity", "shaft", "shallow", "shallows", "shelter", "shop", "silence",
+    "snitch", "solace", "sorrow", "spence", "stacks", "stern", "sullen", "tangle",
+    "tempest", "terminus", "throttle", "trader", "transcendence", "trenches", "tribunal",
+    "twine", "twinning", "twitch", "ultimacy", "unmaking", "vanguard", "vortex", "warmth",
+    "warrens", "watcher", "weed", "wishbone", "wright", "zenith", "ziggurat", "zymology",
+})
+
 # Common words that are valid NPC speaker names (kept in exact `npc_names`),
 # but should not trigger substring `Glossary:` prompt injection inside normal prose.
 NPC_SUBSTRING_EN_STOPWORDS = frozenset({
@@ -402,6 +443,14 @@ def extract_datamining_terms(
 
                 include_runtime = spec.include_in_runtime
                 entry_tier = spec.tier
+                if src_lang in ("en", "de", "fr") and include_runtime:
+                    is_single_word = (" " not in src_clean and "-" not in src_clean)
+                    if is_single_word and spec.category in LATIN_NOISY_SINGLE_WORD_CATEGORIES:
+                        include_runtime = False
+                        drop_counts[f"runtime_latin_single:{spec.category}"] += 1
+                    elif src_lang == "en" and spec.category == "place_name" and src_clean.casefold() in PLACE_NAME_EN_STOPWORDS:
+                        include_runtime = False
+                        drop_counts["runtime_place_name_en_stopword"] += 1
                 if spec.filename == "ENpcResident.csv" and row_id in proper_npc_row_ids:
                     if src_lang == "ja":
                         if len(src_clean) >= 3:
@@ -430,7 +479,12 @@ def extract_datamining_terms(
                     m_the = RE_LEADING_THE.match(src_clean)
                     if m_the:
                         bare = m_the.group(1).strip()
-                        if len(bare) >= 6 and bare.casefold() not in GENERIC_EN_STOPWORDS:
+                        bare_low = bare.casefold()
+                        if (
+                            len(bare) >= 6
+                            and bare_low not in GENERIC_EN_STOPWORDS
+                            and bare_low not in PLACE_NAME_EN_STOPWORDS
+                        ):
                             entries.append(
                                 TermEntry(
                                     pair=pair_key,

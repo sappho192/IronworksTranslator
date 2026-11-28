@@ -144,6 +144,40 @@ class BuildGlossaryTests(unittest.TestCase):
                 },
             )
 
+    def test_extract_datamining_terms_excludes_noisy_latin_single_words_from_runtime(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for rel, content in [
+                ("csv/en/Addon.csv", "#,Text\n1,Excellent\n2,Duty Support\n"),
+                ("csv/ko/csv/Addon.csv", "#,Text\n1,최고품질\n2,임무 지원\n"),
+                ("csv/en/PlaceName.csv", "#,Name\n1,Stern\n2,The Library\n3,The Mizzenmast\n4,Thavnair\n"),
+                ("csv/ko/csv/PlaceName.csv", "#,Name\n1,위층\n2,도서실\n3,미젠마스트\n4,사베네어 섬\n"),
+                ("csv/ko/csv/ClassJob.csv", "#,Name\n0,\n"),
+            ]:
+                p = root / rel
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text(content, encoding="utf-8")
+
+            drops: Counter[str] = Counter()
+            entries = extract_datamining_terms(
+                root,
+                source_langs=("en",),
+                target_lang="ko",
+                drop_counts=drops,
+                sheets=(
+                    SheetSpec("Addon.csv", "Text", 3, "addon_ui", True, max_source_len=18, max_target_len=24, min_ja_len=3, min_latin_len=5),
+                    SheetSpec("PlaceName.csv", "Name", 1, "place_name", True, min_ja_len=2, min_latin_len=4),
+                ),
+            )
+            rt_sources = {e.source for e in entries if e.include_in_runtime}
+            self.assertNotIn("Excellent", rt_sources)
+            self.assertIn("Duty Support", rt_sources)
+            self.assertNotIn("Stern", rt_sources)
+            self.assertNotIn("Library", rt_sources)
+            self.assertIn("The Library", rt_sources)
+            self.assertIn("Mizzenmast", rt_sources)
+            self.assertIn("Thavnair", rt_sources)
+
     def test_community_curated_json_has_no_duplicates_or_banned_noise(self):
         curated_path = Path(__file__).parent / "community_curated.json"
         entries = extract_curated_community_json(curated_path)

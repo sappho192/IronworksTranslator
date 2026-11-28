@@ -285,4 +285,43 @@ public class MiLMMTGlossaryMatcherTests
             [new MiLMMTGlossaryTerm("파티", "パーティ")],
             partyParticle);
     }
+
+    [Fact]
+    public void Match_AllowsEnglishRegularPluralsOnFourPlusCharTerms()
+    {
+        const string englishJson = """
+            {
+              "version": "2026-11-28.2",
+              "pairs": {
+                "English->Korean": [
+                  { "source": "Aetheryte", "target": "에테라이트" },
+                  { "source": "alchemist", "target": "연금술사" },
+                  { "source": "Radz-at-Han", "target": "라자한" },
+                  { "source": "art", "target": "예술" }
+                ]
+              }
+            }
+            """;
+
+        var matcher = MiLMMTGlossaryMatcher.FromJson(englishJson);
+
+        var matches = matcher.Match(
+            TranslationLanguageCode.English,
+            TranslationLanguageCode.Korean,
+            "Our first test pair of aetherytes was built with alchemists from Radz-at-Han.");
+        Assert.Equal(
+            [
+                new MiLMMTGlossaryTerm("Aetheryte", "에테라이트"),
+                new MiLMMTGlossaryTerm("alchemist", "연금술사"),
+                new MiLMMTGlossaryTerm("Radz-at-Han", "라자한"),
+            ],
+            matches);
+
+        // Must NOT match embedded compounds or 3-char plurals
+        var noFalseHits = matcher.Match(
+            TranslationLanguageCode.English,
+            TranslationLanguageCode.Korean,
+            "Look at those arts and aetheryteships.");
+        Assert.Empty(noFalseHits);
+    }
 }

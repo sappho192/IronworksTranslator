@@ -302,12 +302,12 @@ namespace IronworksTranslator.Utils.Translator
                         continue;
                     }
 
-                    if (!PassesBoundaryCheck(haystack, i, length, term))
+                    if (!TryPassBoundaryCheck(haystack, i, length, term, sourceLanguage, out var matchedLength))
                     {
                         continue;
                     }
 
-                    candidates.Add(new MatchCandidate(i, i + length, length, term.Source, term.Target));
+                    candidates.Add(new MatchCandidate(i, i + matchedLength, matchedLength, term.Source, term.Target));
                 }
             }
 
@@ -388,8 +388,15 @@ namespace IronworksTranslator.Utils.Translator
             "은", "는", "이", "가", "을", "를", "의", "에", "로", "와", "과", "도", "만", "랑", "께", "야", "요",
         ];
 
-        private static bool PassesBoundaryCheck(string text, int start, int length, IndexedTerm term)
+        private static bool TryPassBoundaryCheck(
+            string text,
+            int start,
+            int length,
+            IndexedTerm term,
+            TranslationLanguageCode sourceLanguage,
+            out int matchedLength)
         {
+            matchedLength = length;
             var end = start + length;
 
             if (term.StartsWithLatinAlnum && start > 0 && IsLatinAlnum(text[start - 1]))
@@ -399,7 +406,31 @@ namespace IronworksTranslator.Utils.Translator
 
             if (term.EndsWithLatinAlnum && end < text.Length && IsLatinAlnum(text[end]))
             {
-                return false;
+                // Allow simple English regular plurals (-s, sibilant -es) on 4+ char terms
+                // (e.g., "aetherytes" -> "Aetheryte", "alchemists" -> "alchemist").
+                if (sourceLanguage == TranslationLanguageCode.English && length >= 4)
+                {
+                    if (text[end] == 's' && (end + 1 == text.Length || !IsLatinAlnum(text[end + 1])))
+                    {
+                        matchedLength = length + 1;
+                    }
+                    else if (text[end] == 'e'
+                        && end + 1 < text.Length
+                        && text[end + 1] == 's'
+                        && (end + 2 == text.Length || !IsLatinAlnum(text[end + 2]))
+                        && term.MatchKey[^1] is 's' or 'x' or 'z' or 'h')
+                    {
+                        matchedLength = length + 2;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
             }
 
             if (term.StartsWithKatakana && start > 0 && IsKatakana(text[start - 1]))

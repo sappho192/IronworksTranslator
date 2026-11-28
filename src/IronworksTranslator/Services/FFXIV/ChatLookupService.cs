@@ -242,7 +242,14 @@ namespace IronworksTranslator.Services.FFXIV
             string text,
             long? sequence = null)
         {
-            var dialogueEntry = new DialogueEntry(kind, speaker, text);
+            var sanitizedSpeaker = FfxivTextSanitizer.SanitizeSpeaker(speaker);
+            var sanitizedText = FfxivTextSanitizer.SanitizeDialogueText(text);
+            if (string.IsNullOrWhiteSpace(sanitizedText))
+            {
+                return;
+            }
+
+            var dialogueEntry = new DialogueEntry(kind, sanitizedSpeaker, sanitizedText);
             ChatQueue.EnqueueDialogue(dialogueEntry);
             Log.Debug(
                 "Enqueued dialogue observation. Kind: {DialogueKind}, Sequence: {Sequence}, " +

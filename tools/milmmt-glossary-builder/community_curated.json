@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-28.1",
+  "version": "2026-11-28.2",
   "policy": "Global-server (JP/EN) transliteration and player terminology preferred for global-server communication; KR official alternatives are recorded in 'kr_official' when they diverge. Excludes encyclopedia explanations, generic Japanese words, unprompted politeness, and position codes (D1-D4, H1-H2).",
   "pairs": {
     "Japanese->Korean": [
@@ -316,7 +316,38 @@
       {"source": "ピクミン", "target": "피크민", "category": "raid_callout"},
       {"source": "デスペナ", "target": "데스페널티", "category": "raid_callout"},
       {"source": "床ぺロ", "target": "눕다", "category": "chat_slang"},
-      {"source": "ナギ節", "target": "세기말", "category": "chat_slang"}
+      {"source": "ナギ節", "target": "세기말", "category": "chat_slang"},
+      {"source": "ユザイベ", "target": "유저이벤트", "category": "chat_slang"}
+    ],
+    "English->Korean": [
+      {"source": "Sharlayan", "target": "샬레이안", "category": "lore_proper"},
+      {"source": "Yedlihmad", "target": "예드리만", "category": "lore_proper"},
+      {"source": "Aetheryte", "target": "에테라이트", "category": "system_core"},
+      {"source": "Aether", "target": "에테르", "category": "lore_proper"},
+      {"source": "Chocobo", "target": "초코보", "category": "lore_proper"},
+      {"source": "Moogle", "target": "모그리", "category": "lore_proper"},
+      {"source": "Primal", "target": "야만신", "category": "lore_proper"},
+      {"source": "Ascian", "target": "아씨엔", "category": "lore_proper"},
+      {"source": "Allagan", "target": "알라그", "category": "lore_proper"},
+      {"source": "Garlean", "target": "갈레말", "category": "lore_proper"},
+      {"source": "Garlemald", "target": "갈레말 제국", "category": "lore_proper"},
+      {"source": "Lominsan", "target": "로민사", "category": "lore_proper"},
+      {"source": "Gridanian", "target": "그리다니아", "category": "lore_proper"},
+      {"source": "Ishgardian", "target": "이슈가르드", "category": "lore_proper"},
+      {"source": "Thavnairian", "target": "사베네어", "category": "lore_proper"},
+      {"source": "Doman", "target": "도마", "category": "lore_proper"},
+      {"source": "Eorzean", "target": "에오르제아", "category": "lore_proper"},
+      {"source": "Zodiark", "target": "조디아크", "category": "lore_proper"},
+      {"source": "Glamour", "target": "투영", "category": "system_core"},
+      {"source": "Retainer", "target": "집사", "category": "system_core"},
+      {"source": "Linkshell", "target": "링크셸", "category": "system_core"},
+      {"source": "Teleport", "target": "텔레포", "category": "system_core"},
+      {"source": "Tomestone", "target": "석판", "category": "system_core"},
+      {"source": "Materia", "target": "마테리아", "category": "system_core"},
+      {"source": "Housing", "target": "하우징", "category": "system_core"},
+      {"source": "Minion", "target": "꼬마 친구", "category": "system_core"},
+      {"source": "FATE", "target": "돌발 임무", "category": "system_core"},
+      {"source": "GATE", "target": "돌발 게임", "category": "system_core"}
     ]
   }
 }
