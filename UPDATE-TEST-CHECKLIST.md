@@ -81,7 +81,7 @@ Expected result:
 - Accepting the terms writes:
 
 ```powershell
-$env:APPDATA\IronworksTranslator\settings.v4.yaml
+$env:APPDATA\IronworksTranslator\settings.v5.yaml
 ```
 
 - Fresh installs do not need to create the unversioned legacy `settings.yaml`.
@@ -132,7 +132,7 @@ For portable migration:
 Expected result:
 
 - `settings.yaml` is copied to `%APPDATA%\IronworksTranslator\settings.yaml`.
-- The app imports that legacy file into `%APPDATA%\IronworksTranslator\settings.v4.yaml`.
+- The app imports that legacy file into `%APPDATA%\IronworksTranslator\settings.v5.yaml`.
 - The imported legacy `settings.yaml` remains available as a downgrade snapshot for older builds.
 - `data\model` is copied to `%LOCALAPPDATA%\IronworksTranslator\data\model` if the destination was empty.
 - Existing destination files are not overwritten.
@@ -215,12 +215,12 @@ Expected result:
 Settings schema isolation check:
 
 1. Start with an older package and a populated unversioned `settings.yaml`.
-2. Launch the newer package and confirm it imports the settings into `settings.v4.yaml`.
+2. Launch the newer package and confirm it imports the settings into `settings.v5.yaml`.
 3. Confirm the legacy `settings.yaml` remains readable by the older package.
-4. Change settings in the newer package and confirm only `settings.v4.yaml` changes.
+4. Change settings in the newer package and confirm only `settings.v5.yaml` changes.
 5. Reinstall and launch the older package. Confirm it reaches the main window and update prompt using its preserved `settings.yaml`.
-6. Change settings in the older package and confirm `settings.v4.yaml` is unchanged.
-7. Migrate a version 3 snapshot, confirm `settings.v3.yaml` remains unchanged, and confirm closing the automatic release notes dialog records `ui_settings.last_release_notes_app_version` in version 4 only.
+6. Change settings in the older package and confirm `settings.v5.yaml` is unchanged.
+7. Migrate a version 4 snapshot (`settings.v4.yaml`), confirm `settings.v4.yaml` remains unchanged, and confirm retired stock `MiLMMT_*` model sizes migrate cleanly to `Ironworks_1B` / `Ironworks_4B` in `settings.v5.yaml` while preserving quantization and temporary fallback until v0.2 is downloaded.
 8. For every future incompatible settings change, increment `AppPaths.SettingsSchemaVersion`; never repurpose or overwrite an existing versioned settings file.
 
 ## 8. Post-Update Regression Checks

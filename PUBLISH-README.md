@@ -117,6 +117,14 @@ after the notes dialog closes successfully; failed or empty fetches are retried
 on a later launch. Release versions retain prerelease labels and omit build
 metadata, matching the packaged informational version.
 
+Version 2.4.0 uses schema 5 (`settings.v5.yaml`) because the local translator
+now persists `Ironworks_1B` and `Ironworks_4B` (`Ironworks Translator v0.2`)
+as the selectable `MiLMMTModelSize` values while retiring stock `MiLMMT`
+profiles to temporary fallback. It imports `settings.v4.yaml` (or the latest
+earlier snapshot) once without overwriting it, preserves supported quantization
+choices during migration, and keeps older builds able to read their preserved
+`settings.v4.yaml` or legacy `settings.yaml`.
+
 ## Useful Options
 
 ```powershell
