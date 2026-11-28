@@ -66,6 +66,24 @@ artifacts\.venv-milmmt\Scripts\python.exe tools\milmmt-dataset-builder\train_mil
 - Check `v0.2` baseline LR (`5e-5`), **not** `v0.1` (`3e-5`).
 - Confirm `reload_or_merge_verified: true` and `skipped_over_max_len: 0` in `train_summary.json`.
 
+### 4.1 On-Policy CPO-SimPO preference alignment (breaking the 4B SFT ceiling)
+
+When SFT plateaus on adjacent-register boundaries (`고어체 -> 하오체/해라체`, `해라체 -> 반말/하게체`, `해요체 -> 하십시오체`) or when incorporating user-curated preference pairs (`cpo_user.jsonl`), run `tools/milmmt-dataset-builder/train_milmmt_cpo.py` on top of the best merged bf16 SFT checkpoint (e.g., `merged_4b_lw_84_100`):
+
+```powershell
+artifacts\.venv-milmmt\Scripts\python.exe tools\milmmt-dataset-builder\train_milmmt_cpo.py `
+  --base-model <MERGED_SFT_BF16_DIR> `
+  --cpo-jsonl <PURE_ONPOLICY_CPO_JSONL> `
+  --anchor-jsonl <ONPOLICY_KL_ANCHOR_JSONL> `
+  --out-dir <OUT_DIR> `
+  --epochs 3.0 --lr 2e-5 --grad-accum 32 --beta 2.0 --gamma 0.5 `
+  --lambda-nll 0.5 --lambda-anchor 1.0 --lora-r 8 --lora-alpha 16 --max-len 384
+```
+
+- Filter mined on-policy failures to confirmed wrong-register outputs (`rejected_style != "None"`) so valid trailing vocatives are never falsely penalized.
+- Pair CPO examples with **on-policy KL anchors** (the base checkpoint's own outputs on 6-direction general replay + glossary/style-glossary anchors) to guarantee `0 / 24` general regressions.
+- Always sweep CPO delta scaling (`a50`, `a60`, `a75`, `lw40-75`) via `merge_lora_layerwise.py` instead of blindly shipping `a100` (which can overshoot into distractor/loop regressions). Empirically, `a50` (`Q8_0` + lossless `BF16 -> imatrix Q5_K_M`) broke `4B` from `85.0%` SFT up to `90.0–91.3%` with `0/182` stability failures and `0/24` general regressions.
+
 ## 5. Merging and quantization
 
 1. **Merge sweep (`tools/milmmt-dataset-builder/merge_lora_layerwise.py`)**:

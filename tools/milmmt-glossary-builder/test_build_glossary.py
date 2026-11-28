@@ -208,6 +208,7 @@ class BuildGlossaryTests(unittest.TestCase):
         self.assertEqual(classify_korean_sentence_style("어서 이리로 오시오."), "하오체")
         self.assertEqual(classify_korean_sentence_style("짐은 울다하 제17대 국왕 나나모 울 나모이니라."), "고어체")
         self.assertEqual(classify_korean_sentence_style("감사히 여겨야 할 것이옵니다."), "고어체")
+        self.assertEqual(classify_korean_sentence_style("부디 모래의 집으로 빨리 돌아가소서."), "고어체")
         # Promissive -(으)ㄹ게 remains 반말, not 하게체
         self.assertEqual(classify_korean_sentence_style("조금만 기다릴게."), "반말")
         self.assertEqual(classify_korean_sentence_style("이렇게 먼 곳까지 와줘서 고마워"), "반말")
