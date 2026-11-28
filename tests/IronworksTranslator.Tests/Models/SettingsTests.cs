@@ -48,7 +48,7 @@ public class SettingsTests
         Assert.Equal(400, settings.UiSettings.ChatWindowWidth);
         Assert.Equal(200, settings.UiSettings.ChatWindowHeight);
         Assert.Equal(TranslatorEngine.Papago, settings.TranslatorSettings!.TranslatorEngine);
-        Assert.Equal(MiLMMTModelSize.MiLMMT_1B, settings.TranslatorSettings.MiLMMTModelSize);
+        Assert.Equal(MiLMMTModelSize.Ironworks_1B, settings.TranslatorSettings.MiLMMTModelSize);
         Assert.Equal(MiLMMTQuantization.Q8_0, settings.TranslatorSettings.MiLMMTQuantization);
     }
 
@@ -162,123 +162,118 @@ public class SettingsTests
     }
 
     [Fact]
-    public void MiLMMTModelProfiles_ResolveSupportedProfilesAndFallbackQuantization()
+    public void MiLMMTModelProfiles_ResolveSupportedProfilesAndFallbackMapping()
     {
-        Assert.True(MiLMMTModelProfiles.IsSupported(MiLMMTModelSize.MiLMMT_1B, MiLMMTQuantization.Q8_0));
-        Assert.False(MiLMMTModelProfiles.IsSupported(MiLMMTModelSize.MiLMMT_12B, MiLMMTQuantization.Q8_0));
+        Assert.Equal(
+            [MiLMMTModelSize.Ironworks_1B, MiLMMTModelSize.Ironworks_4B],
+            MiLMMTModelProfiles.SelectableModelSizes);
+        Assert.Equal(0, MiLMMTModelProfiles.GetSelectableModelSizeIndex(MiLMMTModelSize.Ironworks_1B));
+        Assert.Equal(1, MiLMMTModelProfiles.GetSelectableModelSizeIndex(MiLMMTModelSize.Ironworks_4B));
 
-        var fallback = MiLMMTModelProfiles.GetDefaultQuantization(MiLMMTModelSize.MiLMMT_12B);
-        var profile = MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_12B, fallback);
+        Assert.True(MiLMMTModelProfiles.IsSupported(MiLMMTModelSize.Ironworks_1B, MiLMMTQuantization.Q8_0));
+        Assert.True(MiLMMTModelProfiles.IsSupported(MiLMMTModelSize.Ironworks_1B, MiLMMTQuantization.Q4_K_M));
+        Assert.True(MiLMMTModelProfiles.IsSupported(MiLMMTModelSize.Ironworks_4B, MiLMMTQuantization.Q4_K_M));
+        Assert.True(MiLMMTModelProfiles.IsSupported(MiLMMTModelSize.Ironworks_4B, MiLMMTQuantization.Q8_0));
+        Assert.False(MiLMMTModelProfiles.IsSupported(MiLMMTModelSize.MiLMMT_1B, MiLMMTQuantization.Q8_0));
+        Assert.False(MiLMMTModelProfiles.IsSupported(MiLMMTModelSize.MiLMMT_4B, MiLMMTQuantization.Q4_K_M));
+        Assert.False(MiLMMTModelProfiles.IsSupported(MiLMMTModelSize.MiLMMT_12B, MiLMMTQuantization.Q4_K_M));
 
-        Assert.Equal(MiLMMTQuantization.Q4_K_M, fallback);
+        Assert.Equal(MiLMMTModelSize.Ironworks_1B, MiLMMTModelProfiles.GetFallbackModelSize(MiLMMTModelSize.MiLMMT_1B));
+        Assert.Equal(MiLMMTModelSize.Ironworks_1B, MiLMMTModelProfiles.GetFallbackModelSize(MiLMMTModelSize.MiLMMT_1B_Compact));
+        Assert.Equal(MiLMMTModelSize.Ironworks_4B, MiLMMTModelProfiles.GetFallbackModelSize(MiLMMTModelSize.MiLMMT_4B));
+        Assert.Equal(MiLMMTModelSize.Ironworks_4B, MiLMMTModelProfiles.GetFallbackModelSize(MiLMMTModelSize.MiLMMT_12B));
+
+        Assert.Equal(MiLMMTQuantization.Q8_0, MiLMMTModelProfiles.GetDefaultQuantization(MiLMMTModelSize.Ironworks_1B));
+        Assert.Equal(MiLMMTQuantization.Q4_K_M, MiLMMTModelProfiles.GetDefaultQuantization(MiLMMTModelSize.Ironworks_4B));
+
+        var profile = MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_4B, MiLMMTQuantization.Q4_K_M);
         Assert.Contains("huggingface.co", profile.DownloadUrl);
         Assert.EndsWith(profile.FileName, profile.FilePath);
     }
 
     [Fact]
-    public void MiLMMTModelProfiles_RestoreStandardQ4AndScopeCompactToDebugBuild()
+    public void MiLMMTModelProfiles_ExposeOfficialV02ModelsAndRetireStockMiLMMT()
     {
-        var standard = MiLMMTModelProfiles.Get(
-            MiLMMTModelSize.MiLMMT_1B,
-            MiLMMTQuantization.Q4_K_M);
+        var iw1bQ8 = MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_1B, MiLMMTQuantization.Q8_0);
+        Assert.Equal("Ironworks Translator 1B v0.2 Q8_0", iw1bQ8.DisplayName);
+        Assert.Equal("sappho192/ironworks-translator-1b-v0.2", iw1bQ8.Repository);
+        Assert.Equal("ironworks-translator-1b-v0.2.Q8_0.gguf", iw1bQ8.FileName);
+        Assert.Equal(1069305088, iw1bQ8.FileSize);
+        Assert.Equal("981e606ddfd368ec81bd6a74717587e69feb577be70f45298d43f703555b6a91", iw1bQ8.Sha256);
+        Assert.EndsWith("ironworks-translator-1b-v0.2", iw1bQ8.DirectoryPath);
+        Assert.True(iw1bQ8.SupportsGlossaryPrompt);
+        Assert.True(iw1bQ8.SupportsStylePrompt);
+        Assert.True(iw1bQ8.Supports(TranslationLanguageCode.German));
+        Assert.True(iw1bQ8.Supports(TranslationLanguageCode.French));
 
-        Assert.Equal("MiLMMT 1B v1.0 Q4_K_M", standard.DisplayName);
-        Assert.Equal(
-            "mradermacher/MiLMMT-46-1B-v1.0-GGUF",
-            standard.Repository);
-        Assert.Equal("MiLMMT-46-1B-v1.0.Q4_K_M.gguf", standard.FileName);
-        Assert.Equal(806057408, standard.FileSize);
-        Assert.Equal(
-            "74d38ba75108d455326e9deeaf9ab01bb266dfa665eae9c4aa84e84485d4fdf9",
-            standard.Sha256);
-        Assert.EndsWith("milmmt-46-1b-v1.0", standard.DirectoryPath);
-        Assert.True(standard.Supports(TranslationLanguageCode.German));
-        Assert.True(standard.Supports(TranslationLanguageCode.French));
+        var iw1bQ4 = MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_1B, MiLMMTQuantization.Q4_K_M);
+        Assert.Equal("Ironworks Translator 1B v0.2 Q4_K_M", iw1bQ4.DisplayName);
+        Assert.Equal(806056960, iw1bQ4.FileSize);
+        Assert.Equal("4c2fd57f958feb39c3576dc109f3860925c1abf2aed5b7bb203ded25779722ae", iw1bQ4.Sha256);
+        Assert.True(iw1bQ4.SupportsGlossaryPrompt);
+        Assert.True(iw1bQ4.SupportsStylePrompt);
 
-        var legacyV01 = MiLMMTModelProfiles.Retired
+        var iw4bQ4 = MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_4B, MiLMMTQuantization.Q4_K_M);
+        Assert.Equal("Ironworks Translator 4B v0.2 Q4_K_M", iw4bQ4.DisplayName);
+        Assert.Equal("sappho192/ironworks-translator-4b-v0.2", iw4bQ4.Repository);
+        Assert.Equal("ironworks-translator-4b-v0.2.Q4_K_M.gguf", iw4bQ4.FileName);
+        Assert.True(iw4bQ4.SupportsGlossaryPrompt);
+        Assert.True(iw4bQ4.SupportsStylePrompt);
+
+        var iw4bQ8 = MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_4B, MiLMMTQuantization.Q8_0);
+        Assert.Equal("Ironworks Translator 4B v0.2 Q8_0", iw4bQ8.DisplayName);
+        Assert.Equal("ironworks-translator-4b-v0.2.Q8_0.gguf", iw4bQ8.FileName);
+        Assert.True(iw4bQ8.SupportsGlossaryPrompt);
+        Assert.True(iw4bQ8.SupportsStylePrompt);
+
+        var retiredFallbacks = MiLMMTModelProfiles.Retired
             .Where(profile => profile.AllowTemporaryFallback)
             .ToArray();
-        Assert.Equal(5, legacyV01.Length);
-        Assert.All(legacyV01, profile =>
-        {
-            Assert.Contains("v0.1", profile.FileName);
-            Assert.Contains("v0.1", profile.DirectoryPath);
-        });
+        Assert.Equal(14, retiredFallbacks.Length);
+        Assert.Contains(retiredFallbacks, p => p.FileName == "MiLMMT-46-1B-v1.0.Q8_0.gguf");
+        Assert.Contains(retiredFallbacks, p => p.FileName == "MiLMMT-46-4B-v1.0.Q4_K_M.gguf");
+        Assert.Contains(retiredFallbacks, p => p.FileName == "MiLMMT-46-12B-v1.0.Q4_K_M.gguf");
+        Assert.Contains(retiredFallbacks, p => p.FileName == "ironworks-translator-1b-v0.1.Q8_0.gguf" && p.SupportsGlossaryPrompt && !p.SupportsStylePrompt);
+        Assert.Contains(retiredFallbacks, p => p.FileName == "ironworks-translator-4b-v0.1.Q4_K_M.gguf" && p.SupportsGlossaryPrompt && !p.SupportsStylePrompt);
 
-#if DEBUG
-        var compact = MiLMMTModelProfiles.Get(
-            MiLMMTModelSize.MiLMMT_1B_Compact,
-            MiLMMTQuantization.Q4_K_M);
-
-        Assert.Equal("MiLMMT 1B Compact (Debug)", compact.DisplayName);
-        Assert.Equal(
-            "sappho192/MiLMMT-46-1B-v0.1-ko-en-ja-pruned-130k-imatrix-Q4_K_M-GGUF",
-            compact.Repository);
-        Assert.Equal(
-            "milmmt-pruned-130k-bf16-imatrix-mix-late16-25-ffngateupq8-Q4_K_M.gguf",
-            compact.FileName);
-        Assert.True(compact.Supports(TranslationLanguageCode.Korean));
-        Assert.False(compact.Supports(TranslationLanguageCode.German));
-        Assert.Contains(MiLMMTModelSize.MiLMMT_1B_Compact, MiLMMTModelProfiles.SelectableModelSizes);
-        Assert.Contains(MiLMMTModelSize.Ironworks_1B, MiLMMTModelProfiles.SelectableModelSizes);
-        var ironworks1b = MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_1B, MiLMMTQuantization.Q8_0);
-        Assert.True(ironworks1b.SupportsGlossaryPrompt);
-        Assert.Equal("sappho192/ironworks-translator-1b-v0.1", ironworks1b.Repository);
-        Assert.Equal("ironworks-translator-1b-v0.1.Q8_0.gguf", ironworks1b.FileName);
-        Assert.Equal(MiLMMTQuantization.Q8_0, MiLMMTModelProfiles.GetDefaultQuantization(MiLMMTModelSize.Ironworks_1B));
-        Assert.Contains(MiLMMTModelSize.Ironworks_4B, MiLMMTModelProfiles.SelectableModelSizes);
-        var ironworks4b = MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_4B, MiLMMTQuantization.Q4_K_M);
-        Assert.True(ironworks4b.SupportsGlossaryPrompt);
-        Assert.True(ironworks4b.SupportsStylePrompt);
-        Assert.Equal("sappho192/ironworks-translator-4b-v0.2", ironworks4b.Repository);
-        Assert.Equal("ironworks-translator-4b-v0.2.Q4_K_M.gguf", ironworks4b.FileName);
-        Assert.Equal(MiLMMTQuantization.Q4_K_M, MiLMMTModelProfiles.GetDefaultQuantization(MiLMMTModelSize.Ironworks_4B));
-        var ironworks4bQ8 = MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_4B, MiLMMTQuantization.Q8_0);
-        Assert.True(ironworks4bQ8.SupportsGlossaryPrompt);
-        Assert.True(ironworks4bQ8.SupportsStylePrompt);
-        Assert.Equal("ironworks-translator-4b-v0.2.Q8_0.gguf", ironworks4bQ8.FileName);
-        Assert.Equal(5, MiLMMTModelProfiles.Retired.Count);
-#else
         var retiredCompact = Assert.Single(
             MiLMMTModelProfiles.Retired,
             profile => profile.Size == MiLMMTModelSize.MiLMMT_1B_Compact);
-        Assert.Equal(
-            "milmmt-pruned-130k-bf16-imatrix-mix-late16-25-ffngateupq8-Q4_K_M.gguf",
-            retiredCompact.FileName);
         Assert.False(retiredCompact.AllowTemporaryFallback);
         Assert.DoesNotContain(MiLMMTModelSize.MiLMMT_1B_Compact, MiLMMTModelProfiles.SelectableModelSizes);
         Assert.Equal(
-            MiLMMTModelSize.MiLMMT_1B,
-            MiLMMTModelProfiles.GetFallbackModelSize(MiLMMTModelSize.MiLMMT_1B_Compact));
-        Assert.Equal(
             new[] { retiredCompact },
             MiLMMTModelProfiles.GetDownloadedRetiredProfiles(profile => profile == retiredCompact));
-#endif
     }
 
     [Fact]
-    public void MiLMMTModelProfiles_ResolveEffectiveProfile_PrefersV10AndFallsBackToMatchingV01()
+    public void MiLMMTModelProfiles_ResolveEffectiveProfile_PrefersV02ThenMatchingNewestFallback()
     {
-        var target4BQ4 = MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_4B, MiLMMTQuantization.Q4_K_M);
-        var legacy1BQ8 = MiLMMTModelProfiles.Retired.Single(p =>
-            p.AllowTemporaryFallback && p.Size == MiLMMTModelSize.MiLMMT_1B && p.Quantization == MiLMMTQuantization.Q8_0);
-        var legacy4BQ4 = MiLMMTModelProfiles.Retired.Single(p =>
-            p.AllowTemporaryFallback && p.Size == MiLMMTModelSize.MiLMMT_4B && p.Quantization == MiLMMTQuantization.Q4_K_M);
-        var legacy4BQ8 = MiLMMTModelProfiles.Retired.Single(p =>
-            p.AllowTemporaryFallback && p.Size == MiLMMTModelSize.MiLMMT_4B && p.Quantization == MiLMMTQuantization.Q8_0);
+        var target4BQ4 = MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_4B, MiLMMTQuantization.Q4_K_M);
+        var retiredIw4Bv01Q4 = MiLMMTModelProfiles.Retired.Single(p =>
+            p.FileName == "ironworks-translator-4b-v0.1.Q4_K_M.gguf");
+        var retiredStock4Bv10Q4 = MiLMMTModelProfiles.Retired.Single(p =>
+            p.FileName == "MiLMMT-46-4B-v1.0.Q4_K_M.gguf");
+        var retiredStock4Bv01Q8 = MiLMMTModelProfiles.Retired.Single(p =>
+            p.FileName == "MiLMMT-46-4B-v0.1.Q8_0.gguf");
+        var retiredStock1Bv10Q8 = MiLMMTModelProfiles.Retired.Single(p =>
+            p.FileName == "MiLMMT-46-1B-v1.0.Q8_0.gguf");
 
         Assert.Equal(
             target4BQ4,
-            MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, p => p == target4BQ4 || p == legacy4BQ4));
+            MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, p => p == target4BQ4 || p == retiredIw4Bv01Q4));
         Assert.Equal(
-            legacy4BQ4,
-            MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, p => p == legacy1BQ8 || p == legacy4BQ4 || p == legacy4BQ8));
+            retiredIw4Bv01Q4,
+            MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, p => p == retiredStock1Bv10Q8 || p == retiredStock4Bv10Q4 || p == retiredIw4Bv01Q4));
         Assert.Equal(
-            legacy4BQ8,
-            MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, p => p == legacy1BQ8 || p == legacy4BQ8));
+            retiredStock4Bv10Q4,
+            MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, p => p == retiredStock1Bv10Q8 || p == retiredStock4Bv10Q4 || p == retiredStock4Bv01Q8));
         Assert.Equal(
-            legacy1BQ8,
-            MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, p => p == legacy1BQ8));
+            retiredStock4Bv01Q8,
+            MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, p => p == retiredStock1Bv10Q8 || p == retiredStock4Bv01Q8));
+        Assert.Equal(
+            retiredStock1Bv10Q8,
+            MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, p => p == retiredStock1Bv10Q8));
         Assert.Null(
             MiLMMTModelProfiles.ResolveEffectiveProfile(target4BQ4, _ => false));
     }
@@ -287,11 +282,11 @@ public class SettingsTests
     public void MiLMMTModelProfiles_PreferredAvailableProfile_UsesDownloadedFallbackForSelectedSize()
     {
         var expected = MiLMMTModelProfiles.Get(
-            MiLMMTModelSize.MiLMMT_4B,
+            MiLMMTModelSize.Ironworks_4B,
             MiLMMTQuantization.Q4_K_M);
 
         var selected = MiLMMTModelProfiles.FindPreferredAvailableProfile(
-            MiLMMTModelSize.MiLMMT_4B,
+            MiLMMTModelSize.Ironworks_4B,
             MiLMMTQuantization.Q8_0,
             profile => profile == expected);
 
@@ -302,11 +297,11 @@ public class SettingsTests
     public void MiLMMTModelProfiles_PreferredAvailableProfile_PreservesAvailablePreferredQuantization()
     {
         var expected = MiLMMTModelProfiles.Get(
-            MiLMMTModelSize.MiLMMT_4B,
+            MiLMMTModelSize.Ironworks_4B,
             MiLMMTQuantization.Q8_0);
 
         var selected = MiLMMTModelProfiles.FindPreferredAvailableProfile(
-            MiLMMTModelSize.MiLMMT_4B,
+            MiLMMTModelSize.Ironworks_4B,
             MiLMMTQuantization.Q8_0,
             profile => profile.Quantization is MiLMMTQuantization.Q4_K_M or MiLMMTQuantization.Q8_0);
 
@@ -314,10 +309,35 @@ public class SettingsTests
     }
 
     [Fact]
+    public void NormalizeSettings_MigratesRetiredStockMiLMMTSizePreservingSupportedQuantization()
+    {
+        var settings4b = IronworksSettings.CreateDefault();
+        settings4b.TranslatorSettings!.MiLMMTModelSize = MiLMMTModelSize.MiLMMT_4B;
+        settings4b.TranslatorSettings.MiLMMTQuantization = MiLMMTQuantization.Q8_0;
+        IronworksSettings.NormalizeSettings(settings4b);
+        Assert.Equal(MiLMMTModelSize.Ironworks_4B, settings4b.TranslatorSettings.MiLMMTModelSize);
+        Assert.Equal(MiLMMTQuantization.Q8_0, settings4b.TranslatorSettings.MiLMMTQuantization);
+
+        var settings12b = IronworksSettings.CreateDefault();
+        settings12b.TranslatorSettings!.MiLMMTModelSize = MiLMMTModelSize.MiLMMT_12B;
+        settings12b.TranslatorSettings.MiLMMTQuantization = MiLMMTQuantization.Q4_K_M;
+        IronworksSettings.NormalizeSettings(settings12b);
+        Assert.Equal(MiLMMTModelSize.Ironworks_4B, settings12b.TranslatorSettings.MiLMMTModelSize);
+        Assert.Equal(MiLMMTQuantization.Q4_K_M, settings12b.TranslatorSettings.MiLMMTQuantization);
+
+        var settings1b = IronworksSettings.CreateDefault();
+        settings1b.TranslatorSettings!.MiLMMTModelSize = MiLMMTModelSize.MiLMMT_1B;
+        settings1b.TranslatorSettings.MiLMMTQuantization = MiLMMTQuantization.Q4_K_M;
+        IronworksSettings.NormalizeSettings(settings1b);
+        Assert.Equal(MiLMMTModelSize.Ironworks_1B, settings1b.TranslatorSettings.MiLMMTModelSize);
+        Assert.Equal(MiLMMTQuantization.Q4_K_M, settings1b.TranslatorSettings.MiLMMTQuantization);
+    }
+
+    [Fact]
     public void MiLMMTModelStorageItem_CompatibilityChangesOnlyAtMemoryThresholds()
     {
         var profile = MiLMMTModelProfiles.Get(
-            MiLMMTModelSize.MiLMMT_4B,
+            MiLMMTModelSize.Ironworks_4B,
             MiLMMTQuantization.Q4_K_M);
         const ulong gib = 1024UL * 1024UL * 1024UL;
 

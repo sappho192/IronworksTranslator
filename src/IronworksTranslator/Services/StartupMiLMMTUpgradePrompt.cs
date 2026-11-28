@@ -86,7 +86,7 @@ namespace IronworksTranslator.Services
                     if (!shouldDownload)
                     {
                         Log.Information(
-                            "User postponed MiLMMT v1.0 upgrade for {TargetModel}; continuing with temporary v0.1 fallback.",
+                            "User postponed local model upgrade for {TargetModel}; continuing with temporary legacy fallback.",
                             plan.TargetProfile.DisplayName);
                         return;
                     }
@@ -94,7 +94,7 @@ namespace IronworksTranslator.Services
                     if (!downloadModel(plan.TargetProfile))
                     {
                         Log.Warning(
-                            "MiLMMT v1.0 upgrade download for {TargetModel} did not complete; continuing with temporary v0.1 fallback.",
+                            "Local model upgrade download for {TargetModel} did not complete; continuing with temporary legacy fallback.",
                             plan.TargetProfile.DisplayName);
                         return;
                     }

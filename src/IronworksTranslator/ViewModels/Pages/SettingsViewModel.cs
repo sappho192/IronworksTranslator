@@ -113,7 +113,8 @@ namespace IronworksTranslator.ViewModels.Pages
         [NotifyPropertyChangedFor(nameof(SelectedMiLMMTDownloadButtonVisibility))]
         private MiLMMTModelSize _miLMMTModelSize = IronworksSettings.Instance.TranslatorSettings.MiLMMTModelSize;
         [ObservableProperty]
-        private int _miLMMTModelSizeIndex = (int)IronworksSettings.Instance.TranslatorSettings.MiLMMTModelSize;
+        private int _miLMMTModelSizeIndex = MiLMMTModelProfiles.GetSelectableModelSizeIndex(
+            IronworksSettings.Instance.TranslatorSettings.MiLMMTModelSize);
         public IReadOnlyList<string> MiLMMTModelSizeOptions => MiLMMTModelProfiles.SelectableModelSizes
             .Select(modelSize => IronworksTranslator.Helpers.Extensions.EnumExtension.GetDescription(modelSize))
             .ToArray();
@@ -201,11 +202,13 @@ namespace IronworksTranslator.ViewModels.Pages
             }
 
             var fallbackModelSize = MiLMMTModelProfiles.GetFallbackModelSize(MiLMMTModelSize);
-            var fallbackQuantization = MiLMMTModelProfiles.GetDefaultQuantization(fallbackModelSize);
+            var fallbackQuantization = MiLMMTModelProfiles.IsSupported(fallbackModelSize, MiLMMTQuantization)
+                ? MiLMMTQuantization
+                : MiLMMTModelProfiles.GetDefaultQuantization(fallbackModelSize);
             if (MiLMMTModelSize != fallbackModelSize)
             {
                 MiLMMTModelSize = fallbackModelSize;
-                MiLMMTModelSizeIndex = (int)fallbackModelSize;
+                MiLMMTModelSizeIndex = MiLMMTModelProfiles.GetSelectableModelSizeIndex(fallbackModelSize);
             }
 
             if (MiLMMTQuantization != fallbackQuantization)
@@ -251,7 +254,7 @@ namespace IronworksTranslator.ViewModels.Pages
             if (profile != null)
             {
                 MiLMMTModelSize = profile.Size;
-                MiLMMTModelSizeIndex = (int)profile.Size;
+                MiLMMTModelSizeIndex = MiLMMTModelProfiles.GetSelectableModelSizeIndex(profile.Size);
                 MiLMMTQuantization = profile.Quantization;
                 MiLMMTQuantizationIndex = (int)profile.Quantization;
             }

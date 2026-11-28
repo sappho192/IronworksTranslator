@@ -8,10 +8,10 @@ namespace IronworksTranslator.Tests.Services;
 public class StartupMiLMMTUpgradePromptTests
 {
     private static readonly MiLMMTModelProfile Target1BQ8 =
-        MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_1B, MiLMMTQuantization.Q8_0);
+        MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_1B, MiLMMTQuantization.Q8_0);
     private static readonly MiLMMTModelProfile Legacy1BQ8 =
         MiLMMTModelProfiles.Retired.Single(p =>
-            p.AllowTemporaryFallback && p.Size == MiLMMTModelSize.MiLMMT_1B && p.Quantization == MiLMMTQuantization.Q8_0);
+            p.AllowTemporaryFallback && p.FileName == "MiLMMT-46-1B-v1.0.Q8_0.gguf");
 
     [Theory]
     [InlineData(TranslatorEngine.Papago)]

@@ -136,9 +136,9 @@ namespace IronworksTranslator.Utils.Translator
         /// </summary>
         internal static MiLMMTModelProfile GetDownloadProfile(MiLMMTModelProfile currentProfile)
         {
-            return currentProfile.Size == MiLMMTModelSize.MiLMMT_1B
+            return currentProfile.Size == MiLMMTModelSize.Ironworks_1B
                 ? currentProfile
-                : MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_1B, MiLMMTQuantization.Q8_0);
+                : MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_1B, MiLMMTQuantization.Q8_0);
         }
 
         private static bool IsCloudEngine(TranslatorEngine engine)

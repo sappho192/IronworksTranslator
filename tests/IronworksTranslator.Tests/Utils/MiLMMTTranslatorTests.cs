@@ -103,7 +103,7 @@ public class MiLMMTTranslatorTests
             }
             """);
 
-        var baseProfile = MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_1B, MiLMMTQuantization.Q8_0);
+        var baseProfile = MiLMMTModelProfiles.Retired.Single(p => p.FileName == "MiLMMT-46-1B-v1.0.Q8_0.gguf");
         Assert.False(baseProfile.SupportsGlossaryPrompt);
 
         var basePrompt = MiLMMTTranslator.BuildPromptForProfile(
@@ -114,7 +114,8 @@ public class MiLMMTTranslatorTests
             matcher);
         Assert.DoesNotContain("Glossary:", basePrompt);
 
-        var glossaryProfile = baseProfile with { SupportsGlossaryPrompt = true };
+        var glossaryProfile = MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_1B, MiLMMTQuantization.Q8_0);
+        Assert.True(glossaryProfile.SupportsGlossaryPrompt);
         var glossaryPrompt = MiLMMTTranslator.BuildPromptForProfile(
             glossaryProfile,
             TranslationLanguageCode.Japanese,
@@ -174,12 +175,12 @@ public class MiLMMTTranslatorTests
             }
             """);
 
-        var v01Profile = MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_4B, MiLMMTQuantization.Q4_K_M) with
-        {
-            SupportsGlossaryPrompt = true,
-            SupportsStylePrompt = false,
-        };
-        var v02Profile = v01Profile with { SupportsStylePrompt = true };
+        var v01Profile = MiLMMTModelProfiles.Retired.Single(p => p.FileName == "ironworks-translator-4b-v0.1.Q4_K_M.gguf");
+        Assert.True(v01Profile.SupportsGlossaryPrompt);
+        Assert.False(v01Profile.SupportsStylePrompt);
+        var v02Profile = MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_4B, MiLMMTQuantization.Q4_K_M);
+        Assert.True(v02Profile.SupportsGlossaryPrompt);
+        Assert.True(v02Profile.SupportsStylePrompt);
 
         // v0.1 profile must never emit Style:
         var v01Prompt = MiLMMTTranslator.BuildPromptForProfile(

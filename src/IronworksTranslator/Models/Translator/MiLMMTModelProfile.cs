@@ -27,8 +27,8 @@ namespace IronworksTranslator.Models.Translator
             MiLMMTModelSize.MiLMMT_4B => "MiLMMT 4B",
             MiLMMTModelSize.MiLMMT_12B => "MiLMMT 12B",
             MiLMMTModelSize.MiLMMT_1B_Compact => "MiLMMT 1B Compact (Debug)",
-            MiLMMTModelSize.Ironworks_1B => "Ironworks Translator 1B v0.1 (Debug)",
-            MiLMMTModelSize.Ironworks_4B => "Ironworks Translator 4B v0.2 (Debug)",
+            MiLMMTModelSize.Ironworks_1B => "Ironworks Translator 1B v0.2",
+            MiLMMTModelSize.Ironworks_4B => "Ironworks Translator 4B v0.2",
             _ => Size.ToString(),
         };
         public string DirectoryPath => DirectoryNameOverride != null
@@ -69,94 +69,33 @@ namespace IronworksTranslator.Models.Translator
         private static readonly MiLMMTModelProfile[] Profiles =
         [
             new(
-                MiLMMTModelSize.MiLMMT_1B,
-                MiLMMTQuantization.Q4_K_M,
-                "mradermacher/MiLMMT-46-1B-v1.0-GGUF",
-                "MiLMMT-46-1B-v1.0.Q4_K_M.gguf",
-                806057408,
-                "74d38ba75108d455326e9deeaf9ab01bb266dfa665eae9c4aa84e84485d4fdf9",
-                1.2,
-                AllLanguages,
-                "settings.translator.engine.milmmt.note.1b.q4"),
-            new(
-                MiLMMTModelSize.MiLMMT_1B,
-                MiLMMTQuantization.Q8_0,
-                "mradermacher/MiLMMT-46-1B-v1.0-GGUF",
-                "MiLMMT-46-1B-v1.0.Q8_0.gguf",
-                1069305536,
-                "e813418992ee1eae0d2859ca1a610b31ad19577078803aed4124dc9518f84b22",
-                1.5,
-                AllLanguages,
-                "settings.translator.engine.milmmt.note.1b.q8"),
-            new(
-                MiLMMTModelSize.MiLMMT_4B,
-                MiLMMTQuantization.Q4_K_M,
-                "mradermacher/MiLMMT-46-4B-v1.0-GGUF",
-                "MiLMMT-46-4B-v1.0.Q4_K_M.gguf",
-                2489893152,
-                "25424cbb5423afaa22b1b53bfb3d8aa116cfd84b5f8dcfa82363bfb3c4221ddf",
-                3.2,
-                AllLanguages,
-                "settings.translator.engine.milmmt.note.4b.q4"),
-            new(
-                MiLMMTModelSize.MiLMMT_4B,
-                MiLMMTQuantization.Q8_0,
-                "mradermacher/MiLMMT-46-4B-v1.0-GGUF",
-                "MiLMMT-46-4B-v1.0.Q8_0.gguf",
-                4130401312,
-                "92796e263e22461c273c9f964ba4c1454d8dc764a482af60bc1ad9c269d9e7d0",
-                5.0,
-                AllLanguages,
-                "settings.translator.engine.milmmt.note.4b.q8"),
-            new(
-                MiLMMTModelSize.MiLMMT_12B,
-                MiLMMTQuantization.Q4_K_M,
-                "mradermacher/MiLMMT-46-12B-v1.0-GGUF",
-                "MiLMMT-46-12B-v1.0.Q4_K_M.gguf",
-                7300777440,
-                "8c2d878d8daf8722faf1a42eef02ce046411ede17bf3115fb8b2cce491d5fb03",
-                8.8,
-                AllLanguages,
-                "settings.translator.engine.milmmt.note.12b.q4"),
-#if DEBUG
-            new(
-                MiLMMTModelSize.MiLMMT_1B_Compact,
-                MiLMMTQuantization.Q4_K_M,
-                "sappho192/MiLMMT-46-1B-v0.1-ko-en-ja-pruned-130k-imatrix-Q4_K_M-GGUF",
-                "milmmt-pruned-130k-bf16-imatrix-mix-late16-25-ffngateupq8-Q4_K_M.gguf",
-                803547328,
-                "5f781fdc9a685212dba3244b7cf2df39625776066043408f769549195f018b0d",
-                1.2,
-                KoEnJaLanguages,
-                "settings.translator.engine.milmmt.note.1b.compact",
-                "MiLMMT 1B Compact (Debug)",
-                "milmmt-46-1b-v0.1"),
-            new(
                 MiLMMTModelSize.Ironworks_1B,
                 MiLMMTQuantization.Q8_0,
-                "sappho192/ironworks-translator-1b-v0.1",
-                "ironworks-translator-1b-v0.1.Q8_0.gguf",
+                "sappho192/ironworks-translator-1b-v0.2",
+                "ironworks-translator-1b-v0.2.Q8_0.gguf",
                 1069305088,
-                "cb1040e81d29dd7308d3956d7742007398f001170ee5c22bbcb32ae41f180932",
+                "981e606ddfd368ec81bd6a74717587e69feb577be70f45298d43f703555b6a91",
                 1.5,
                 AllLanguages,
-                "settings.translator.engine.milmmt.note.1b.ffxiv",
-                "Ironworks Translator 1B v0.1 Q8_0 (Debug)",
-                "ironworks-translator-1b-v0.1",
-                SupportsGlossaryPrompt: true),
+                "settings.translator.engine.milmmt.note.1b.ffxiv.q8",
+                "Ironworks Translator 1B v0.2 Q8_0",
+                "ironworks-translator-1b-v0.2",
+                SupportsGlossaryPrompt: true,
+                SupportsStylePrompt: true),
             new(
                 MiLMMTModelSize.Ironworks_1B,
                 MiLMMTQuantization.Q4_K_M,
-                "sappho192/ironworks-translator-1b-v0.1",
-                "ironworks-translator-1b-v0.1.Q4_K_M.gguf",
+                "sappho192/ironworks-translator-1b-v0.2",
+                "ironworks-translator-1b-v0.2.Q4_K_M.gguf",
                 806056960,
-                "d33e366de2f29de6eff976f5bed4c21286a7ddcca40df6783fcf9e56e8534542",
+                "4c2fd57f958feb39c3576dc109f3860925c1abf2aed5b7bb203ded25779722ae",
                 1.2,
                 AllLanguages,
-                "settings.translator.engine.milmmt.note.1b.ffxiv",
-                "Ironworks Translator 1B v0.1 Q4_K_M (Debug)",
-                "ironworks-translator-1b-v0.1",
-                SupportsGlossaryPrompt: true),
+                "settings.translator.engine.milmmt.note.1b.ffxiv.q4",
+                "Ironworks Translator 1B v0.2 Q4_K_M",
+                "ironworks-translator-1b-v0.2",
+                SupportsGlossaryPrompt: true,
+                SupportsStylePrompt: true),
             new(
                 MiLMMTModelSize.Ironworks_4B,
                 MiLMMTQuantization.Q4_K_M,
@@ -166,8 +105,8 @@ namespace IronworksTranslator.Models.Translator
                 "9560b867600d9bec155cbb5cccfd694a1ff35a784c2c1fd954637a5ea56a236e",
                 3.2,
                 AllLanguages,
-                "settings.translator.engine.milmmt.note.4b.ffxiv",
-                "Ironworks Translator 4B v0.2 Q4_K_M (Debug)",
+                "settings.translator.engine.milmmt.note.4b.ffxiv.q4",
+                "Ironworks Translator 4B v0.2 Q4_K_M",
                 "ironworks-translator-4b-v0.2",
                 SupportsGlossaryPrompt: true,
                 SupportsStylePrompt: true),
@@ -180,16 +119,138 @@ namespace IronworksTranslator.Models.Translator
                 "12b4090ebaa11caa3024ab0759188da6b037741d28ef9661a578d3a1f9d5ce76",
                 5.0,
                 AllLanguages,
-                "settings.translator.engine.milmmt.note.4b.ffxiv",
-                "Ironworks Translator 4B v0.2 Q8_0 (Debug)",
+                "settings.translator.engine.milmmt.note.4b.ffxiv.q8",
+                "Ironworks Translator 4B v0.2 Q8_0",
                 "ironworks-translator-4b-v0.2",
                 SupportsGlossaryPrompt: true,
                 SupportsStylePrompt: true),
-#endif
         ];
 
+        // Ordered newest-first so temporary fallback prefers the most recent installed model
+        // within a matching size family (Ironworks v0.1 -> MiLMMT v1.0 -> MiLMMT v0.1).
         private static readonly MiLMMTModelProfile[] RetiredProfiles =
         [
+            new(
+                MiLMMTModelSize.Ironworks_1B,
+                MiLMMTQuantization.Q8_0,
+                "sappho192/ironworks-translator-1b-v0.1",
+                "ironworks-translator-1b-v0.1.Q8_0.gguf",
+                1069305088,
+                "cb1040e81d29dd7308d3956d7742007398f001170ee5c22bbcb32ae41f180932",
+                1.5,
+                AllLanguages,
+                "settings.translator.engine.milmmt.note.retired.1b.ffxiv",
+                "Ironworks Translator 1B v0.1 Q8_0",
+                "ironworks-translator-1b-v0.1",
+                AllowTemporaryFallback: true,
+                SupportsGlossaryPrompt: true),
+            new(
+                MiLMMTModelSize.Ironworks_1B,
+                MiLMMTQuantization.Q4_K_M,
+                "sappho192/ironworks-translator-1b-v0.1",
+                "ironworks-translator-1b-v0.1.Q4_K_M.gguf",
+                806056960,
+                "d33e366de2f29de6eff976f5bed4c21286a7ddcca40df6783fcf9e56e8534542",
+                1.2,
+                AllLanguages,
+                "settings.translator.engine.milmmt.note.retired.1b.ffxiv",
+                "Ironworks Translator 1B v0.1 Q4_K_M",
+                "ironworks-translator-1b-v0.1",
+                AllowTemporaryFallback: true,
+                SupportsGlossaryPrompt: true),
+            new(
+                MiLMMTModelSize.Ironworks_4B,
+                MiLMMTQuantization.Q4_K_M,
+                "sappho192/ironworks-translator-4b-v0.1",
+                "ironworks-translator-4b-v0.1.Q4_K_M.gguf",
+                2489892704,
+                "07e235125d266e2f5e79d73d33b73c0193e84773caec1d2e862ecd8588d97dd6",
+                3.2,
+                AllLanguages,
+                "settings.translator.engine.milmmt.note.retired.4b.ffxiv",
+                "Ironworks Translator 4B v0.1 Q4_K_M",
+                "ironworks-translator-4b-v0.1",
+                AllowTemporaryFallback: true,
+                SupportsGlossaryPrompt: true),
+            new(
+                MiLMMTModelSize.Ironworks_4B,
+                MiLMMTQuantization.Q8_0,
+                "sappho192/ironworks-translator-4b-v0.1",
+                "ironworks-translator-4b-v0.1.Q8_0.gguf",
+                4130400864,
+                "0039cf32ec0d474433b78305c9ec9e10544066638a84ec0607c545550a111a8f",
+                5.0,
+                AllLanguages,
+                "settings.translator.engine.milmmt.note.retired.4b.ffxiv",
+                "Ironworks Translator 4B v0.1 Q8_0",
+                "ironworks-translator-4b-v0.1",
+                AllowTemporaryFallback: true,
+                SupportsGlossaryPrompt: true),
+            new(
+                MiLMMTModelSize.MiLMMT_1B,
+                MiLMMTQuantization.Q8_0,
+                "mradermacher/MiLMMT-46-1B-v1.0-GGUF",
+                "MiLMMT-46-1B-v1.0.Q8_0.gguf",
+                1069305536,
+                "e813418992ee1eae0d2859ca1a610b31ad19577078803aed4124dc9518f84b22",
+                1.5,
+                AllLanguages,
+                "settings.translator.engine.milmmt.note.retired.v1_0",
+                "MiLMMT 1B v1.0 Q8_0",
+                "milmmt-46-1b-v1.0",
+                AllowTemporaryFallback: true),
+            new(
+                MiLMMTModelSize.MiLMMT_1B,
+                MiLMMTQuantization.Q4_K_M,
+                "mradermacher/MiLMMT-46-1B-v1.0-GGUF",
+                "MiLMMT-46-1B-v1.0.Q4_K_M.gguf",
+                806057408,
+                "74d38ba75108d455326e9deeaf9ab01bb266dfa665eae9c4aa84e84485d4fdf9",
+                1.2,
+                AllLanguages,
+                "settings.translator.engine.milmmt.note.retired.v1_0",
+                "MiLMMT 1B v1.0 Q4_K_M",
+                "milmmt-46-1b-v1.0",
+                AllowTemporaryFallback: true),
+            new(
+                MiLMMTModelSize.MiLMMT_4B,
+                MiLMMTQuantization.Q4_K_M,
+                "mradermacher/MiLMMT-46-4B-v1.0-GGUF",
+                "MiLMMT-46-4B-v1.0.Q4_K_M.gguf",
+                2489893152,
+                "25424cbb5423afaa22b1b53bfb3d8aa116cfd84b5f8dcfa82363bfb3c4221ddf",
+                3.2,
+                AllLanguages,
+                "settings.translator.engine.milmmt.note.retired.v1_0",
+                "MiLMMT 4B v1.0 Q4_K_M",
+                "milmmt-46-4b-v1.0",
+                AllowTemporaryFallback: true),
+            new(
+                MiLMMTModelSize.MiLMMT_4B,
+                MiLMMTQuantization.Q8_0,
+                "mradermacher/MiLMMT-46-4B-v1.0-GGUF",
+                "MiLMMT-46-4B-v1.0.Q8_0.gguf",
+                4130401312,
+                "92796e263e22461c273c9f964ba4c1454d8dc764a482af60bc1ad9c269d9e7d0",
+                5.0,
+                AllLanguages,
+                "settings.translator.engine.milmmt.note.retired.v1_0",
+                "MiLMMT 4B v1.0 Q8_0",
+                "milmmt-46-4b-v1.0",
+                AllowTemporaryFallback: true),
+            new(
+                MiLMMTModelSize.MiLMMT_12B,
+                MiLMMTQuantization.Q4_K_M,
+                "mradermacher/MiLMMT-46-12B-v1.0-GGUF",
+                "MiLMMT-46-12B-v1.0.Q4_K_M.gguf",
+                7300777440,
+                "8c2d878d8daf8722faf1a42eef02ce046411ede17bf3115fb8b2cce491d5fb03",
+                8.8,
+                AllLanguages,
+                "settings.translator.engine.milmmt.note.retired.v1_0",
+                "MiLMMT 12B v1.0 Q4_K_M",
+                "milmmt-46-12b-v1.0",
+                AllowTemporaryFallback: true),
             new(
                 MiLMMTModelSize.MiLMMT_1B,
                 MiLMMTQuantization.Q4_K_M,
@@ -255,7 +316,6 @@ namespace IronworksTranslator.Models.Translator
                 "MiLMMT 12B v0.1 Q4_K_M",
                 "milmmt-46-12b-v0.1",
                 AllowTemporaryFallback: true),
-#if !DEBUG
             new(
                 MiLMMTModelSize.MiLMMT_1B_Compact,
                 MiLMMTQuantization.Q4_K_M,
@@ -268,79 +328,6 @@ namespace IronworksTranslator.Models.Translator
                 "settings.translator.engine.milmmt.note.retired.1b.compact",
                 "MiLMMT 1B Compact (Debug)",
                 "milmmt-46-1b-v0.1"),
-            new(
-                MiLMMTModelSize.Ironworks_1B,
-                MiLMMTQuantization.Q8_0,
-                "sappho192/ironworks-translator-1b-v0.1",
-                "ironworks-translator-1b-v0.1.Q8_0.gguf",
-                1069305088,
-                "cb1040e81d29dd7308d3956d7742007398f001170ee5c22bbcb32ae41f180932",
-                1.5,
-                AllLanguages,
-                "settings.translator.engine.milmmt.note.retired.1b.ffxiv",
-                "Ironworks Translator 1B v0.1 Q8_0 (Debug)",
-                "ironworks-translator-1b-v0.1"),
-            new(
-                MiLMMTModelSize.Ironworks_1B,
-                MiLMMTQuantization.Q4_K_M,
-                "sappho192/ironworks-translator-1b-v0.1",
-                "ironworks-translator-1b-v0.1.Q4_K_M.gguf",
-                806056960,
-                "d33e366de2f29de6eff976f5bed4c21286a7ddcca40df6783fcf9e56e8534542",
-                1.2,
-                AllLanguages,
-                "settings.translator.engine.milmmt.note.retired.1b.ffxiv",
-                "Ironworks Translator 1B v0.1 Q4_K_M (Debug)",
-                "ironworks-translator-1b-v0.1"),
-            new(
-                MiLMMTModelSize.Ironworks_4B,
-                MiLMMTQuantization.Q4_K_M,
-                "sappho192/ironworks-translator-4b-v0.1",
-                "ironworks-translator-4b-v0.1.Q4_K_M.gguf",
-                2489892704,
-                "07e235125d266e2f5e79d73d33b73c0193e84773caec1d2e862ecd8588d97dd6",
-                3.2,
-                AllLanguages,
-                "settings.translator.engine.milmmt.note.retired.4b.ffxiv",
-                "Ironworks Translator 4B v0.1 Q4_K_M (Debug)",
-                "ironworks-translator-4b-v0.1"),
-            new(
-                MiLMMTModelSize.Ironworks_4B,
-                MiLMMTQuantization.Q8_0,
-                "sappho192/ironworks-translator-4b-v0.1",
-                "ironworks-translator-4b-v0.1.Q8_0.gguf",
-                4130400864,
-                "0039cf32ec0d474433b78305c9ec9e10544066638a84ec0607c545550a111a8f",
-                5.0,
-                AllLanguages,
-                "settings.translator.engine.milmmt.note.retired.4b.ffxiv",
-                "Ironworks Translator 4B v0.1 Q8_0 (Debug)",
-                "ironworks-translator-4b-v0.1"),
-            new(
-                MiLMMTModelSize.Ironworks_4B,
-                MiLMMTQuantization.Q4_K_M,
-                "sappho192/ironworks-translator-4b-v0.2",
-                "ironworks-translator-4b-v0.2.Q4_K_M.gguf",
-                2489892704,
-                "9560b867600d9bec155cbb5cccfd694a1ff35a784c2c1fd954637a5ea56a236e",
-                3.2,
-                AllLanguages,
-                "settings.translator.engine.milmmt.note.retired.4b.ffxiv",
-                "Ironworks Translator 4B v0.2 Q4_K_M (Debug)",
-                "ironworks-translator-4b-v0.2"),
-            new(
-                MiLMMTModelSize.Ironworks_4B,
-                MiLMMTQuantization.Q8_0,
-                "sappho192/ironworks-translator-4b-v0.2",
-                "ironworks-translator-4b-v0.2.Q8_0.gguf",
-                4130400864,
-                "12b4090ebaa11caa3024ab0759188da6b037741d28ef9661a578d3a1f9d5ce76",
-                5.0,
-                AllLanguages,
-                "settings.translator.engine.milmmt.note.retired.4b.ffxiv",
-                "Ironworks Translator 4B v0.2 Q8_0 (Debug)",
-                "ironworks-translator-4b-v0.2"),
-#endif
         ];
 
         public static IReadOnlyList<MiLMMTModelProfile> All => Profiles;
@@ -348,15 +335,22 @@ namespace IronworksTranslator.Models.Translator
         public static IEnumerable<MiLMMTModelProfile> AllKnown => Profiles.Concat(RetiredProfiles);
         public static IReadOnlyList<MiLMMTModelSize> SelectableModelSizes { get; } =
         [
-            MiLMMTModelSize.MiLMMT_1B,
-            MiLMMTModelSize.MiLMMT_4B,
-            MiLMMTModelSize.MiLMMT_12B,
-#if DEBUG
-            MiLMMTModelSize.MiLMMT_1B_Compact,
             MiLMMTModelSize.Ironworks_1B,
             MiLMMTModelSize.Ironworks_4B,
-#endif
         ];
+
+        public static int GetSelectableModelSizeIndex(MiLMMTModelSize size)
+        {
+            for (var i = 0; i < SelectableModelSizes.Count; i++)
+            {
+                if (SelectableModelSizes[i] == size)
+                {
+                    return i;
+                }
+            }
+
+            return 0;
+        }
 
         public static IReadOnlyList<MiLMMTModelProfile> GetDownloadedRetiredProfiles(
             Func<MiLMMTModelProfile, bool> isAvailable)
@@ -383,12 +377,14 @@ namespace IronworksTranslator.Models.Translator
             ArgumentNullException.ThrowIfNull(targetProfile);
             ArgumentNullException.ThrowIfNull(isAvailable);
 
+            var targetFamily = GetFallbackModelSize(targetProfile.Size);
             return RetiredProfiles
                 .Where(profile => profile.AllowTemporaryFallback && isAvailable(profile))
                 .OrderBy(profile =>
-                    profile.Size == targetProfile.Size && profile.Quantization == targetProfile.Quantization ? 0 : 1)
-                .ThenBy(profile => profile.Size == targetProfile.Size ? 0 : 1)
-                .ThenBy(profile => profile.FileSize)
+                    GetFallbackModelSize(profile.Size) == targetFamily && profile.Quantization == targetProfile.Quantization
+                        ? 0
+                        : 1)
+                .ThenBy(profile => GetFallbackModelSize(profile.Size) == targetFamily ? 0 : 1)
                 .FirstOrDefault();
         }
 
@@ -426,9 +422,16 @@ namespace IronworksTranslator.Models.Translator
 
         public static MiLMMTModelSize GetFallbackModelSize(MiLMMTModelSize size)
         {
-            return Profiles.Any(profile => profile.Size == size)
-                ? size
-                : MiLMMTModelSize.MiLMMT_1B;
+            if (Profiles.Any(profile => profile.Size == size))
+            {
+                return size;
+            }
+
+            return size switch
+            {
+                MiLMMTModelSize.MiLMMT_4B or MiLMMTModelSize.MiLMMT_12B => MiLMMTModelSize.Ironworks_4B,
+                _ => MiLMMTModelSize.Ironworks_1B,
+            };
         }
 
         public static MiLMMTQuantization GetDefaultQuantization(MiLMMTModelSize size)
@@ -456,7 +459,7 @@ namespace IronworksTranslator.Models.Translator
         public static MiLMMTModelProfile GetCurrent()
         {
             var settings = Models.Settings.IronworksSettings.Instance?.TranslatorSettings;
-            var size = settings?.MiLMMTModelSize ?? MiLMMTModelSize.MiLMMT_1B;
+            var size = settings?.MiLMMTModelSize ?? MiLMMTModelSize.Ironworks_1B;
             var quantization = settings?.MiLMMTQuantization ?? MiLMMTQuantization.Q8_0;
             size = GetFallbackModelSize(size);
             if (!IsSupported(size, quantization))

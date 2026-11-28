@@ -75,6 +75,7 @@ namespace IronworksTranslator.Helpers
                 MiLMMTModelSize.MiLMMT_1B => $"{StableModelSizePrefix}1B",
                 MiLMMTModelSize.MiLMMT_4B => $"{StableModelSizePrefix}4B",
                 MiLMMTModelSize.MiLMMT_12B => $"{StableModelSizePrefix}12B",
+                MiLMMTModelSize.Ironworks_4B => $"{StableModelSizePrefix}4B",
                 _ => $"{StableModelSizePrefix}1B",
             };
         }

@@ -16,10 +16,10 @@ namespace IronworksTranslator.Models.Enums
         [Description("MiLMMT 1B Compact (Debug)")]
         MiLMMT_1B_Compact,
 
-        [Description("Ironworks Translator 1B v0.1 (Debug)")]
+        [Description("Ironworks Translator 1B v0.2")]
         Ironworks_1B,
 
-        [Description("Ironworks Translator 4B v0.1 (Debug)")]
+        [Description("Ironworks Translator 4B v0.2")]
         Ironworks_4B,
     }
 }

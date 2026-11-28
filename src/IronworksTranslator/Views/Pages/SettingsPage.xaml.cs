@@ -825,7 +825,7 @@ namespace IronworksTranslator.Views.Pages
             try
             {
                 ViewModel.MiLMMTModelSize = profile.Size;
-                ViewModel.MiLMMTModelSizeIndex = (int)profile.Size;
+                ViewModel.MiLMMTModelSizeIndex = MiLMMTModelProfiles.GetSelectableModelSizeIndex(profile.Size);
                 ViewModel.MiLMMTQuantization = profile.Quantization;
                 ViewModel.MiLMMTQuantizationIndex = (int)profile.Quantization;
                 if (rememberIfAvailable)

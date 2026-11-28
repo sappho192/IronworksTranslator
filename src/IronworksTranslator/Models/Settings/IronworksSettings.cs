@@ -64,7 +64,7 @@ namespace IronworksTranslator.Models.Settings
                 {
                     ClientLanguage = ClientLanguage.Korean,
                     TranslatorEngine = TranslatorEngine.Papago,
-                    MiLMMTModelSize = MiLMMTModelSize.MiLMMT_1B,
+                    MiLMMTModelSize = MiLMMTModelSize.Ironworks_1B,
                     MiLMMTQuantization = MiLMMTQuantization.Q8_0,
                     LocalModelDevicePriority = localModelDevicePriority,
                     LocalModelDevicePriorityUserSelected = false,
@@ -255,8 +255,11 @@ namespace IronworksTranslator.Models.Settings
 
             var fallbackSize = IronworksTranslator.Models.Translator.MiLMMTModelProfiles.GetFallbackModelSize(
                 translatorSettings.MiLMMTModelSize);
-            var fallbackQuantization = IronworksTranslator.Models.Translator.MiLMMTModelProfiles.GetDefaultQuantization(
-                fallbackSize);
+            var fallbackQuantization = IronworksTranslator.Models.Translator.MiLMMTModelProfiles.IsSupported(
+                fallbackSize,
+                translatorSettings.MiLMMTQuantization)
+                ? translatorSettings.MiLMMTQuantization
+                : IronworksTranslator.Models.Translator.MiLMMTModelProfiles.GetDefaultQuantization(fallbackSize);
             Log.Information(
                 "MiLMMT model profile normalized from {PreviousSize} {PreviousQuantization} to {Size} {Quantization}.",
                 translatorSettings.MiLMMTModelSize,

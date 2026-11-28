@@ -10,7 +10,7 @@ namespace IronworksTranslator.Utils
         private const string AppFolderName = "IronworksTranslator";
         // Increment this before shipping any persisted change that an older
         // application may not deserialize. Never reuse an existing schema file.
-        internal const int SettingsSchemaVersion = 4;
+        internal const int SettingsSchemaVersion = 5;
 
         public static string RoamingAppDataDirectory { get; } = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -58,11 +58,11 @@ namespace IronworksTranslator.Utils
 
         public static string MiLMMTModelDirectory { get; } = Path.Combine(
             ModelDirectory,
-            "milmmt-46-1b-v1.0");
+            "ironworks-translator-1b-v0.2");
 
         public static string MiLMMTModelPath { get; } = Path.Combine(
             MiLMMTModelDirectory,
-            "MiLMMT-46-1B-v1.0.Q8_0.gguf");
+            "ironworks-translator-1b-v0.2.Q8_0.gguf");
 
         public static string GetMiLMMTModelDirectory(MiLMMTModelSize modelSize)
         {
@@ -70,12 +70,13 @@ namespace IronworksTranslator.Utils
                 ModelDirectory,
                 modelSize switch
                 {
+                    MiLMMTModelSize.MiLMMT_1B => "milmmt-46-1b-v1.0",
                     MiLMMTModelSize.MiLMMT_4B => "milmmt-46-4b-v1.0",
                     MiLMMTModelSize.MiLMMT_12B => "milmmt-46-12b-v1.0",
                     MiLMMTModelSize.MiLMMT_1B_Compact => "milmmt-46-1b-v0.1",
-                    MiLMMTModelSize.Ironworks_1B => "ironworks-translator-1b-v0.1",
+                    MiLMMTModelSize.Ironworks_1B => "ironworks-translator-1b-v0.2",
                     MiLMMTModelSize.Ironworks_4B => "ironworks-translator-4b-v0.2",
-                    _ => "milmmt-46-1b-v1.0",
+                    _ => "ironworks-translator-1b-v0.2",
                 });
         }
 

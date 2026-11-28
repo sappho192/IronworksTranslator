@@ -8,13 +8,13 @@ namespace IronworksTranslator.Tests.Utils;
 public class TranslatorFallbackPolicyTests
 {
     private static readonly MiLMMTModelProfile Default1BQ8 =
-        MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_1B, MiLMMTQuantization.Q8_0);
+        MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_1B, MiLMMTQuantization.Q8_0);
     private static readonly MiLMMTModelProfile OneBQ4 =
-        MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_1B, MiLMMTQuantization.Q4_K_M);
+        MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_1B, MiLMMTQuantization.Q4_K_M);
     private static readonly MiLMMTModelProfile FourBQ4 =
-        MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_4B, MiLMMTQuantization.Q4_K_M);
-    private static readonly MiLMMTModelProfile TwelveBQ4 =
-        MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_12B, MiLMMTQuantization.Q4_K_M);
+        MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_4B, MiLMMTQuantization.Q4_K_M);
+    private static readonly MiLMMTModelProfile FourBQ8 =
+        MiLMMTModelProfiles.Get(MiLMMTModelSize.Ironworks_4B, MiLMMTQuantization.Q8_0);
 
     private static Func<TranslatorEngine, bool> Unavailable(params TranslatorEngine[] engines) =>
         engine => engines.Contains(engine);
@@ -172,7 +172,7 @@ public class TranslatorFallbackPolicyTests
             TranslatorEngine.Papago,
             Unavailable(TranslatorEngine.Papago),
             deeplApiKeyCount: 0,
-            TwelveBQ4,
+            FourBQ8,
             Downloaded());
 
         Assert.Equal(TranslatorFallbackActionKind.DownloadLocalModel, decision.Kind);
@@ -190,14 +190,12 @@ public class TranslatorFallbackPolicyTests
     [Fact]
     public void FindAvailableLocalProfile_PrefersSameSizeThenSmallestFile()
     {
-        var fourBQ8 = MiLMMTModelProfiles.Get(MiLMMTModelSize.MiLMMT_4B, MiLMMTQuantization.Q8_0);
-
         var sameSize = TranslatorFallbackPolicy.FindAvailableLocalProfile(
-            fourBQ8,
+            FourBQ8,
             Downloaded(Default1BQ8, FourBQ4));
         var smallest = TranslatorFallbackPolicy.FindAvailableLocalProfile(
-            TwelveBQ4,
-            Downloaded(Default1BQ8, OneBQ4, FourBQ4));
+            FourBQ8,
+            Downloaded(Default1BQ8, OneBQ4));
 
         Assert.Equal(FourBQ4, sameSize);
         Assert.Equal(OneBQ4, smallest);
