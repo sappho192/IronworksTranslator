@@ -98,9 +98,27 @@ dotnet tool update --global vpk --version 1.2.0
   패키지 DLL을 포함한 실제 Release 앱으로 BattleTalk 등 변경된 capability의 smoke를 다시
   통과해야 합니다.
 
+## 저장소 스킬
+
+반복되는 다단계 작업은 아래 저장소 스킬을 먼저 읽고 따릅니다.
+
+- 앱 릴리스 패키징·검증·게시: `skills/release-ironworks-translator/SKILL.md`
+- MiLMMT 파인튜닝·병합·양자화·6-게이트 평가: `skills/train-eval-milmmt/SKILL.md`
+- Cloudflare D1 번역 제보 검수 및 R2 런타임 용어집 배포: `skills/triage-translation-reports/SKILL.md`
+
+## MiLMMT 파인튜닝·평가 및 용어집 불변 규칙
+
+- 모델 품질과 승격 판정은 bf16 체크포인트나 `eval_loss`가 아니라 **실제 양자화 GGUF + Step 0 그리디 디코딩**(`temperature=0.0, top_k=1, repeat_penalty=1.0, frequency_penalty=0.30, repeat_last_n=16`) 결과로만 수행합니다.
+- 모든 평가 보고는 **안정성 실패(루프·언어 드리프트·빈 출력·잘림·태그 누수)와 정확한 분모**를 내용 지표보다 먼저 표기하며, **일반 다국어 24건 및 hold-out 장문 전수 정성 검수** 없이 승격하지 않습니다.
+- SFT 데이터셋은 **일반 다국어 6방향 리플레이 ≥18~20%**와 **기존 FFXIV 예산 보존(단순 누적 금지)**을 유지합니다. `4B` 기본 병합은 **Layer-wise Alpha (`0.84 -> 1.00`)**를 우선 검토하고, 경량 양자화는 **무손실 `BF16 -> imatrix Q5_K_M`**을 사용합니다(`Q8_0` 재양자화 및 `imatrix Q4_K_M` 지양).
+- `4B`에서는 동일 체급 자가 증류(`4B -> 4B`)로 SFT 화계 상한(`~85%`)을 넘지 못합니다. 인접 화계 경계 돌파에는 선호도 정렬(DPO/CPO/SimPO) 또는 외부 고품질 교사/검수 데이터를 사용합니다.
+- `MiLMMTGlossaryMatcher.cs`와 `tools/milmmt-dataset-builder/build_sft_dataset.py`의 매칭 규칙(한국어 조사 경계, 영어 복수형 등)은 항상 양쪽을 동시에 동기화하고 C#/Python 테스트를 함께 갱신합니다.
+- FFXIV 인게임 채팅·대사 유입 경로(`ChatLookupService`, `DialogueWindow`)는 반드시 `FfxivTextSanitizer`를 거쳐 SeString 제어 바이트 누수를 차단합니다.
+
 ## 작업 전 체크리스트
 
 - 시작할 때 `git status --short --branch`로 사용자 변경을 확인하고, 관련 없는 변경은 되돌리지 마세요.
 - 파일 검색은 `rg`와 `rg --files`를 우선 사용합니다.
 - 변경 범위가 UI 문자열, 설정, 번역 엔진, 릴리스, 사용자 데이터 위치 중 하나에 닿으면 관련 문서와 테스트를 함께 확인합니다.
+- `docs/agent-log/` 등 커밋 대상 문서에는 로컬 절대 경로(`C:\`, `D:\`, `file:///`), 사용자 계정명, Cloudflare Account ID, 자격 증명, 플레이어 닉네임·원문 채팅을 남기지 마세요.
 - 작업 후 가능한 최소 검증 명령을 실행하고, 실행하지 못한 검증은 이유를 남깁니다.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Triage Translation Reports"
+  short_description: "Audit D1 reports, fix matcher/glossary, deploy to R2"
+  default_prompt: "Use $triage-translation-reports to inspect pending D1 translation reports, classify fixes, update the runtime glossary, and verify live R2 publication."

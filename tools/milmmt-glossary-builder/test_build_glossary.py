@@ -210,6 +210,8 @@ class BuildGlossaryTests(unittest.TestCase):
         self.assertEqual(classify_korean_sentence_style("감사히 여겨야 할 것이옵니다."), "고어체")
         # Promissive -(으)ㄹ게 remains 반말, not 하게체
         self.assertEqual(classify_korean_sentence_style("조금만 기다릴게."), "반말")
+        self.assertEqual(classify_korean_sentence_style("이렇게 먼 곳까지 와줘서 고마워"), "반말")
+        self.assertEqual(classify_korean_sentence_style("저기 빛이 보여."), "반말")
         # Common noun false positives rejected
         self.assertIsNone(classify_korean_sentence_style("여기가 약속 장소"))
 

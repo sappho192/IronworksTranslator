@@ -65,11 +65,17 @@ $env:RestoreSources = "https://api.nuget.org/v3/index.json"
 dotnet restore src\IronworksTranslator\IronworksTranslator.sln
 ```
 
-4. Verify `Sharlayan.Lite/<version>/.nupkg.metadata`:
-   - `source` equals `https://api.nuget.org/v3/index.json`.
-   - `contentHash` equals the `Sharlayan.Lite/<version>` `sha512` value in `src/IronworksTranslator/obj/project.assets.json`.
-5. Record the official cache DLL SHA-256, file version, and product/informational version commit.
-6. After build/publish, compare that DLL with the Release/RID build input under `src/IronworksTranslator/bin/Release`.
+4. Run the formalized Sharlayan provenance verifier against the official cache and `project.assets.json`:
+
+```powershell
+.\tools\release-verification\Verify-SharlayanProvenance.ps1 `
+  -CacheDir $env:NUGET_PACKAGES `
+  -FailOnNonOfficialNuGetSource `
+  -OutputPath "Releases\sharlayan-provenance-prebuild.json"
+```
+
+5. Require `source` to equal `https://api.nuget.org/v3/index.json` and `contentHash` to match `src/IronworksTranslator/obj/project.assets.json`. Record the official cache DLL SHA-256, file version, and informational version commit.
+6. After build/publish, rerun `Verify-SharlayanProvenance.ps1 -CheckBuiltDlls` (or let `Verify-ReleasePackage.ps1` invoke it) to compare the official cache DLL against the Release/RID build outputs under `src/IronworksTranslator/bin/Release`.
 7. Expect the final app to be a single-file executable; absence of a separate `Sharlayan.dll` in the publish directory is not a mismatch. Never substitute a local-feed DLL.
 
 ## 4. Run Release tests and native-runtime gates
@@ -125,15 +131,25 @@ Require and record:
 
 ## 6. Inspect the packaged application
 
-Extract the full `.nupkg` into a new unique temporary directory. Do not reuse or recursively clear a broad directory.
+Run the formalized package verifier against the built release directory (it extracts the full `.nupkg` into a fresh temporary directory, checks versions, `LICENSES\llama.cpp-MIT.txt`, CUDA/Vulkan `Verify-WindowsNativePackage.ps1` integrity, `releases.<channel>.json`, Sharlayan provenance, and optionally writes `Releases\<VERSION>-sha256.txt`):
 
-Verify:
+```powershell
+.\tools\release-verification\Verify-ReleasePackage.ps1 `
+  -Version <VERSION> `
+  -ReleaseChannel Stable `
+  -CacheDir $env:NUGET_PACKAGES `
+  -WriteSha256File `
+  -OutputPath "Releases\<VERSION>\PACKAGE-VERIFICATION.json"
+```
+
+(Pass `-ReleaseChannel Beta -ReleaseDir Releases\beta` for Beta releases.)
+
+Require all checks in `PACKAGE-VERIFICATION.json` to pass:
 
 - `IronworksTranslator.exe`, `IronworksTranslator.Launcher.exe`, and `IronworksMiLMMTNativeProbe.exe` exist.
 - App and launcher file/product versions match the tag and commit.
 - `LICENSES\llama.cpp-MIT.txt` matches the repository source hash.
-- `milmmt-runtime-packs-manifest.json` and both backend `native-manifest.json` files exist.
-- Running `Verify-WindowsNativePackage.ps1` against the extracted CUDA and Vulkan directories returns `integrityVerified=true`.
+- `milmmt-runtime-packs-manifest.json` and both backend `native-manifest.json` files exist with `integrityVerified=true` for CUDA and Vulkan.
 - `releases.win.json` or `releases.beta.json` contains the new full/delta entries, correct hashes and sizes, and the expected previous full package entry when generating an update.
 
 Do not treat static runtime integrity as hardware or model-inference smoke.
@@ -193,16 +209,25 @@ gh release create <VERSION> `
 
 ## 9. Verify the public release
 
-1. Query the release and require:
-   - correct tag and a title exactly equal to the version value;
-   - `isDraft=false`;
-   - Stable `isPrerelease=false`, or Beta `isPrerelease=true`;
-   - all expected assets in `uploaded` state with the expected sizes and digests.
-2. For Stable, query the repository latest-release endpoint and require the new tag.
-3. Download every asset anonymously from the public release URL into a new temporary directory.
-4. Compare every public SHA-256 with the local artifact.
-5. Read the published body and compare it with the supplied notes.
-6. Recheck `git status --short --branch` and remote synchronization.
+Run the formalized public release verifier (downloads every asset anonymously into a fresh temporary directory, checks GitHub metadata/title/draft/prerelease/latest, verifies SHA-256 against local artifacts, and compares published release notes):
+
+```powershell
+.\tools\release-verification\Verify-PublicRelease.ps1 `
+  -Version <VERSION> `
+  -ReleaseDir "Releases" `
+  -ReleaseChannel Stable `
+  -NotesFile "Releases\<VERSION>-release-notes.md" `
+  -OutputPath "Releases\<VERSION>\PUBLIC-VERIFICATION.json"
+```
+
+(Pass `-ReleaseChannel Beta -ReleaseDir "Releases\beta"` for Beta releases.)
+
+Require:
+
+1. Exact tag, title equal to `<VERSION>`, `isDraft=false`, and expected `isPrerelease` / latest-release status.
+2. Every asset in `uploaded` state with byte-for-byte SHA-256 parity against the local artifact.
+3. Published release body matches the supplied notes.
+4. Recheck `git status --short --branch` and remote synchronization.
 
 ## 10. Report evidence and remaining gates
 

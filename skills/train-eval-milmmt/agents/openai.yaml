@@ -1,0 +1,4 @@
+interface:
+  display_name: "Train & Eval MiLMMT"
+  short_description: "Train, merge, quantize, and 6-gate audit MiLMMT models"
+  default_prompt: "Use $train-eval-milmmt to prepare the dataset, train or merge MiLMMT, quantize GGUFs, and run full 6-gate quantitative and qualitative verification."
