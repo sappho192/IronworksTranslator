@@ -153,6 +153,42 @@ bundled verifier before packaging, then run the probe against each published `ll
 on supported hardware. CUDA must report a `CUDA*` buffer and Vulkan must report a
 `Vulkan*` buffer; full raw-prompt model smoke remains a public-release gate.
 
+### Automated Release Verification Scripts
+
+Official verification scripts live under `tools\release-verification\` and emit structured JSON reports:
+
+1. **Sharlayan.Lite official NuGet provenance gate** (run after restoring into a dedicated official-only `NUGET_PACKAGES` cache):
+
+   ```powershell
+   .\tools\release-verification\Verify-SharlayanProvenance.ps1 `
+       -CacheDir "C:\tmp\ironworks-2.4.0-nuget" `
+       -CheckBuiltDlls `
+       -OutputPath "Releases\2.4.0\SHARLAYAN-PROVENANCE.json"
+   ```
+
+2. **Pre-upload package, native runtime-pack, and feed verification** (extracts the Velopack `full.nupkg`, re-checks `Sharlayan.Lite` provenance, verifies binaries/licenses/manifests/CUDA & Vulkan packs, checks `releases.<channel>.json`, optionally runs hardware native probes and writes `<Version>-sha256.txt`):
+
+   ```powershell
+   .\tools\release-verification\Verify-ReleasePackage.ps1 `
+       -Version "2.4.0" `
+       -ReleaseDir "Releases\2.4.0" `
+       -PublishDir "publish\IronworksTranslator (2.4.0)" `
+       -CacheDir "C:\tmp\ironworks-2.4.0-nuget" `
+       -RunHardwareNativeProbe `
+       -WriteSha256File
+   ```
+
+3. **Post-upload public GitHub Release verification** (checks release flags, `/releases/latest` for Stable, release notes body, cross-channel isolation, and anonymous download SHA-256/digest match):
+
+   ```powershell
+   .\tools\release-verification\Verify-PublicRelease.ps1 `
+       -Version "2.4.0" `
+       -ReleaseDir "Releases\2.4.0" `
+       -NotesFile "Releases\2.4.0-release-notes.md"
+   ```
+
+For Beta releases, pass `-ReleaseChannel Beta` to `Verify-ReleasePackage.ps1` and `Verify-PublicRelease.ps1`.
+
 For local update testing, build two different versions into the same `Releases` folder, install the older `Setup.exe`, then launch it and confirm it updates to the newer release.
 
 After the update package download succeeds, verify that the Velopack `Packages` directory retains only the newest full `.nupkg`. Older full packages, delta packages, and incomplete `.partial` downloads are removed automatically before restart; this cleanup does not remove `Setup.exe`, installed application files, settings, logs, or model data.
