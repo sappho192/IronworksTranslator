@@ -221,6 +221,37 @@ def _is_katakana(ch: str) -> bool:
     return ("\u30A0" <= ch <= "\u30FF") or ch == "\u30FC"
 
 
+def _is_hangul_syllable(ch: str) -> bool:
+    return "\uAC00" <= ch <= "\uD7A3"
+
+
+_KO_TRAILING_SUFFIXES: tuple[str, ...] = (
+    # 3-char particles / copula (checked longest-first)
+    "에서는", "에서도", "에서만", "에게는", "에게도", "한테는", "한테도",
+    "으로는", "으로도", "으로만", "까지는", "까지도", "부터는", "부터도",
+    "입니다", "이에요", "입니까", "이라면", "이라도", "이라고", "이라는",
+    "이네요", "이군요", "이지요", "인가요", "인데요", "이니까",
+    # 2-char particles / copula
+    "에서", "에게", "한테", "으로", "까지", "부터", "보다", "처럼", "만큼",
+    "이랑", "이나", "라도", "마저", "조차", "밖에", "하고",
+    "이다", "이야", "예요", "이요", "인가", "인지", "인데", "이면", "이라", "이죠",
+    "에도", "에는", "에만", "로는", "로도", "로만", "과는", "와는",
+    # 1-char particles
+    "은", "는", "이", "가", "을", "를", "의", "에", "로", "와", "과", "도", "만", "랑", "께", "야", "요",
+)
+
+
+def _has_allowed_korean_suffix_boundary(text: str, suffix_start: int) -> bool:
+    remaining = text[suffix_start:]
+    for suffix in _KO_TRAILING_SUFFIXES:
+        if not remaining.startswith(suffix):
+            continue
+        after = suffix_start + len(suffix)
+        if after == len(text) or not _is_hangul_syllable(text[after]):
+            return True
+    return False
+
+
 class FastGlossaryMatcher:
     """Fast length-filtered, boundary-safe glossary matcher for SFT construction."""
 
@@ -366,6 +397,12 @@ class FastGlossaryMatcher:
                         continue
                     if _is_katakana(needle[-1]) and end < len(hay) and _is_katakana(hay[end]):
                         continue
+                elif src_lang == "ko":
+                    if _is_hangul_syllable(needle[0]) and idx > 0 and _is_hangul_syllable(hay[idx - 1]):
+                        continue
+                    if _is_hangul_syllable(needle[-1]) and end < len(hay) and _is_hangul_syllable(hay[end]):
+                        if not _has_allowed_korean_suffix_boundary(hay, end):
+                            continue
                 if any(not (end <= s or idx >= e) for s, e in used_spans):
                     continue
                 found_span = (idx, end)

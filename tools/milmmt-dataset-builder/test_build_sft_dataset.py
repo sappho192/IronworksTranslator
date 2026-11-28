@@ -11,6 +11,7 @@ from build_sft_dataset import (
     is_valid_parallel,
     render_prompt,
 )
+from eval_gguf import matches_glossary_target
 
 
 class BuildSftDatasetTests(unittest.TestCase):
@@ -130,6 +131,49 @@ class BuildSftDatasetTests(unittest.TestCase):
         self.assertTrue(is_valid_parallel("ja", "ko", "こんにちは", "안녕하세요"))
         self.assertFalse(is_valid_parallel("ja", "ko", "攻略手帳", "攻略帳"))
         self.assertFalse(is_valid_parallel("en", "ko", "ゴールドソーサー", "골드 소서"))
+
+    def test_eval_matches_glossary_target_preserves_word_space_boundaries(self):
+        # Regression: stripping spaces previously turned "로민사 공중" into "로민사공중" and failed.
+        self.assertTrue(
+            matches_glossary_target(
+                "꼭대기에는 제독이 지휘실을 두고 로민사 공중, 육지, 해양을 감시하고 있습니다.",
+                "로민사",
+            )
+        )
+        self.assertTrue(matches_glossary_target("골드소서에서 만나요.", "골드 소서"))
+        self.assertTrue(matches_glossary_target("골드 소서에 도착했습니다.", "골드 소서"))
+        self.assertFalse(matches_glossary_target("골드소서러를 만났습니다.", "골드 소서"))
+
+    def test_korean_reverse_glossary_matcher_enforces_hangul_boundaries(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            gl_path = Path(tmp) / "glossary.full.json"
+            gl_path.write_text(
+                json.dumps(
+                    {
+                        "version": "test",
+                        "pairs": {
+                            "English->Korean": [
+                                {"source": "Dancer", "target": "무도가", "tier": 1, "category": "class_job"},
+                                {"source": "Aetheryte", "target": "에테라이트", "tier": 1, "category": "place_name"},
+                                {"source": "Illusion", "target": "환영", "tier": 1, "category": "status"},
+                            ]
+                        },
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            matcher = FastGlossaryMatcher(gl_path)
+            # Valid Korean particle boundary passes
+            self.assertEqual(
+                matcher.find_verified_matches("ko", "en", "에테라이트에서 무도가로 만나요.", "Meet as Dancer at Aetheryte."),
+                [("에테라이트", "Aetheryte", "place_name"), ("무도가", "Dancer", "class_job")],
+            )
+            # Compound verb "환영합니다" must NOT false-match "환영"
+            self.assertEqual(
+                matcher.find_verified_matches("ko", "en", "환영합니다!", "Welcome to Illusion!"),
+                [],
+            )
 
 
 if __name__ == "__main__":

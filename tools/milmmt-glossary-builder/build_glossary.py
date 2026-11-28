@@ -138,6 +138,26 @@ GENERIC_DE_FR_STOPWORDS = frozenset({
     "ja", "nein", "oui", "non", "alle", "tous", "zurück", "retour", "fermer",
     "schließen", "start", "ende", "fin", "name", "nom", "zeit", "temps", "text", "texte",
 })
+GENERIC_KO_STOPWORDS = frozenset({
+    "기술", "주택", "자택", "변신", "차원", "환영", "응원", "뒷문", "정제", "무효",
+    "미끼", "표식", "시작", "종료", "확인", "취소", "변경", "설정", "삭제", "추가",
+    "저장", "검색", "이동", "실행", "선택", "표시", "이전", "다음", "닫기", "열기",
+    "공격", "방어", "대상", "연속", "범위", "기준", "필요", "가능", "조정", "모집",
+    "완료", "실패", "성공", "대기", "준비", "진행", "일반", "보통", "어려움", "극한",
+    "전투", "휴식", "대화", "교환", "거래", "상점", "보상", "경험", "시간", "장소",
+    "이름", "목록", "정보", "상태", "효과", "강화", "약화", "회복", "부활", "사망",
+    "승리", "패배", "입장", "퇴장", "탈퇴", "가입", "초대", "추방", "차단", "해제",
+    "수락", "거절", "동의", "반대", "질문", "답변", "설명", "안내", "경고", "주의",
+    "위험", "안전", "무기", "방어구", "장비", "도구", "재료", "음식", "약품", "물약",
+    "날씨", "맑음", "흐림", "안개", "바람", "번개", "눈보라", "폭풍", "쾌청",
+})
+REVERSE_CORE_CATEGORIES = frozenset({
+    "curated", "class_job", "grand_company", "race", "tribe", "deity", "place_name", "duty",
+})
+REVERSE_EXTENDED_CATEGORIES = frozenset({
+    "status", "trait", "ui_command", "general_action",
+})
+RE_REVERSE_NOISY_TARGET = re.compile(r"(?:コンテンツ名は|「[^」]+」)")
 # Common words that are valid NPC speaker names (kept in exact `npc_names`),
 # but should not trigger substring `Glossary:` prompt injection inside normal prose.
 NPC_SUBSTRING_EN_STOPWORDS = frozenset({
@@ -1258,6 +1278,87 @@ def merge_entries(
     return winners, conflicts
 
 
+def build_reverse_entries(
+    winners: dict[tuple[str, str], TermEntry],
+    *,
+    reverse_target_langs: Sequence[str],
+    drop_counts: Counter[str] | None = None,
+) -> list[TermEntry]:
+    """Derive deterministic, high-precision Korean->* reverse glossary entries from forward winners."""
+    if drop_counts is None:
+        drop_counts = Counter()
+
+    allowed_targets = {LANG_CODE_TO_NAME[c] for c in reverse_target_langs if c in LANG_CODE_TO_NAME and c != "ko"}
+    if not allowed_targets:
+        return []
+
+    grouped: dict[tuple[str, str], list[TermEntry]] = defaultdict(list)
+    for entry in winners.values():
+        if not entry.include_in_runtime or "->" not in entry.pair:
+            continue
+        src_name, dst_name = entry.pair.split("->", 1)
+        if dst_name != "Korean" or src_name not in allowed_targets:
+            continue
+
+        ko_src = entry.target.strip()
+        rev_tgt = entry.source.strip()
+        if not ko_src or not rev_tgt or ko_src.casefold() == rev_tgt.casefold():
+            drop_counts["reverse:empty_or_identical"] += 1
+            continue
+        if not RE_HANGUL.search(ko_src) or RE_KANA.search(ko_src):
+            drop_counts["reverse:invalid_ko_source"] += 1
+            continue
+        if ko_src in GENERIC_KO_STOPWORDS:
+            drop_counts["reverse:generic_ko_stopword"] += 1
+            continue
+        if RE_REVERSE_NOISY_TARGET.search(rev_tgt):
+            drop_counts["reverse:noisy_target"] += 1
+            continue
+
+        # Allow 2-char Korean sources only for high-precision core FFXIV categories or curated Tier 0/2 terms.
+        if entry.tier in (0, 2) or entry.category in REVERSE_CORE_CATEGORIES:
+            min_ko_len = 2
+        elif entry.category in REVERSE_EXTENDED_CATEGORIES:
+            min_ko_len = 3
+        else:
+            drop_counts[f"reverse:excluded_category:{entry.category}"] += 1
+            continue
+
+        if len(ko_src) < min_ko_len:
+            drop_counts["reverse:ko_too_short"] += 1
+            continue
+
+        grouped[(f"Korean->{src_name}", ko_src)].append(entry)
+
+    reverse_entries: list[TermEntry] = []
+    for (rev_pair, ko_src), candidates in sorted(grouped.items()):
+        # Deterministically pick the cleanest canonical target:
+        # lower tier -> core category -> no leading "The "/"the " -> shorter canonical form -> lexicographic.
+        candidates.sort(
+            key=lambda e: (
+                e.tier,
+                0 if e.category in REVERSE_CORE_CATEGORIES else 1,
+                1 if RE_LEADING_THE.match(e.source) or e.source.startswith("the ") else 0,
+                len(e.source),
+                e.source,
+            )
+        )
+        best = candidates[0]
+        reverse_entries.append(
+            TermEntry(
+                pair=rev_pair,
+                source=ko_src,
+                target=best.source,
+                tier=best.tier,
+                origin=f"reverse:{best.origin}",
+                category=best.category,
+                include_in_runtime=True,
+            )
+        )
+
+    return reverse_entries
+
+
 def build_glossary_payload(
     winners: dict[tuple[str, str], TermEntry],
     *,
@@ -1328,6 +1429,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         choices=list(LANG_CODE_TO_NAME.keys()),
         help="Target language code.",
     )
+    parser.add_argument(
+        "--reverse-target-langs",
+        nargs="*",
+        default=[],
+        choices=["ja", "en", "de", "fr"],
+        help="Optional target languages for derived Korean->* reverse runtime glossary pairs (e.g. --reverse-target-langs ja en).",
+    )
     parser.add_argument("--version", default=dt.date.today().strftime("%Y-%m-%d.1"), help="Glossary version string.")
     parser.add_argument("--out-dir", type=Path, required=True, help="Output directory for JSON files.")
     args = parser.parse_args(argv)
@@ -1373,6 +1481,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             all_entries.extend(extract_ff14_terms_md(args.ff14_terms_md, drop_counts))
 
     winners, conflicts = merge_entries(all_entries, drop_counts=drop_counts)
+    reverse_entries = build_reverse_entries(
+        winners,
+        reverse_target_langs=args.reverse_target_langs,
+        drop_counts=drop_counts,
+    )
+    for rev in reverse_entries:
+        winners[(rev.pair, rev.source)] = rev
 
     # Deduplicate exported community phrase pairs
     seen_phrases: set[tuple[str, str]] = set()

@@ -25,6 +25,16 @@ from build_sft_dataset import render_prompt
 RE_KANA = re.compile(r"[\u3040-\u309F\u30A0-\u30FF]")
 RE_LOOP = re.compile(r"(.{1,4})\1{7,}")
 RE_TAGS = re.compile(r"(?:\[HQ\]|×\d+|G\.A\.T\.E\.)")
+_KO_TERM_BOUNDARY_RE = r"(?:$|[\s.,!?'\"‘’“”()\[\]에의를을은는이가로와과도만부까지부터한테께랑])"
+
+
+def matches_glossary_target(output: str, target: str) -> bool:
+    """Check whether output contains target respecting trailing boundary without stripping output spaces."""
+    parts = target.strip().split()
+    if not parts:
+        return False
+    pattern = r"\s*".join(re.escape(part) for part in parts)
+    return bool(re.search(pattern + _KO_TERM_BOUNDARY_RE, output))
 
 
 def query_completion(port: int, prompt: str, max_tokens: int) -> tuple[str, int]:
@@ -94,19 +104,10 @@ def main() -> int:
             max_tok = 256 if r.get("translation_kind") == "dialogue" else 64
             out, toks = query_completion(args.port, prompt, max_tok)
 
-            out_nospace = out.replace(" ", "")
             item_term_ok = []
             for g in r.get("glossary_terms", []):
                 term_total += 1
-                tgt_ns = g["target"].replace(" ", "")
-                # Require end-of-word or common Korean particle/punctuation after target
-                # so e.g. '골드소서' does not false-match inside '골드소서러'.
-                hit = bool(
-                    re.search(
-                        re.escape(tgt_ns) + r"(?:$|[\s.,!?'\"‘’“”()\[\]에의를을은는이가로와과도만부])",
-                        out_nospace,
-                    )
-                )
+                hit = matches_glossary_target(out, g["target"])
                 if hit:
                     term_hits += 1
                 item_term_ok.append({"source": g["source"], "target": g["target"], "hit": hit})

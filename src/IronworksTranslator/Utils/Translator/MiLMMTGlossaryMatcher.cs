@@ -146,7 +146,9 @@ namespace IronworksTranslator.Utils.Translator
                         StartsWithLatinAlnum: IsLatinAlnum(matchKey[0]),
                         EndsWithLatinAlnum: IsLatinAlnum(matchKey[^1]),
                         StartsWithKatakana: IsKatakana(matchKey[0]),
-                        EndsWithKatakana: IsKatakana(matchKey[^1])));
+                        EndsWithKatakana: IsKatakana(matchKey[^1]),
+                        StartsWithHangul: IsHangulSyllable(matchKey[0]),
+                        EndsWithHangul: IsHangulSyllable(matchKey[^1])));
                     pairCount++;
                 }
 
@@ -370,6 +372,22 @@ namespace IronworksTranslator.Utils.Translator
             return false;
         }
 
+        private static readonly string[] KoreanTrailingSuffixes =
+        [
+            // 3-char particles / copula (checked longest-first)
+            "에서는", "에서도", "에서만", "에게는", "에게도", "한테는", "한테도",
+            "으로는", "으로도", "으로만", "까지는", "까지도", "부터는", "부터도",
+            "입니다", "이에요", "입니까", "이라면", "이라도", "이라고", "이라는",
+            "이네요", "이군요", "이지요", "인가요", "인데요", "이니까",
+            // 2-char particles / copula
+            "에서", "에게", "한테", "으로", "까지", "부터", "보다", "처럼", "만큼",
+            "이랑", "이나", "라도", "마저", "조차", "밖에", "하고",
+            "이다", "이야", "예요", "이요", "인가", "인지", "인데", "이면", "이라", "이죠",
+            "에도", "에는", "에만", "로는", "로도", "로만", "과는", "와는",
+            // 1-char particles
+            "은", "는", "이", "가", "을", "를", "의", "에", "로", "와", "과", "도", "만", "랑", "께", "야", "요",
+        ];
+
         private static bool PassesBoundaryCheck(string text, int start, int length, IndexedTerm term)
         {
             var end = start + length;
@@ -394,7 +412,42 @@ namespace IronworksTranslator.Utils.Translator
                 return false;
             }
 
+            if (term.StartsWithHangul && start > 0 && IsHangulSyllable(text[start - 1]))
+            {
+                return false;
+            }
+
+            if (term.EndsWithHangul && end < text.Length && IsHangulSyllable(text[end]))
+            {
+                return HasAllowedKoreanSuffixBoundary(text, end);
+            }
+
             return true;
+        }
+
+        private static bool HasAllowedKoreanSuffixBoundary(string text, int suffixStart)
+        {
+            var remaining = text.AsSpan(suffixStart);
+            foreach (var suffix in KoreanTrailingSuffixes)
+            {
+                if (!remaining.StartsWith(suffix.AsSpan(), StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                var afterSuffix = suffixStart + suffix.Length;
+                if (afterSuffix == text.Length || !IsHangulSyllable(text[afterSuffix]))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsHangulSyllable(char ch)
+        {
+            return ch >= '\uAC00' && ch <= '\uD7A3';
         }
 
         private static bool IsLatinScriptLanguage(TranslationLanguageCode language)
@@ -502,7 +555,9 @@ namespace IronworksTranslator.Utils.Translator
             bool StartsWithLatinAlnum,
             bool EndsWithLatinAlnum,
             bool StartsWithKatakana,
-            bool EndsWithKatakana);
+            bool EndsWithKatakana,
+            bool StartsWithHangul,
+            bool EndsWithHangul);
 
         private readonly record struct MatchCandidate(
             int Start,

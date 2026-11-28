@@ -234,4 +234,55 @@ public class MiLMMTGlossaryMatcherTests
             [new MiLMMTGlossaryTerm("至天の座アルカディア:ヘビー級", "지천의 좌 아르카디아: 헤비급")],
             matches);
     }
+
+    [Fact]
+    public void Match_EnforcesKoreanHangulAndParticleBoundaries_ForReverseGlossary()
+    {
+        const string reverseJson = """
+            {
+              "version": "2026-11-28.2",
+              "pairs": {
+                "Korean->Japanese": [
+                  { "source": "에테라이트", "target": "エーテライト" },
+                  { "source": "무도가", "target": "踊り子" },
+                  { "source": "림사 로민사", "target": "リムサ・ロミンサ" },
+                  { "source": "파티", "target": "パーティ" },
+                  { "source": "환영", "target": "幻影" },
+                  { "source": "골드 소서", "target": "ゴールドソーサー" }
+                ]
+              }
+            }
+            """;
+
+        var matcher = MiLMMTGlossaryMatcher.FromJson(reverseJson);
+
+        // Exact terms and Korean particles/copula match cleanly
+        var validMatches = matcher.Match(
+            TranslationLanguageCode.Korean,
+            TranslationLanguageCode.Japanese,
+            "림사 로민사에 있는 에테라이트에서 무도가입니다!");
+        Assert.Equal(
+            [
+                new MiLMMTGlossaryTerm("림사 로민사", "リムサ・ロミンサ"),
+                new MiLMMTGlossaryTerm("에테라이트", "エーテライト"),
+                new MiLMMTGlossaryTerm("무도가", "踊り子"),
+            ],
+            validMatches);
+
+        // Compound nouns / verbs / embedded substrings are rejected
+        var falseHits = matcher.Match(
+            TranslationLanguageCode.Korean,
+            TranslationLanguageCode.Japanese,
+            "환영합니다! 파티원 모집 중, 골드 소서러는 제외, 대무도가도 제외.");
+        Assert.Empty(falseHits);
+
+        // Standalone particle after term passes
+        var partyParticle = matcher.Match(
+            TranslationLanguageCode.Korean,
+            TranslationLanguageCode.Japanese,
+            "파티로 갈게요!");
+        Assert.Equal(
+            [new MiLMMTGlossaryTerm("파티", "パーティ")],
+            partyParticle);
+    }
 }

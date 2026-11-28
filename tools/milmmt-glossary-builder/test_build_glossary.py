@@ -8,6 +8,7 @@ from build_glossary import (
     SheetSpec,
     TermEntry,
     build_glossary_payload,
+    build_reverse_entries,
     clean_community_gloss,
     clean_exd_text,
     extract_curated_community_json,
@@ -162,13 +163,51 @@ class BuildGlossaryTests(unittest.TestCase):
         self.assertEqual(classify_korean_sentence_style("앞으로 펼쳐질 일에 대한 준비는 되어 있나?"), "반말")
         self.assertEqual(classify_korean_sentence_style("자, 그럼 출발해볼까!"), "반말")
         self.assertEqual(classify_korean_sentence_style("그 여로에 나도 동행하도록 하지. 흥미롭군."), "해라체")
+        self.assertEqual(classify_korean_sentence_style("내가 돌아올 때까지 여기서 기다려라."), "해라체")
+        self.assertEqual(classify_korean_sentence_style("어서 이리로 와라."), "해라체")
         self.assertEqual(classify_korean_sentence_style("그러한 이유로 모진 태도를 보였던 걸세."), "하게체")
         self.assertEqual(classify_korean_sentence_style("그럼, 먼저 출발하겠네."), "하게체")
+        self.assertEqual(classify_korean_sentence_style("이렇게 먼 곳까지 와줘서 고맙네."), "하게체")
+        self.assertEqual(classify_korean_sentence_style("내가 돌아올 때까지 여기서 기다리게."), "하게체")
+        self.assertEqual(classify_korean_sentence_style("다 끝나면 에테라이트 광장에서 만나게."), "하게체")
         self.assertEqual(classify_korean_sentence_style("정말로 하늘을 난단 말이오?"), "하오체")
         self.assertEqual(classify_korean_sentence_style("어서 이리로 오시오."), "하오체")
         self.assertEqual(classify_korean_sentence_style("짐은 울다하 제17대 국왕 나나모 울 나모이니라."), "고어체")
+        self.assertEqual(classify_korean_sentence_style("감사히 여겨야 할 것이옵니다."), "고어체")
+        # Promissive -(으)ㄹ게 remains 반말, not 하게체
+        self.assertEqual(classify_korean_sentence_style("조금만 기다릴게."), "반말")
         # Common noun false positives rejected
         self.assertIsNone(classify_korean_sentence_style("여기가 약속 장소"))
+
+    def test_build_reverse_entries_disambiguates_and_filters_noise(self):
+        entries = [
+            TermEntry("Japanese->Korean", "星導山寺院 コンテンツ名は「壊神修行 星導山寺院」", "성도산 사원", 2, "community", "community_term", True),
+            TermEntry("Japanese->Korean", "壊神修行 星導山寺院", "성도산 사원", 1, "datamining:ContentFinderCondition.csv", "duty", True),
+            TermEntry("Japanese->Korean", "星導山寺院", "성도산 사원", 1, "datamining:PlaceName.csv", "place_name", True),
+            TermEntry("English->Korean", "The Aetherochemical Research Facility", "마과학 연구소", 1, "datamining:PlaceName.csv", "place_name", True),
+            TermEntry("English->Korean", "Aetherochemical Research Facility", "마과학 연구소", 1, "datamining:ContentFinderCondition.csv", "duty", True),
+            TermEntry("Japanese->Korean", "踊り子", "무도가", 1, "datamining:ClassJob.csv", "class_job", True),
+            TermEntry("English->Korean", "Illusion", "환영", 1, "datamining:Status.csv", "status", True),
+            TermEntry("English->Korean", "Clear Skies", "쾌청", 1, "datamining:Weather.csv", "weather", True),
+            TermEntry("Japanese->Korean", "戻る", "돌아가기", 3, "datamining:Addon.csv", "addon_ui", True),
+            TermEntry("Japanese->Korean", "秘策", "비책", 1, "datamining:Status.csv", "status", True),
+            TermEntry("Japanese->Korean", "霊薬", "환상약", 1, "datamining:Status.csv", "status", True),
+        ]
+        winners, _ = merge_entries(entries)
+        drops: Counter[str] = Counter()
+        rev = build_reverse_entries(winners, reverse_target_langs=("ja", "en"), drop_counts=drops)
+        got = {(e.pair, e.source): e.target for e in rev}
+
+        # Cleanest shortest canonical target chosen deterministically
+        self.assertEqual(got[("Korean->Japanese", "성도산 사원")], "星導山寺院")
+        self.assertEqual(got[("Korean->English", "마과학 연구소")], "Aetherochemical Research Facility")
+        self.assertEqual(got[("Korean->Japanese", "무도가")], "踊り子")
+        # 3-char status kept, 2-char status dropped, generic Korean stopwords & weather/addon_ui excluded
+        self.assertEqual(got[("Korean->Japanese", "환상약")], "霊薬")
+        self.assertNotIn(("Korean->Japanese", "비책"), got)
+        self.assertNotIn(("Korean->English", "환영"), got)
+        self.assertNotIn(("Korean->English", "쾌청"), got)
+        self.assertNotIn(("Korean->Japanese", "돌아가기"), got)
 
     def test_npc_style_overrides_and_extraction(self):
         overrides = load_npc_style_overrides(Path(__file__).parent / "npc_style_overrides.json")
